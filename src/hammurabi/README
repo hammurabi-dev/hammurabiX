@@ -1,0 +1,15 @@
+@author: Tess Jaffe (et. al.)
+@email: tess.jaffe@nasa.gov
+
+Hammurabi is a HEALPix-based tool for simulating observables such as
+polarized synchrotron and thermal dust emission from models of physical inputs such as 
+magnetic fields, dust and electron distributions, etc. 
+It is a modular C++ framework into which you can add your own models easily 
+and then use it to perform the line-of-sight integration to compute the observables. 
+See the wiki for installation and usage information. 
+Please cite the original Waelkens et al. (2009) paper if you use hammurabi.
+
+This is an internal version open to HAMMURABI/DRAGON/IMAGINE developers only,
+for problems please also contact
+@author: Jiaxin Wang
+@email: jiwang@sissa.it
