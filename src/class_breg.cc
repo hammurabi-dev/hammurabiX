@@ -13,7 +13,7 @@
 using namespace std;
 
 vec3 Breg::get_breg(const vec3 &pos, Pond *par,Grid_breg *grid){
-    if(grid->permission){
+    if(grid->read_permission){
         return read_grid(pos,grid,par);
     }
     else {
@@ -115,7 +115,7 @@ vec3 Breg::read_grid(const vec3 &pos, Grid_breg *grid, Pond *par){
 }
 
 void Breg::write_grid(Pond *par, Grid_breg *grid){
-    if(!grid->permission){
+    if(!grid->write_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
         <<" at line "<<__LINE__<<endl
@@ -148,19 +148,6 @@ void Breg::write_grid(Pond *par, Grid_breg *grid){
 }
 
 /* wmap-3yr */
-/*
-Bwmap::Bwmap(const vector<double> &in, Pond *par){
-    if(in.size()!=par->bwmap.size()){
-        cerr<<"WAR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"Bwmap: NOT ASSIGNING FULL PAR-SET"<<endl;
-    }
-    for(decltype(in.size()) i=0;i!=in.size();++i){
-        par->bwmap[i] = in[i];
-    }
-}
-*/
 vec3 Bwmap::breg(const vec3 &pos,Pond *par){
     vec3 b_vec3(0.,0.,0.);
     const double r = sqrt(pos.x*pos.x + pos.y*pos.y);
@@ -186,19 +173,6 @@ vec3 Bwmap::breg(const vec3 &pos,Pond *par){
 }
 
 /* local */
-/*
-Blocal::Blocal(const vector<double> &in, Pond *par){
-    if(in.size()!=par->blocal.size()){
-        cerr<<"WAR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"Blocal: NOT ASSIGNING FULL PAR-SET"<<endl;
-    }
-    for(decltype(in.size()) i=0;i!=in.size();++i){
-        par->blocal[i] = in[i];
-    }
-}
-*/
 vec3 Blocal::breg(const vec3 &pos, Pond *par){
     // units
     const double bd = par->blocal[0]*CGS_U_muGauss;

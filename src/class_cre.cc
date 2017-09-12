@@ -15,7 +15,23 @@
 
 using namespace std;
 
-double CRE::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *,const double &Bper,const bool &cue){
+double CRE::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper,const bool &cue){
+    cerr<<"ERR:"<<__FILE__
+    <<" : in function "<<__func__<<endl
+    <<" at line "<<__LINE__<<endl
+    <<"DYNAMIC BINDING FAILURE"<<endl;
+    exit(1);
+}
+
+double CRE::read_grid(const unsigned int &n, const vec3 &pos,Grid_cre *grid){
+    cerr<<"ERR:"<<__FILE__
+    <<" : in function "<<__func__<<endl
+    <<" at line "<<__LINE__<<endl
+    <<"DYNAMIC BINDING FAILURE"<<endl;
+    exit(1);
+}
+
+void CRE::write_grid(Pond *par,Grid_cre *grid){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -24,19 +40,6 @@ double CRE::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *,const double &Bp
 }
 
 /* analytical CRE flux */
-/*
-CRE_ana::CRE_ana(const vector<double> &in,Pond *par){
-    if(in.size()!=par->creana.size()){
-        cerr<<"WAR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"CRE: NOT ASSIGNING FULL PAR-SET"<<endl;
-    }
-    for(decltype(in.size()) i=0;i!=in.size();++i){
-        par->creana[i] = in[i];
-    }
-}
-*/
 // give values to spectral index and norm factor
 // we drag this part out to meet users need of changing analytical model of CRE
 void CRE_ana::flux_param(const vec3 &pos,Pond *par,const double &Bper, double &index,double &norm){
@@ -74,7 +77,7 @@ void CRE_ana::flux_param(const vec3 &pos,Pond *par,const double &Bper, double &i
 }
 
 double CRE_ana::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper,const bool &cue){
-    if(grid->permission){
+    if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
         <<" at line "<<__LINE__<<endl
@@ -254,7 +257,7 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3 &pos,Grid_cre *gr
 
 double CRE_num::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper,const bool &cue){
     double J = 0.;
-    if(!grid->permission){
+    if(!grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
         <<" at line "<<__LINE__<<endl

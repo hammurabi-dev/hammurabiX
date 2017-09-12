@@ -1,17 +1,27 @@
 # README
 
-Next Generation Hammuarbi
+Hammurabi X (reforged version of Hammurabi in C++11 std)
 
-Open to HAMMURABI/DRAGON/IMAGINE developing groups ONLY!
+Re-developed by:
 
-Currently, we simulate synchrotron emission, Faraday depth with following physical quantities modeled:
+* Jiaxin Wang (SISSA)
+* Theo Steininger (MPA)
+* Tess R. Jaffe (NASA)
+* Torsten A. Ensslin (MPA)
+
+It simulates 
+
+* synchrotron emission
+* Faraday depth
+
+with following physical quantities modeled:
 
 * galactic structures
 * galactic magnetic fields
 * free(thermal) electron fields
 * cosmic ray electron fields
 
-This code contains (or is benefit from) following packages:
+Our code contains (or is benefit from) following packages:
 
 * Hammurabi
 * YMW16
@@ -23,19 +33,18 @@ Major improvements:
 
 * in c++11 std
 * XML as parameter file style
-* parameters handled by Pond class collectively
-* memory, in/outputs handled by Grid class collectively
+* parameters handled collectively
+* memory and in/outputs handled collectively
+* apply Simpson's rule in line-of-sight integration
 * YMW16 regular free electron density field
-* divergence-free random magnetic field generator (need further development)
+* divergence-free anisotropic random magnetic field generator
 * random free electron density field generator (need further development)
-* not producing dust emission (need further development)
-* python wrapper
-* simple mcmc pipeline with PyMultiNest for regular fields
-* fully parallelized (under development)
+* python wrapper/interface to DRAGON code (under development)
+* fully parallelized with MPI (under development)
 
 Dependencies:
 
-* Healpix (Healpy)
+* Healpix
 * FFTW3
 * CFITSIO
 * GSL

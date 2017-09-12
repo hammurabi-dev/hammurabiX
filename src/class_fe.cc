@@ -16,7 +16,7 @@
 using namespace std;
 
 double FE::get_density(const vec3 &pos, Pond *par, Grid_fe *grid){
-    if(grid->permission){
+    if(grid->read_permission){
         return read_grid(pos,grid,par);
     }
     else {
@@ -129,7 +129,7 @@ double FE::read_grid(const vec3 &pos, Grid_fe *grid, Pond *par){
 }
 
 void FE::write_grid(Pond *par, Grid_fe *grid){
-    if(!grid->permission){
+    if(!grid->write_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
         <<" at line "<<__LINE__<<endl

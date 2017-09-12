@@ -24,21 +24,21 @@
 using namespace std;
 
 void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fe *gfe,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Pond *par) {
-    
-    gint->dm_map.SetNside(gint->sim_nside, NEST);
-    int sim_npix = gint->dm_map.Npix();
-    gint->dm_map.fill(0.);
-    
+    // unsigned int, pre-calculated in gint
+    auto sim_npix = gint->sim_npix;
+    if (gint->do_dm) {
+        gint->dm_map.SetNside(gint->sim_nside, NEST);
+        gint->dm_map.fill(0.);
+    }
     if (gint->do_sync) {
         gint->Is_map.SetNside(gint->sim_nside, NEST);
         gint->Qs_map.SetNside(gint->sim_nside, NEST);
         gint->Us_map.SetNside(gint->sim_nside, NEST);
-        
         gint->Is_map.fill(0.);
         gint->Qs_map.fill(0.);
         gint->Us_map.fill(0.);
     }
-    if (gint->do_fd) {
+    if (gint->do_fd or gint->do_sync) {
         gint->fd_map.SetNside(gint->sim_nside, NEST);
         gint->fd_map.fill(0.);
     }
@@ -48,17 +48,15 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,G
         Healpix_Map<double> current_Is_map;
         Healpix_Map<double> current_Qs_map;
         Healpix_Map<double> current_Us_map;
-        
         Healpix_Map<double> current_fd_map;
         Healpix_Map<double> current_dm_map;
         
-        
         auto current_nside = get_shell_nside(current_shell,gint->total_shell,gint->sim_nside);
-        
-        current_dm_map.SetNside(current_nside, NEST);
-        int current_npix = current_dm_map.Npix();
-        current_dm_map.fill(0.);
-        
+        unsigned int current_npix = 12*current_nside*current_nside;
+        if (gint->do_dm) {
+            current_dm_map.SetNside(current_nside, NEST);
+            current_dm_map.fill(0.);
+        }
         if (gint->do_sync) {
             current_Is_map.SetNside(current_nside, NEST);
             current_Qs_map.SetNside(current_nside, NEST);
@@ -67,7 +65,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,G
             current_Qs_map.fill(0.);
             current_Us_map.fill(0.);
         }
-        if (gint->do_fd) {
+        if (gint->do_fd or gint->do_sync) {
             current_fd_map.SetNside(current_nside, NEST);
             current_fd_map.fill(0.);
         }
@@ -85,7 +83,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,G
          * outer shells are set by maintaining the same bin length
          * for example the 2nd inner shell set by bin_num, while the 3rd inner shell set by 2*bin_num
          */
-        if(current_shell>1){
+        if (current_shell>1) {
             shell_ref.delta_d = (shell_ref.d_stop-shell_ref.d_start)/(gint->bin_num*(pow(2,current_shell-1)-pow(2,current_shell-2)));
         }
         
@@ -94,35 +92,50 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,G
             struct_observables observables;
             observables.Is = observables.Qs = observables.Us = 0.;
             observables.dm = 0.;
-            pointing ptg = current_dm_map.pix2ang(ipix);
+            // notice that either do_dm or do_fd should be true
+            // if include dust emission, remember to complete logic for ptg assignment!
+            pointing ptg;
+            if (gint->do_dm) {
+                ptg = current_dm_map.pix2ang(ipix);
+            }
             // get fd out from inner shells
-            if (gint->do_fd) {
+            if (gint->do_fd or gint->do_sync) {
+                ptg = current_fd_map.pix2ang(ipix);
                 observables.fd = gint->fd_map.interpolated_value(ptg);
             }
+            
+            // core function!
             radial_integration(shell_ref,ptg,observables,breg,brnd,fe,fernd,cre,gbreg,gbrnd,gfe,gfernd,gcre,gint,par);
             
             // assembling new shell
-            current_dm_map[ipix] = observables.dm;
+            if (gint->do_dm) {
+                current_dm_map[ipix] = observables.dm;
+            }
             if (gint->do_sync) {
                 current_Is_map[ipix] = toolkit::temp_convert(observables.Is,par->sim_freq);
                 current_Qs_map[ipix] = toolkit::temp_convert(observables.Qs,par->sim_freq);
                 current_Us_map[ipix] = toolkit::temp_convert(observables.Us,par->sim_freq);
             }
-            if (gint->do_fd) {
+            if (gint->do_fd or gint->do_sync) {
                 current_fd_map[ipix] = observables.fd;
             }
         }
         //adding up new shell map to sim map
 #pragma omp parallel for
         for (decltype(sim_npix) ipix=0;ipix<sim_npix;++ipix) {
-            pointing ptg = gint->dm_map.pix2ang(ipix);
-            gint->dm_map[ipix] += current_dm_map.interpolated_value(ptg);
+            pointing ptg;
+            if (gint->do_dm) {
+                ptg = gint->dm_map.pix2ang(ipix);
+                gint->dm_map[ipix] += current_dm_map.interpolated_value(ptg);
+            }
             if (gint->do_sync) {
+                ptg = gint->Is_map.pix2ang(ipix);
                 gint->Is_map[ipix] += current_Is_map.interpolated_value(ptg);
                 gint->Qs_map[ipix] += current_Qs_map.interpolated_value(ptg);
                 gint->Us_map[ipix] += current_Us_map.interpolated_value(ptg);
             }
-            if(gint->do_fd){
+            if (gint->do_fd or gint->do_sync) {
+                ptg = gint->fd_map.pix2ang(ipix);
                 gint->fd_map[ipix] += current_fd_map.interpolated_value(ptg);
             }
         }
@@ -134,13 +147,13 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,G
 void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, struct_observables &pixobs,Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fe *gfe,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Pond *par) {
     // pass in fd, zero others
     double inner_shells_fd=0.;
-    if(gint->do_fd){inner_shells_fd=pixobs.fd;}
+    if (gint->do_fd or gint->do_sync) {inner_shells_fd=pixobs.fd;}
     pixobs.dm=0.;pixobs.fd=0.;
     pixobs.Is=0.;pixobs.Us=0.;pixobs.Qs=0.;
     // angular position
     const double THE = ptg_in.theta;
     const double PHI = ptg_in.phi;
-    if (check_simulation_lower_limit(fabs(0.5*CGS_U_pi-THE),gint->lat_lim)){return;}
+    if (check_simulation_lower_limit(fabs(0.5*CGS_U_pi-THE),gint->lat_lim)) {return;}
     // for calculating synchrotron emission
     const double lambda_square = (CGS_U_C_light/par->sim_freq)*(CGS_U_C_light/par->sim_freq);
     // convert intensity to brightness temperature and include j(omega) to j(nu)=2pi*j(omega)
@@ -157,9 +170,9 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
         ec_pos = toolkit::get_LOS_unit_vec(THE,PHI)*dist;
         pos = ec_pos + par->SunPosition;
         // check LOS depth limit
-        if (check_simulation_upper_limit(pos.Length(),gint->gc_r_max)){continue;}
-        if (check_simulation_upper_limit(fabs(pos.z),gint->gc_z_max)){continue;}
-        if (check_simulation_upper_limit(ec_pos.Length(),gint->ec_r_max)){continue;}
+        if (check_simulation_upper_limit(pos.Length(),gint->gc_r_max)) {break;}
+        if (check_simulation_upper_limit(fabs(pos.z),gint->gc_z_max)) {break;}
+        if (check_simulation_upper_limit(ec_pos.Length(),gint->ec_r_max)) {break;}
         
         // B field
         vec3 b_vec = brnd->get_brnd(pos,par,gbrnd);
@@ -197,10 +210,11 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
         }
         
         // DM
-        F_dm.push_back(te*shell_ref.delta_d);
-        
+        if(gint->do_dm){
+            F_dm.push_back(te*shell_ref.delta_d);
+        }
         // Faraday depth
-        if(gint->do_fd){
+        if(gint->do_fd or gint->do_sync){
             const double fd_forefactor = -(CGS_U_qe*CGS_U_qe*CGS_U_qe)/(2.*CGS_U_pi*CGS_U_MEC2*CGS_U_MEC2);
             F_fd.push_back(te*B_par*fd_forefactor*shell_ref.delta_d);
         }
@@ -224,14 +238,27 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
     
     // second iteration in distance
     // applying Simpson's rule
-    for(decltype(F_dm.size())i=1;i<F_dm.size()-1;i+=2){
-        if(F_dm.empty()){
-            break;
-        }
+    // be careful with the logic for assigining simpson_size!
+    int simpson_size=0;
+    if(gint->do_dm){
+        simpson_size = F_dm.size();
+    }
+    if(gint->do_fd or gint->do_sync){
+        simpson_size = F_fd.size();
+    }
+#ifndef NDEBUG
+    if(simpson_size==0){
+        cerr<<"ERR: EMPTY LOS INTERGATION"<<endl;
+        exit(1);
+    }
+#endif
+    for(decltype(simpson_size)i=1;i<simpson_size-1;i+=2){
         // DM
-        pixobs.dm += (F_dm[i-1]+4.*F_dm[i]+F_dm[i+1])/6.;
+        if(gint->do_dm){
+            pixobs.dm += (F_dm[i-1]+4.*F_dm[i]+F_dm[i+1])/6.;
+        }
         // FD
-        if(gint->do_fd){
+        if(gint->do_fd or gint->do_sync){
             pixobs.fd += (F_fd[i-1]+4.*F_fd[i]+F_fd[i+1])/6.;
         }
         // Sync

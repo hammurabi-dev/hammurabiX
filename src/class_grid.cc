@@ -78,8 +78,10 @@ Grid_breg::Grid_breg(string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
     XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("breg_grid");
-    permission = ptr->BoolAttribute("cue");
-    if(permission){
+    read_permission = ptr->BoolAttribute("read");
+    write_permission = ptr->BoolAttribute("write");
+    // build up grid when have read or write permission
+    if(read_permission or write_permission){
         cout<<"IFNO: GRID_BREG I/O ACTIVE"<<endl;
         filename = ptr->Attribute("filename");
         build_grid(doc);
@@ -185,6 +187,15 @@ void Grid_breg::import_grid(void){
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
         reg_b_z[i] = tmp;
     }
+    auto eof = input.tellg();
+    input.seekg (0, input.end);
+    if (eof != input.tellg()){
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"INCORRECT LENGTH"<<endl;
+        exit(1);
+    }
     input.close();
 }
 
@@ -193,14 +204,16 @@ Grid_brnd::Grid_brnd(string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
     XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random");
-    if(ptr->BoolAttribute("cue")){
-        build_grid(doc);
-    }
     // sometimes users don't want to write out random field
     // but generation of random field needs grid
+    bool build_permission = ptr->BoolAttribute("cue");
     ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("brnd_grid");
-    permission = ptr->BoolAttribute("cue");
-    if(permission){
+    read_permission = ptr->BoolAttribute("read");
+    write_permission = ptr->BoolAttribute("write");
+    if(build_permission or read_permission){
+        build_grid(doc);
+    }
+    if(read_permission or write_permission){
         cout<<"IFNO: GRID_BRND I/O ACTIVE"<<endl;
         filename = ptr->Attribute("filename");
     }
@@ -318,6 +331,15 @@ void Grid_brnd::import_grid(void){
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
         fftw_b_z[i] = tmp;
     }
+    auto eof = input.tellg();
+    input.seekg (0, input.end);
+    if (eof != input.tellg()){
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"INCORRECT LENGTH"<<endl;
+        exit(1);
+    }
     input.close();
 }
 
@@ -326,8 +348,9 @@ Grid_fe::Grid_fe(string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
     XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("fe_grid");
-    permission = ptr->BoolAttribute("cue");
-    if(permission){
+    read_permission = ptr->BoolAttribute("read");
+    write_permission = ptr->BoolAttribute("write");
+    if(read_permission or write_permission){
         cout<<"IFNO: FE I/O ACTIVE"<<endl;
         filename = ptr->Attribute("filename");
         build_grid(doc);
@@ -427,6 +450,15 @@ void Grid_fe::import_grid(void){
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
         fe[i] = tmp;
     }
+    auto eof = input.tellg();
+    input.seekg (0, input.end);
+    if (eof != input.tellg()){
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"INCORRECT LENGTH"<<endl;
+        exit(1);
+    }
     input.close();
 }
 
@@ -435,14 +467,16 @@ Grid_fernd::Grid_fernd(string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
     XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random");
-    if(ptr->BoolAttribute("cue")){
-        build_grid(doc);
-    }
+    bool build_permission = ptr->BoolAttribute("cue");
     // sometimes users don't want to write out random field
     // but generation of random field needs grid
     ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("fernd_grid");
-    permission = ptr->BoolAttribute("cue");
-    if(permission){
+    read_permission = ptr->BoolAttribute("read");
+    write_permission = ptr->BoolAttribute("write");
+    if(build_permission or read_permission){
+        build_grid(doc);
+    }
+    if(read_permission or write_permission){
         cout<<"IFNO: FE_RND I/O ACTIVE"<<endl;
         filename = ptr->Attribute("filename");
     }
@@ -540,6 +574,15 @@ void Grid_fernd::import_grid(void){
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
         fftw_fe[i] = tmp;
     }
+    auto eof = input.tellg();
+    input.seekg (0, input.end);
+    if (eof != input.tellg()){
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"INCORRECT LENGTH"<<endl;
+        exit(1);
+    }
     input.close();
 }
 
@@ -549,20 +592,29 @@ Grid_cre::Grid_cre(string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
     XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("cre_grid");
-    permission = ptr->BoolAttribute("cue");
-    if(permission){
+    read_permission = ptr->BoolAttribute("read");
+    write_permission = ptr->BoolAttribute("write");
+    // security check
+    string type_check = doc->FirstChildElement("root")->FirstChildElement("CRE")->Attribute("type");
+    if(read_permission and type_check=="Analytic"){
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"ANALYTIC CRE DO NOT READ"<<endl;
+        exit(1);
+    }
+    if(read_permission or write_permission){
         cout<<"IFNO: CRE I/O ACTIVE"<<endl;
         filename = ptr->Attribute("filename");
         build_grid(doc);
     }
-    ec_frame = doc->FirstChildElement("root")->FirstChildElement("Grid")->BoolAttribute("ec_frame");
+    //ec_frame = doc->FirstChildElement("root")->FirstChildElement("Grid")->BoolAttribute("ec_frame");
 }
 
 void Grid_cre::build_grid(XMLDocument *doc){
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("DragonGrid");
+    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("CRE")->FirstChildElement("Numeric");
     // spatial 2D
     if(strcmp(ptr->Attribute("type"),"2D")==0){
-        ptr = ptr->FirstChildElement("Box");
         nr = FetchUnsigned(ptr,"nr");
         nz = FetchUnsigned(ptr,"nz");
         nx = 0; ny = 0;
@@ -574,10 +626,11 @@ void Grid_cre::build_grid(XMLDocument *doc){
         Ekmin = CGS_U_GeV*FetchDouble(ptr,"Ekmin");
         Ekmax = CGS_U_GeV*FetchDouble(ptr,"Ekmax");
         Ekfact = CGS_U_GeV*FetchDouble(ptr,"Ekfact");
+        
+        cre_size = nE*nr*nz;
     }
     // spatial 3D
     else if(strcmp(ptr->Attribute("type"),"3D")==0){
-        ptr = ptr->FirstChildElement("Box");
         nr = 0;
         nz = FetchUnsigned(ptr,"nz");
         nx = FetchUnsigned(ptr,"nx");
@@ -591,6 +644,8 @@ void Grid_cre::build_grid(XMLDocument *doc){
         Ekmin = CGS_U_GeV*FetchDouble(ptr,"Ekmin");
         Ekmax = CGS_U_GeV*FetchDouble(ptr,"Ekmax");
         Ekfact = CGS_U_GeV*FetchDouble(ptr,"Ekfact");
+        
+        cre_size = nE*nx*ny*nz;
     }
     else{
         cerr<<"ERR:"<<__FILE__
@@ -603,7 +658,6 @@ void Grid_cre::build_grid(XMLDocument *doc){
     const double bytes = cre_size*8.;
     cout<<"INFO: CRE REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
     
-    cre_size = nE*nr*nz;
     cre_flux = new double[cre_size];
 }
 
@@ -639,6 +693,15 @@ void Grid_cre::import_grid(void){
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
         cre_flux[i] = tmp;
     }
+    auto eof = input.tellg();
+    input.seekg (0, input.end);
+    if (eof != input.tellg()){
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"INCORRECT LENGTH"<<endl;
+        exit(1);
+    }
     input.close();
 }
 
@@ -654,45 +717,48 @@ void Grid_int::build_grid(XMLDocument *doc){
     
     total_shell = FetchUnsigned(ptr,"shell");
     sim_nside = FetchUnsigned(ptr,"nside");
+    sim_npix = 12*sim_nside*sim_nside;
     ec_r_max = CGS_U_kpc*FetchDouble(ptr,"ec_r_max");
     gc_r_max = FetchDouble(ptr,"gc_r_max")*CGS_U_kpc;
     gc_z_max = FetchDouble(ptr,"gc_z_max")*CGS_U_kpc;
-    bin_num = FetchUnsigned(ptr,"bin_num");
+    bin_num = floor((ec_r_max/(FetchDouble(ptr,"ec_r_res")*CGS_U_kpc))/pow(2.,total_shell-1));
     lat_lim = FetchDouble(ptr,"lat_lim")*CGS_U_pi/180.;
     // output file name
     
     ptr = doc->FirstChildElement("root")->FirstChildElement("Output");
-    sim_dm_name = ptr->FirstChildElement("DM")->Attribute("filename");
     
+    do_dm = ptr->FirstChildElement("DM")->BoolAttribute("cue");
     do_fd = ptr->FirstChildElement("Faraday")->BoolAttribute("cue");
     do_sync = ptr->FirstChildElement("Sync")->BoolAttribute("cue");
-    if(do_sync) {
-        do_fd = true;
-    }
     
+    if (not (do_dm or do_fd or do_sync)) {
+        cerr<<"PEACE: NO OUTPUT REQUIRED"<<endl;
+        exit(1);
+    }
+    sim_dm_name = ptr->FirstChildElement("DM")->Attribute("filename");
     sim_sync_name = ptr->FirstChildElement("Sync")->Attribute("filename");
     sim_fd_name = ptr->FirstChildElement("Faraday")->Attribute("filename");
     
 }
 
 void Grid_int::export_grid(void){
-    // do_dm is always true
-    // in units pc/cm^3, conventional units
-    dm_map.Scale(CGS_U_ccm/CGS_U_pc);
-    fitshandle out_dm;
-    std::stringstream outfname_dm;
-    // cleanup content of outfname
-    outfname_dm.str("");
-    // give content to outfname
-    outfname_dm << sim_dm_name;
-    std::ifstream in_dm(outfname_dm.str().data());
-    if(in_dm.is_open()){
-        out_dm.delete_file(outfname_dm.str());
+    if(do_dm){
+        // in units pc/cm^3, conventional units
+        dm_map.Scale(CGS_U_ccm/CGS_U_pc);
+        fitshandle out_dm;
+        std::stringstream outfname_dm;
+        // cleanup content of outfname
+        outfname_dm.str("");
+        // give content to outfname
+        outfname_dm << sim_dm_name;
+        std::ifstream in_dm(outfname_dm.str().data());
+        if(in_dm.is_open()){
+            out_dm.delete_file(outfname_dm.str());
+        }
+        out_dm.create(outfname_dm.str());
+        write_Healpix_map_to_fits(out_dm, dm_map, PLANCK_FLOAT64);
+        out_dm.close();
     }
-    out_dm.create(outfname_dm.str());
-    write_Healpix_map_to_fits(out_dm, dm_map, PLANCK_FLOAT64);
-    out_dm.close();
-    
     if(do_sync){
         fitshandle out_sc;
         std::stringstream outfname_sc;

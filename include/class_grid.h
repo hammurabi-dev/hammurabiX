@@ -63,7 +63,7 @@ class Grid_breg final : public Grid{
     double *reg_b_x, *reg_b_y, *reg_b_z;
     
     std::string filename;
-    bool permission, ec_frame;
+    bool read_permission, write_permission, ec_frame;
     
     double lx, ly, lz;
     unsigned int nx, ny, nz;
@@ -86,7 +86,7 @@ class Grid_brnd final : public Grid{
     fftw_plan fftw_px, fftw_py, fftw_pz;
     
     std::string filename;
-    bool permission, ec_frame;
+    bool read_permission, write_permission, ec_frame;
     
     double lx, ly, lz;
     unsigned int nx, ny, nz;
@@ -105,7 +105,7 @@ class Grid_fe final : public Grid{
     double *fe;
     
     std::string filename;
-    bool permission, ec_frame;
+    bool read_permission, write_permission, ec_frame;
     
     double lx, ly, lz;
     unsigned int nx, ny, nz;
@@ -127,7 +127,7 @@ class Grid_fernd final : public Grid{
     fftw_plan fftw_p;
     
     std::string filename;
-    bool permission, ec_frame;
+    bool read_permission, write_permission, ec_frame;
     
     double lx, ly, lz;
     unsigned int nx, ny, nz;
@@ -145,7 +145,7 @@ class Grid_cre final : public Grid{
     double *cre_flux;
     
     std::string filename;
-    bool permission, ec_frame;
+    bool read_permission, write_permission, ec_frame;
     
     // 2-D spatial 1-D spectral grid
     unsigned int nE, nr, nz;
@@ -173,11 +173,11 @@ class Grid_int final : public Grid{
     Healpix_Map<double> fd_map;
     
     // shell parameters
-    unsigned int sim_nside, total_shell, bin_num;
+    unsigned int sim_nside, sim_npix, total_shell, bin_num;
     // shell boundary
     double gc_r_max, ec_r_max, gc_z_max, lat_lim;
     // switches
-    bool do_sync, do_fd;
+    bool do_dm, do_sync, do_fd;
     
     std::string sim_sync_name;
     std::string sim_fd_name;

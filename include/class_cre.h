@@ -21,6 +21,9 @@ class CRE{
      * get J_tot(cue=1)/J_pol(cue=0) at given position
      */
     virtual double get_emissivity(const vec3 &,Pond *,Grid_cre *,const double &,const bool &);
+    virtual double read_grid(const unsigned int &, const vec3 &,Grid_cre *);
+    virtual void write_grid(Pond *,Grid_cre *);
+    
 };
 
 /* Analytical CRE flux */
@@ -72,7 +75,7 @@ class CRE_num final: public CRE{
      * automatically select bi/trilinear interpolation according to
      * 2+1/3+1 spatial-spectral CRE flux grid
      */
-    double read_grid(const unsigned int &, const vec3 &,Grid_cre *);
+    double read_grid(const unsigned int &, const vec3 &,Grid_cre *) override;
 };
 #endif
 // END

@@ -20,9 +20,14 @@ using namespace std;
 /* base class */
 
 vec3 Brnd::get_brnd(const vec3 &pos, Pond *par, Grid_brnd *grid){
+    if(grid->read_permission){
+        return read_grid(pos,grid,par);
+    }
     // if no specific random field model is called
     // base class will return zero vector
-    return vec3(0.,0.,0.);
+    else{
+        return vec3(0.,0.,0.);
+    }
 }
 
 double Brnd::b_spec(const double &k, Pond *par){

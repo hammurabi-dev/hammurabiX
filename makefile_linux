@@ -41,7 +41,7 @@ hammurabi: LFLAGS = $(ALL_L) \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
 	-lgsl -lgslcblas -lm -lfftw3 -fopenmp
 
-hammurabi_OBJ = $(addprefix $(BASE)/src/generic/, tinyxml2.o class_grid.o class_pond.o) $(addprefix $(BASE)/src/hammurabi/, namespace_toolkit.o class_fe.o class_fernd.o class_breg.o class_brnd.o class_cre.o class_int.o hammurabi.o) 
+hammurabi_OBJ = $(addprefix $(BASE)/src/, tinyxml2.o class_grid.o class_pond.o namespace_toolkit.o class_fe.o class_fernd.o class_breg.o class_brnd.o class_cre.o class_int.o hammurabi.o) 
 
 $(hammurabi_OBJ): $(addprefix $(BASE)/include/, cgs_units_file.h class*.h namespace_toolkit.h tinyxml2.h)
 

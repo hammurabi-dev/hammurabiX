@@ -1,40 +1,38 @@
 <?xml version="1.0"?>
 <!-- FULL PARAMETER-SET FOR ALL MODULES -->
-<!-- the "cue" values act as switches for usage -->
+<!-- "cue" acts as switches for usage -->
 <root>
-    
+    <!-- final output .fits maps -->
     <Output>
-        <!-- dispersion measure -->
-        <DM filename="dm.fits"/>
-        <!-- synchrotron emission -->
+        <!-- Dispersion Measure -->
+        <DM cue="1" filename="dm.fits"/>
+        <!-- Synchrotron Emission -->
         <Sync cue="1" filename="iqu_sync.fits"/>
-        <!-- Faraday depth -->
-        <Faraday cue="0" filename="fd.fits"/>
+        <!-- Faraday Depth -->
+        <Faraday cue="1" filename="fd.fits"/>
     </Output>
     
-    <!-- INTERACTIVE OUTPUT -->
+    <!-- INTERACTIVE IN/OUTPUT -->
     <Interface>
-        <!-- RESOLUTION DEFINED IN root->Grid->Box -->
-        <!-- regular magnetic field grid -->
-        <breg_grid cue="0" filename="breg.bin"/>
-        <!-- turbulent magnetic field grid -->
-        <brnd_grid cue="0" filename="brnd.bin"/>
-        <!-- free electron field grid -->
-        <fe_grid cue="0" filename="ymw16.bin"/>
-        <!-- turbulent free electron field grid -->
-        <fernd_grid cue="0" filename="fernd.bin"/>
-        <!-- cosmic ray grid -->
-        <cr_grid cue="0" filename="cr.bin"/>
-        <!-- cosmic ray electron grid -->
-        <cre_grid cue="0" filename="cre.bin"/>
+        <!-- RESOLUTION DEFINED IN './Grid/Box' -->
+        <!-- regular magnetic field -->
+        <breg_grid read="0" write="0" filename="breg.bin"/>
+        <!-- turbulent magnetic field -->
+        <brnd_grid read="0" write="0" filename="brnd.bin"/>
+        <!-- free electron field -->
+        <fe_grid read="0" write="0" filename="ymw16.bin"/>
+        <!-- turbulent free electron field -->
+        <fernd_grid read="0" write="0" filename="fernd.bin"/>
+        <!-- cosmic ray electron -->
+        <cre_grid read="0" write="0" filename="cre.bin"/>
     </Interface>
     
     <!-- HAMMURABI GRID -->
-    <Grid type="3D" ec_frame="1">
-        <!-- ec_frame offers a northern polar sky simulation shortcut -->
+    <Grid type="3D" ec_frame="0">
+        <!-- ec_frame offers a local simulation timesaving scheme -->
         <SunPosition>
             <x value="-8.3"/> <!-- kpc -->
-            <y value="0"/>
+            <y value="0"/> <!-- kpc -->
             <z value="6"/> <!-- pc -->
         </SunPosition>
         
@@ -44,48 +42,22 @@
             <ny value="200"/>
             <nz value="160"/>
             <!-- box length in each direction -->
-            <lx value="10.0"/>
-            <ly value="10.0"/>
-            <lz value="8.0"/>
+            <lx value="10.0"/> <!-- kpc -->
+            <ly value="10.0"/> <!-- kpc -->
+            <lz value="8.0"/> <!-- kpc -->
         </Box>
-        
+        <!-- LOS integration -->
         <Integration> <!-- LOS integration for hammurabi -->
             <shell value="1"/>
             <nside value="16"/>
-            <ec_r_max value="10.0"/>
-            <gc_r_max value="16.0"/>
-            <gc_z_max value="5.0"/>
-            <bin_num value="200"/>
-            <lat_lim value="60."/> <!-- [90,-90] -->
+            <ec_r_max value="10.0"/> <!-- kpc -->
+            <gc_r_max value="16.0"/> <!-- kpc -->
+            <gc_z_max value="5.0"/> <!-- kpc -->
+            <ec_r_res value="0.1"/> <!-- kpc -->
+            <!-- lower limit on galactic latitude -->
+            <lat_lim value="60."/> <!-- [0,90] -->
         </Integration>
     </Grid>
-    
-    <!-- special 2D/3D-spatial grid for Dragon -->
-    <DragonGrid type="2D"> <!-- use 3D or 2D -->
-        <Box>
-            <nE value="80"/>
-            <nr value="80"/>
-            <nx value="80"/>
-            <ny value="80"/>
-            <nz value="16"/>
-            <lr value="20.0"/>
-            <lx value="40.0"/>
-            <ly value="40.0"/>
-            <lz value="8.0"/>
-            <Ekmin value="1.0"/>
-            <Ekmax value="1000.0"/>
-            <Ekfactor value="1.2"/>
-        </Box>
-        
-        <NuclearChain>
-            <Zmax value="2"/>
-            <Zmin value="1"/>
-        </NuclearChain>
-    </DragonGrid>
-    
-    <Algorithm>
-        
-    </Algorithm>
     
     <!-- GALAXY SETTINGS -->
     <Galaxy>
@@ -110,7 +82,7 @@
                 </Local>
             </Regular>
             <!-- turbulent fields -->
-            <Random cue="0" type="Gauss">
+            <Random cue="1" type="Gauss">
                 <!-- Gaussian random -->
                 <Gauss>
                     <p0 value="2.0"/> <!-- norm at k0 -->
@@ -242,100 +214,10 @@
                 <psi_4 value="10.64"/>
                 <psi_5 value="2.77"/>
             </HH14>
-            
-            <!-- Apply the spiral arm pattern to the sources? -->
-            <KappaSource cue="1" />
-            <!-- Apply the spiral arm pattern to the H2 gas? -->
-            <KappaGasH2 cue="0" />
-            <!-- Apply the spiral arm pattern to the HI gas? -->
-            <KappaGasHI cue="0" />
-            <!-- Apply the spiral arm pattern to the HII gas? -->
-            <KappaGasHII cue="1" />
-            <!-- Apply spiral arm pattern to the ISRF (dust component)? -->
-            <KappaISRFDust cue="1" />
-            <!-- Apply spiral arm pattern to the ISRF (starlight component)? -->
-            <KappaISRFStarlight cue="1" />
         </SpiralArms>
-        
-        <Diffusion>
-        </Diffusion>
-        
-        <Reacceleration>
-        </Reacceleration>
-        
-        <CrossSection>
-        </CrossSection>
-        
-        <XCOmode>
-        </XCOmode>
-        
-        <Gas>
-        </Gas>
-        
-        <SNR>
-        </SNR>
     </Galaxy>
     
-    <!-- COMSIC RAY -->
-    <CR>
-        <!-- Reference energy for nuclei normalization in GeV -->
-        <ProtNormEn_GeV value="100" />
-        <!-- Reference energy for primary electron normalization in GeV -->
-        <ElNormEn_GeV value="33.0" />
-        <!-- Proton flux at reference energy   for normalization; in DRAGON units: GeV^-1 m^-2 s^-1 sr^-1 -->
-        <ProtNormFlux value="5.e-2" />
-        <!-- Electron flux at reference energy for normalization; in DRAGON units: GeV^-1 m^-2 s^-1 sr^-1 -->
-        <ElNormFlux value="0.004" />
-        <!-- Reference energy for primary electron extra component normalization in GeV -->
-        <ElNormEnExtra_GeV value="300" />
-        <!-- Extra component flux at reference energy; in DRAGON units: GeV^-1 m^-2 s^-1 sr^-1 -->
-        <ElNormFluxExtra value="1.e-06" />
-        
-        <!-- You can add an arbitrary number of breaks!! -->
-        <InjectionIndexAllNuclei>
-            <!-- First injection slope for nuclei -->
-            <alpha_0 value="2.2" />
-            <!-- Position of first break (rigidity) in GV -->
-            <rho_0 value="1.0" />
-            <!-- Second injection slope for nuclei -->
-            <alpha_1 value="2.2" />
-            <!-- Position of second break (rigidity) in GV -->
-            <rho_1 value="11.0" />
-            <alpha_2 value="2.2" />
-            <rho_2 value="111.0" />
-            <alpha_3 value="2.2" />
-        </InjectionIndexAllNuclei>
-        
-        <!-- You can add an arbitrary number of breaks!! -->
-        <InjectionIndexElectrons>
-            <!-- First injection slope for electrons -->
-            <alpha_0 value="1.60" />
-            <!-- Position of first break (rigidity) in GV -->
-            <rho_0 value="1.0" />
-            <!-- Second injection slope for electrons -->
-            <alpha_1 value="1.60" />
-            <!-- Position of second break (rigidity) in GV -->
-            <rho_1 value="5.0" />
-            <alpha_2 value="2.50" />
-            <rho_2 value="10.0" />
-            <alpha_3 value="2.50" />
-            <!-- Energy of exp cutoff for electrons, in GeV -->
-            <CutoffRigEl value="10000.0" />
-        </InjectionIndexElectrons>
-        
-        <InjectionIndexExtraComponent>
-            <rho_0 value="1.0" />
-            <rho_1 value="4.0" />
-            <rho_2 value="10.0" />
-            <alpha_0 value="1.70" />
-            <alpha_1 value="1.70" />
-            <alpha_2 value="1.70" />
-            <alpha_3 value="1.70" />
-            <CutoffRigExtra value="10000.0" />
-        </InjectionIndexExtraComponent>
-    </CR>
-    
-    <!-- ANALYTICAL CRE -->
+    <!-- ANALYTICAL/NUMERICAL CRE -->
     <CRE type="Analytic" freq="23.0"> <!-- frequency @ GHz -->
         <Analytic>
             <alpha value="3.0"/>
@@ -346,7 +228,24 @@
             <je value="0.25"/>
         </Analytic>
         
-        <Dragon />
+        <Numerical />
     </CRE>
+    
+    <!-- DRAGON GRID FOR NUMERICAL CRE INPUT -->
+    <CREGrid type="2D">
+        <Box>
+            <nr value=""/>
+            <nx value=""/>
+            <ny value=""/>
+            <nz value=""/>
+            <nE value=""/>
+            <lx value=""/>
+            <ly value=""/>
+            <lz value=""/>
+            <Ekmin value=""/>
+            <Ekmax value=""/>
+            <Ekfact value=""/>
+        </Box>
+    </CREGrid>
     
 </root>

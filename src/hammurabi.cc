@@ -44,18 +44,31 @@ int main(int argc, char **argv) {
     Breg *breg = new Breg();
     Brnd *brnd = new Brnd();
     CRE *cre = new CRE();
-    // fe
+    
+    // regular FE field
     string fetype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->Attribute("type");
-    if(fetype=="YMW16"){
+    // if import from file, no need to build specific fe class
+    if(grid_fe->read_permission){
+        grid_fe->import_grid();
+    }
+    else if(fetype=="YMW16"){
         cout<<"INFO: USING YMW16 FE MODEL"<<endl;
         fe = new YMW16();
-        // write out binary file and exit
-        //fe->write_grid(par,grid_fe);
-        //grid_fe->export_grid();
     }
     else{return EXIT_FAILURE;}
+    // if export to file
+    if(grid_fe->write_permission){
+        // write out binary file and exit
+        fe->write_grid(par,grid_fe);
+        grid_fe->export_grid();
+    }
+    
     // random FE field
-    if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->BoolAttribute("cue")){
+    // if import from file, no need to build specific fe_rnd class
+    if(grid_fernd->read_permission){
+        grid_fernd->import_grid();
+    }
+    else if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->BoolAttribute("cue")){
         string ferndtype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->Attribute("type");
         if(ferndtype=="Gauss"){
             cout<<"INFO: USING GAUSSIAN RANDOM FE MODEL"<<endl;
@@ -69,10 +82,17 @@ int main(int argc, char **argv) {
     else{
         cout<<"INFO: NO RANDOM FE FIELD"<<endl;
     }
+    // if export to file
+    if(grid_fernd->write_permission){
+        grid_fernd->export_grid();
+    }
     
     // regular B field, must before random B field
     string bregtype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Regular")->Attribute("type");
-    if(bregtype=="WMAP"){
+    if(grid_breg->read_permission){
+        grid_breg->import_grid();
+    }
+    else if(bregtype=="WMAP"){
         cout<<"INFO: USING WMAP3YR REGUALR B MODEL"<<endl;
         breg = new Bwmap();
     }
@@ -81,9 +101,17 @@ int main(int argc, char **argv) {
         breg = new Blocal();
     }
     else{return EXIT_FAILURE;}
+    // if export to file
+    if(grid_breg->write_permission){
+        breg->write_grid(par,grid_breg);
+        grid_breg->export_grid();
+    }
     
     // random B field
-    if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->BoolAttribute("cue")){
+    if(grid_brnd->read_permission){
+        grid_brnd->import_grid();
+    }
+    else if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->BoolAttribute("cue")){
         string brndtype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->Attribute("type");
         if(brndtype=="Gauss"){
             cout<<"INFO: USING GAUSSIAN RANDOM B MODEL"<<endl;
@@ -103,6 +131,10 @@ int main(int argc, char **argv) {
     else{
         cout<<"INFO: NO RANDOM B FIELD"<<endl;
     }
+    // if export to file
+    if(grid_brnd->write_permission){
+        grid_brnd->export_grid();
+    }
     
     // cre
     string cretype = doc->FirstChildElement("root")->FirstChildElement("CRE")->Attribute("type");
@@ -110,35 +142,19 @@ int main(int argc, char **argv) {
         cout<<"INFO: USING ANALYTICAL CRE MODEL"<<endl;
         cre = new CRE_ana();
     }
-    else if(cretype=="Dragon"){
+    else if(cretype=="Numeric"){
         cout<<"INFO: USING CRE FROM DRAGON"<<endl;
+        grid_cre->import_grid();
         cre = new CRE_num();
     }
     else{return EXIT_FAILURE;}
+    // if export to file
+    if(grid_cre->write_permission){
+        cre->write_grid(par,grid_cre);
+        grid_cre->export_grid();
+    }
     
-    /* IMPORT/EXPORT BINARY FILES */
-    if(doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("fe_grid")->BoolAttribute("cue")){
-        //fe->write_grid(par,grid_fe);
-        //grid_fe->export_grid();
-        grid_fe->import_grid();
-    }
-    if(doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("breg_grid")->BoolAttribute("cue")){
-        //breg->write_grid(par,grid_breg);
-        //grid_breg->export_grid();
-        grid_breg->import_grid();
-    }
-    if(doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("fernd_grid")->BoolAttribute("cue")){
-        // DESIGNED FOR UNUSUAL NEED
-        //grid_fernd->export_grid();
-        //grid_fernd->export_grid();
-    }
-    if(doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("brnd_grid")->BoolAttribute("cue")){
-        // DESIGNED FOR UNUSUAL NEED
-        //grid_brnd->export_grid();
-        //grid_brnd->import_grid();
-    }
     /* START CALCULATION */
-    
     Integrator *intobj = new Integrator();
     cout<<"...ALL MODULES BUILT..."<<endl;
     

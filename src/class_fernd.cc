@@ -20,9 +20,14 @@ using namespace std;
 /* base class */
 
 double FErnd::get_fernd(const vec3 &pos, Pond *par, Grid_fernd *grid){
-    // if no specific random field model is called
-    // base class will return zero vector
-    return 0.;
+    if(grid->read_permission){
+        return read_grid(pos,grid,par);
+    }
+    else{
+        // if no specific random field model is called
+        // base class will return zero vector
+        return 0.;
+    }
 }
 
 double FErnd::fe_spec(const double &k, Pond *par){
