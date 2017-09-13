@@ -4,6 +4,8 @@
 #include <sys/time.h>
 #include "namespace_toolkit.h"
 #include "cgs_units_file.h"
+#include <thread>
+#include <sstream>
 
 using namespace std;
 
@@ -206,7 +208,11 @@ namespace toolkit {
     unsigned long int random_seed(void){
         struct timeval tv;
         gettimeofday(&tv,0);
-        return (tv.tv_sec + tv.tv_usec);
+        // casting thread id into unsinged long
+        stringstream ss;
+        ss << this_thread::get_id();
+        auto th_id = stoul(ss.str());
+        return (th_id + tv.tv_sec + tv.tv_usec);
     }
     
     // offer time stamp

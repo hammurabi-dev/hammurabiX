@@ -18,7 +18,7 @@ DEBUG = -g #-NDEBUG
 CXXFLAGS = -m64 -O2 -fopenmp -Wall -fPIC -Wno-deprecated -pthread $(DEBUG)
 
 # RULE
-$(BASE)/src/hammurabi/%.o : %.cc
+$(BASE)/src/%.o : %.cc
 	$(CXX) $(CXXFLAGS)  -o $@ $<
 
 # HAMMURABI STAND ALONE
