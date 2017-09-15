@@ -1,3 +1,4 @@
+#include <sstream>
 #include <iostream>
 #include <fftw3.h>
 #include <array>
