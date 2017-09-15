@@ -242,16 +242,24 @@ void Grid_brnd::build_grid(XMLDocument *doc){
     fftw_b_kx = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*full_size));
     fftw_b_ky = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*full_size));
     fftw_b_kz = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*full_size));
-    // DFT plan
-    fftw_px = fftw_plan_dft_3d(nx,ny,nz,fftw_b_kx,fftw_b_kx,FFTW_BACKWARD,FFTW_MEASURE);
-    fftw_py = fftw_plan_dft_3d(nx,ny,nz,fftw_b_ky,fftw_b_ky,FFTW_BACKWARD,FFTW_MEASURE);
-    fftw_pz = fftw_plan_dft_3d(nx,ny,nz,fftw_b_kz,fftw_b_kz,FFTW_BACKWARD,FFTW_MEASURE);
+    // DFT plans
+    // backword plan
+    fftw_px_bw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_kx,fftw_b_kx,FFTW_BACKWARD,FFTW_ESTIMATE);
+    fftw_py_bw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_ky,fftw_b_ky,FFTW_BACKWARD,FFTW_ESTIMATE);
+    fftw_pz_bw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_kz,fftw_b_kz,FFTW_BACKWARD,FFTW_ESTIMATE);
+    // forward plan
+    fftw_px_fw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_kx,fftw_b_kx,FFTW_FORWARD,FFTW_ESTIMATE);
+    fftw_py_fw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_ky,fftw_b_ky,FFTW_FORWARD,FFTW_ESTIMATE);
+    fftw_pz_fw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_kz,fftw_b_kz,FFTW_FORWARD,FFTW_ESTIMATE);
 }
 
 void Grid_brnd::clean_grid(void){
-    fftw_destroy_plan(fftw_px);
-    fftw_destroy_plan(fftw_py);
-    fftw_destroy_plan(fftw_pz);
+    fftw_destroy_plan(fftw_px_bw);
+    fftw_destroy_plan(fftw_py_bw);
+    fftw_destroy_plan(fftw_pz_bw);
+    fftw_destroy_plan(fftw_px_fw);
+    fftw_destroy_plan(fftw_py_fw);
+    fftw_destroy_plan(fftw_pz_fw);
     fftw_free(fftw_b_kx);
     fftw_free(fftw_b_ky);
     fftw_free(fftw_b_kz);

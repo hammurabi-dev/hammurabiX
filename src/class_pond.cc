@@ -44,21 +44,20 @@ void Pond::b_pond(XMLDocument *doc){
     blocal.push_back(FetchDouble(subptr,"z0")); //kpc
     blocal.push_back(FetchDouble(subptr,"bn")); //microGauss
     blocal.push_back(FetchDouble(subptr,"bs")); //microGauss
-    // bgrnd
-    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Gauss");
-    bgrnd.push_back(FetchDouble(subptr,"p0")); //in microGauss^2;
+    // brnd_iso
+    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Iso");
+    brnd_iso.push_back(FetchDouble(subptr,"rms")); //in microGauss^2;
     // turning point
-    bgrnd.push_back(FetchDouble(subptr,"k0"));
+    brnd_iso.push_back(FetchDouble(subptr,"k0"));
     // index before turning (large scales)
-    bgrnd.push_back(FetchDouble(subptr,"a0"));
-    // bfrnd
-    subptr = ptr->FirstChildElement("Random")->FirstChildElement("GaussPlus");
-    bgrnd.push_back(FetchDouble(subptr,"beta"));
-
+    brnd_iso.push_back(FetchDouble(subptr,"a0"));
+    // brnd_aniso
+    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Anisoglob");
+    brnd_ani.push_back(FetchDouble(subptr,"rho"));
     // rescaling parameters
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Rescal");
-    bscal.push_back(FetchDouble(subptr,"r0"));
-    bscal.push_back(FetchDouble(subptr,"z0"));
+    brnd_scal.push_back(FetchDouble(subptr,"r0"));
+    brnd_scal.push_back(FetchDouble(subptr,"z0"));
 }
 
 void Pond::fe_pond(XMLDocument *doc){
@@ -136,18 +135,18 @@ void Pond::fe_pond(XMLDocument *doc){
     t7_thetaLI = FetchDouble(subptr,"thetaLI");//deg
     
     // gaussian random
-    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Gauss");
+    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Iso");
     // nomalization
-    fegrnd.push_back(FetchDouble(subptr,"p0"));
+    fernd_iso.push_back(FetchDouble(subptr,"rms"));
     // turning point
-    fegrnd.push_back(FetchDouble(subptr,"k0"));
+    fernd_iso.push_back(FetchDouble(subptr,"k0"));
     // index before turning (large scales)
-    fegrnd.push_back(FetchDouble(subptr,"a0"));
+    fernd_iso.push_back(FetchDouble(subptr,"a0"));
     
     // rescaling parameters for random fe
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Rescal");
-    fescal.push_back(FetchDouble(subptr,"r0"));
-    fescal.push_back(FetchDouble(subptr,"z0"));
+    fernd_scal.push_back(FetchDouble(subptr,"r0"));
+    fernd_scal.push_back(FetchDouble(subptr,"z0"));
     
 }
 

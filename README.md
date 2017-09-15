@@ -1,12 +1,12 @@
 # README
 
-Hammurabi X (reforged version of Hammurabi in C++11 std)
+Hammurabi X (reforged Hammurabi in C++11 std)
 
 Re-developed by:
 
 * Jiaxin Wang (SISSA)
-* Theo Steininger (MPA)
 * Tess R. Jaffe (NASA)
+* Theo Steininger (MPA)
 * Torsten A. Ensslin (MPA)
 
 It simulates 

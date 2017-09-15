@@ -113,17 +113,18 @@ int main(int argc, char **argv) {
     }
     else if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->BoolAttribute("cue")){
         string brndtype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->Attribute("type");
-        if(brndtype=="Gauss"){
-            cout<<"INFO: USING GAUSSIAN RANDOM B MODEL"<<endl;
-            brnd = new Bgrnd(par,grid_brnd);
+        if(brndtype=="Iso"){
+            cout<<"INFO: USING ISOTROPIC RANDOM B MODEL"<<endl;
+            brnd = new Brnd_iso();
             // fill grid with random fields
-            brnd->write_grid(par,grid_brnd);
+            brnd->write_grid_iso(par,grid_brnd);
         }
-        else if(brndtype=="GaussPlus"){
+        else if(brndtype=="Anisoglob"){
             cout<<"INFO: USING GAUSSIAN PLUS ANISOTROPIC RANDOM B MODEL"<<endl;
-            brnd = new Bfrnd(par,grid_brnd);
+            //brnd = new Brnd_ani(par,grid_brnd);
             // fill grid with random fields
-            brnd->write_grid_plus(par,breg,grid_breg,grid_brnd);
+            //brnd->write_grid_ani(par,breg,grid_breg,grid_brnd);
+            return EXIT_FAILURE;
         }
         else{return EXIT_FAILURE;}
         

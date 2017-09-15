@@ -30,73 +30,38 @@ vec3 Brnd::get_brnd(const vec3 &pos, Pond *par, Grid_brnd *grid){
     }
 }
 
+// since we are using rms normalization
+// p0 is hidden and not affecting anything
 double Brnd::b_spec(const double &k, Pond *par){
-    //units fixing
-    const double p0 = par->bgrnd[0]*pow(CGS_U_muGauss,2)*CGS_U_kpc;
-    const double k0 = par->bgrnd[1]/CGS_U_kpc;
-    const double a0 = par->bgrnd[2];
+    //units fixing, wave vector in 1/kpc units
+    const double p0 = par->brnd_iso[0]*pow(CGS_U_muGauss,2);//*CGS_U_kpc;
+    const double k0 = par->brnd_iso[1];//CGS_U_kpc;
+    const double a0 = par->brnd_iso[2];
     const double unit = 1./(4*CGS_U_pi*k*k);
     // avoid nan
     if(k<=0.){
         return 0.;
     }
-    // modified Giacalone-Jokipii model
-    //const double P = 2*p0*pow(k/k0,a0)/(1.+pow(k/k0,a0-a1));
+    // Giacalone-Jokipii
+    //const double P = 2*p0/(1.+pow(k/k0,a0));
     
     // power law
     
     double P = 0.;
     if(k>k0){
-        P = p0*pow(k/k0,a0);
+        P = p0/pow(k/k0,a0);
     }
+    
     return P*unit;
 }
 
-// theoretical integration from k_min in simulation to k=1/1pc of P(k)pi^2
-double Brnd::get_energy(Pond *par, Grid_brnd *grid){
-    // minimum physical k in DFT
-    const double k_start = sqrt(pow(1./grid->lx,2)+pow(1./grid->ly,2)+pow(1./grid->lz,2));
-    // end at 1pc
-    const double k_end = 1000./CGS_U_kpc;
-    // steps
-    const unsigned int N = 3000;
-    const double k_lapse = (k_end-k_start)/N;
-    double result = 0.;
-    // using simpson's rule
-    for(unsigned int i=0;i!=N;++i){
-        double k0 = k_start + i*k_lapse;
-        double k1 = k0 + 0.5*k_lapse;
-        double k2 = k0 + k_lapse;
-        result += (k0*k0*b_spec(k0,par)+4.*k1*k1*b_spec(k1,par)+k2*k2*b_spec(k2,par))*k_lapse/12.;
-    }
-    return result;
-}
-
-// theoretical integration from k_max in simulation to k=1/1pc of P(k)pi^2
-double Brnd::get_missing(Pond *par, Grid_brnd *grid){
-    // maximum physical k in DFT
-    double k_start = sqrt(3.)*(grid->nx/grid->lx)/2.;
-    // end at 1pc
-    const double k_end = 1000./CGS_U_kpc;
-    // steps
-    const unsigned int N = 1000;
-    const double k_lapse = (k_end-k_start)/N;
-    double result = 0.;
-    // using simpson's rule
-    for(unsigned int i=0;i!=N;++i){
-        double k0 = k_start + i*k_lapse;
-        double k1 = k0 + 0.5*k_lapse;
-        double k2 = k0 + k_lapse;
-        result += (k0*k0*b_spec(k0,par)+4.*k1*k1*b_spec(k1,par)+k2*k2*b_spec(k2,par))*k_lapse/12.;
-    }
-    return result;
-}
-
+// galactic scaling of random field energy density
+// set to 1 at observer's place
 double Brnd::rescal_fact(const vec3 &pos, Pond *par){
-    const double r_cyl = sqrt(pos.x*pos.x+pos.y*pos.y)/CGS_U_kpc;
-    const double z = fabs(pos.z/CGS_U_kpc);
-    const double r0 = par->bscal[0];
-    const double z0 = par->bscal[1];
+    const double r_cyl = (sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x))/CGS_U_kpc;
+    const double z = (fabs(pos.z) - fabs(par->SunPosition.z))/CGS_U_kpc;
+    const double r0 = par->brnd_scal[0];
+    const double z0 = par->brnd_scal[1];
     if(r_cyl==0. or z==0){return 1.;}
     else{
     	return exp(-r_cyl/r0)*exp(-z/z0);
@@ -187,150 +152,191 @@ vec3 Brnd::read_grid(const vec3 &pos, Grid_brnd *grid, Pond *par){
 }
 
 // base class does not write out to grid
-void Brnd::write_grid(Pond *par,Grid_brnd *grid){
+void Brnd::write_grid_iso(Pond *par,Grid_brnd *grid){
     cerr<<"WAR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
     <<"DYNAMIC BINDING FAILURE"<<endl;
     exit(1);
 }
-void Brnd::write_grid_plus(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *gbrnd){
+/*
+void Brnd::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *gbrnd){
     cerr<<"WAR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
     <<"DYNAMIC BINDING FAILURE"<<endl;
     exit(1);
 }
+*/
+/* isotropic random field */
 
-/* gaussian random field */
-
-Bgrnd::Bgrnd(Pond *par, Grid_brnd *grid){
-    get_energy_rslt = get_energy(par,grid);
-    get_missing_rslt = get_missing(par,grid);
-}
-
-vec3 Bgrnd::get_brnd(const vec3 &pos, Pond *par, Grid_brnd *grid){
+vec3 Brnd_iso::get_brnd(const vec3 &pos, Pond *par, Grid_brnd *grid){
     // interpolate written grid to given position
     // check if you have called ::write_grid
     return read_grid(pos,grid,par);
 }
 
-void Bgrnd::write_grid(Pond *par, Grid_brnd *grid){
+void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
+    // PHASE I
+    // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
     // initialize random seed
     gsl_rng *r = gsl_rng_alloc(gsl_rng_taus);
-    // from tools
     gsl_rng_set(r, toolkit::random_seed());
-    
+    // start Fourier space filling
     for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
         for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
             for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
-                
                 // point out where we are
                 auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l);
-                
                 // FFT expects up to n/2 positive while n/2 to n negative
-                // physical k in cgs dimension
-                double kx = double(i)/grid->lx;
-                double ky = double(j)/grid->ly;
-                double kz = double(l)/grid->lz;
+                // physical k in 1/kpc dimension
+                double kx = double(i)/(grid->lx/CGS_U_kpc);
+                double ky = double(j)/(grid->ly/CGS_U_kpc);
+                double kz = double(l)/(grid->lz/CGS_U_kpc);
                 if(i>=grid->nx/2) kx -= double(grid->nx)/grid->lx;
                 if(j>=grid->ny/2) ky -= double(grid->ny)/grid->ly;
                 if(l>=grid->nz/2) kz -= double(grid->nz)/grid->lz;
-                
                 const double k = sqrt(kx*kx + ky*ky + kz*kz);
-                
-                // kx=ky=0 elements, since sqrt(kx^2+ky^2) in above
-                if(i==0 and j==0) {
-                    grid->fftw_b_kx[idx][0]=0.; grid->fftw_b_kx[idx][1]=0.;
-                    grid->fftw_b_ky[idx][0]=0.; grid->fftw_b_ky[idx][1]=0.;
-                    grid->fftw_b_kz[idx][0]=0.; grid->fftw_b_kz[idx][1]=0.;
-                    continue;
-                }
-                
-                // now we express k space base {e1,e2,\hat{k}} by {x,y,z} base
-                // the following form is one of infinite combinations
-                vec3 ep,em; // ep and em are actually e+ and e- in draft
-                ep.x = kx*kz/(k*sqrt(kx*kx+ky*ky));
-                ep.y = ky*kz/(k*sqrt(kx*kx+ky*ky));
-                ep.z = -sqrt(kx*kx+ky*ky)/k;
-                
-                em.x = -ky/sqrt(kx*kx+ky*ky);
-                em.y = kx/sqrt(kx*kx+ky*ky);
-                em.z = 0.;
-                // the idea of ep and em is that, following divergenceless requirement
-                // we decompose b(k) into two vector modes
-                // the pre-normalized bases of two vector modes are ep and em
-                // bp and bm are two complex coeffcients in two directions
-                // which satisfy <bp^2 + bm^2> = P(k)(2\pi)^3
-                // in terms of Re and Im components in bp and bm, they can be just random
-                // no constraints on these two degrees of freedom
-                
-                // ratio of plus mode variance
-                // rho should go just random within [0,1]
-                const double rho = gsl_rng_uniform(r);
-                // angles
-                // angles also go random within [0, 2pi]
-                const double angp = 2*CGS_U_pi*gsl_rng_uniform(r);
-                const double angm = 2*CGS_U_pi*gsl_rng_uniform(r);
                 // physical dk^3
-                const double dk3 = 1./(grid->lx*grid->ly*grid->lz);
+                const double dk3 = pow(CGS_U_kpc,3.)/(grid->lx*grid->ly*grid->lz);
                 
-                // cheating simpson evaluation
+                // simpson's rule
                 double element = 2.*b_spec(k,par)/3.;
-                const double halfdk = 0.5*sqrt(pow(1./grid->lx,2)+pow(1./grid->ly,2)+pow(1./grid->lz,2));
+                const double halfdk = 0.5*sqrt(pow(CGS_U_kpc/grid->lx,2)+pow(CGS_U_kpc/grid->ly,2)+pow(CGS_U_kpc/grid->lz,2));
                 element += b_spec(k+halfdk,par)/6.;
                 element += b_spec(k-halfdk,par)/6.;
-                // sigma+ and sigma-
-                const double sigmap = sqrt(element*dk3*rho);
-                const double sigmam = sqrt(element*dk3*(1-rho));
-                
-                // amplitude sampling
-                const double bp = gsl_ran_gaussian(r,sigmap);
-                const double bm = gsl_ran_gaussian(r,sigmam);
-                
-                grid->fftw_b_kx[idx][0] = bp*cos(angp)*ep.x + bm*cos(angm)*em.x;
-                grid->fftw_b_ky[idx][0] = bp*cos(angp)*ep.y + bm*cos(angm)*em.y;
-                grid->fftw_b_kz[idx][0] = bp*cos(angp)*ep.z;
-                
-                // fix zero imaginary elements
-                if((i==0 or i==grid->nx/2) and (j==0 or j==grid->ny/2) and (l==0 or l==grid->nz/2)) {
+                // amplitude, dividing by two because equal allocation to Re and Im parts
+                const double sigma = sqrt(element*dk3/2.0);
+                grid->fftw_b_kx[idx][0] = gsl_ran_gaussian(r,sigma);
+                grid->fftw_b_ky[idx][0] = gsl_ran_gaussian(r,sigma);
+                grid->fftw_b_kz[idx][0] = gsl_ran_gaussian(r,sigma);
+                grid->fftw_b_kx[idx][1] = gsl_ran_gaussian(r,sigma);
+                grid->fftw_b_ky[idx][1] = gsl_ran_gaussian(r,sigma);
+                grid->fftw_b_kz[idx][1] = gsl_ran_gaussian(r,sigma);
+                if(i==0 and j==0 and l==0) {
+                    grid->fftw_b_kx[idx][0] = 0.;
+                    grid->fftw_b_ky[idx][0] = 0.;
+                    grid->fftw_b_kz[idx][0] = 0.;
                     grid->fftw_b_kx[idx][1] = 0.;
                     grid->fftw_b_ky[idx][1] = 0.;
                     grid->fftw_b_kz[idx][1] = 0.;
-                }else {
-                    grid->fftw_b_kx[idx][1] = bp*sin(angp)*ep.x + bm*sin(angm)*em.x;
-                    grid->fftw_b_ky[idx][1] = bp*sin(angp)*ep.y + bm*sin(angm)*em.y;
-                    grid->fftw_b_kz[idx][1] = bp*sin(angp)*ep.z;
                 }
             }// l
         }// j
     }// i
     // free random memory
     gsl_rng_free(r);
+    // no Hermiticity fixing, complex 2 complex
+    // execute DFT backward plan
+    fftw_execute(grid->fftw_px_bw);
+    fftw_execute(grid->fftw_py_bw);
+    fftw_execute(grid->fftw_pz_bw);
     
-    // fix Hermiticity, use auxiliary function
-    hermiticity(grid->fftw_b_kx, grid->nx, grid->ny, grid->nz);
-    hermiticity(grid->fftw_b_ky, grid->nx, grid->ny, grid->nz);
-    hermiticity(grid->fftw_b_kz, grid->nx, grid->ny, grid->nz);
     
-    // execute DFT plan
-    fftw_execute(grid->fftw_px);
-    fftw_execute(grid->fftw_py);
-    fftw_execute(grid->fftw_pz);
+    // PHASE II
+    // RESCALING FIELD PROFILE IN REAL SPACE
+    double b_var;
+    // isotropicity has been checked
+    b_var = toolkit::Variance(grid->fftw_b_kx[0], grid->full_size);
+    for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
+        for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
+            for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
+                // get physical position
+                vec3 pos;
+                pos.x = grid->lx*(double(i)/(grid->nx-1) - 0.5);
+                pos.y = grid->ly*(double(j)/(grid->ny-1) - 0.5);
+                pos.z = grid->lz*(double(l)/(grid->nz-1) - 0.5);
+                // if use solar-centric grid
+                if(grid->ec_frame){
+                    pos.x += par->SunPosition.x;
+                }
+                // get rescaling factor
+                double ratio = sqrt(rescal_fact(pos,par))*par->brnd_iso[0]*CGS_U_muGauss/sqrt(3.*b_var);
+                //double ratio = par->brnd_iso[0]*CGS_U_muGauss/sqrt(3.*b_var); // for debug
+                // add anisotropic field to random one
+                auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l);
+                grid->fftw_b_kx[idx][0] *= ratio;
+                grid->fftw_b_ky[idx][0] *= ratio;
+                grid->fftw_b_kz[idx][0] *= ratio;
+                grid->fftw_b_kx[idx][1] *= ratio;
+                grid->fftw_b_ky[idx][1] *= ratio;
+                grid->fftw_b_kz[idx][1] *= ratio;
+            } //l
+        } //j
+    } //i
+    // execute DFT forward plan
+    fftw_execute(grid->fftw_px_fw);
+    fftw_execute(grid->fftw_py_fw);
+    fftw_execute(grid->fftw_pz_fw);
     
+    
+    // PHASE III
+    // RE-ORTHOGONALIZING IN FOURIER SPACE
+    // Gram-Schmidt process
+    for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
+        for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
+            for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
+                // temporary k vector
+                vec3 tmp_k;
+                // point out where we are
+                auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l);
+                // FFT expects up to n/2 positive while n/2 to n negative
+                // physical k in cgs dimension
+                tmp_k.x = double(i)/grid->lx;
+                tmp_k.y = double(j)/grid->ly;
+                tmp_k.z = double(l)/grid->lz;
+                if(i>=grid->nx/2) tmp_k.x -= double(grid->nx)/grid->lx;
+                if(j>=grid->ny/2) tmp_k.y -= double(grid->ny)/grid->ly;
+                if(l>=grid->nz/2) tmp_k.z -= double(grid->nz)/grid->lz;
+                
+                
+                const vec3 tmp_b_re = {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};
+                const vec3 tmp_b_im = {grid->fftw_b_kx[idx][1],grid->fftw_b_ky[idx][1],grid->fftw_b_kz[idx][1]};
+                
+                const vec3 free_b_re = gramschmidt(tmp_k,tmp_b_re);
+                const vec3 free_b_im = gramschmidt(tmp_k,tmp_b_im);
+                
+                grid->fftw_b_kx[idx][0] = free_b_re.x;
+                grid->fftw_b_ky[idx][0] = free_b_re.y;
+                grid->fftw_b_kz[idx][0] = free_b_re.z;
+                grid->fftw_b_kx[idx][1] = free_b_im.x;
+                grid->fftw_b_ky[idx][1] = free_b_im.y;
+                grid->fftw_b_kz[idx][1] = free_b_im.z;
+                
+                if(i==0 and j==0 and l==0) {
+                    grid->fftw_b_kx[idx][0] = 0.;
+                    grid->fftw_b_ky[idx][0] = 0.;
+                    grid->fftw_b_kz[idx][0] = 0.;
+                    grid->fftw_b_kx[idx][1] = 0.;
+                    grid->fftw_b_ky[idx][1] = 0.;
+                    grid->fftw_b_kz[idx][1] = 0.;
+                }
+            }// l
+        }// j
+    }// i
+    
+    // execute DFT backward plan
+    fftw_execute(grid->fftw_px_bw);
+    fftw_execute(grid->fftw_py_bw);
+    fftw_execute(grid->fftw_pz_bw);
     // get real elements, use auxiliary function
     complex2real(grid->fftw_b_kx, grid->fftw_b_x, grid->full_size);
     complex2real(grid->fftw_b_ky, grid->fftw_b_y, grid->full_size);
     complex2real(grid->fftw_b_kz, grid->fftw_b_z, grid->full_size);
-    
+    // according to FFTW3 manual
+    // transform forward followed by backword scale up array by nx*ny*nz
+    for(unsigned long int i=0;i!=grid->full_size;++i){
+        grid->fftw_b_x[i] /= grid->full_size;
+        grid->fftw_b_y[i] /= grid->full_size;
+        grid->fftw_b_z[i] /= grid->full_size;
+    }
+
 #ifndef NDEBUG
-    double b_var;
+    // check RMS
     b_var = toolkit::Variance(grid->fftw_b_x, grid->full_size);
     b_var +=toolkit::Variance(grid->fftw_b_y, grid->full_size);
     b_var +=toolkit::Variance(grid->fftw_b_z, grid->full_size);
     cout<< "BRND: Numerical RMS: "<<sqrt(b_var)/CGS_U_muGauss<<" microG"<<endl;
-    cout<<"BRND: Analytical RMS: "<<sqrt(get_energy_rslt*8.*CGS_U_pi)/CGS_U_muGauss<<" microG"<<endl;
-    cout<<"BRND: Missing RMS: "<<sqrt(get_missing_rslt*8.*CGS_U_pi)/CGS_U_muGauss<<" microG"<<endl;
     // check average divergence
     double div=0;
     for(decltype(grid->nx) i=2;i!=grid->nx-2;++i) {
@@ -350,148 +356,45 @@ void Bgrnd::write_grid(Pond *par, Grid_brnd *grid){
 #endif
 }
 
-// hermiticity fixer
-void Bgrnd::hermiticity(fftw_complex *a_c,const unsigned int &N1,const unsigned int &N2,const unsigned int &N3){
-    /* hermiticity: complete volume for k < N3/2 */
-    for(unsigned int i=1;i!=N1;i++){
-        for(unsigned int j=1;j!=N2;j++){
-            for(unsigned int k=1;k!=N3/2;k++){
-                auto idx = toolkit::Index3d(N1,N2,N3,i,j,k);
-                auto idxc = toolkit::Index3d(N1,N2,N3,N1-i,N2-j,N3-k);
-                a_c[idxc][0] = a_c[idx][0];
-                a_c[idxc][1] = -a_c[idx][1];
-            }
-        }
-    }
-    /* hermiticity: plane for k = N3/2, j<N2/2 */
-    for(unsigned int i=1;i!=N1;i++){
-        for(unsigned int j=1;j!=N2/2;j++){
-            unsigned int k=N3/2;
-            auto idx = toolkit::Index3d(N1,N2,N3,i,j,k);
-            auto idxc = toolkit::Index3d(N1,N2,N3,N1-i,N2-j,k);
-            a_c[idxc][0] = a_c[idx][0];
-            a_c[idxc][1] = -a_c[idx][1];
-        }
-    }
-    /* hermiticity: plane for k = 0, j<N2/2 */
-    for(unsigned int i=1;i!=N1;i++){
-        for(unsigned int j=1;j!=N2/2;j++){
-            unsigned int k=0;
-            auto idx = toolkit::Index3d(N1,N2,N3,i,j,k);
-            auto idxc = toolkit::Index3d(N1,N2,N3,N1-i,N2-j,k);
-            a_c[idxc][0] = a_c[idx][0];
-            a_c[idxc][1] = -a_c[idx][1];
-        }
-    }
-    /* hermiticity: plane for j = 0, k<N3/2 */
-    for(unsigned int i=1;i!=N1;i++){
-        for(unsigned int k=1;k!=N3/2;k++){
-            unsigned int j=0;
-            auto idx = toolkit::Index3d(N1,N2,N3,i,j,k);
-            auto idxc = toolkit::Index3d(N1,N2,N3,N1-i,j,N3-k);
-            a_c[idxc][0] = a_c[idx][0];
-            a_c[idxc][1] = -a_c[idx][1];
-        }
-    }
-    /* hermiticity: plane for i = 0, k<N3/2 */
-    for(unsigned int j=1;j!=N2;j++){
-        for(unsigned int k=1;k!=N3/2;k++){
-            unsigned int i=0;
-            auto idx = toolkit::Index3d(N1,N2,N3,i,j,k);
-            auto idxc = toolkit::Index3d(N1,N2,N3,i,N2-j,N3-k);
-            a_c[idxc][0] = a_c[idx][0];
-            a_c[idxc][1] = -a_c[idx][1];
-        }
-    }
-    /* hermiticity: line for k = N3/2, j=N2/2 */
-    for(unsigned int i=1;i!=N1/2;i++){
-        unsigned int j=N2/2;
-        unsigned int k=N3/2;
-        auto idx = toolkit::Index3d(N1,N2,N3,i,j,k);
-        auto idxc = toolkit::Index3d(N1,N2,N3,N1-i,j,k);
-        a_c[idxc][0] = a_c[idx][0];
-        a_c[idxc][1] = -a_c[idx][1];
-    }
-    /* hermiticity: line for k = 0, j=N2/2 */
-    for(unsigned int i=1;i!=N1/2;i++){
-        unsigned int j=N2/2;
-        unsigned int k=0;
-        auto idx = toolkit::Index3d(N1,N2,N3,i,j,k);
-        auto idxc = toolkit::Index3d(N1,N2,N3,N1-i,j,k);
-        a_c[idxc][0] = a_c[idx][0];
-        a_c[idxc][1] = -a_c[idx][1];
-    }
-    /* hermiticity: line for k = N3/2, j=0 */
-    for(unsigned int i=1;i!=N1/2;i++){
-        unsigned int k=N3/2;
-        unsigned int j=0;
-        auto idx = toolkit::Index3d(N1,N2,N3,i,j,k);
-        auto idxc = toolkit::Index3d(N1,N2,N3,N1-i,j,k);
-        a_c[idxc][0] = a_c[idx][0];
-        a_c[idxc][1] = -a_c[idx][1];
-    }
-    /* hermiticity: line for k = N3/2, i=0 */
-    for(unsigned int j=1;j!=N2/2;j++){
-        unsigned int k=N3/2;
-        unsigned int i=0;
-        auto idx = toolkit::Index3d(N1,N2,N3,i,j,k);
-        auto idxc = toolkit::Index3d(N1,N2,N3,i,N2-j,k);
-        a_c[idxc][0] = a_c[idx][0];
-        a_c[idxc][1] = -a_c[idx][1];
-    }
-    /* hermiticity: line for k = 0, j=0 */
-    for(unsigned int i=1;i!=N1/2;i++){
-        unsigned int k=0;
-        unsigned int j=0;
-        auto idx = toolkit::Index3d(N1,N2,N3,i,j,k);
-        auto idxc = toolkit::Index3d(N1,N2,N3,N1-i,j,k);
-        a_c[idxc][0] = a_c[idx][0];
-        a_c[idxc][1] = -a_c[idx][1];
-    }
-    /* hermiticity: line for k = 0, i=0 */
-    for(unsigned int j=1;j!=N2/2;j++){
-        unsigned int k=0;
-        unsigned int i=0;
-        auto idx = toolkit::Index3d(N1,N2,N3,i,j,k);
-        auto idxc = toolkit::Index3d(N1,N2,N3,i,N2-j,k);
-        a_c[idxc][0] = a_c[idx][0];
-        a_c[idxc][1] = -a_c[idx][1];
-    }
-    /* hermiticity: line for i = 0, j=0 */
-    for(unsigned int k=1;k!=N3/2;k++){
-        unsigned int i=0;
-        unsigned int j=0;
-        auto idx = toolkit::Index3d(N1,N2,N3,i,j,k);
-        auto idxc = toolkit::Index3d(N1,N2,N3,i,j,N3-k);
-        a_c[idxc][0] = a_c[idx][0];
-        a_c[idxc][1] = -a_c[idx][1];
-    }
-}
-
 // get real components from fftw_complex arrays
-void Bgrnd::complex2real(const fftw_complex *input,double *output,const unsigned long int &size) {
+void Brnd_iso::complex2real(const fftw_complex *input,double *output,const unsigned long int &size) {
     for(unsigned long int i=0;i!=size;++i){
         output[i] = input[i][0];
     }
 }
 
-/* gaussian random + anisotropic random */
-Bfrnd::Bfrnd(Pond *par, Grid_brnd *grid){
-    get_energy_rslt = get_energy(par,grid);
-    get_missing_rslt = get_missing(par,grid);
+// Gram-Schimdt, rewritten using Healpix vec3 library
+// tiny error caused by machine is inevitable
+vec3 Brnd_iso::gramschmidt(const vec3 &k,const vec3 &b){
+    if(k.Length()==0 or b.Length()==0){
+        return vec3{0,0,0};
+    }
+    vec3 b_free;
+    b_free.x = b.x - k.x*dotprod(k,b)/k.SquaredLength();
+    b_free.y = b.y - k.y*dotprod(k,b)/k.SquaredLength();
+    b_free.z = b.z - k.z*dotprod(k,b)/k.SquaredLength();
+    b_free *= b.Length()/b_free.Length();
+    return b_free;
 }
 
-void Bfrnd::write_grid_plus(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
+
+/* anisotropic random
+Brnd_ani::Brnd_ani(Pond *par, Grid_brnd *grid){
+    get_missing_rslt = get_missing_ratio(par,grid);
+}
+ */
+/*
+void Brnd_ani::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
     // first, evaluate Gaussian random field to grid
-    // inherit from Bgrnd
-    write_grid(par,grid);
+    // inherit from Brnd_iso
+    write_grid_iso(par,grid);
     // second, add anisotropic value
     // initialize random seed
     gsl_rng *r = gsl_rng_alloc(gsl_rng_taus);
     // from tools
     gsl_rng_set(r, toolkit::random_seed());
     // last parameter is beta (the scaling factor wrt regular field strength)
-    const double beta = par->bgrnd[par->bgrnd.size()-1];
+    const double beta = par->brnd_iso[par->brnd_iso.size()-1];
     // position, regualr field
     vec3 pos, regular;
     for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
@@ -518,4 +421,5 @@ void Bfrnd::write_grid_plus(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *
     // free random memory
     gsl_rng_free(r);
 }
+ */
 // END

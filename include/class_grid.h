@@ -83,7 +83,9 @@ class Grid_brnd final : public Grid{
     double *fftw_b_x, *fftw_b_y, *fftw_b_z;
     // Fourier space
     fftw_complex *fftw_b_kx, *fftw_b_ky, *fftw_b_kz;
-    fftw_plan fftw_px, fftw_py, fftw_pz;
+    // for/backward plans
+    fftw_plan fftw_px_bw, fftw_py_bw, fftw_pz_bw;
+    fftw_plan fftw_px_fw, fftw_py_fw, fftw_pz_fw;
     
     std::string filename;
     bool read_permission, write_permission, ec_frame;

@@ -36,29 +36,15 @@ class Brnd{
      * write field to grid (model dependent)
      * user can export_grid to binary file with Grid_xxx::export_grid
      */
-    virtual void write_grid(Pond *,Grid_brnd *);
+    virtual void write_grid_iso(Pond *,Grid_brnd *);
     /*@write_grid_plus
      * for dynamic binding only
      */
-    virtual void write_grid_plus(Pond *,Breg *,Grid_breg *,Grid_brnd *);
+    //virtual void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *);
     /*@ b_spec
      * isotropic power-spectrum
      */
     virtual double b_spec(const double &,Pond *);
-    /*@get_energy
-     * get theoretical energy density in cgs units with given b_spec
-     */
-    virtual double get_energy(Pond *,Grid_brnd *);
-    /*@get_missing
-     * get missing energy density (in cgs units given b_spec)
-     * due to k_max in discrete simulation
-     */
-    virtual double get_missing(Pond *,Grid_brnd *);
-    /*@xxx_rslt
-     * get_energy & get_missing only calculated once
-     * and stored in xxx_rslt in constructor
-     */
-    double get_energy_rslt, get_missing_rslt;
     /*@rescal_fact
      * field energy density rescal factor
      */
@@ -66,40 +52,35 @@ class Brnd{
 };
 
 
-/* gaussian random field */
+/* isotropic random field */
 // not final derived class
-class Bgrnd : public Brnd{
+class Brnd_iso : public Brnd{
     public:
-    Bgrnd(void) = default;
-    Bgrnd(Pond *,Grid_brnd *);
-    /*@Bgrnd(vector)
-     * reassign parameters in pond
-     * designed for passing parameters during MCMC
-     */
-    //Bgrnd(const std::vector<double>&,Pond *,Grid_brnd *);
+    Brnd_iso(void) = default;
+    
     vec3 get_brnd(const vec3 &,Pond *,Grid_brnd *) override;
-    void write_grid(Pond *,Grid_brnd *) override;
+    void write_grid_iso(Pond *,Grid_brnd *) override;
     
     protected:
-    /*@hermiticity
-     * fix hermiticity of b(k) grid
-     */
-    void hermiticity(fftw_complex *,const unsigned int &,const unsigned int &,const unsigned int &);
     /*@complex2real
      * fetch real b(x) values from in-plane DFT
      */
     void complex2real(const fftw_complex *,double *,const unsigned long int &);
+    /*@gramschmidt
+     * orthogonalization process
+     */
+    vec3 gramschmidt(const vec3 &,const vec3 &);
 };
 
-/* gaussian random field + anisotropic random field */
-class Bfrnd final : public Bgrnd{
+
+/* anisotropic random field
+class Brnd_ani final : public Brnd_iso{
     public:
-    Bfrnd(void) = default;
-    Bfrnd(Pond *,Grid_brnd *);
-    //Bfrnd(const std::vector<double>&, Pond *,Grid_brnd *);
+    Brnd_ani(void) = default;
+    Brnd_ani(Pond *,Grid_brnd *);
     // use Breg::breg function
-    void write_grid_plus(Pond *, Breg *, Grid_breg *, Grid_brnd *) override;
+    void write_grid_ani(Pond *, Breg *, Grid_breg *, Grid_brnd *) override;
 };
-
+*/
 #endif
 // END

@@ -27,11 +27,12 @@ class Pond {
     std::vector<double> bwmap;
     // local
     std::vector<double> blocal;
-    // gaussian random (+ anisotropic)
-    std::vector<double> bgrnd;
-
+    
+    std::vector<double> brnd_iso;
+    
+    std::vector<double> brnd_ani;
     // rescaling parameters for random b
-    std::vector<double> bscal;
+    std::vector<double> brnd_scal;
     
     // free electron
     // ymw16
@@ -45,9 +46,9 @@ class Pond {
     double t6_J_LB, t6_nlb1, t6_detlb1, t6_wlb1, t6_hlb1, t6_thetalb1, t6_nlb2, t6_detlb2, t6_wlb2, t6_hlb2, t6_thetalb2;
     double t7_nLI, t7_RLI, t7_WLI, t7_detthetaLI, t7_thetaLI;
     // gaussian random
-    std::vector<double> fegrnd;
+    std::vector<double> fernd_iso;
     // rescaling parameters for random fe
-    std::vector<double> fescal;
+    std::vector<double> fernd_scal;
     
     // cre
     // analytical

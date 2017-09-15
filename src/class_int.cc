@@ -175,28 +175,19 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
         if (check_simulation_upper_limit(ec_pos.Length(),gint->ec_r_max)) {break;}
         
         // B field
-        vec3 b_vec = brnd->get_brnd(pos,par,gbrnd);
         vec3 B_vec = breg->get_breg(pos,par,gbreg);
         // add random field
-        double b_rnd_scaling = 0.;
-        if(b_vec.Length()!=0){
-            b_rnd_scaling = brnd->rescal_fact(pos,par);
-            B_vec += b_vec*sqrt(b_rnd_scaling);
-        }
+        B_vec += brnd->get_brnd(pos,par,gbrnd);
+        
         const double B_par = toolkit::get_par2LOS(B_vec,THE,PHI);
         // un-scaled B_per, if random B is active, we scale up this
         // in calculating emissivity, so it is not constant
         double B_per = toolkit::get_perp2LOS(B_vec,THE,PHI);
         
         // FE field
-        double te_rnd = fernd->get_fernd(pos,par,gfernd);
         double te = fe->get_density(pos,par,gfe);
         // add random field
-        double fe_rnd_scaling = 0.;
-        if(te_rnd!=0){
-            fe_rnd_scaling = fernd->rescal_fact(pos,par);
-            te += te_rnd*sqrt(fe_rnd_scaling);
-        }
+        te += fernd->get_fernd(pos,par,gfernd);
         // to avoid negative value
         if(te<0){
             /*
@@ -221,14 +212,7 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
         
         // Synchrotron Emission
         if(gint->do_sync){
-            // fix leakage of isotropic random magnetic field energy
-            // only when random field is active, we use B_per_fix since
-            double B_per_ex = B_per;
-            if(b_vec.Length()!=0){
-                B_per_ex = sqrt(B_per*B_per + (16.*CGS_U_pi/3.)*brnd->get_missing_rslt*b_rnd_scaling);
-            }
-            
-            F_Jtot.push_back(cre->get_emissivity(pos,par,gcre,B_per_ex,1)*shell_ref.delta_d*i2bt);
+            F_Jtot.push_back(cre->get_emissivity(pos,par,gcre,B_per,1)*shell_ref.delta_d*i2bt);
             // J_pol receive no contribution from missing random
             F_Jpol.push_back(cre->get_emissivity(pos,par,gcre,B_per,0)*shell_ref.delta_d*i2bt);
             // intrinsic polarization angle, following IAU definition

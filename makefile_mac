@@ -56,7 +56,7 @@ hammurabi: $(hammurabi_OBJ) $(BASE)/lib/libhammurabi.a run $(BASE)/src/hammurabi
 # ALIAS
 .PHONY: clean
 clean:
-	rm $(BASE)/lib/*.a $(BASE)/src/*.o $(BASE)/src/generic/*.o $(BASE)/src/dragon/*.o; rm -rf $(BASE)/run
+	rm $(BASE)/lib/*.a $(BASE)/src/*.o; rm -rf $(BASE)/run
 .PHONY: tar 
 tar:
 	tar cfv NUWA.tar.gz makefile* include data src wrapper fit

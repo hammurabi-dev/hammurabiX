@@ -55,7 +55,7 @@
             <gc_z_max value="5.0"/> <!-- kpc -->
             <ec_r_res value="0.1"/> <!-- kpc -->
             <!-- lower limit on galactic latitude -->
-            <lat_lim value="60."/> <!-- [0,90] -->
+            <lat_lim value="55."/> <!-- [0,90] -->
         </Integration>
     </Grid>
     
@@ -82,18 +82,17 @@
                 </Local>
             </Regular>
             <!-- turbulent fields -->
-            <Random cue="1" type="Gauss">
-                <!-- Gaussian random -->
-                <Gauss>
-                    <p0 value="2.0"/> <!-- norm at k0 -->
+            <Random cue="0" type="Iso" seed="-1">
+                <!-- isotropic -->
+                <Iso>
+                    <rms value="2.0"/> <!-- norm at k0 -->
                     <k0 value="1.0"/> <!-- k0 = 1/Lambda in kpc -->
-                    <a0 value="-1.7"/>
-                </Gauss>
-                <!-- Gaussian + Aniso -->
-                <GaussPlus>
-                    <!-- use Gaussian random setting above -->
-                    <beta value="0.5"/>
-                </GaussPlus>
+                    <a0 value="1.7"/> <!-- 5/3, Kolmogrov -->
+                </Iso>
+                <!-- global anisotropy -->
+                <Anisoglob>
+                    <rho value="0.5"/>
+                </Anisoglob>
                 <!-- rescaling -->
                 <Rescal>
                     <r0 value="8.0"/> <!-- in kpc -->
@@ -179,12 +178,12 @@
                 
             </YMW16>
             <!-- turbulent free electron -->
-            <Random cue="0" type="Gauss">
-                <Gauss>
-                    <p0 value="1.0"/>
+            <Random cue="0" type="Iso" seed="-1">
+                <Iso>
+                    <rms value="1.0"/>
                     <k0 value="2.0"/> <!-- k0 = 1/Lambda in kpc -->
                     <a0 value="-1.7"/>
-                </Gauss>
+                </Iso>
                 <!-- rescaling -->
                 <Rescal>
                     <r0 value="8.0"/> <!-- in kpc -->
@@ -228,12 +227,7 @@
             <je value="0.25"/>
         </Analytic>
         
-        <Numerical />
-    </CRE>
-    
-    <!-- DRAGON GRID FOR NUMERICAL CRE INPUT -->
-    <CREGrid type="2D">
-        <Box>
+        <Numeric type="2D">
             <nr value=""/>
             <nx value=""/>
             <ny value=""/>
@@ -245,7 +239,7 @@
             <Ekmin value=""/>
             <Ekmax value=""/>
             <Ekfact value=""/>
-        </Box>
-    </CREGrid>
+        </Numeric>
+    </CRE>
     
 </root>

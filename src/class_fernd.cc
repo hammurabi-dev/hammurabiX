@@ -32,9 +32,9 @@ double FErnd::get_fernd(const vec3 &pos, Pond *par, Grid_fernd *grid){
 
 double FErnd::fe_spec(const double &k, Pond *par){
     //units fixing
-    const double p0 = par->fegrnd[0]*CGS_U_kpc;
-    const double k0 = par->fegrnd[1]/CGS_U_kpc;
-    const double a0 = par->fegrnd[2];
+    const double p0 = par->fernd_iso[0]*CGS_U_kpc;
+    const double k0 = par->fernd_iso[1]/CGS_U_kpc;
+    const double a0 = par->fernd_iso[2];
     const double unit = 1./(4*CGS_U_pi*k*k);
     // avoid nan
     if(k<=0.){
@@ -96,8 +96,8 @@ double FErnd::get_missing(Pond *par, Grid_fernd *grid){
 double FErnd::rescal_fact(const vec3 &pos, Pond *par){
     const double r_cyl = sqrt(pos.x*pos.x+pos.y*pos.y)/CGS_U_kpc;
     const double z = fabs(pos.z/CGS_U_kpc);
-    const double r0 = par->fescal[0];
-    const double z0 = par->fescal[1];
+    const double r0 = par->fernd_scal[0];
+    const double z0 = par->fernd_scal[1];
     if(r_cyl==0. or z==0) {return 1.;}
     else{
 	return exp(-r_cyl/r0)*exp(-z/z0);
@@ -194,21 +194,7 @@ FEgrnd::FEgrnd(Pond *par, Grid_fernd *grid){
     get_variance_rslt = get_variance(par,grid);
     get_missing_rslt = get_missing(par,grid);
 }
-/*
-FEgrnd::FEgrnd(const vector<double> &in, Pond *par, Grid_fernd *grid){
-    if(in.size()!=par->fegrnd.size()){
-        cerr<<"WAR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"FEgrnd: NOT ASSIGNING FULL PAR-SET"<<endl;
-    }
-    for(decltype(in.size()) i=0;i!=in.size();++i){
-        par->fegrnd[i] = in[i];
-    }
-    get_variance_rslt = get_variance(par,grid);
-    get_missing_rslt = get_missing(par,grid);
-}
-*/
+
 double FEgrnd::get_fernd(const vec3 &pos, Pond *par, Grid_fernd *grid){
     // interpolate written grid to given position
     // check if you have called ::write_grid
