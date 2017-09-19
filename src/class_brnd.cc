@@ -159,7 +159,7 @@ void Brnd::write_grid_iso(Pond *par,Grid_brnd *grid){
     <<"DYNAMIC BINDING FAILURE"<<endl;
     exit(1);
 }
-/*
+
 void Brnd::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *gbrnd){
     cerr<<"WAR:"<<__FILE__
     <<" : in function "<<__func__<<endl
@@ -167,7 +167,7 @@ void Brnd::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *gb
     <<"DYNAMIC BINDING FAILURE"<<endl;
     exit(1);
 }
-*/
+
 /* isotropic random field */
 
 vec3 Brnd_iso::get_brnd(const vec3 &pos, Pond *par, Grid_brnd *grid){
@@ -373,34 +373,86 @@ vec3 Brnd_iso::gramschmidt(const vec3 &k,const vec3 &b){
     b_free.x = b.x - k.x*dotprod(k,b)/k.SquaredLength();
     b_free.y = b.y - k.y*dotprod(k,b)/k.SquaredLength();
     b_free.z = b.z - k.z*dotprod(k,b)/k.SquaredLength();
-    b_free *= b.Length()/b_free.Length();
+    //b_free *= b.Length()/b_free.Length();
+    b_free = toolkit::versor(b_free)*b.Length();
     return b_free;
 }
 
 
-/* anisotropic random
-Brnd_ani::Brnd_ani(Pond *par, Grid_brnd *grid){
-    get_missing_rslt = get_missing_ratio(par,grid);
+/* global anisotropic random field */
+
+double Brnd_anig::anisotropy(const vec3 &pos, Pond *par, Breg *breg, Grid_breg *gbreg){
+    // the simplest case, const.
+    return par->brnd_anig[0];
 }
- */
-/*
-void Brnd_ani::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
-    // first, evaluate Gaussian random field to grid
-    // inherit from Brnd_iso
-    write_grid_iso(par,grid);
-    // second, add anisotropic value
+
+void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
+    // PHASE I
+    // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
     // initialize random seed
     gsl_rng *r = gsl_rng_alloc(gsl_rng_taus);
-    // from tools
     gsl_rng_set(r, toolkit::random_seed());
-    // last parameter is beta (the scaling factor wrt regular field strength)
-    const double beta = par->brnd_iso[par->brnd_iso.size()-1];
-    // position, regualr field
-    vec3 pos, regular;
+    // start Fourier space filling
     for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
         for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
             for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
-                // get regular field vector at given grid point
+                // point out where we are
+                auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l);
+                // FFT expects up to n/2 positive while n/2 to n negative
+                // physical k in 1/kpc dimension
+                double kx = double(i)/(grid->lx/CGS_U_kpc);
+                double ky = double(j)/(grid->ly/CGS_U_kpc);
+                double kz = double(l)/(grid->lz/CGS_U_kpc);
+                if(i>=grid->nx/2) kx -= double(grid->nx)/grid->lx;
+                if(j>=grid->ny/2) ky -= double(grid->ny)/grid->ly;
+                if(l>=grid->nz/2) kz -= double(grid->nz)/grid->lz;
+                const double k = sqrt(kx*kx + ky*ky + kz*kz);
+                // physical dk^3
+                const double dk3 = pow(CGS_U_kpc,3.)/(grid->lx*grid->ly*grid->lz);
+                
+                // simpson's rule
+                double element = 2.*b_spec(k,par)/3.;
+                const double halfdk = 0.5*sqrt(pow(CGS_U_kpc/grid->lx,2)+pow(CGS_U_kpc/grid->ly,2)+pow(CGS_U_kpc/grid->lz,2));
+                element += b_spec(k+halfdk,par)/6.;
+                element += b_spec(k-halfdk,par)/6.;
+                // amplitude, dividing by two because equal allocation to Re and Im parts
+                const double sigma = sqrt(element*dk3/2.0);
+                grid->fftw_b_kx[idx][0] = gsl_ran_gaussian(r,sigma);
+                grid->fftw_b_ky[idx][0] = gsl_ran_gaussian(r,sigma);
+                grid->fftw_b_kz[idx][0] = gsl_ran_gaussian(r,sigma);
+                grid->fftw_b_kx[idx][1] = gsl_ran_gaussian(r,sigma);
+                grid->fftw_b_ky[idx][1] = gsl_ran_gaussian(r,sigma);
+                grid->fftw_b_kz[idx][1] = gsl_ran_gaussian(r,sigma);
+                if(i==0 and j==0 and l==0) {
+                    grid->fftw_b_kx[idx][0] = 0.;
+                    grid->fftw_b_ky[idx][0] = 0.;
+                    grid->fftw_b_kz[idx][0] = 0.;
+                    grid->fftw_b_kx[idx][1] = 0.;
+                    grid->fftw_b_ky[idx][1] = 0.;
+                    grid->fftw_b_kz[idx][1] = 0.;
+                }
+            }// l
+        }// j
+    }// i
+    // free random memory
+    gsl_rng_free(r);
+    // no Hermiticity fixing, complex 2 complex
+    // execute DFT backward plan
+    fftw_execute(grid->fftw_px_bw);
+    fftw_execute(grid->fftw_py_bw);
+    fftw_execute(grid->fftw_pz_bw);
+    
+    
+    // PHASE II
+    // RESCALING FIELD PROFILE IN REAL SPACE
+    double b_var;
+    // isotropicity has been checked
+    b_var = toolkit::Variance(grid->fftw_b_kx[0], grid->full_size);
+    for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
+        for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
+            for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
+                // get physical position
+                vec3 pos;
                 pos.x = grid->lx*(double(i)/(grid->nx-1) - 0.5);
                 pos.y = grid->ly*(double(j)/(grid->ny-1) - 0.5);
                 pos.z = grid->lz*(double(l)/(grid->nz-1) - 0.5);
@@ -408,18 +460,125 @@ void Brnd_ani::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
                 if(grid->ec_frame){
                     pos.x += par->SunPosition.x;
                 }
-                regular = breg->get_breg(pos,par,gbreg);
-                // add anisotropic field to random one
+                // assemble b_Re and b_Im
                 auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l);
-                regular *= sqrt(beta)*gsl_rng_uniform(r);
-                grid->fftw_b_x[idx] += regular.x;
-                grid->fftw_b_y[idx] += regular.y;
-                grid->fftw_b_z[idx] += regular.z;
+                vec3 b_re = {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};
+                vec3 b_im = {grid->fftw_b_kx[idx][1],grid->fftw_b_ky[idx][1],grid->fftw_b_kz[idx][1]};
+                
+                // get rescaling factor
+                double ratio = sqrt(rescal_fact(pos,par))*par->brnd_iso[0]*CGS_U_muGauss/sqrt(3.*b_var);
+                double rho = anisotropy(pos,par,breg,gbreg);
+                // impose anisotropy
+                vec3 B_versor = toolkit::versor(breg->get_breg(pos,par,gbreg));
+                if(B_versor.Length()!=0){
+                    vec3 b_re_par = B_versor*dotprod(B_versor,b_re);
+                    vec3 b_re_perp = b_re - b_re_par;
+                    b_re = toolkit::versor(b_re_par*rho + b_re_perp*(1-rho))*(b_re.Length()*ratio);
+                    vec3 b_im_par = B_versor*dotprod(B_versor,b_im);
+                    vec3 b_im_perp = b_im - b_im_par;
+                    b_im = toolkit::versor(b_im_par*rho + b_im_perp*(1-rho))*(b_im.Length()*ratio);
+                }
+                // add anisotropic field to random one
+                grid->fftw_b_kx[idx][0] = b_re.x;
+                grid->fftw_b_ky[idx][0] = b_re.y;
+                grid->fftw_b_kz[idx][0] = b_re.z;
+                grid->fftw_b_kx[idx][1] = b_im.x;
+                grid->fftw_b_ky[idx][1] = b_im.y;
+                grid->fftw_b_kz[idx][1] = b_im.z;
+            } //l
+        } //j
+    } //i
+    // execute DFT forward plan
+    fftw_execute(grid->fftw_px_fw);
+    fftw_execute(grid->fftw_py_fw);
+    fftw_execute(grid->fftw_pz_fw);
+    
+    
+    // PHASE III
+    // RE-ORTHOGONALIZING IN FOURIER SPACE
+    // Gram-Schmidt process
+    for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
+        for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
+            for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
+                // temporary k vector
+                vec3 tmp_k;
+                // point out where we are
+                auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l);
+                // FFT expects up to n/2 positive while n/2 to n negative
+                // physical k in cgs dimension
+                tmp_k.x = double(i)/grid->lx;
+                tmp_k.y = double(j)/grid->ly;
+                tmp_k.z = double(l)/grid->lz;
+                if(i>=grid->nx/2) tmp_k.x -= double(grid->nx)/grid->lx;
+                if(j>=grid->ny/2) tmp_k.y -= double(grid->ny)/grid->ly;
+                if(l>=grid->nz/2) tmp_k.z -= double(grid->nz)/grid->lz;
+                
+                
+                const vec3 tmp_b_re = {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};
+                const vec3 tmp_b_im = {grid->fftw_b_kx[idx][1],grid->fftw_b_ky[idx][1],grid->fftw_b_kz[idx][1]};
+                
+                const vec3 free_b_re = gramschmidt(tmp_k,tmp_b_re);
+                const vec3 free_b_im = gramschmidt(tmp_k,tmp_b_im);
+                
+                grid->fftw_b_kx[idx][0] = free_b_re.x;
+                grid->fftw_b_ky[idx][0] = free_b_re.y;
+                grid->fftw_b_kz[idx][0] = free_b_re.z;
+                grid->fftw_b_kx[idx][1] = free_b_im.x;
+                grid->fftw_b_ky[idx][1] = free_b_im.y;
+                grid->fftw_b_kz[idx][1] = free_b_im.z;
+                
+                if(i==0 and j==0 and l==0) {
+                    grid->fftw_b_kx[idx][0] = 0.;
+                    grid->fftw_b_ky[idx][0] = 0.;
+                    grid->fftw_b_kz[idx][0] = 0.;
+                    grid->fftw_b_kx[idx][1] = 0.;
+                    grid->fftw_b_ky[idx][1] = 0.;
+                    grid->fftw_b_kz[idx][1] = 0.;
+                }
+            }// l
+        }// j
+    }// i
+    
+    // execute DFT backward plan
+    fftw_execute(grid->fftw_px_bw);
+    fftw_execute(grid->fftw_py_bw);
+    fftw_execute(grid->fftw_pz_bw);
+    // get real elements, use auxiliary function
+    complex2real(grid->fftw_b_kx, grid->fftw_b_x, grid->full_size);
+    complex2real(grid->fftw_b_ky, grid->fftw_b_y, grid->full_size);
+    complex2real(grid->fftw_b_kz, grid->fftw_b_z, grid->full_size);
+    // according to FFTW3 manual
+    // transform forward followed by backword scale up array by nx*ny*nz
+    for(unsigned long int i=0;i!=grid->full_size;++i){
+        grid->fftw_b_x[i] /= grid->full_size;
+        grid->fftw_b_y[i] /= grid->full_size;
+        grid->fftw_b_z[i] /= grid->full_size;
+    }
+    
+#ifndef NDEBUG
+    // check RMS
+    b_var = toolkit::Variance(grid->fftw_b_x, grid->full_size);
+    b_var +=toolkit::Variance(grid->fftw_b_y, grid->full_size);
+    b_var +=toolkit::Variance(grid->fftw_b_z, grid->full_size);
+    cout<< "BRND: Numerical RMS: "<<sqrt(b_var)/CGS_U_muGauss<<" microG"<<endl;
+    // check average divergence
+    double div=0;
+    for(decltype(grid->nx) i=2;i!=grid->nx-2;++i) {
+        for(decltype(grid->ny) j=2;j!=grid->ny-2;++j) {
+            for(decltype(grid->nz) k=2;k!=grid->nz-2;++k) {
+                auto idxf = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i+1,j,k);
+                auto idxb = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i-1,j,k);
+                auto idyf = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j+1,k);
+                auto idyb = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j-1,k);
+                auto idzf = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k+1);
+                auto idzb = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k-1);
+                div += fabs( (grid->fftw_b_x[idxf]-grid->fftw_b_x[idxb]) + (grid->fftw_b_y[idyf]-grid->fftw_b_y[idyb]) + (grid->fftw_b_z[idzf]-grid->fftw_b_z[idzb]) );
             }
         }
     }
-    // free random memory
-    gsl_rng_free(r);
+    cout<<"BRND: Averaged divergence: "<<div/(CGS_U_muGauss*grid->nx*grid->ny*grid->nz)<<" microG/grid"<<endl;
+#endif
+
 }
- */
+
 // END

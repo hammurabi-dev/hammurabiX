@@ -32,15 +32,15 @@ class Brnd{
      * user has to write_grid ahead
      */
     virtual vec3 read_grid(const vec3 &,Grid_brnd *,Pond *);
-    /*@write_grid
+    /*@write_grid_iso
      * write field to grid (model dependent)
      * user can export_grid to binary file with Grid_xxx::export_grid
      */
     virtual void write_grid_iso(Pond *,Grid_brnd *);
-    /*@write_grid_plus
+    /*@write_grid_anig
      * for dynamic binding only
      */
-    //virtual void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *);
+    virtual void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *);
     /*@ b_spec
      * isotropic power-spectrum
      */
@@ -73,13 +73,29 @@ class Brnd_iso : public Brnd{
 };
 
 
-/* anisotropic random field
-class Brnd_ani final : public Brnd_iso{
+/* global anisotropic random field */
+class Brnd_anig final : public Brnd_iso{
     public:
-    Brnd_ani(void) = default;
-    Brnd_ani(Pond *,Grid_brnd *);
+    Brnd_anig(void) = default;
     // use Breg::breg function
-    void write_grid_ani(Pond *, Breg *, Grid_breg *, Grid_brnd *) override;
+    void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *) override;
+    
+    private:
+    /*@anisotropy
+     * calculate anisotropy at given point
+     */
+    double anisotropy(const vec3 &,Pond *,Breg *,Grid_breg *);
+};
+
+/* local anisotropic random field */
+/*
+class Brnd_anil final : public Brnd{
+    public:
+    Brnd_anil(void) = default;
+    // anisotropic power spectrum
+    double b_spec(const double &,Pond *) override;
+    // use Breg::breg function
+    void write_grid_anil(Pond *,Breg *,Grid_breg *,Grid_brnd *) override;
 };
 */
 #endif

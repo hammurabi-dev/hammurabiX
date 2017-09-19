@@ -27,10 +27,12 @@ class Pond {
     std::vector<double> bwmap;
     // local
     std::vector<double> blocal;
-    
+    // isotropic
     std::vector<double> brnd_iso;
-    
-    std::vector<double> brnd_ani;
+    // global aniso
+    std::vector<double> brnd_anig;
+    // local aniso
+    std::vector<double> brnd_anil;
     // rescaling parameters for random b
     std::vector<double> brnd_scal;
     

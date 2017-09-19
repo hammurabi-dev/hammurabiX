@@ -51,9 +51,12 @@ void Pond::b_pond(XMLDocument *doc){
     brnd_iso.push_back(FetchDouble(subptr,"k0"));
     // index before turning (large scales)
     brnd_iso.push_back(FetchDouble(subptr,"a0"));
-    // brnd_aniso
+    // brnd_aniso_glob
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Anisoglob");
-    brnd_ani.push_back(FetchDouble(subptr,"rho"));
+    brnd_anig.push_back(FetchDouble(subptr,"rho"));
+    // brnd_aniso_local
+    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Anisolocal");
+    brnd_anig.push_back(FetchDouble(subptr,"beta"));
     // rescaling parameters
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Rescal");
     brnd_scal.push_back(FetchDouble(subptr,"r0"));

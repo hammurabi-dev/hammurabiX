@@ -120,11 +120,10 @@ int main(int argc, char **argv) {
             brnd->write_grid_iso(par,grid_brnd);
         }
         else if(brndtype=="Anisoglob"){
-            cout<<"INFO: USING GAUSSIAN PLUS ANISOTROPIC RANDOM B MODEL"<<endl;
-            //brnd = new Brnd_ani(par,grid_brnd);
+            cout<<"INFO: USING GLOBAL ANISOTROPIC RANDOM B MODEL"<<endl;
+            brnd = new Brnd_anig();
             // fill grid with random fields
-            //brnd->write_grid_ani(par,breg,grid_breg,grid_brnd);
-            return EXIT_FAILURE;
+            brnd->write_grid_ani(par,breg,grid_breg,grid_brnd);
         }
         else{return EXIT_FAILURE;}
         

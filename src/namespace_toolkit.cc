@@ -70,6 +70,13 @@ namespace toolkit {
         cyl_vec.z=input.z;
     }
     
+    vec3 versor(const vec3 &b){
+        if(b.Length()==0.) {return vec3(0.,0.,0.);}
+        vec3 V = b;
+        V.Normalize();
+        return V;
+    }
+    
     // Mean for array
     double Mean(const double *arr,const unsigned long int &size){
         double avg=0;

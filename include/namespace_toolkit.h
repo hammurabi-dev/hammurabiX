@@ -54,6 +54,11 @@ namespace toolkit {
         output[1] = sin(phi)*input[0] + cos(phi)*input[1];
         output[2] = input[2];
     }
+    /*@versor
+     * get versor of given vector
+     */
+    vec3 versor(const vec3 &);
+    
     /*@Index3d
      * find index of 3D grid
      */

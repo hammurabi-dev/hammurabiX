@@ -96,6 +96,10 @@
                 <Anisoglob>
                     <rho value="0.5"/>
                 </Anisoglob>
+                <!-- local turbulent -->
+                <Anisolocal>
+                    <beta value="1.0"/>
+                </Anisolocal>
                 <!-- rescaling -->
                 <Rescal>
                     <r0 value="8.0"/> <!-- in kpc -->
