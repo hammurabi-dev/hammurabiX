@@ -468,6 +468,15 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 // get rescaling factor
                 double ratio = sqrt(rescal_fact(pos,par))*par->brnd_iso[0]*CGS_U_muGauss/sqrt(3.*b_var);
                 double rho = anisotropy(pos,par,breg,gbreg);
+#ifndef NDEBUG
+                if(rho<0. or rho>1.){
+                    cerr<<"ERR:"<<__FILE__
+                    <<" : in function "<<__func__<<endl
+                    <<" at line "<<__LINE__<<endl
+                    <<"WRONG VALUE"<<endl;
+                    exit(1);
+                }
+#endif
                 // impose anisotropy
                 vec3 B_versor = toolkit::versor(breg->get_breg(pos,par,gbreg));
                 if(B_versor.Length()!=0){
