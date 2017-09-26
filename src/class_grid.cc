@@ -725,8 +725,9 @@ void Grid_int::build_grid(XMLDocument *doc){
     XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Integration");
     
     total_shell = FetchUnsigned(ptr,"shell");
-    sim_nside = FetchUnsigned(ptr,"nside");
-    sim_npix = 12*sim_nside*sim_nside;
+    nside_sim = FetchUnsigned(ptr,"nside_sim");
+    nside_min = FetchUnsigned(ptr,"nside_min");
+    npix_sim = 12*nside_sim*nside_sim;
     ec_r_max = CGS_U_kpc*FetchDouble(ptr,"ec_r_max");
     gc_r_max = FetchDouble(ptr,"gc_r_max")*CGS_U_kpc;
     gc_z_max = FetchDouble(ptr,"gc_z_max")*CGS_U_kpc;

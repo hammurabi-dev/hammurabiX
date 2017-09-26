@@ -1,12 +1,12 @@
-# EXTERNAL LIB
+# EXTERNAL LIBRARIES
 GSL = /home/jiaxin/gsl
 FFTW = /usr/local
 CFITSIO = /home/jiaxin/cfitsio
 HEALPIX = /home/jiaxin/healpix/Healpix_3.30
 HEALPIX_TARGET = generic_gcc
 
-# INTERNAL DIR
-BASE = /home/jiaxin/lab/hamx
+# EXECUTABLE NAME
+EXE = hamx
 
 # COMPILER
 CXX = g++ -std=c++11
@@ -17,47 +17,48 @@ DEBUG = -g #-NDEBUG
 # COMPILE OPTIONS
 CXXFLAGS = -m64 -O2 -fopenmp -Wall -fPIC -Wno-deprecated -pthread $(DEBUG)
 
-# RULE
-$(BASE)/src/%.o : %.cc
-	$(CXX) $(CXXFLAGS)  -o $@ $<
-
-
-# HAMMURABI STAND ALONE
-hammurabi: EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
+EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
 	-I$(HEALPIX)/src/cxx/$(HEALPIX_TARGET)/include \
-	-I$(BASE)/include -I.
-hammurabi: CXXFLAGS += $(EXT_INC)
+	-I include -I.
+CXXFLAGS += $(EXT_INC)
  
-hammurabi: ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
+ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
 	-L$(HEALPIX)/src/cxx/$(HEALPIX_TARGET)/lib \
-	-L$(BASE)/lib -L. 
-hammurabi: LFLAGS = $(ALL_L) \
+	-L lib -L. 
+LFLAGS = $(ALL_L) \
 	-lhammurabi \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
 	-lgsl -lgslcblas -lm -lfftw3 -fopenmp
 
-hammurabi_OBJ = $(addprefix $(BASE)/src/, tinyxml2.o class_grid.o class_pond.o namespace_toolkit.o class_fe.o class_fernd.o class_breg.o class_brnd.o class_cre.o class_int.o hammurabi.o) 
+OBJ = $(addprefix src/, tinyxml2.o class_grid.o class_pond.o namespace_toolkit.o class_fe.o class_fernd.o class_breg.o class_brnd.o class_cre.o class_int.o) 
 
-$(hammurabi_OBJ): $(addprefix $(BASE)/include/, cgs_units_file.h class*.h namespace_toolkit.h tinyxml2.h)
+HEADS = $(addprefix include/, cgs_units_file.h class*.h namespace_toolkit.h tinyxml2.h)
 
-$(BASE)/lib/libhammurabi.a: $(hammurabi_OBJ)
-	ar cr $(BASE)/lib/libhammurabi.a $(hammurabi_OBJ)
+# RULES
 
-hammurabi: $(hammurabi_OBJ) $(BASE)/lib/libhammurabi.a run $(BASE)/src/hammurabi.o
-	$(CXX) -o $(BASE)/run/hammurabi $(BASE)/src/hammurabi.o $(LFLAGS)
+default: $(EXE)
 
-# DRAGON STAND ALONE
+src/hammurabi.o: src/hammurabi.cc $(OBJ)
 
-# HAMMURABI-DRAGON
+$(EXE): $(OBJ) src/hammurabi.o lib/libhammurabi.a
+	mkdir bin
+        $(CXX) $^ -o bin/$(EXE) $(LFLAGS)
+	cp data/* bin; cp python_utils/* bin
 
-# ALIAS
+%.o: %.cc $(HEADS)
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
+
+lib/libhammurabi.a: $(OBJ) src/hammurabi.o
+	ar cr $@ $^
+
+help:
+	echo $(OBJ)
+
 .PHONY: clean
 clean:
-	rm $(BASE)/lib/*.a $(BASE)/src/*.o; rm -rf $(BASE)/run
+	rm lib/*.a src/*.o; rm -rf bin
 .PHONY: tar 
 tar:
-	tar cfv NUWA.tar.gz makefile* include data src wrapper fit
-.PHONY: run
-run:
-	rm -rf $(BASE)/run ; mkdir $(BASE)/run; cp $(BASE)/data/* $(BASE)/run; cp $(BASE)/python_utils/* $(BASE)/run
+	tar cfv HamX.tar.gz makefile* include src
+
 # END

@@ -424,20 +424,24 @@ namespace tinyxml2
         
         output += *length;
         
-        // Scary scary fall throughs.
+        // Scary scary fall throughs are annotated with carefully designed comments
+        // to suppress compiler warnings such as -Wimplicit-fallthrough in gcc
         switch (*length) {
             case 4:
                 --output;
                 *output = (char)((input | BYTE_MARK) & BYTE_MASK);
                 input >>= 6;
+                //fall through
             case 3:
                 --output;
                 *output = (char)((input | BYTE_MARK) & BYTE_MASK);
                 input >>= 6;
+                //fall through
             case 2:
                 --output;
                 *output = (char)((input | BYTE_MARK) & BYTE_MASK);
                 input >>= 6;
+                //fall through
             case 1:
                 --output;
                 *output = (char)(input | FIRST_BYTE_MARK[*length]);
@@ -772,6 +776,18 @@ namespace tinyxml2
         }
     }
     
+    XMLNode* XMLNode::DeepClone(XMLDocument* target) const
+    {
+        XMLNode* clone = this->ShallowClone(target);
+        if (!clone) return 0;
+        
+        for (const XMLNode* child = this->FirstChild(); child; child = child->NextSibling()) {
+            XMLNode* childClone = child->DeepClone(target);
+            TIXMLASSERT(childClone);
+            clone->InsertEndChild(childClone);
+        }
+        return clone;
+    }
     
     void XMLNode::DeleteChildren()
     {
@@ -801,6 +817,8 @@ namespace tinyxml2
         if ( child->_next ) {
             child->_next->_prev = child->_prev;
         }
+        child->_next = 0;
+        child->_prev = 0;
         child->_parent = 0;
     }
     
@@ -811,6 +829,9 @@ namespace tinyxml2
         TIXMLASSERT( node->_document == _document );
         TIXMLASSERT( node->_parent == this );
         Unlink( node );
+        TIXMLASSERT(node->_prev == 0);
+        TIXMLASSERT(node->_next == 0);
+        TIXMLASSERT(node->_parent == 0);
         DeleteNode( node );
     }
     
@@ -889,6 +910,13 @@ namespace tinyxml2
         if ( afterThis->_parent != this ) {
             TIXMLASSERT( false );
             return 0;
+        }
+        if ( afterThis == addThis ) {
+            // Current state: BeforeThis -> AddThis -> OneAfterAddThis
+            // Now AddThis must disappear from it's location and then
+            // reappear between BeforeThis and OneAfterAddThis.
+            // So just leave it where it is.
+            return addThis;
         }
         
         if ( afterThis->_next == 0 ) {
@@ -1055,11 +1083,16 @@ namespace tinyxml2
         return 0;
     }
     
-    void XMLNode::DeleteNode( XMLNode* node )
+    /*static*/ void XMLNode::DeleteNode( XMLNode* node )
     {
         if ( node == 0 ) {
             return;
         }
+        TIXMLASSERT(node->_document);
+        if (!node->ToDocument()) {
+            node->_document->MarkInUse(node);
+        }
+        
         MemPool* pool = node->_memPool;
         node->~XMLNode();
         pool->Free( node );
@@ -1070,10 +1103,13 @@ namespace tinyxml2
         TIXMLASSERT( insertThis );
         TIXMLASSERT( insertThis->_document == _document );
         
-        if ( insertThis->_parent )
+        if (insertThis->_parent) {
             insertThis->_parent->Unlink( insertThis );
-        else
+        }
+        else {
+            insertThis->_document->MarkInUse(insertThis);
             insertThis->_memPool->SetTracked();
+        }
     }
     
     const XMLElement* XMLNode::ToElementWithName( const char* name ) const
@@ -1941,10 +1977,10 @@ namespace tinyxml2
         "XML_ERROR_FILE_NOT_FOUND",
         "XML_ERROR_FILE_COULD_NOT_BE_OPENED",
         "XML_ERROR_FILE_READ_ERROR",
-        "XML_ERROR_ELEMENT_MISMATCH",
+        "UNUSED_XML_ERROR_ELEMENT_MISMATCH",
         "XML_ERROR_PARSING_ELEMENT",
         "XML_ERROR_PARSING_ATTRIBUTE",
-        "XML_ERROR_IDENTIFYING_TAG",
+        "UNUSED_XML_ERROR_IDENTIFYING_TAG",
         "XML_ERROR_PARSING_TEXT",
         "XML_ERROR_PARSING_CDATA",
         "XML_ERROR_PARSING_COMMENT",
@@ -1979,9 +2015,25 @@ namespace tinyxml2
     }
     
     
+    void XMLDocument::MarkInUse(XMLNode* node)
+    {
+        TIXMLASSERT(node);
+        TIXMLASSERT(node->_parent == 0);
+        
+        for (int i = 0; i < _unlinked.Size(); ++i) {
+            if (node == _unlinked[i]) {
+                _unlinked.SwapRemove(i);
+                break;
+            }
+        }
+    }
+    
     void XMLDocument::Clear()
     {
         DeleteChildren();
+        while( _unlinked.Size()) {
+            DeleteNode(_unlinked[0]);	// Will remove from _unlinked as part of delete.
+        }
         
 #ifdef DEBUG
         const bool hadError = Error();
@@ -2008,6 +2060,19 @@ namespace tinyxml2
 #endif
     }
     
+    
+    void XMLDocument::DeepCopy(XMLDocument* target) const
+    {
+        TIXMLASSERT(target);
+        if (target == this) {
+            return; // technically success - a no-op.
+        }
+        
+        target->Clear();
+        for (const XMLNode* node = this->FirstChild(); node; node = node->NextSibling()) {
+            target->InsertEndChild(node->DeepClone(target));
+        }
+    }
     
     XMLElement* XMLDocument::NewElement( const char* name )
     {
@@ -2254,6 +2319,16 @@ namespace tinyxml2
         return errorName;
     }
     
+    const char* XMLDocument::GetErrorStr1() const
+    {
+        return _errorStr1.GetStr();
+    }
+    
+    const char* XMLDocument::GetErrorStr2() const
+    {
+        return _errorStr2.GetStr();
+    }
+    
     const char* XMLDocument::ErrorName() const
     {
         return ErrorIDToName(_errorID);
@@ -2312,8 +2387,9 @@ namespace tinyxml2
         }
         for( int i=0; i<NUM_ENTITIES; ++i ) {
             const char entityValue = entities[i].value;
-            TIXMLASSERT( ((unsigned char)entityValue) < ENTITY_RANGE );
-            _entityFlag[ (unsigned char)entityValue ] = true;
+            const unsigned char flagIndex = (unsigned char)entityValue;
+            TIXMLASSERT( flagIndex < ENTITY_RANGE );
+            _entityFlag[flagIndex] = true;
         }
         _restrictedEntityFlag[(unsigned char)'&'] = true;
         _restrictedEntityFlag[(unsigned char)'<'] = true;
@@ -2674,4 +2750,3 @@ namespace tinyxml2
     }
     
 }   // namespace tinyxml2
-

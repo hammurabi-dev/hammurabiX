@@ -25,21 +25,21 @@ using namespace std;
 
 void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fe *gfe,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Pond *par) {
     // unsigned int, pre-calculated in gint
-    auto sim_npix = gint->sim_npix;
+    auto npix_sim = gint->npix_sim;
     if (gint->do_dm) {
-        gint->dm_map.SetNside(gint->sim_nside, NEST);
+        gint->dm_map.SetNside(gint->nside_sim, NEST);
         gint->dm_map.fill(0.);
     }
     if (gint->do_sync) {
-        gint->Is_map.SetNside(gint->sim_nside, NEST);
-        gint->Qs_map.SetNside(gint->sim_nside, NEST);
-        gint->Us_map.SetNside(gint->sim_nside, NEST);
+        gint->Is_map.SetNside(gint->nside_sim, NEST);
+        gint->Qs_map.SetNside(gint->nside_sim, NEST);
+        gint->Us_map.SetNside(gint->nside_sim, NEST);
         gint->Is_map.fill(0.);
         gint->Qs_map.fill(0.);
         gint->Us_map.fill(0.);
     }
     if (gint->do_fd or gint->do_sync) {
-        gint->fd_map.SetNside(gint->sim_nside, NEST);
+        gint->fd_map.SetNside(gint->nside_sim, NEST);
         gint->fd_map.fill(0.);
     }
     
@@ -51,7 +51,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,G
         Healpix_Map<double> current_fd_map;
         Healpix_Map<double> current_dm_map;
         
-        auto current_nside = get_shell_nside(current_shell,gint->total_shell,gint->sim_nside);
+        auto current_nside = get_shell_nside(current_shell,gint->total_shell,gint->nside_min);
         unsigned int current_npix = 12*current_nside*current_nside;
         if (gint->do_dm) {
             current_dm_map.SetNside(current_nside, NEST);
@@ -122,7 +122,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,G
         }
         //adding up new shell map to sim map
 #pragma omp parallel for
-        for (decltype(sim_npix) ipix=0;ipix<sim_npix;++ipix) {
+        for (decltype(npix_sim) ipix=0;ipix<npix_sim;++ipix) {
             pointing ptg;
             if (gint->do_dm) {
                 ptg = gint->dm_map.pix2ang(ipix);
@@ -269,13 +269,13 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
 // TOOLS
 //---------------------------------------------------------
 // compute nside number at given shell
-unsigned int Integrator::get_shell_nside(const unsigned int &shell_numb,const unsigned int &total_shell,const unsigned int &sim_nside) const{
+unsigned int Integrator::get_shell_nside(const unsigned int &shell_numb,const unsigned int &total_shell,const unsigned int &nside_min) const{
     if (shell_numb<1 or shell_numb>total_shell){
         cerr<<"INVALID shell_numb"<<endl;
         exit(1);
     }
     auto difference = shell_numb-1;
-    auto shell_nside = sim_nside;
+    auto shell_nside = nside_min;
     if (difference!=0){
         for (decltype(difference) n=0;n!=difference;++n){
             shell_nside *= 2;

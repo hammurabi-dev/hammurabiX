@@ -49,7 +49,8 @@
         <!-- LOS integration -->
         <Integration>
             <shell value="1"/>
-            <nside value="16"/>
+            <nside_sim value="16"/>
+            <nside_min value="16"/>
             <!-- maximum radius in earth/galactic centric frame -->
             <ec_r_max value="30.0"/> <!-- kpc -->
             <gc_r_max value="20.0"/> <!-- kpc -->

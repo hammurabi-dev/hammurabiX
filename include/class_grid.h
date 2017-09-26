@@ -175,7 +175,7 @@ class Grid_int final : public Grid{
     Healpix_Map<double> fd_map;
     
     // shell parameters
-    unsigned int sim_nside, sim_npix, total_shell, bin_num;
+    unsigned int nside_sim, nside_min, npix_sim, total_shell, bin_num;
     // shell boundary
     double gc_r_max, ec_r_max, gc_z_max, lat_lim;
     // switches
