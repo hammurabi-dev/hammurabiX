@@ -7,6 +7,7 @@
 #include <vector>
 #include <tinyxml2.h>
 #include <cstdlib>
+#include <memory>
 
 #include "class_pond.h"
 #include "class_grid.h"
@@ -21,16 +22,16 @@
 using namespace std;
 using namespace tinyxml2;
 
-int main(int argc, char **argv) {
+int main(int , char **argv) {
     toolkit::timestamp();
     cout<<"...STARTING HAMMURABI..."<<endl;
     string file_name(argv[1]);
     
-    /* BUILD SPECIFIED MODULES */
+    // BUILD SPECIFIED MODULES
     Pond *par = new Pond(file_name);
+    Grid_fe *grid_fe = new Grid_fe(file_name);
     Grid_breg *grid_breg = new Grid_breg(file_name);
     Grid_brnd *grid_brnd = new Grid_brnd(file_name);
-    Grid_fe *grid_fe = new Grid_fe(file_name);
     Grid_fernd *grid_fernd = new Grid_fernd(file_name);
     Grid_cre *grid_cre = new Grid_cre(file_name);
     Grid_int *grid_int = new Grid_int(file_name);
@@ -39,11 +40,7 @@ int main(int argc, char **argv) {
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
     
-    FE *fe = new FE();
-    FErnd *fernd = new FErnd();
-    Breg *breg = new Breg();
-    Brnd *brnd = new Brnd();
-    CRE *cre = new CRE();
+    FE *fe; Breg *breg; FErnd *fernd; Brnd *brnd; CRE *cre;
     
     // regular FE field
     string fetype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->Attribute("type");
@@ -63,34 +60,11 @@ int main(int argc, char **argv) {
         grid_fe->export_grid();
     }
     
-    // random FE field
-    // if import from file, no need to build specific fe_rnd class
-    if(grid_fernd->read_permission){
-        grid_fernd->import_grid();
-    }
-    else if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->BoolAttribute("cue")){
-        string ferndtype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->Attribute("type");
-        if(ferndtype=="Gauss"){
-            cout<<"INFO: USING GAUSSIAN RANDOM FE MODEL"<<endl;
-            // non default constructor
-            fernd = new FEgrnd(par,grid_fernd);
-            // fill grid with random fields
-            fernd->write_grid(par,grid_fernd);
-        }
-        else{return EXIT_FAILURE;}
-    }
-    else{
-        cout<<"INFO: NO RANDOM FE FIELD"<<endl;
-    }
-    // if export to file
-    if(grid_fernd->write_permission){
-        grid_fernd->export_grid();
-    }
-    
     // regular B field, must before random B field
     string bregtype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Regular")->Attribute("type");
     if(grid_breg->read_permission){
         grid_breg->import_grid();
+        breg = new Breg();
     }
     else if(bregtype=="WMAP"){
         cout<<"INFO: USING WMAP3YR REGUALR B MODEL"<<endl;
@@ -105,6 +79,31 @@ int main(int argc, char **argv) {
     if(grid_breg->write_permission){
         breg->write_grid(par,grid_breg);
         grid_breg->export_grid();
+    }
+    
+    // random FE field
+    // if import from file, no need to build specific fe_rnd class
+    if(grid_fernd->read_permission){
+        grid_fernd->import_grid();
+    }
+    else if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->BoolAttribute("cue")){
+        string ferndtype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->Attribute("type");
+        if(ferndtype=="Gauss"){
+            cout<<"INFO: USING GAUSSIAN RANDOM FE MODEL"<<endl;
+            // non default constructor
+            fernd = new FEgrnd();
+            // fill grid with random fields
+            fernd->write_grid(par,grid_fernd);
+        }
+        else{return EXIT_FAILURE;}
+    }
+    else{
+        cout<<"INFO: NO RANDOM FE FIELD"<<endl;
+        fernd = new FErnd();
+    }
+    // if export to file
+    if(grid_fernd->write_permission){
+        grid_fernd->export_grid();
     }
     
     // random B field
@@ -130,6 +129,7 @@ int main(int argc, char **argv) {
     }
     else{
         cout<<"INFO: NO RANDOM B FIELD"<<endl;
+        brnd = new Brnd();
     }
     // if export to file
     if(grid_brnd->write_permission){
@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
         grid_cre->export_grid();
     }
     
-    /* START CALCULATION */
+    // START CALCULATION
     Integrator *intobj = new Integrator();
     cout<<"...ALL MODULES BUILT..."<<endl;
     
@@ -162,7 +162,7 @@ int main(int argc, char **argv) {
     cout<<"...PRODUCING MAPS..."<<endl;
     grid_int->export_grid();
     
-    /* CLEANING */
+    // CLEANING
     cout<<"...ENDING HAMMURABI..."<<endl;
     delete par; delete grid_breg; delete grid_brnd;
     delete grid_fe;delete grid_fernd; delete grid_cre; delete grid_int;

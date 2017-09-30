@@ -48,4 +48,10 @@ Dependencies:
 * FFTW3
 * CFITSIO
 * GSL
-* PyMultiNest
+
+Compiling and running:
+```
+make -f [makefile_name]
+cd bin/
+./hamx [paramfile_name]
+```

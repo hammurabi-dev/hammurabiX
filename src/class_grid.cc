@@ -16,7 +16,7 @@
 using namespace tinyxml2;
 using namespace std;
 
-void Grid::build_grid(XMLDocument *doc){
+void Grid::build_grid(XMLDocument *){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -87,8 +87,8 @@ Grid_breg::Grid_breg(string file_name){
         filename = ptr->Attribute("filename");
         build_grid(doc);
     }
-    ec_frame = doc->FirstChildElement("root")->FirstChildElement("Grid")->BoolAttribute("ec_frame");
-    if(ec_frame) cout<<"CAUTION: GRID IN NORTHERN HALF EC FRAME!"<<endl;
+    
+    delete doc;
 }
 
 void Grid_breg::build_grid(XMLDocument *doc){
@@ -98,10 +98,13 @@ void Grid_breg::build_grid(XMLDocument *doc){
     ny = FetchUnsigned(ptr,"ny");
     nz = FetchUnsigned(ptr,"nz");
     full_size = nx*ny*nz;
-    // box size for filling random field
-    lx = CGS_U_kpc*FetchDouble(ptr,"lx");
-    ly = CGS_U_kpc*FetchDouble(ptr,"ly");
-    lz = CGS_U_kpc*FetchDouble(ptr,"lz");
+    // box limit for filling field
+    x_max = CGS_U_kpc*FetchDouble(ptr,"x_max");
+    x_min = CGS_U_kpc*FetchDouble(ptr,"x_min");
+    y_max = CGS_U_kpc*FetchDouble(ptr,"y_max");
+    y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
+    z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
+    z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
     // memory check (double complex + double + double)
     const double bytes = full_size*(3.*8.);
     cout<<"INFO: BREG REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
@@ -218,7 +221,8 @@ Grid_brnd::Grid_brnd(string file_name){
         cout<<"IFNO: GRID_BRND I/O ACTIVE"<<endl;
         filename = ptr->Attribute("filename");
     }
-    ec_frame = doc->FirstChildElement("root")->FirstChildElement("Grid")->BoolAttribute("ec_frame");
+    
+    delete doc;
 }
 
 void Grid_brnd::build_grid(XMLDocument *doc){
@@ -228,10 +232,13 @@ void Grid_brnd::build_grid(XMLDocument *doc){
     ny = FetchUnsigned(ptr,"ny");
     nz = FetchUnsigned(ptr,"nz");
     full_size = nx*ny*nz;
-    // box size for filling random field
-    lx = CGS_U_kpc*FetchDouble(ptr,"lx");
-    ly = CGS_U_kpc*FetchDouble(ptr,"ly");
-    lz = CGS_U_kpc*FetchDouble(ptr,"lz");
+    // box limit for filling field
+    x_max = CGS_U_kpc*FetchDouble(ptr,"x_max");
+    x_min = CGS_U_kpc*FetchDouble(ptr,"x_min");
+    y_max = CGS_U_kpc*FetchDouble(ptr,"y_max");
+    y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
+    z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
+    z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
     // memory check (double complex + double + double)
     const double bytes = full_size*(3.*16.+3.*8.);
     cout<<"INFO: BRND REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
@@ -364,7 +371,8 @@ Grid_fe::Grid_fe(string file_name){
         filename = ptr->Attribute("filename");
         build_grid(doc);
     }
-    ec_frame = doc->FirstChildElement("root")->FirstChildElement("Grid")->BoolAttribute("ec_frame");
+    
+    delete doc;
 }
 
 void Grid_fe::build_grid(XMLDocument *doc){
@@ -374,10 +382,13 @@ void Grid_fe::build_grid(XMLDocument *doc){
     ny = FetchUnsigned(ptr,"ny");
     nz = FetchUnsigned(ptr,"nz");
     full_size = nx*ny*nz;
-    // box size for filling random field
-    lx = CGS_U_kpc*FetchDouble(ptr,"lx");
-    ly = CGS_U_kpc*FetchDouble(ptr,"ly");
-    lz = CGS_U_kpc*FetchDouble(ptr,"lz");
+    // box limit for filling field
+    x_max = CGS_U_kpc*FetchDouble(ptr,"x_max");
+    x_min = CGS_U_kpc*FetchDouble(ptr,"x_min");
+    y_max = CGS_U_kpc*FetchDouble(ptr,"y_max");
+    y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
+    z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
+    z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
     // memory check
     const double bytes = full_size*8.;
     cout<<"INFO: FE REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
@@ -489,7 +500,8 @@ Grid_fernd::Grid_fernd(string file_name){
         cout<<"IFNO: FE_RND I/O ACTIVE"<<endl;
         filename = ptr->Attribute("filename");
     }
-    ec_frame = doc->FirstChildElement("root")->FirstChildElement("Grid")->BoolAttribute("ec_frame");
+    
+    delete doc;
 }
 
 void Grid_fernd::build_grid(XMLDocument *doc){
@@ -499,10 +511,13 @@ void Grid_fernd::build_grid(XMLDocument *doc){
     ny = FetchUnsigned(ptr,"ny");
     nz = FetchUnsigned(ptr,"nz");
     full_size = nx*ny*nz;
-    // box size for filling random field
-    lx = CGS_U_kpc*FetchDouble(ptr,"lx");
-    ly = CGS_U_kpc*FetchDouble(ptr,"ly");
-    lz = CGS_U_kpc*FetchDouble(ptr,"lz");
+    // box limit for filling field
+    x_max = CGS_U_kpc*FetchDouble(ptr,"x_max");
+    x_min = CGS_U_kpc*FetchDouble(ptr,"x_min");
+    y_max = CGS_U_kpc*FetchDouble(ptr,"y_max");
+    y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
+    z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
+    z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
     // memory check (double complex + double + double)
     const double bytes = full_size*(16.+ 8.);
     cout<<"INFO: FERND REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
@@ -617,7 +632,8 @@ Grid_cre::Grid_cre(string file_name){
         filename = ptr->Attribute("filename");
         build_grid(doc);
     }
-    //ec_frame = doc->FirstChildElement("root")->FirstChildElement("Grid")->BoolAttribute("ec_frame");
+    
+    delete doc;
 }
 
 void Grid_cre::build_grid(XMLDocument *doc){
@@ -629,9 +645,10 @@ void Grid_cre::build_grid(XMLDocument *doc){
         nx = 0; ny = 0;
         nE = FetchUnsigned(ptr,"nE");
         cre_size = nE*nr*nz;
-        lr = CGS_U_kpc*FetchDouble(ptr,"lr");
-        lz = CGS_U_kpc*FetchDouble(ptr,"lz");
-        lx = 0.; ly = 0.;
+        r_max = CGS_U_kpc*FetchDouble(ptr,"r_max");
+        z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
+        z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
+        x_max = 0.; x_min = 0.; y_max = 0.; y_min = 0.;
         Ekmin = CGS_U_GeV*FetchDouble(ptr,"Ekmin");
         Ekmax = CGS_U_GeV*FetchDouble(ptr,"Ekmax");
         Ekfact = CGS_U_GeV*FetchDouble(ptr,"Ekfact");
@@ -646,10 +663,13 @@ void Grid_cre::build_grid(XMLDocument *doc){
         ny = FetchUnsigned(ptr,"ny");
         nE = FetchUnsigned(ptr,"nE");
         cre_size = nE*nx*ny*nz;
-        lx = CGS_U_kpc*FetchDouble(ptr,"lx");
-        ly = CGS_U_kpc*FetchDouble(ptr,"ly");
-        lz = CGS_U_kpc*FetchDouble(ptr,"lz");
-        lr = 0.;
+        x_max = CGS_U_kpc*FetchDouble(ptr,"x_max");
+        x_min = CGS_U_kpc*FetchDouble(ptr,"x_min");
+        y_max = CGS_U_kpc*FetchDouble(ptr,"y_max");
+        y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
+        z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
+        z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
+        r_max = 0.;
         Ekmin = CGS_U_GeV*FetchDouble(ptr,"Ekmin");
         Ekmax = CGS_U_GeV*FetchDouble(ptr,"Ekmax");
         Ekfact = CGS_U_GeV*FetchDouble(ptr,"Ekfact");
@@ -672,6 +692,47 @@ void Grid_cre::build_grid(XMLDocument *doc){
 
 void Grid_cre::clean_grid(void){
     delete [] cre_flux;
+}
+
+void Grid_cre::export_grid(void){
+    if(filename.empty()){
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"NONEXIST FILE"<<endl;
+        exit(1);
+    }
+    ofstream output(filename.c_str(), std::ios::out|std::ios::binary);
+    if (!output.is_open()){
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"COULD NOT OPEN: "<<filename<<endl;
+        exit(1);
+    }
+    double tmp = 0.;
+    for(decltype(cre_size) i=0;i!=cre_size;++i){
+        if (output.eof()) {
+            cerr<<"ERR:"<<__FILE__
+            <<" : in function "<<__func__<<endl
+            <<" at line "<<__LINE__<<endl
+            <<"UNEXPECTED END AT: "<<i<<endl;
+            exit(1);
+        }
+        tmp = cre_flux[i];
+        output.write(reinterpret_cast<char*>(&tmp),sizeof(double));
+    }
+    output.close();
+    // exit program
+    clean_grid();
+    if(nx!=0){
+        cout<<"...COSMIC-RAY ELECTRON IN 4D GRID..."<<endl;
+    }
+    else{
+        cout<<"...COSMIC-RAY ELECTRON IN 3D GRID..."<<endl;
+    }
+    cout<<"...FIELD EXPORTED AND CLEANED..."<<endl;
+    exit(0);
 }
 
 void Grid_cre::import_grid(void){
@@ -719,6 +780,8 @@ Grid_int::Grid_int(string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
     build_grid(doc);
+    
+    delete doc;
 }
 
 void Grid_int::build_grid(XMLDocument *doc){

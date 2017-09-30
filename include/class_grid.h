@@ -54,6 +54,7 @@ class Grid{
 class Grid_breg final : public Grid{
     public:
     Grid_breg(std::string);
+    virtual ~Grid_breg(void) = default;
     void build_grid(XMLDocument *) override;
     void clean_grid(void) override;
     void export_grid(void) override;
@@ -63,9 +64,9 @@ class Grid_breg final : public Grid{
     double *reg_b_x, *reg_b_y, *reg_b_z;
     
     std::string filename;
-    bool read_permission, write_permission, ec_frame;
+    bool read_permission, write_permission;
     
-    double lx, ly, lz;
+    double x_max, x_min, y_max, y_min, z_max, z_min;
     unsigned int nx, ny, nz;
     unsigned long int full_size;
     
@@ -75,6 +76,7 @@ class Grid_breg final : public Grid{
 class Grid_brnd final : public Grid{
     public:
     Grid_brnd(std::string);
+    virtual ~Grid_brnd(void) = default;
     void build_grid(XMLDocument *) override;
     void clean_grid(void) override;
     void export_grid(void) override;
@@ -88,9 +90,9 @@ class Grid_brnd final : public Grid{
     fftw_plan fftw_px_fw, fftw_py_fw, fftw_pz_fw;
     
     std::string filename;
-    bool read_permission, write_permission, ec_frame;
+    bool read_permission, write_permission;
     
-    double lx, ly, lz;
+    double x_max, x_min, y_max, y_min, z_max, z_min;
     unsigned int nx, ny, nz;
     unsigned long int full_size;
 };
@@ -99,6 +101,7 @@ class Grid_brnd final : public Grid{
 class Grid_fe final : public Grid{
     public:
     Grid_fe(std::string);
+    virtual ~Grid_fe(void) = default;
     void build_grid(XMLDocument *) override;
     void clean_grid(void) override;
     void export_grid(void) override;
@@ -107,9 +110,9 @@ class Grid_fe final : public Grid{
     double *fe;
     
     std::string filename;
-    bool read_permission, write_permission, ec_frame;
+    bool read_permission, write_permission;
     
-    double lx, ly, lz;
+    double x_max, x_min, y_max, y_min, z_max, z_min;
     unsigned int nx, ny, nz;
     unsigned long int full_size;
 };
@@ -118,6 +121,7 @@ class Grid_fe final : public Grid{
 class Grid_fernd final : public Grid{
     public:
     Grid_fernd(std::string);
+    virtual ~Grid_fernd(void) = default;
     void build_grid(XMLDocument *) override;
     void clean_grid(void) override;
     void export_grid(void) override;
@@ -129,9 +133,9 @@ class Grid_fernd final : public Grid{
     fftw_plan fftw_p;
     
     std::string filename;
-    bool read_permission, write_permission, ec_frame;
+    bool read_permission, write_permission;
     
-    double lx, ly, lz;
+    double x_max, x_min, y_max, y_min, z_max, z_min;
     unsigned int nx, ny, nz;
     unsigned long int full_size;
 };
@@ -140,31 +144,32 @@ class Grid_fernd final : public Grid{
 class Grid_cre final : public Grid{
     public:
     Grid_cre(std::string);
+    virtual ~Grid_cre(void) = default;
     void build_grid(XMLDocument *) override;
     void clean_grid(void) override;
+    void export_grid(void) override;
     void import_grid(void) override;
     
     double *cre_flux;
     
     std::string filename;
-    bool read_permission, write_permission, ec_frame;
+    bool read_permission, write_permission;
     
     // 2-D spatial 1-D spectral grid
     unsigned int nE, nr, nz;
     unsigned long int cre_size;
-    // lr is radius not diameter
-    // while lz = zmax - zmin
-    double lr,lz, Ekmin, Ekmax, Ekfact;
+    double r_max, z_max, z_min, Ekmin, Ekmax, Ekfact;
     
     // or 3+1 dimension grid
     unsigned int nx,ny;
-    double lx,ly;
+    double x_max, x_min, y_max, y_min;
 };
 
 /* line of signt integrator */
 class Grid_int final : public Grid{
     public:
     Grid_int(std::string);
+    virtual ~Grid_int(void) = default;
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
     

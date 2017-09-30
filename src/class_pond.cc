@@ -26,6 +26,8 @@ Pond::Pond(std::string file_name){
     b_pond(doc);
     fe_pond(doc);
     cre_pond(doc);
+    
+    delete doc;
 }
 
 // magnetic field

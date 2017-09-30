@@ -28,7 +28,7 @@
     </Interface>
     
     <!-- HAMMURABI GRID -->
-    <Grid type="3D" ec_frame="0">
+    <Grid type="3D">
         <!-- ec_frame offers a local simulation timesaving scheme -->
         <SunPosition>
             <x value="-8.3"/> <!-- kpc -->
@@ -41,10 +41,13 @@
             <nx value="400"/>
             <ny value="400"/>
             <nz value="80"/>
-            <!-- box length in each direction -->
-            <lx value="40.0"/> <!-- kpc -->
-            <ly value="40.0"/> <!-- kpc -->
-            <lz value="8.0"/> <!-- kpc -->
+            <!-- box edge in each direction -->
+            <x_min value="-20.0"/>
+            <x_max value="20.0"/>
+            <y_min value="-20.0"/>
+            <y_max value="20.0"/>
+            <z_min value="-4.0"/>
+            <z_max value="4.0"/>
         </Box>
         <!-- LOS integration -->
         <Integration>
@@ -86,7 +89,7 @@
                 </Local>
             </Regular>
             <!-- turbulent fields -->
-            <Random cue="1" type="Iso" seed="-1">
+            <Random cue="0" type="Iso" seed="-1">
                 <!-- isotropic -->
                 <Iso>
                     <rms value="1.0"/> <!-- norm at k0 -->
@@ -241,9 +244,15 @@
             <ny value=""/>
             <nz value=""/>
             <nE value=""/>
-            <lx value=""/>
-            <ly value=""/>
-            <lz value=""/>
+            
+            <r_max value=""/>
+            <x_min value=""/>
+            <x_max value=""/>
+            <y_min value=""/>
+            <y_max value=""/>
+            <z_min value=""/>
+            <z_max value=""/>
+            
             <Ekmin value=""/>
             <Ekmax value=""/>
             <Ekfact value=""/>

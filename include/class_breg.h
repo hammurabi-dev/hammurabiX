@@ -33,7 +33,7 @@ class Breg{
     /*@read_grid
      * read from grid with trilinear interpolation
      */
-    virtual vec3 read_grid(const vec3 &, Grid_breg *, Pond *);
+    virtual vec3 read_grid(const vec3 &, Grid_breg *);
     /*@write_grid
      * write to grid
      */
@@ -44,6 +44,7 @@ class Breg{
 class Bwmap final : public Breg {
     public:
     Bwmap(void) = default;
+    virtual ~Bwmap(void) = default;
     /*@Bwmap(not void)
      * reassign breg parameters in pond
      * with given vector of values
@@ -56,6 +57,7 @@ class Bwmap final : public Breg {
 class Blocal final : public Breg {
     public:
     Blocal(void) = default;
+    virtual ~Blocal(void) = default;
     //Blocal(const std::vector<double>&, Pond *);
     vec3 breg(const vec3 &,Pond *) override;
 };

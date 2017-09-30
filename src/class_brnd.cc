@@ -19,9 +19,9 @@ using namespace std;
 
 /* base class */
 
-vec3 Brnd::get_brnd(const vec3 &pos, Pond *par, Grid_brnd *grid){
+vec3 Brnd::get_brnd(const vec3 &pos, Grid_brnd *grid){
     if(grid->read_permission){
-        return read_grid(pos,grid,par);
+        return read_grid(pos,grid);
     }
     // if no specific random field model is called
     // base class will return zero vector
@@ -34,8 +34,8 @@ vec3 Brnd::get_brnd(const vec3 &pos, Pond *par, Grid_brnd *grid){
 // p0 is hidden and not affecting anything
 double Brnd::b_spec(const double &k, Pond *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 = par->brnd_iso[0]*pow(CGS_U_muGauss,2);//*CGS_U_kpc;
-    const double k0 = par->brnd_iso[1];//CGS_U_kpc;
+    const double p0 = par->brnd_iso[0]*pow(CGS_U_muGauss,2);
+    const double k0 = par->brnd_iso[1];
     const double a0 = par->brnd_iso[2];
     const double unit = 1./(4*CGS_U_pi*k*k);
     // avoid nan
@@ -44,9 +44,7 @@ double Brnd::b_spec(const double &k, Pond *par){
     }
     // Giacalone-Jokipii
     //const double P = 2*p0/(1.+pow(k/k0,a0));
-    
     // power law
-    
     double P = 0.;
     if(k>k0){
         P = p0/pow(k/k0,a0);
@@ -68,23 +66,21 @@ double Brnd::rescal_fact(const vec3 &pos, Pond *par){
     }
 }
 
-vec3 Brnd::read_grid(const vec3 &pos, Grid_brnd *grid, Pond *par){
+vec3 Brnd::read_grid(const vec3 &pos, Grid_brnd *grid){
     
     decltype(grid->nx) xl, yl, zl;
     
-    double tmp = (grid->nx-1)*(pos.x/grid->lx + 0.5);
-    // if use solar-centric grid
-    if(grid->ec_frame) tmp -= (grid->nx-1)*(par->SunPosition.x/grid->lx);
+    double tmp = (grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min);
     if (tmp<0 or tmp>grid->nx-1) { return vec3(0.,0.,0.);}
     else xl = floor(tmp);
     const double xd = tmp - xl;
     
-    tmp = (grid->ny-1)*(pos.y/grid->ly + 0.5);
+    tmp = (grid->ny-1)*(pos.y-grid->y_min)/(grid->y_max-grid->y_min);
     if (tmp<0 or tmp>grid->ny-1) { return vec3(0.,0.,0.);}
     else yl = floor(tmp);
     const double yd = tmp - yl;
     
-    tmp = (grid->nz-1)*(pos.z/grid->lz + 0.5);
+    tmp = (grid->nz-1)*(pos.z-grid->z_min)/(grid->z_max-grid->z_min);
     if (tmp<0 or tmp>grid->nz-1) { return vec3(0.,0.,0.);}
     else zl = floor(tmp);
     const double zd = tmp - zl;
@@ -152,7 +148,7 @@ vec3 Brnd::read_grid(const vec3 &pos, Grid_brnd *grid, Pond *par){
 }
 
 // base class does not write out to grid
-void Brnd::write_grid_iso(Pond *par,Grid_brnd *grid){
+void Brnd::write_grid_iso(Pond *,Grid_brnd *){
     cerr<<"WAR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -160,7 +156,7 @@ void Brnd::write_grid_iso(Pond *par,Grid_brnd *grid){
     exit(1);
 }
 
-void Brnd::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *gbrnd){
+void Brnd::write_grid_ani(Pond *, Breg *, Grid_breg *, Grid_brnd *){
     cerr<<"WAR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -170,10 +166,10 @@ void Brnd::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *gb
 
 /* isotropic random field */
 
-vec3 Brnd_iso::get_brnd(const vec3 &pos, Pond *par, Grid_brnd *grid){
+vec3 Brnd_iso::get_brnd(const vec3 &pos, Grid_brnd *grid){
     // interpolate written grid to given position
     // check if you have called ::write_grid
-    return read_grid(pos,grid,par);
+    return read_grid(pos,grid);
 }
 
 void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
@@ -183,6 +179,9 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     gsl_rng *r = gsl_rng_alloc(gsl_rng_taus);
     gsl_rng_set(r, toolkit::random_seed());
     // start Fourier space filling
+    double lx = grid->x_max-grid->x_min;
+    double ly = grid->y_max-grid->y_min;
+    double lz = grid->z_max-grid->z_min;
     for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
         for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
             for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
@@ -190,19 +189,19 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
                 auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l);
                 // FFT expects up to n/2 positive while n/2 to n negative
                 // physical k in 1/kpc dimension
-                double kx = double(i)/(grid->lx/CGS_U_kpc);
-                double ky = double(j)/(grid->ly/CGS_U_kpc);
-                double kz = double(l)/(grid->lz/CGS_U_kpc);
-                if(i>=grid->nx/2) kx -= double(grid->nx)/grid->lx;
-                if(j>=grid->ny/2) ky -= double(grid->ny)/grid->ly;
-                if(l>=grid->nz/2) kz -= double(grid->nz)/grid->lz;
+                double kx = i/(lx/CGS_U_kpc);
+                double ky = j/(ly/CGS_U_kpc);
+                double kz = l/(lz/CGS_U_kpc);
+                if(i>=grid->nx/2) kx -= grid->nx/(lx/CGS_U_kpc);
+                if(j>=grid->ny/2) ky -= grid->ny/(ly/CGS_U_kpc);
+                if(l>=grid->nz/2) kz -= grid->nz/(lz/CGS_U_kpc);
                 const double k = sqrt(kx*kx + ky*ky + kz*kz);
                 // physical dk^3
-                const double dk3 = pow(CGS_U_kpc,3.)/(grid->lx*grid->ly*grid->lz);
+                const double dk3 = pow(CGS_U_kpc,3.)/(lx*ly*lz);
                 
                 // simpson's rule
                 double element = 2.*b_spec(k,par)/3.;
-                const double halfdk = 0.5*sqrt(pow(CGS_U_kpc/grid->lx,2)+pow(CGS_U_kpc/grid->ly,2)+pow(CGS_U_kpc/grid->lz,2));
+                const double halfdk = 0.5*sqrt(pow(CGS_U_kpc/lx,2)+pow(CGS_U_kpc/ly,2)+pow(CGS_U_kpc/lz,2));
                 element += b_spec(k+halfdk,par)/6.;
                 element += b_spec(k-halfdk,par)/6.;
                 // amplitude, dividing by two because equal allocation to Re and Im parts
@@ -243,13 +242,9 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
             for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
                 // get physical position
                 vec3 pos;
-                pos.x = grid->lx*(double(i)/(grid->nx-1) - 0.5);
-                pos.y = grid->ly*(double(j)/(grid->ny-1) - 0.5);
-                pos.z = grid->lz*(double(l)/(grid->nz-1) - 0.5);
-                // if use solar-centric grid
-                if(grid->ec_frame){
-                    pos.x += par->SunPosition.x;
-                }
+                pos.x = i*lx/(grid->nx-1) + grid->x_min;
+                pos.y = j*ly/(grid->ny-1) + grid->y_min;
+                pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
                 double ratio = sqrt(rescal_fact(pos,par))*par->brnd_iso[0]*CGS_U_muGauss/sqrt(3.*b_var);
                 //double ratio = par->brnd_iso[0]*CGS_U_muGauss/sqrt(3.*b_var); // for debug
@@ -282,12 +277,12 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
                 auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l);
                 // FFT expects up to n/2 positive while n/2 to n negative
                 // physical k in cgs dimension
-                tmp_k.x = double(i)/grid->lx;
-                tmp_k.y = double(j)/grid->ly;
-                tmp_k.z = double(l)/grid->lz;
-                if(i>=grid->nx/2) tmp_k.x -= double(grid->nx)/grid->lx;
-                if(j>=grid->ny/2) tmp_k.y -= double(grid->ny)/grid->ly;
-                if(l>=grid->nz/2) tmp_k.z -= double(grid->nz)/grid->lz;
+                tmp_k.x = i/(lx/CGS_U_kpc);
+                tmp_k.y = j/(ly/CGS_U_kpc);
+                tmp_k.z = l/(lz/CGS_U_kpc);
+                if(i>=grid->nx/2) tmp_k.x -= grid->nx/(lx/CGS_U_kpc);
+                if(j>=grid->ny/2) tmp_k.y -= grid->ny/(ly/CGS_U_kpc);
+                if(l>=grid->nz/2) tmp_k.z -= grid->nz/(lz/CGS_U_kpc);
                 
                 
                 const vec3 tmp_b_re = {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};
@@ -381,7 +376,7 @@ vec3 Brnd_iso::gramschmidt(const vec3 &k,const vec3 &b){
 
 /* global anisotropic random field */
 
-double Brnd_anig::anisotropy(const vec3 &pos, Pond *par, Breg *breg, Grid_breg *gbreg){
+double Brnd_anig::anisotropy(const vec3 &, Pond *par, Breg *, Grid_breg *){
     // the simplest case, const.
     return par->brnd_anig[0];
 }
@@ -393,6 +388,9 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
     gsl_rng *r = gsl_rng_alloc(gsl_rng_taus);
     gsl_rng_set(r, toolkit::random_seed());
     // start Fourier space filling
+    double lx = grid->x_max-grid->x_min;
+    double ly = grid->y_max-grid->y_min;
+    double lz = grid->z_max-grid->z_min;
     for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
         for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
             for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
@@ -400,19 +398,19 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l);
                 // FFT expects up to n/2 positive while n/2 to n negative
                 // physical k in 1/kpc dimension
-                double kx = double(i)/(grid->lx/CGS_U_kpc);
-                double ky = double(j)/(grid->ly/CGS_U_kpc);
-                double kz = double(l)/(grid->lz/CGS_U_kpc);
-                if(i>=grid->nx/2) kx -= double(grid->nx)/grid->lx;
-                if(j>=grid->ny/2) ky -= double(grid->ny)/grid->ly;
-                if(l>=grid->nz/2) kz -= double(grid->nz)/grid->lz;
+                double kx = i/(lx/CGS_U_kpc);
+                double ky = j/(ly/CGS_U_kpc);
+                double kz = l/(lz/CGS_U_kpc);
+                if(i>=grid->nx/2) kx -= grid->nx/(lx/CGS_U_kpc);
+                if(j>=grid->ny/2) ky -= grid->ny/(ly/CGS_U_kpc);
+                if(l>=grid->nz/2) kz -= grid->nz/(lz/CGS_U_kpc);
                 const double k = sqrt(kx*kx + ky*ky + kz*kz);
                 // physical dk^3
-                const double dk3 = pow(CGS_U_kpc,3.)/(grid->lx*grid->ly*grid->lz);
+                const double dk3 = pow(CGS_U_kpc,3.)/(lx*ly*lz);
                 
                 // simpson's rule
                 double element = 2.*b_spec(k,par)/3.;
-                const double halfdk = 0.5*sqrt(pow(CGS_U_kpc/grid->lx,2)+pow(CGS_U_kpc/grid->ly,2)+pow(CGS_U_kpc/grid->lz,2));
+                const double halfdk = 0.5*sqrt(pow(CGS_U_kpc/lx,2)+pow(CGS_U_kpc/ly,2)+pow(CGS_U_kpc/lz,2));
                 element += b_spec(k+halfdk,par)/6.;
                 element += b_spec(k-halfdk,par)/6.;
                 // amplitude, dividing by two because equal allocation to Re and Im parts
@@ -453,13 +451,9 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
             for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
                 // get physical position
                 vec3 pos;
-                pos.x = grid->lx*(double(i)/(grid->nx-1) - 0.5);
-                pos.y = grid->ly*(double(j)/(grid->ny-1) - 0.5);
-                pos.z = grid->lz*(double(l)/(grid->nz-1) - 0.5);
-                // if use solar-centric grid
-                if(grid->ec_frame){
-                    pos.x += par->SunPosition.x;
-                }
+                pos.x = i*lx/(grid->nx-1) + grid->x_min;
+                pos.y = j*ly/(grid->ny-1) + grid->y_min;
+                pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // assemble b_Re and b_Im
                 auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l);
                 vec3 b_re = {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};
@@ -514,13 +508,13 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 // point out where we are
                 auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l);
                 // FFT expects up to n/2 positive while n/2 to n negative
-                // physical k in cgs dimension
-                tmp_k.x = double(i)/grid->lx;
-                tmp_k.y = double(j)/grid->ly;
-                tmp_k.z = double(l)/grid->lz;
-                if(i>=grid->nx/2) tmp_k.x -= double(grid->nx)/grid->lx;
-                if(j>=grid->ny/2) tmp_k.y -= double(grid->ny)/grid->ly;
-                if(l>=grid->nz/2) tmp_k.z -= double(grid->nz)/grid->lz;
+                // physical k in 1/kpc
+                tmp_k.x = i/(lx/CGS_U_kpc);
+                tmp_k.y = j/(ly/CGS_U_kpc);
+                tmp_k.z = l/(lz/CGS_U_kpc);
+                if(i>=grid->nx/2) tmp_k.x -= grid->nx/(lx/CGS_U_kpc);
+                if(j>=grid->ny/2) tmp_k.y -= grid->ny/(ly/CGS_U_kpc);
+                if(l>=grid->nz/2) tmp_k.z -= grid->nz/(lz/CGS_U_kpc);
                 
                 
                 const vec3 tmp_b_re = {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};

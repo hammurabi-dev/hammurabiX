@@ -17,7 +17,7 @@ using namespace tinyxml2;
 class Pond {
     public:
     Pond(std::string);
-    ~Pond(void) = default;
+    virtual ~Pond(void) = default;
     
     // observer
     vec3 SunPosition;

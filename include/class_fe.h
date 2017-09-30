@@ -29,7 +29,7 @@ class FE{
     /*@read_grid
      * read from grid with trilinear interpolation
      */
-    virtual double read_grid(const vec3 &,Grid_fe *,Pond *);
+    virtual double read_grid(const vec3 &,Grid_fe *);
     /*@write_grid
      * write to grid
      */
@@ -49,6 +49,7 @@ class FE{
 class YMW16 final : public FE{
     public:
     YMW16(void) = default;
+    virtual ~YMW16(void) = default;
     double density(const vec3 &, Pond *) override;
     
     private:

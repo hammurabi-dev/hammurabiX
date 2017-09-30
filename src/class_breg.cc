@@ -12,16 +12,16 @@
 
 using namespace std;
 
-vec3 Breg::get_breg(const vec3 &pos, Pond *par,Grid_breg *grid){
+vec3 Breg::get_breg(const vec3 &pos, Pond *par, Grid_breg *grid){
     if(grid->read_permission){
-        return read_grid(pos,grid,par);
+        return read_grid(pos,grid);
     }
     else {
         return breg(pos,par);
     }
 }
 
-vec3 Breg::breg(const vec3 &pos, Pond *par){
+vec3 Breg::breg(const vec3 &, Pond *){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -30,24 +30,22 @@ vec3 Breg::breg(const vec3 &pos, Pond *par){
     return vec3(0.,0.,0.);
 }
 
-vec3 Breg::read_grid(const vec3 &pos, Grid_breg *grid, Pond *par){
+vec3 Breg::read_grid(const vec3 &pos, Grid_breg *grid){
     
     // get position in sim box
     decltype(grid->nx) xl, yl, zl;
     
-    double tmp = (grid->nx-1)*(pos.x/grid->lx + 0.5);
-    // if use solar-centric frame
-    if(grid->ec_frame) tmp -= (grid->nx-1)*(par->SunPosition.x/grid->lx);
+    double tmp = (grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min);
     if (tmp<0 or tmp>grid->nx-1) { return vec3(0.,0.,0.);}
     else xl = floor(tmp);
     const double xd = tmp - xl;
     
-    tmp = (grid->ny-1)*(pos.y/grid->ly + 0.5);
+    tmp = (grid->ny-1)*(pos.y-grid->y_min)/(grid->y_max-grid->y_min);
     if (tmp<0 or tmp>grid->ny-1) { return vec3(0.,0.,0.);}
     else yl = floor(tmp);
     const double yd = tmp - yl;
     
-    tmp = (grid->nz-1)*(pos.z/grid->lz + 0.5);
+    tmp = (grid->nz-1)*(pos.z-grid->z_min)/(grid->z_max-grid->z_min);
     if (tmp<0 or tmp>grid->nz-1) { return vec3(0.,0.,0.);}
     else zl = floor(tmp);
     const double zd = tmp - zl;
@@ -124,17 +122,16 @@ void Breg::write_grid(Pond *par, Grid_breg *grid){
     }
     
     vec3 gc_pos, tmp_vec;
+    double lx = grid->x_max-grid->x_min;
+    double ly = grid->y_max-grid->y_min;
+    double lz = grid->z_max-grid->z_min;
     for(decltype(grid->nx) i=0;i!=grid->nx;++i){
         for(decltype(grid->ny) j=0;j!=grid->ny;++j){
             for(decltype(grid->nz) k=0;k!=grid->nz;++k){
                 
-                gc_pos.x = grid->lx*(double(i)/(grid->nx-1) - 0.5);
-                gc_pos.y = grid->ly*(double(j)/(grid->ny-1) - 0.5);
-                gc_pos.z = grid->lz*(double(k)/(grid->nz-1) - 0.5);
-                
-                if(grid->ec_frame){
-                    gc_pos.x += par->SunPosition.x;
-                }
+                gc_pos.x = i*lx/(grid->nx-1) + grid->x_min;
+                gc_pos.y = j*ly/(grid->ny-1) + grid->y_min;
+                gc_pos.z = k*lz/(grid->nz-1) + grid->z_min;
                 
                 tmp_vec = breg(gc_pos,par);
                 auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k);

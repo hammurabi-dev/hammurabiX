@@ -23,19 +23,11 @@ class FErnd{
     public:
     FErnd(void) = default;
     virtual ~FErnd(void) = default;
-    virtual double get_fernd(const vec3 &,Pond *,Grid_fernd *);
-    virtual double read_grid(const vec3 &,Grid_fernd *,Pond *);
+    virtual double get_fernd(const vec3 &,Grid_fernd *);
+    virtual double read_grid(const vec3 &,Grid_fernd *);
     virtual void write_grid(Pond *,Grid_fernd *);
     
     virtual double fe_spec(const double &k,Pond *);
-    /*@get_variance
-     * variance of density field <n^2>
-     */
-    virtual double get_variance(Pond *,Grid_fernd *);
-    /*@get_missing
-     * missing part of density variance, necessary for Emission Measure
-     */
-    virtual double get_missing(Pond *,Grid_fernd *);
     /*@rescal_fact
      * spatial rescaling factor for variance <n^2>
      */
@@ -47,9 +39,10 @@ class FErnd{
 /* gaussian random field */
 class FEgrnd : public FErnd{
     public:
-    FEgrnd(Pond *,Grid_fernd *);
-    //FEgrnd(const std::vector<double>&,Pond *,Grid_fernd *);
-    double get_fernd(const vec3 &,Pond *,Grid_fernd *) override;
+    FEgrnd(void) = default;
+    virtual ~FEgrnd(void) = default;
+    
+    double get_fernd(const vec3 &,Grid_fernd *) override;
     void write_grid(Pond *,Grid_fernd *) override;
     protected:
     void hermiticity(fftw_complex *,const unsigned int &,const unsigned int &,const unsigned int &);

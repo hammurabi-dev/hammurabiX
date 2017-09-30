@@ -26,12 +26,12 @@ class Brnd{
      * base class version returns zero field
      * derived class version call read_grid
      */
-    virtual vec3 get_brnd(const vec3 &,Pond *,Grid_brnd *);
+    virtual vec3 get_brnd(const vec3 &,Grid_brnd *);
     /*@read_grid
      * read field from grid with trilinear interpolation
      * user has to write_grid ahead
      */
-    virtual vec3 read_grid(const vec3 &,Grid_brnd *,Pond *);
+    virtual vec3 read_grid(const vec3 &,Grid_brnd *);
     /*@write_grid_iso
      * write field to grid (model dependent)
      * user can export_grid to binary file with Grid_xxx::export_grid
@@ -57,8 +57,8 @@ class Brnd{
 class Brnd_iso : public Brnd{
     public:
     Brnd_iso(void) = default;
-    
-    vec3 get_brnd(const vec3 &,Pond *,Grid_brnd *) override;
+    virtual ~Brnd_iso(void) = default;
+    vec3 get_brnd(const vec3 &,Grid_brnd *) override;
     void write_grid_iso(Pond *,Grid_brnd *) override;
     
     protected:
@@ -77,6 +77,7 @@ class Brnd_iso : public Brnd{
 class Brnd_anig final : public Brnd_iso{
     public:
     Brnd_anig(void) = default;
+    virtual ~Brnd_anig(void) = default;
     // use Breg::breg function
     void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *) override;
     

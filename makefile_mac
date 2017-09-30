@@ -18,7 +18,7 @@ CXX = g++-7 -std=c++11
 DEBUG = -g #-NDEBUG
 
 # COMPILE OPTIONS
-CXXFLAGS = -O2 -fopenmp -Wall -fPIC -Wno-deprecated -pthread $(DEBUG)
+CXXFLAGS = -O0 -Wall -Wextra -fPIC -Wno-deprecated $(DEBUG) -fopenmp -pthread
 
 EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
 	-I$(HEALPIX)/include \
@@ -47,7 +47,7 @@ default: $(EXE)
 src/hammurabi.o: src/hammurabi.cc $(OBJ)
 
 $(EXE): $(OBJ) src/hammurabi.o lib/libhammurabi.a
-	mkdir bin
+	rm -rf bin; mkdir bin
 	$(CXX) $^ -o bin/$(EXE) $(LFLAGS)
 	cp data/* bin; cp python_utils/* bin
 

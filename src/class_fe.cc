@@ -17,7 +17,7 @@ using namespace std;
 
 double FE::get_density(const vec3 &pos, Pond *par, Grid_fe *grid){
     if(grid->read_permission){
-        return read_grid(pos,grid,par);
+        return read_grid(pos,grid);
     }
     else {
         return density(pos,par);
@@ -34,9 +34,9 @@ double FE::density_blur(const vec3 &pos, Pond *par, Grid_fe *grid){
     // sampling point number
     unsigned int step = 1000;
     // gaussian blur scale
-    double blur_scale_x = grid->lx/(grid->nx*CGS_U_kpc);
-    double blur_scale_y = grid->ly/(grid->ny*CGS_U_kpc);
-    double blur_scale_z = grid->lz/(grid->nz*CGS_U_kpc);
+    double blur_scale_x = (grid->x_max-grid->x_min)/(grid->nx*CGS_U_kpc);
+    double blur_scale_y = (grid->y_max-grid->y_min)/(grid->ny*CGS_U_kpc);
+    double blur_scale_z = (grid->z_max-grid->z_min)/(grid->nz*CGS_U_kpc);
     // sample position
     vec3 pos_s;
     gsl_rng *r = gsl_rng_alloc(gsl_rng_taus);
@@ -58,7 +58,7 @@ double FE::density_blur(const vec3 &pos, Pond *par, Grid_fe *grid){
     return ne_blur/step;
 }
 
-double FE::density(const vec3 &pos, Pond *par){
+double FE::density(const vec3 &, Pond *){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -67,23 +67,21 @@ double FE::density(const vec3 &pos, Pond *par){
     return 0.;
 }
 
-double FE::read_grid(const vec3 &pos, Grid_fe *grid, Pond *par){
+double FE::read_grid(const vec3 &pos, Grid_fe *grid){
     
     decltype(grid->nx) xl, yl, zl;
     
-    double tmp = (grid->nx-1)*(pos.x/grid->lx + 0.5);
-    // if use solar-centric grid
-    if(grid->ec_frame) tmp -= (grid->nx-1)*(par->SunPosition.x/grid->lx);
+    double tmp = (grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min);
     if (tmp<1 or tmp>grid->nx-1) { return 0.;}
     else xl = floor(tmp);
     const double xd = tmp - xl;
     
-    tmp = (grid->ny-1)*(pos.y/grid->ly + 0.5);
+    tmp = (grid->ny-1)*(pos.y-grid->y_min)/(grid->y_max-grid->y_min);
     if (tmp<1 or tmp>grid->ny-1) { return 0.;}
     else yl = floor(tmp);
     const double yd = tmp - yl;
     
-    tmp = (grid->nz-1)*(pos.z/grid->lz + 0.5);
+    tmp = (grid->nz-1)*(pos.z-grid->z_min)/(grid->z_max-grid->z_min);
     if (tmp<1 or tmp>grid->nz-1) { return 0.;}
     else zl = floor(tmp);
     const double zd = tmp - zl;
@@ -96,6 +94,7 @@ double FE::read_grid(const vec3 &pos, Grid_fe *grid, Pond *par){
         exit(1);
     }
 #endif
+    double fe;
     if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
         double i1,i2,j1,j2,w1,w2;
         
@@ -118,14 +117,24 @@ double FE::read_grid(const vec3 &pos, Grid_fe *grid, Pond *par){
         w1=i1*(1-yd)+i2*yd;
         w2=j1*(1-yd)+j2*yd;
         
-        return (w1*(1-xd)+w2*xd);
+        fe = (w1*(1-xd)+w2*xd);
         
     }
     else {
         auto idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl);
-        return grid->fe[idx1];
+        fe = grid->fe[idx1];
     }
+#ifndef NDEBUG
+    if(fe<0){
+        cerr<<"WAR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"WRONG VALUE"<<endl;
+        exit(1);
+    }
+#endif
     
+    return fe;
 }
 
 void FE::write_grid(Pond *par, Grid_fe *grid){
@@ -138,18 +147,18 @@ void FE::write_grid(Pond *par, Grid_fe *grid){
     }
     cout<<"...FE: WRITING OUTPUT..."<<endl;
     vec3 gc_pos;
+    double lx = grid->x_max-grid->x_min;
+    double ly = grid->y_max-grid->y_min;
+    double lz = grid->z_max-grid->z_min;
     for(decltype(grid->nx) i=0;i!=grid->nx;++i){
         for(decltype(grid->ny) j=0;j!=grid->ny;++j){
             for(decltype(grid->nz) k=0;k!=grid->nz;++k){
                 auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k);
                 
-                gc_pos.x = grid->lx*(double(i)/(grid->nx-1) - 0.5);
-                gc_pos.y = grid->ly*(double(j)/(grid->ny-1) - 0.5);
-                gc_pos.z = grid->lz*(double(k)/(grid->nz-1) - 0.5);
+                gc_pos.x = lx*i/(grid->nx-1) + grid->x_min;
+                gc_pos.y = ly*j/(grid->ny-1) + grid->y_min;
+                gc_pos.z = lz*k/(grid->nz-1) + grid->z_min;
                 
-                if(grid->ec_frame){
-                    gc_pos.x += par->SunPosition.x;
-                }
                 // two solutions
                 //grid->fe[idx] = density_blur(gc_pos, par, grid);
                 grid->fe[idx] = density(gc_pos,par);

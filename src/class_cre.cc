@@ -15,7 +15,7 @@
 
 using namespace std;
 
-double CRE::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper,const bool &cue){
+double CRE::get_emissivity(const vec3 &,Pond *,Grid_cre *,const double &,const bool &){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -23,7 +23,7 @@ double CRE::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const double
     exit(1);
 }
 
-double CRE::read_grid(const unsigned int &n, const vec3 &pos,Grid_cre *grid){
+double CRE::read_grid(const unsigned int &, const vec3 &,Grid_cre *){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -31,7 +31,7 @@ double CRE::read_grid(const unsigned int &n, const vec3 &pos,Grid_cre *grid){
     exit(1);
 }
 
-void CRE::write_grid(Pond *par,Grid_cre *grid){
+void CRE::write_grid(Pond *,Grid_cre *){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -42,7 +42,7 @@ void CRE::write_grid(Pond *par,Grid_cre *grid){
 /* analytical CRE flux */
 // give values to spectral index and norm factor
 // we drag this part out to meet users need of changing analytical model of CRE
-void CRE_ana::flux_param(const vec3 &pos,Pond *par,const double &Bper, double &index,double &norm){
+void CRE_ana::flux_param(const vec3 &pos,Pond *par, double &index,double &norm){
     // units
     const double alpha = par->creana[0];
     const double beta = par->creana[1];
@@ -60,12 +60,10 @@ void CRE_ana::flux_param(const vec3 &pos,Pond *par,const double &Bper, double &i
     const double cre_beta_10 = sqrt(1.-1./cre_gamma_10);
     // from flux to density unit convertion
     const double unitfactor = (4.*CGS_U_pi*CGS_U_MEC/cre_beta_10)/(CGS_U_GeV*10000.*CGS_U_cm*CGS_U_cm*CGS_U_sec);
-    // coefficients which do not attend integration
-    const double forefactor = pow(CGS_U_qe,2.5)*sqrt(fabs(Bper)*2.*CGS_U_MEC*2.*CGS_U_pi*par->sim_freq)/(4.*CGS_U_pi*CGS_U_MEC2);
     
     /* MODEL DEPENDENT PARAMETERS */
     // CRE flux normalizaton factor at earth, model dependent
-    const double C_earth = je*unitfactor*pow(cre_gamma_10,alpha-beta*R0);
+    const double C_earth = je*pow(cre_gamma_10,alpha-beta*R0);
     const double normfactor = C_earth*exp(R0/hr);
     // for scaling of CRE density at spatial position, same as wmap3yr model
     // this is changeable by users
@@ -73,7 +71,40 @@ void CRE_ana::flux_param(const vec3 &pos,Pond *par,const double &Bper, double &i
     // this is changeable by users
     index = -alpha+beta*r+theta*z;
     
-    norm = forefactor*normfactor*scalfactor;
+    norm = normfactor*scalfactor*unitfactor;
+}
+
+// En in CGS units, return in [GeV m^2 s sr]^-1
+double CRE_ana::flux(const vec3 &pos,Pond *par,const double &En){
+    // units
+    const double alpha = par->creana[0];
+    const double beta = par->creana[1];
+    const double theta = par->creana[2];
+    const double hr = par->creana[3]*CGS_U_kpc;
+    const double hz = par->creana[4]*CGS_U_kpc;
+    // je is already in [GeV m^2 s sr]^-1 units
+    const double je = par->creana[5];
+    // gamma according to En
+    const double gamma = En/CGS_U_MEC2;
+    // R0 as it should be
+    const double R0 = sqrt(par->SunPosition.x*par->SunPosition.x+par->SunPosition.y*par->SunPosition.y);
+    // sylindrical position
+    const double r = sqrt(pos.x*pos.x+pos.y*pos.y);
+    const double z = fabs(pos.z);
+    // gamma,beta at 10GeV
+    const double cre_gamma_10 = 10.*CGS_U_GeV/CGS_U_MEC2;
+    
+    /* MODEL DEPENDENT PARAMETERS */
+    // CRE flux normalizaton factor at earth, model dependent
+    const double C_earth = je*pow(cre_gamma_10,alpha-beta*R0);
+    const double normfactor = C_earth*exp(R0/hr);
+    // for scaling of CRE density at spatial position, same as wmap3yr model
+    // this is changeable by users
+    const double scalfactor = exp(-r/hr)*(1./pow(cosh(z/hz),2.));
+    // this is changeable by users
+    const double index = -alpha+beta*r+theta*z;
+    
+    return normfactor*scalfactor*pow(gamma,index);
 }
 
 double CRE_ana::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper,const bool &cue){
@@ -88,52 +119,21 @@ double CRE_ana::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const do
         // allocating values to index, norm according to user defined model
         // user may consider building derived class from CRE_ana
         double index, norm;
-        flux_param(pos,par,Bper,index,norm);
+        flux_param(pos,par,index,norm);
         
         // synchrotron integration
-        //double abserr; //switch on with gsl integration
-        struct int_pars inner;
-        inner.A = sqrt(2.*CGS_U_MEC)/sqrt(3.*CGS_U_qe*abs(Bper));
-        inner.omega = 2.*CGS_U_pi*par->sim_freq;
-        inner.index = index;
-        
-        /* TWO STATIC FUNCTIONS ARE DEFINED IN HEADER FILE
-         double gF(double x, void * pars) {
-         return pow(A*sqrt(omega/x), index ) * gsl_sf_synchrotron_1(x) * pow(x, -1.5);
-         }
-         double gG(double x, void * pars) {
-         return pow(A*sqrt(omega/x), index ) * gsl_sf_synchrotron_2(x) * pow(x, -1.5);
-         }
-         */
+        double A = sqrt(2.*CGS_U_MEC)/sqrt(3.*CGS_U_qe*abs(Bper));
+        double omega = 2.*CGS_U_pi*par->sim_freq;
+    
 	if(cue){
-        // test with gsl integration
-        /*
-        gsl_function f;
-        f.function = &gF;
-        f.params = &inner;
-        gsl_integration_workspace *wf = gsl_integration_workspace_alloc(100);
-        gsl_integration_qag(&f,0,10,0,1.0e-2,100,1,wf,&J,&abserr);
-        gsl_integration_workspace_free(wf);
-        */
-        // analytical solution
-        double mu = -(3.+inner.index)/2.0;
-        J = pow(inner.A*sqrt(inner.omega),inner.index)*pow(2,mu+1)*gsl_sf_gamma(0.5*mu+7./3.)*gsl_sf_gamma(0.5*mu+2./3.)/(mu+2.);
+        double mu = -(3.+index)/2.0;
+        J = pow(A*sqrt(omega),index)*pow(2,mu+1)*gsl_sf_gamma(0.5*mu+7./3.)*gsl_sf_gamma(0.5*mu+2./3.)/(mu+2.);
         
         return norm*J/(4.*CGS_U_pi);
     }
 	else{
-        // test with gsl integration
-        /*
-        gsl_function g;
-        g.function = &gG;
-        g.params = &inner;
-        gsl_integration_workspace *wg = gsl_integration_workspace_alloc(100);
-        gsl_integration_qag(&g,0,30,0,1.0e-2,100,1,wg,&J,&abserr);
-        gsl_integration_workspace_free(wg);
-        */
-        // analytical solution
-        double mu = -(3.+inner.index)/2.0;
-        J = pow(inner.A*sqrt(inner.omega),inner.index)*pow(2,mu)*gsl_sf_gamma(0.5*mu+4./3.)*gsl_sf_gamma(0.5*mu+2./3.);
+        double mu = -(3.+index)/2.0;
+        J = pow(A*sqrt(omega),index)*pow(2,mu)*gsl_sf_gamma(0.5*mu+4./3.)*gsl_sf_gamma(0.5*mu+2./3.);
         
         return norm*J/(4.*CGS_U_pi);
 	}
@@ -141,6 +141,63 @@ double CRE_ana::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const do
          check eq(6.16) in Ribiki-Lightman's where Power is defined,
          we need isotropic power which means we need a 1/4pi factor!
          */
+}
+// writing out CRE DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
+void CRE_ana::write_grid(Pond *par, Grid_cre *grid){
+    if(!grid->write_permission){
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"NO PERMISSION"<<endl;
+        exit(1);
+    }
+    
+    vec3 gc_pos;
+    // 2D grid
+    if(grid->nr!=0){
+        double lr = grid->r_max;
+        double lz = grid->z_max-grid->z_min;
+        for(decltype(grid->nE) i=0;i!=grid->nE;++i){
+            for(decltype(grid->nr) j=0;j!=grid->nr;++j){
+                for(decltype(grid->nz) k=0;k!=grid->nz;++k){
+                    // on y=0 2D slide
+                    gc_pos.x = lr*j/(grid->nx-1);
+                    gc_pos.y = 0;
+                    gc_pos.z = lz*k/(grid->nz-1) + grid->z_min;
+                
+                    double E = exp(log(grid->Ekmin) + i*log(grid->Ekfact));
+                
+                    auto idx = toolkit::Index3d(grid->nE,grid->nr,grid->nz,i,j,k);
+                
+                    grid->cre_flux[idx] = flux(gc_pos,par,E);
+                }
+            }
+        }
+    }
+    // 3D grid
+    else if(grid->nx!=0){
+        double lx = grid->x_max-grid->x_min;
+        double ly = grid->y_max-grid->y_min;
+        double lz = grid->z_max-grid->z_min;
+        for(decltype(grid->nE) i=0;i!=grid->nE;++i){
+            for(decltype(grid->nx) j=0;j!=grid->nx;++j){
+                for(decltype(grid->ny) k=0;k!=grid->ny;++k){
+                    for(decltype(grid->nz) m=0;m!=grid->nz;++m){
+                        gc_pos.x = lx*j/(grid->nx-1) + grid->x_min;
+                        gc_pos.y = ly*k/(grid->ny-1) + grid->y_min;
+                        gc_pos.z = lz*m/(grid->nz-1) + grid->z_min;
+                    
+                        double E = exp(log(grid->Ekmin) + (double)i*log(grid->Ekfact));
+                    
+                        auto idx = toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,i,j,k,m);
+                        
+                        grid->cre_flux[idx] = flux(gc_pos,par,E);
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 /* numerical CRE flux */
@@ -154,16 +211,25 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3 &pos,Grid_cre *gr
         // bilinear interpolation
         decltype(grid->nr) rl, zl;
         // notice that lr is radius
-        double tmp = (grid->nr-1)*r/grid->lr;
+        double tmp = (grid->nr-1)*(r/grid->r_max);
         if(tmp<0 or tmp>grid->nr-1) {return 0.;}
         else rl = floor(tmp);
         const double rd = tmp - rl;
         
-        tmp = (grid->nz-1)*(z/grid->lz + 0.5);
+        tmp = (grid->nz-1)*(z-grid->z_min)/(grid->z_max-grid->z_min);
         if(tmp<0 or tmp>grid->nz-1) {return 0.;}
         else zl = floor(tmp);
         const double zd = tmp - zl;
-        
+#ifndef NDEBUG
+        if(rd<0 or zd<0 or rd>1 or zd>1){
+            cerr<<"ERR:"<<__FILE__
+            <<" : in function "<<__func__<<endl
+            <<" at line "<<__LINE__<<endl
+            <<"WRONG VALUE: "<<endl;
+            exit(1);
+        }
+#endif
+        double cre;
         if(rl+1<grid->nr and zl+1<grid->nz){
             auto idx1 = toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl,zl);
             auto idx2 = toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl+1,zl);
@@ -172,38 +238,40 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3 &pos,Grid_cre *gr
             idx1 = toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl,zl+1);
             idx2 = toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl+1,zl+1);
             double i2 = grid->cre_flux[idx1]*(1-rd) + grid->cre_flux[idx2]*rd;
-#ifndef NDEBUG
-            if(i1<0 or i2<0){
-                cerr<<"ERR:"<<__FILE__
-                <<" : in function "<<__func__<<endl
-                <<" at line "<<__LINE__<<endl
-                <<"NEGATIVE CRE FLUX"<<endl;
-                exit(1);
-            }
-#endif
-            return (i1*(1-zd)+i2*zd);
+
+            cre = (i1*(1-zd)+i2*zd);
         }
         else{
             auto idx1 = toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl,zl);
-            return grid->cre_flux[idx1];
+            cre = grid->cre_flux[idx1];
         }
+#ifndef NDEBUG
+        if(cre<0){
+            cerr<<"ERR:"<<__FILE__
+            <<" : in function "<<__func__<<endl
+            <<" at line "<<__LINE__<<endl
+            <<"NEGATIVE CRE FLUX"<<endl;
+            exit(1);
+        }
+#endif
+        return cre;
     }
     // if grid in spatial 3D
     else if(grid->nr==0){
         //trilinear interpolation
         decltype(grid->nx) xl, yl, zl;
         
-        double tmp = (grid->nx-1)*(pos.x/grid->lx + 0.5);
+        double tmp = (grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min);
         if (tmp<0 or tmp>grid->nx-1) { return 0.;}
         else xl = floor(tmp);
         const double xd = tmp - xl;
         
-        tmp = (grid->ny-1)*(pos.y/grid->ly + 0.5);
+        tmp = (grid->ny-1)*(pos.y-grid->y_min)/(grid->y_max-grid->y_min);
         if (tmp<0 or tmp>grid->ny-1) { return 0.;}
         else yl = floor(tmp);
         const double yd = tmp - yl;
         
-        tmp = (grid->nz-1)*(pos.z/grid->lz + 0.5);
+        tmp = (grid->nz-1)*(pos.z-grid->z_min)/(grid->z_max-grid->z_min);
         if (tmp<0 or tmp>grid->nz-1) { return 0.;}
         else zl = floor(tmp);
         const double zd = tmp - zl;
@@ -216,6 +284,7 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3 &pos,Grid_cre *gr
             exit(1);
         }
 #endif
+        double cre;
         if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
             double i1,i2,j1,j2,w1,w2;
             
@@ -238,13 +307,23 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3 &pos,Grid_cre *gr
             w1=i1*(1-yd)+i2*yd;
             w2=j1*(1-yd)+j2*yd;
             
-            return (w1*(1-xd)+w2*xd);
+            cre = (w1*(1-xd)+w2*xd);
             
         }// if not edge
         else {
             auto idx1 = toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,Eidx,xl,yl,zl);
-            return grid->cre_flux[idx1];
+            cre = grid->cre_flux[idx1];
         }
+#ifndef NDEBUG
+        if(cre<0){
+            cerr<<"ERR:"<<__FILE__
+            <<" : in function "<<__func__<<endl
+            <<" at line "<<__LINE__<<endl
+            <<"NEGATIVE CRE FLUX"<<endl;
+            exit(1);
+        }
+#endif
+        return cre;
     }
     else{
         cerr<<"ERR:"<<__FILE__

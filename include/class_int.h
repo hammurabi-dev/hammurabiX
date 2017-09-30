@@ -26,7 +26,7 @@ class Integrator {
     public:
     
     Integrator(void) = default;
-    ~Integrator(void) = default;
+    virtual ~Integrator(void) = default;
     /*@write_grid
      * assmebling pixels/shells into Healpix map
      */

@@ -177,7 +177,7 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
         // B field
         vec3 B_vec = breg->get_breg(pos,par,gbreg);
         // add random field
-        B_vec += brnd->get_brnd(pos,par,gbrnd);
+        B_vec += brnd->get_brnd(pos,gbrnd);
         
         const double B_par = toolkit::get_par2LOS(B_vec,THE,PHI);
         // un-scaled B_per, if random B is active, we scale up this
@@ -187,7 +187,7 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
         // FE field
         double te = fe->get_density(pos,par,gfe);
         // add random field
-        te += fernd->get_fernd(pos,par,gfernd);
+        te += fernd->get_fernd(pos,gfernd);
         // to avoid negative value
         if(te<0){
             /*

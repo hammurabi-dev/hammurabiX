@@ -19,9 +19,9 @@ using namespace std;
 
 /* base class */
 
-double FErnd::get_fernd(const vec3 &pos, Pond *par, Grid_fernd *grid){
+double FErnd::get_fernd(const vec3 &pos, Grid_fernd *grid){
     if(grid->read_permission){
-        return read_grid(pos,grid,par);
+        return read_grid(pos,grid);
     }
     else{
         // if no specific random field model is called
@@ -32,8 +32,8 @@ double FErnd::get_fernd(const vec3 &pos, Pond *par, Grid_fernd *grid){
 
 double FErnd::fe_spec(const double &k, Pond *par){
     //units fixing
-    const double p0 = par->fernd_iso[0]*CGS_U_kpc;
-    const double k0 = par->fernd_iso[1]/CGS_U_kpc;
+    const double p0 = par->fernd_iso[0];
+    const double k0 = par->fernd_iso[1];
     const double a0 = par->fernd_iso[2];
     const double unit = 1./(4*CGS_U_pi*k*k);
     // avoid nan
@@ -42,9 +42,7 @@ double FErnd::fe_spec(const double &k, Pond *par){
     }
     // modified Giacalone-Jokipii model
     //const double P = 2*p0*pow(k/k0,a0)/(1.+pow(k/k0,a0-a1));
-    
     // power law
-    
     double P = 0.;
     if(k>k0){
         P = p0*pow(k/k0,a0);
@@ -53,74 +51,32 @@ double FErnd::fe_spec(const double &k, Pond *par){
     return P*unit;
 }
 
-// theoretical integration from k_min in simulation to k=1/1pc of P(k)pi^2
-double FErnd::get_variance(Pond *par, Grid_fernd *grid){
-    // minimum physical k in DFT
-    const double k_start = sqrt(pow(1./grid->lx,2)+pow(1./grid->ly,2)+pow(1./grid->lz,2));
-    // end at 1pc
-    const double k_end = 1000./CGS_U_kpc;
-    // steps
-    const unsigned int N = 3000;
-    const double k_lapse = (k_end-k_start)/N;
-    double result = 0.;
-    // using simpson's rule
-    for(unsigned int i=0;i!=N;++i){
-        double k0 = k_start + i*k_lapse;
-        double k1 = k0 + 0.5*k_lapse;
-        double k2 = k0 + k_lapse;
-        result += (k0*k0*fe_spec(k0,par)+4.*k1*k1*fe_spec(k1,par)+k2*k2*fe_spec(k2,par))*k_lapse/6.;
-    }
-    return result*4.*CGS_U_pi;
-}
-
-// theoretical integration from k_max in simulation to k=1/1pc of P(k)pi^2
-double FErnd::get_missing(Pond *par, Grid_fernd *grid){
-    // maximum physical k in DFT
-    double k_start = sqrt(3.)*(grid->nx/grid->lx)/2.;
-    // end at 1pc
-    const double k_end = 1000./CGS_U_kpc;
-    // steps
-    const unsigned int N = 1000;
-    const double k_lapse = (k_end-k_start)/N;
-    double result = 0.;
-    // using simpson's rule
-    for(unsigned int i=0;i!=N;++i){
-        double k0 = k_start + i*k_lapse;
-        double k1 = k0 + 0.5*k_lapse;
-        double k2 = k0 + k_lapse;
-        result += (k0*k0*fe_spec(k0,par)+4.*k1*k1*fe_spec(k1,par)+k2*k2*fe_spec(k2,par))*k_lapse/6.;
-    }
-    return result*4.*CGS_U_pi;
-}
-
 double FErnd::rescal_fact(const vec3 &pos, Pond *par){
-    const double r_cyl = sqrt(pos.x*pos.x+pos.y*pos.y)/CGS_U_kpc;
-    const double z = fabs(pos.z/CGS_U_kpc);
+    const double r_cyl = (sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x))/CGS_U_kpc;
+    const double z = (fabs(pos.z) - fabs(par->SunPosition.z))/CGS_U_kpc;
     const double r0 = par->fernd_scal[0];
     const double z0 = par->fernd_scal[1];
     if(r_cyl==0. or z==0) {return 1.;}
     else{
-	return exp(-r_cyl/r0)*exp(-z/z0);
+        return exp(-r_cyl/r0)*exp(-z/z0);
     }
 }
 
-double FErnd::read_grid(const vec3 &pos, Grid_fernd *grid, Pond *par){
+double FErnd::read_grid(const vec3 &pos, Grid_fernd *grid){
     
     decltype(grid->nx) xl, yl, zl;
     
-    double tmp = (grid->nx-1)*(pos.x/grid->lx + 0.5);
-    // if use solar-centric grid
-    if(grid->ec_frame) tmp -= (grid->nx-1)*(par->SunPosition.x/grid->lx);
+    double tmp = (grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min);
     if (tmp<0 or tmp>grid->nx-1) { return 0.;}
     else xl = floor(tmp);
     const double xd = tmp - xl;
     
-    tmp = (grid->ny-1)*(pos.y/grid->ly + 0.5);
+    tmp = (grid->ny-1)*(pos.y-grid->y_min)/(grid->y_max-grid->y_min);
     if (tmp<0 or tmp>grid->ny-1) { return 0.;}
     else yl = floor(tmp);
     const double yd = tmp - yl;
     
-    tmp = (grid->nz-1)*(pos.z/grid->lz + 0.5);
+    tmp = (grid->nz-1)*(pos.z-grid->z_min)/(grid->z_max-grid->z_min);
     if (tmp<0 or tmp>grid->nz-1) { return 0.;}
     else zl = floor(tmp);
     const double zd = tmp - zl;
@@ -166,22 +122,11 @@ double FErnd::read_grid(const vec3 &pos, Grid_fernd *grid, Pond *par){
         auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl);
         density = grid->fftw_fe[idx];
     }
-    /*
-#ifndef NDEBUG
-    if (density<0) {
-        cerr<<"WAR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"NEGATIVE FREE ELECTRON DENSITY"<<endl;
-        exit(1);
-    }
-#endif
-     */
     return density;
 }
 
 // base class does not write out to grid
-void FErnd::write_grid(Pond *par,Grid_fernd *grid){
+void FErnd::write_grid(Pond *,Grid_fernd *){
     cerr<<"WAR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -189,16 +134,12 @@ void FErnd::write_grid(Pond *par,Grid_fernd *grid){
     exit(1);
 }
 
-/* gaussian random field */
-FEgrnd::FEgrnd(Pond *par, Grid_fernd *grid){
-    get_variance_rslt = get_variance(par,grid);
-    get_missing_rslt = get_missing(par,grid);
-}
+/* isotropic random field */
 
-double FEgrnd::get_fernd(const vec3 &pos, Pond *par, Grid_fernd *grid){
+double FEgrnd::get_fernd(const vec3 &pos, Grid_fernd *grid){
     // interpolate written grid to given position
     // check if you have called ::write_grid
-    return read_grid(pos,grid,par);
+    return read_grid(pos,grid);
 }
 
 void FEgrnd::write_grid(Pond *par, Grid_fernd *grid){
@@ -206,7 +147,9 @@ void FEgrnd::write_grid(Pond *par, Grid_fernd *grid){
     gsl_rng *r = gsl_rng_alloc(gsl_rng_taus);
     // from tools
     gsl_rng_set(r, toolkit::random_seed());
-    
+    double lx = grid->x_max-grid->x_min;
+    double ly = grid->y_max-grid->y_min;
+    double lz = grid->z_max-grid->z_min;
     for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
         for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
             for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
@@ -215,13 +158,13 @@ void FEgrnd::write_grid(Pond *par, Grid_fernd *grid){
                 auto idx = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l);
                 
                 // FFT expects up to n/2 positive while n/2 to n negative
-                // physical k in cgs dimension
-                double kx = double(i)/grid->lx;
-                double ky = double(j)/grid->ly;
-                double kz = double(l)/grid->lz;
-                if(i>=grid->nx/2) kx -= double(grid->nx)/grid->lx;
-                if(j>=grid->ny/2) ky -= double(grid->ny)/grid->ly;
-                if(l>=grid->nz/2) kz -= double(grid->nz)/grid->lz;
+                // physical k in 1/kpc dimension
+                double kx = i/(lx/CGS_U_kpc);
+                double ky = j/(ly/CGS_U_kpc);
+                double kz = l/(lz/CGS_U_kpc);
+                if(i>=grid->nx/2) kx -= grid->nx/(lx/CGS_U_kpc);
+                if(j>=grid->ny/2) ky -= grid->ny/(ly/CGS_U_kpc);
+                if(l>=grid->nz/2) kz -= grid->nz/(lz/CGS_U_kpc);
                 
                 const double k = sqrt(kx*kx + ky*ky + kz*kz);
                 
@@ -234,11 +177,11 @@ void FEgrnd::write_grid(Pond *par, Grid_fernd *grid){
                 // angle also go random within [0, 2pi]
                 const double ang = 2*CGS_U_pi*gsl_rng_uniform(r);
                 // physical dk^3
-                const double dk3 = 1./(grid->lx*grid->ly*grid->lz);
+                const double dk3 = 1./(lx*ly*lz);
                 
                 // cheating simpson evaluation
                 double element = 2.*fe_spec(k,par)/3.;
-                const double halfdk = 0.5*sqrt(pow(1./grid->lx,2)+pow(1./grid->ly,2)+pow(1./grid->lz,2));
+                const double halfdk = 0.5*sqrt(pow(1./lx,2)+pow(1./ly,2)+pow(1./lz,2));
                 element += fe_spec(k+halfdk,par)/6.;
                 element += fe_spec(k-halfdk,par)/6.;
                 // sigma+ and sigma-

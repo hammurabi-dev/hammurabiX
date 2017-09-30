@@ -30,42 +30,34 @@ class CRE{
 class CRE_ana : public CRE{
     public:
     CRE_ana(void) = default;
+    virtual ~CRE_ana(void) = default;
     /*@CRE_ana(vector)
      * reassign parameters in pond
      */
     //CRE_ana(const std::vector<double>&,Pond *);
     double get_emissivity(const vec3 &,Pond *,Grid_cre *,const double &,const bool &) override;
     private:
+    /*@flux
+     * return CRE flux at given CRE energy
+     * input CRE energy at CGS units
+     * output at [GeV m^2 s sr]^-1 units
+     */
+    double flux(const vec3 &,Pond *,const double &);
     /*@flux_param
      * flux index and normalization wrt gamma (Lorentz factor) at given position
      */
-    void flux_param(const vec3 &,Pond *,const double &,double &,double &);
-    // integration parameters
-    struct int_pars{
-        double A;
-        double omega;
-        double index;
-    };
-    static double gF(double x, void *pars) {
-        struct CRE_ana::int_pars *p = (struct CRE_ana::int_pars *) pars;
-        double A = (p->A);
-        double omega = (p->omega);
-        double index = (p->index);
-        return pow(A*sqrt(omega/x),index)*gsl_sf_synchrotron_1(x)*pow(x,-1.5);
-    };
-    static double gG(double x, void *pars) {
-        struct CRE_ana::int_pars *p = (struct CRE_ana::int_pars *) pars;
-        double A = (p->A);
-        double omega = (p->omega);
-        double index = (p->index);
-        return pow(A*sqrt(omega/x),index)*gsl_sf_synchrotron_2(x)*pow(x,-1.5);
-    };
+    void flux_param(const vec3 &,Pond *,double &,double &);
+    /*@write_grid
+     * write analytical CRE FLUX to discrete grid
+     */
+    void write_grid(Pond *,Grid_cre *) override;
 };
 
 /* Numerical CRE flux stored in grid_cre */
 class CRE_num final: public CRE{
     public:
     CRE_num(void) = default;
+    virtual ~CRE_num(void) = default;
     double get_emissivity(const vec3 &,Pond *,Grid_cre *,const double &,const bool &) override;
     private:
     /*@read_grid
@@ -76,6 +68,7 @@ class CRE_num final: public CRE{
      * 2+1/3+1 spatial-spectral CRE flux grid
      */
     double read_grid(const unsigned int &, const vec3 &,Grid_cre *) override;
+    
 };
 #endif
 // END
