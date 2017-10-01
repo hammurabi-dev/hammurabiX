@@ -47,6 +47,7 @@ int main(int , char **argv) {
     // if import from file, no need to build specific fe class
     if(grid_fe->read_permission){
         grid_fe->import_grid();
+        fe = new FE();
     }
     else if(fetype=="YMW16"){
         cout<<"INFO: USING YMW16 FE MODEL"<<endl;
@@ -85,11 +86,13 @@ int main(int , char **argv) {
     // if import from file, no need to build specific fe_rnd class
     if(grid_fernd->read_permission){
         grid_fernd->import_grid();
+        fernd = new FErnd();
     }
     else if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->BoolAttribute("cue")){
         string ferndtype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->Attribute("type");
-        if(ferndtype=="Gauss"){
-            cout<<"INFO: USING GAUSSIAN RANDOM FE MODEL"<<endl;
+        if(ferndtype=="Iso"){
+            cout<<"INFO: USING ISOTROPIC RANDOM FE MODEL"<<endl;
+            cout<<"WAR: NOT FINISHED YET"<<endl;
             // non default constructor
             fernd = new FEgrnd();
             // fill grid with random fields
@@ -109,6 +112,7 @@ int main(int , char **argv) {
     // random B field
     if(grid_brnd->read_permission){
         grid_brnd->import_grid();
+        brnd = new Brnd();
     }
     else if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->BoolAttribute("cue")){
         string brndtype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->Attribute("type");
@@ -129,6 +133,7 @@ int main(int , char **argv) {
     }
     else{
         cout<<"INFO: NO RANDOM B FIELD"<<endl;
+        //without read permission, return zeros
         brnd = new Brnd();
     }
     // if export to file

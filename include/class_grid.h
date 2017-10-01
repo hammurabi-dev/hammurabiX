@@ -158,7 +158,7 @@ class Grid_cre final : public Grid{
     // 2-D spatial 1-D spectral grid
     unsigned int nE, nr, nz;
     unsigned long int cre_size;
-    double r_max, z_max, z_min, Ekmin, Ekmax, Ekfact;
+    double r_max, z_max, z_min, E_min, E_max, E_fact;
     
     // or 3+1 dimension grid
     unsigned int nx,ny;

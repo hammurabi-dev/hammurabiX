@@ -239,23 +239,23 @@
         </Analytic>
         
         <Numeric type="2D">
-            <nr value=""/>
-            <nx value=""/>
-            <ny value=""/>
-            <nz value=""/>
-            <nE value=""/>
+            <nr value="80"/>
+            <nx value="80"/>
+            <ny value="80"/>
+            <nz value="80"/>
             
-            <r_max value=""/>
-            <x_min value=""/>
-            <x_max value=""/>
-            <y_min value=""/>
-            <y_max value=""/>
-            <z_min value=""/>
-            <z_max value=""/>
+            <r_max value="20.0"/>
+            <x_min value="0.0"/>
+            <x_max value="0.0"/>
+            <y_min value="0.0"/>
+            <y_max value="0.0"/>
+            <z_min value="-4.0"/>
+            <z_max value="4.0"/>
             
-            <Ekmin value=""/>
-            <Ekmax value=""/>
-            <Ekfact value=""/>
+            <!-- E_max = E_min*exp(nE*E_fact) -->
+            <E_min value="0.1"/>
+            <E_max value="100.0"/>
+            <E_fact value="0.1"/>
         </Numeric>
     </CRE>
     

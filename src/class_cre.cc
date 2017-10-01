@@ -40,15 +40,16 @@ void CRE::write_grid(Pond *,Grid_cre *){
 }
 
 /* analytical CRE flux */
-// give values to spectral index and norm factor
-// we drag this part out to meet users need of changing analytical model of CRE
-void CRE_ana::flux_param(const vec3 &pos,Pond *par, double &index,double &norm){
+// give values to spectral index and norm factor, in cgs units
+// analytical CRE integration use N(\gamma)
+void CRE_ana::flux_param(const vec3 &pos,Pond *par,double &index,double &norm){
     // units
     const double alpha = par->creana[0];
     const double beta = par->creana[1];
     const double theta = par->creana[2];
     const double hr = par->creana[3]*CGS_U_kpc;
     const double hz = par->creana[4]*CGS_U_kpc;
+    // je is in [GeV m^2 s sr]^-1 units
     const double je = par->creana[5];
     // R0 as it should be
     const double R0 = sqrt(par->SunPosition.x*par->SunPosition.x+par->SunPosition.y*par->SunPosition.y);
@@ -58,13 +59,11 @@ void CRE_ana::flux_param(const vec3 &pos,Pond *par, double &index,double &norm){
     // gamma,beta at 10GeV
     const double cre_gamma_10 = 10.*CGS_U_GeV/CGS_U_MEC2;
     const double cre_beta_10 = sqrt(1.-1./cre_gamma_10);
-    // from flux to density unit convertion
-    const double unitfactor = (4.*CGS_U_pi*CGS_U_MEC/cre_beta_10)/(CGS_U_GeV*10000.*CGS_U_cm*CGS_U_cm*CGS_U_sec);
+    // from PHI(E) to N(\gamma) convertion
+    const double unitfactor = (4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*cre_beta_10);
     
-    /* MODEL DEPENDENT PARAMETERS */
-    // CRE flux normalizaton factor at earth, model dependent
-    const double C_earth = je*pow(cre_gamma_10,alpha-beta*R0);
-    const double normfactor = C_earth*exp(R0/hr);
+    // MODEL DEPENDENT PARAMETERS
+    const double normfactor = je*pow(cre_gamma_10,alpha-beta*R0)*exp(R0/hr);
     // for scaling of CRE density at spatial position, same as wmap3yr model
     // this is changeable by users
     const double scalfactor = exp(-r/hr)*(1./pow(cosh(z/hz),2.));
@@ -72,9 +71,11 @@ void CRE_ana::flux_param(const vec3 &pos,Pond *par, double &index,double &norm){
     index = -alpha+beta*r+theta*z;
     
     norm = normfactor*scalfactor*unitfactor;
-}
+    
+}//pass
 
-// En in CGS units, return in [GeV m^2 s sr]^-1
+// En in CGS units, return in [GeV m^2 s Sr]^-1
+// analytical modeling use N(\gamma) while flux is PHI(E)
 double CRE_ana::flux(const vec3 &pos,Pond *par,const double &En){
     // units
     const double alpha = par->creana[0];
@@ -82,29 +83,30 @@ double CRE_ana::flux(const vec3 &pos,Pond *par,const double &En){
     const double theta = par->creana[2];
     const double hr = par->creana[3]*CGS_U_kpc;
     const double hz = par->creana[4]*CGS_U_kpc;
-    // je is already in [GeV m^2 s sr]^-1 units
+    // je is in [GeV m^2 s sr]^-1 units
     const double je = par->creana[5];
-    // gamma according to En
-    const double gamma = En/CGS_U_MEC2;
     // R0 as it should be
     const double R0 = sqrt(par->SunPosition.x*par->SunPosition.x+par->SunPosition.y*par->SunPosition.y);
     // sylindrical position
     const double r = sqrt(pos.x*pos.x+pos.y*pos.y);
     const double z = fabs(pos.z);
+    // gamma according to En
+    const double gamma = En/CGS_U_MEC2;
     // gamma,beta at 10GeV
     const double cre_gamma_10 = 10.*CGS_U_GeV/CGS_U_MEC2;
+    // converting from N to PHI
+    const double unitfactor = sqrt((1.-1./gamma)/(1.-1./cre_gamma_10));
     
-    /* MODEL DEPENDENT PARAMETERS */
+    // MODEL DEPENDENT PARAMETERS
     // CRE flux normalizaton factor at earth, model dependent
-    const double C_earth = je*pow(cre_gamma_10,alpha-beta*R0);
-    const double normfactor = C_earth*exp(R0/hr);
+    const double normfactor = je*pow(cre_gamma_10,alpha-beta*R0)*exp(R0/hr);
     // for scaling of CRE density at spatial position, same as wmap3yr model
     // this is changeable by users
     const double scalfactor = exp(-r/hr)*(1./pow(cosh(z/hz),2.));
     // this is changeable by users
     const double index = -alpha+beta*r+theta*z;
     
-    return normfactor*scalfactor*pow(gamma,index);
+    return normfactor*scalfactor*unitfactor*pow(gamma,index);
 }
 
 double CRE_ana::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper,const bool &cue){
@@ -116,32 +118,35 @@ double CRE_ana::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const do
         exit(1);
     }
     double J = 0.;
-        // allocating values to index, norm according to user defined model
-        // user may consider building derived class from CRE_ana
-        double index, norm;
-        flux_param(pos,par,index,norm);
-        
-        // synchrotron integration
-        double A = sqrt(2.*CGS_U_MEC)/sqrt(3.*CGS_U_qe*abs(Bper));
-        double omega = 2.*CGS_U_pi*par->sim_freq;
+    // allocating values to index, norm according to user defined model
+    // user may consider building derived class from CRE_ana
+    double index, norm;
+    flux_param(pos,par,index,norm);
     
-	if(cue){
+    // coefficients which do not attend integration
+    norm *= sqrt(3)*pow(CGS_U_qe,3)*fabs(Bper)/(4*CGS_U_pi*CGS_U_MEC2);
+    
+    // synchrotron integration
+    double A = sqrt(2.*CGS_U_MEC*2.*CGS_U_pi*par->sim_freq)/sqrt(3.*CGS_U_qe*fabs(Bper));
+    
+    if(cue){
         double mu = -(3.+index)/2.0;
-        J = pow(A*sqrt(omega),index)*pow(2,mu+1)*gsl_sf_gamma(0.5*mu+7./3.)*gsl_sf_gamma(0.5*mu+2./3.)/(mu+2.);
+        J = pow(A,index+1)*pow(2,mu+1)*gsl_sf_gamma(0.5*mu+7./3.)*gsl_sf_gamma(0.5*mu+2./3.)/(mu+2.);
         
         return norm*J/(4.*CGS_U_pi);
     }
-	else{
+    else{
         double mu = -(3.+index)/2.0;
-        J = pow(A*sqrt(omega),index)*pow(2,mu)*gsl_sf_gamma(0.5*mu+4./3.)*gsl_sf_gamma(0.5*mu+2./3.);
+        J = pow(A,index+1)*pow(2,mu)*gsl_sf_gamma(0.5*mu+4./3.)*gsl_sf_gamma(0.5*mu+2./3.);
         
         return norm*J/(4.*CGS_U_pi);
-	}
-        /* the last 4pi comes from solid-angle integration/deviation,
-         check eq(6.16) in Ribiki-Lightman's where Power is defined,
-         we need isotropic power which means we need a 1/4pi factor!
-         */
+    }
+    /* the last 4pi comes from solid-angle integration/deviation,
+     check eq(6.16) in Ribiki-Lightman's where Power is defined,
+     we need isotropic power which means we need a 1/4pi factor!
+     */
 }
+
 // writing out CRE DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
 void CRE_ana::write_grid(Pond *par, Grid_cre *grid){
     if(!grid->write_permission){
@@ -161,14 +166,14 @@ void CRE_ana::write_grid(Pond *par, Grid_cre *grid){
             for(decltype(grid->nr) j=0;j!=grid->nr;++j){
                 for(decltype(grid->nz) k=0;k!=grid->nz;++k){
                     // on y=0 2D slide
-                    gc_pos.x = lr*j/(grid->nx-1);
+                    gc_pos.x = lr*j/(grid->nr-1);
                     gc_pos.y = 0;
                     gc_pos.z = lz*k/(grid->nz-1) + grid->z_min;
-                
-                    double E = exp(log(grid->Ekmin) + i*log(grid->Ekfact));
-                
+                    
+                    double E = grid->E_min*exp(i*grid->E_fact);
+                    
                     auto idx = toolkit::Index3d(grid->nE,grid->nr,grid->nz,i,j,k);
-                
+                    
                     grid->cre_flux[idx] = flux(gc_pos,par,E);
                 }
             }
@@ -186,9 +191,9 @@ void CRE_ana::write_grid(Pond *par, Grid_cre *grid){
                         gc_pos.x = lx*j/(grid->nx-1) + grid->x_min;
                         gc_pos.y = ly*k/(grid->ny-1) + grid->y_min;
                         gc_pos.z = lz*m/(grid->nz-1) + grid->z_min;
-                    
-                        double E = exp(log(grid->Ekmin) + (double)i*log(grid->Ekfact));
-                    
+                        
+                        double E = grid->E_min*exp(i*grid->E_fact);
+                        
                         auto idx = toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,i,j,k,m);
                         
                         grid->cre_flux[idx] = flux(gc_pos,par,E);
@@ -197,14 +202,14 @@ void CRE_ana::write_grid(Pond *par, Grid_cre *grid){
             }
         }
     }
-
+    
 }
 
 /* numerical CRE flux */
 // use bilinear/trilinear interpolationi according to the dimension of CRE flux grid
 double CRE_num::read_grid(const unsigned int &Eidx, const vec3 &pos,Grid_cre *grid){
     // if grid in spatial 2D
-    if(grid->nx==0){
+    if(grid->nr!=0){
         // sylindrical galactic centric position
         const double r = sqrt(pos.x*pos.x+pos.y*pos.y);
         const double z = pos.z;
@@ -238,7 +243,7 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3 &pos,Grid_cre *gr
             idx1 = toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl,zl+1);
             idx2 = toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl+1,zl+1);
             double i2 = grid->cre_flux[idx1]*(1-rd) + grid->cre_flux[idx2]*rd;
-
+            
             cre = (i1*(1-zd)+i2*zd);
         }
         else{
@@ -257,7 +262,7 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3 &pos,Grid_cre *gr
         return cre;
     }
     // if grid in spatial 3D
-    else if(grid->nr==0){
+    else if(grid->nx!=0){
         //trilinear interpolation
         decltype(grid->nx) xl, yl, zl;
         
@@ -351,22 +356,20 @@ double CRE_num::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const do
     double x[grid->nE] = {0.};
     double beta[grid->nE] = {0.};
     // consts used in loop, using cgs units
-    const double shift_fact = (2.*CGS_U_MEC*CGS_U_MEC2*CGS_U_MEC2*2.*CGS_U_pi*par->sim_freq)/(3.*CGS_U_qe*Bper*CGS_U_GeV*CGS_U_GeV);
-    // KE in GeV
-    const double gamma_fact = CGS_U_MEC2/CGS_U_GeV;
+    const double x_fact = (2.*CGS_U_MEC*CGS_U_MEC2*CGS_U_MEC2*2.*CGS_U_pi*par->sim_freq)/(3.*CGS_U_qe*Bper);
+    // KE in cgs units
     for(decltype(grid->nE) i=0;i!=grid->nE;++i){
-        KE[i] = exp(log(grid->Ekmin) + (double)i*log(grid->Ekfact));
-        x[i] = shift_fact/(KE[i]*KE[i]);
-        beta[i] = fabs(sqrt(1-gamma_fact/KE[i]));
+        KE[i] = grid->E_min*exp(i*grid->E_fact);
+        x[i] = x_fact/(KE[i]*KE[i]);
+        beta[i] = sqrt(1-CGS_U_MEC2/KE[i]);
     }
     
     // do energy spectrum integration at given position
     // unit_factor for DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
     // n(E,pos) = \phi(E,pos)*(4\pi/\beta*c), the relatin between flux \phi and density n
     // ref: "Cosmic rays n' particle physics", A3
-    // we integrate over E instead of x
-    // we drop 1/GeV since dE in GeV
-    const double unitfactor = 4.*CGS_U_pi/(CGS_U_C_light*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec);
+    // fore-factor
+    const double fore_factor = 2.*sqrt(3.)*pow(CGS_U_qe,3.)*abs(Bper)/(CGS_U_MEC2*CGS_U_C_light*CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec);
     
     for(decltype(grid->nE) i=0;i!=grid->nE-1;++i){
         double xv = (x[i+1]+x[i])/2.;
@@ -374,7 +377,7 @@ double CRE_num::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const do
         if(xv>10){continue;}
         double dE = fabs(KE[i+1]-KE[i]);
         // we use beta here
-        double de = unitfactor*(read_grid(i+1,pos,grid)/beta[i+1]+read_grid(i,pos,grid)/beta[i])/2.;
+        double de = (read_grid(i+1,pos,grid)/beta[i+1]+read_grid(i,pos,grid)/beta[i])/2.;
 #ifndef NDEBUG
         if(de<0){
             cerr<<"ERR:"<<__FILE__
@@ -384,17 +387,16 @@ double CRE_num::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const do
             exit(1);
         }
 #endif
-	if(cue){
-        J += gsl_sf_synchrotron_1(xv)*de*dE;
-	}
-	else{
-        J += gsl_sf_synchrotron_2(xv)*de*dE;
-	}
+        if(cue){
+            J += gsl_sf_synchrotron_1(xv)*de*dE;
+        }
+        else{
+            J += gsl_sf_synchrotron_2(xv)*de*dE;
+        }
     }
-    // fore factor
-    const double fore_factor = sqrt(3.)*pow(CGS_U_qe,3.)*abs(Bper)/(2.*CGS_U_pi*CGS_U_MEC2);
+    
     return fore_factor*J/(4.*CGS_U_pi);
-    // 4\pi here explained in type1 function
+    // 4\pi is necessary
 }
 
 // END

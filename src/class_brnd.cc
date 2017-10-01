@@ -67,7 +67,6 @@ double Brnd::rescal_fact(const vec3 &pos, Pond *par){
 }
 
 vec3 Brnd::read_grid(const vec3 &pos, Grid_brnd *grid){
-    
     decltype(grid->nx) xl, yl, zl;
     
     double tmp = (grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min);

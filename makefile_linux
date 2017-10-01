@@ -41,9 +41,9 @@ default: $(EXE)
 src/hammurabi.o: src/hammurabi.cc $(OBJ)
 
 $(EXE): $(OBJ) src/hammurabi.o lib/libhammurabi.a
-	mkdir bin
-        $(CXX) $^ -o bin/$(EXE) $(LFLAGS)
-	cp data/* bin; cp python_utils/* bin
+	rm -rf bin; mkdir bin
+   	$(CXX) $^ -o bin/$(EXE) $(LFLAGS)
+	cp data/* bin
 
 %.o: %.cc $(HEADS)
 	$(CXX) -c $< -o $@ $(CXXFLAGS)

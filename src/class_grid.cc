@@ -638,20 +638,21 @@ Grid_cre::Grid_cre(string file_name){
 
 void Grid_cre::build_grid(XMLDocument *doc){
     XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("CRE")->FirstChildElement("Numeric");
+    
+    E_min = CGS_U_GeV*FetchDouble(ptr,"E_min");
+    E_max = CGS_U_GeV*FetchDouble(ptr,"E_max");
+    E_fact = FetchDouble(ptr,"E_fact");
+    nE = ceil(log(E_max/E_min)/E_fact);
     // spatial 2D
     if(strcmp(ptr->Attribute("type"),"2D")==0){
         nr = FetchUnsigned(ptr,"nr");
         nz = FetchUnsigned(ptr,"nz");
         nx = 0; ny = 0;
-        nE = FetchUnsigned(ptr,"nE");
-        cre_size = nE*nr*nz;
+        
         r_max = CGS_U_kpc*FetchDouble(ptr,"r_max");
         z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
         z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
         x_max = 0.; x_min = 0.; y_max = 0.; y_min = 0.;
-        Ekmin = CGS_U_GeV*FetchDouble(ptr,"Ekmin");
-        Ekmax = CGS_U_GeV*FetchDouble(ptr,"Ekmax");
-        Ekfact = CGS_U_GeV*FetchDouble(ptr,"Ekfact");
         
         cre_size = nE*nr*nz;
     }
@@ -661,8 +662,7 @@ void Grid_cre::build_grid(XMLDocument *doc){
         nz = FetchUnsigned(ptr,"nz");
         nx = FetchUnsigned(ptr,"nx");
         ny = FetchUnsigned(ptr,"ny");
-        nE = FetchUnsigned(ptr,"nE");
-        cre_size = nE*nx*ny*nz;
+        
         x_max = CGS_U_kpc*FetchDouble(ptr,"x_max");
         x_min = CGS_U_kpc*FetchDouble(ptr,"x_min");
         y_max = CGS_U_kpc*FetchDouble(ptr,"y_max");
@@ -670,9 +670,6 @@ void Grid_cre::build_grid(XMLDocument *doc){
         z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
         z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
         r_max = 0.;
-        Ekmin = CGS_U_GeV*FetchDouble(ptr,"Ekmin");
-        Ekmax = CGS_U_GeV*FetchDouble(ptr,"Ekmax");
-        Ekfact = CGS_U_GeV*FetchDouble(ptr,"Ekfact");
         
         cre_size = nE*nx*ny*nz;
     }
