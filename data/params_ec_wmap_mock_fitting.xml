@@ -7,7 +7,7 @@
         <!-- Dispersion Measure -->
         <DM cue="1" filename="dm.fits"/>
         <!-- Synchrotron Emission -->
-        <Sync cue="1" filename="iqu_sync.fits"/>
+        <Sync cue="1" freq="23" filename="iqu_sync.fits"/>
         <!-- Faraday Depth -->
         <Faraday cue="1" filename="fd.fits"/>
     </Output>
@@ -42,9 +42,12 @@
             <ny value="200"/>
             <nz value="160"/>
             <!-- box length in each direction -->
-            <lx value="10.0"/> <!-- kpc -->
-            <ly value="10.0"/> <!-- kpc -->
-            <lz value="8.0"/> <!-- kpc -->
+            <x_min value="-13.3"/> <!-- kpc -->
+            <x_max value="3.3"/>
+            <y_min value="-5.0"/>
+            <y_max value="5.0"/>
+            <z_min value="-4.0"/>
+            <z_max value="4.0"/>
         </Box>
         <!-- LOS integration -->
         <Integration> <!-- LOS integration for hammurabi -->
@@ -222,7 +225,7 @@
     </Galaxy>
     
     <!-- ANALYTICAL/NUMERICAL CRE -->
-    <CRE type="Analytic" freq="23.0"> <!-- frequency @ GHz -->
+    <CRE type="Analytic"> <!-- frequency @ GHz -->
         <Analytic>
             <alpha value="3.0"/>
             <beta value="0.0"/>
@@ -233,17 +236,23 @@
         </Analytic>
         
         <Numeric type="2D">
-            <nr value=""/>
-            <nx value=""/>
-            <ny value=""/>
-            <nz value=""/>
-            <nE value=""/>
-            <lx value=""/>
-            <ly value=""/>
-            <lz value=""/>
-            <Ekmin value=""/>
-            <Ekmax value=""/>
-            <Ekfact value=""/>
+            <nr value="80"/>
+            <nx value="80"/>
+            <ny value="80"/>
+            <nz value="80"/>
+            
+            <r_max value="20.0"/>
+            <x_min value="0.0"/>
+            <x_max value="0.0"/>
+            <y_min value="0.0"/>
+            <y_max value="0.0"/>
+            <z_min value="-4.0"/>
+            <z_max value="4.0"/>
+            
+            <!-- E_max = E_min*exp(nE*E_fact) -->
+            <E_min value="0.1"/>
+            <E_max value="100.0"/>
+            <E_fact value="0.1"/>
         </Numeric>
     </CRE>
     

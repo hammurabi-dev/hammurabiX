@@ -1,20 +1,25 @@
 <?xml version="1.0"?>
 <!-- FULL PARAMETER-SET FOR ALL MODULES -->
-<!-- "cue" acts as switches for usage -->
+<!-- author, Jiaxin Wang -->
+<!-- email, jiwang@sissa.it -->
+<!-- "cue", switches for usage -->
 <root>
-    <!-- final output .fits maps -->
+    
     <Output>
         <!-- Dispersion Measure -->
         <DM cue="1" filename="dm.fits"/>
-        <!-- Synchrotron Emission -->
-        <Sync cue="1" filename="iqu_sync.fits"/>
-        <!-- Faraday Depth -->
+        <!-- synchrotron dmission -->
+        <!-- frequency @ GHz -->
+        <Sync cue="1" freq="23" filename="iqu_sync_23.fits"/>
+        <Sync cue="1" freq="2.4" filename="iqu_sync_2.4.fits"/>
+        <!-- Faraday depth -->
         <Faraday cue="1" filename="fd.fits"/>
     </Output>
     
-    <!-- INTERACTIVE IN/OUTPUT -->
+    <!-- physical field grid in/out -->
+    <!-- resolution defined in './Grid/Box' -->
+    <!-- CRE field resolution defined in './CRE/Numeric' -->
     <Interface>
-        <!-- RESOLUTION DEFINED IN './Grid/Box' -->
         <!-- regular magnetic field -->
         <breg_grid read="0" write="0" filename="breg.bin"/>
         <!-- turbulent magnetic field -->
@@ -23,13 +28,12 @@
         <fe_grid read="0" write="0" filename="ymw16.bin"/>
         <!-- turbulent free electron field -->
         <fernd_grid read="0" write="0" filename="fernd.bin"/>
-        <!-- cosmic ray electron -->
+        <!-- cosmic ray electron field -->
         <cre_grid read="0" write="0" filename="cre.bin"/>
     </Interface>
     
-    <!-- HAMMURABI GRID -->
+    <!-- main field grid -->
     <Grid type="3D">
-        <!-- ec_frame offers a local simulation timesaving scheme -->
         <SunPosition>
             <x value="-8.3"/> <!-- kpc -->
             <y value="0"/> <!-- kpc -->
@@ -37,38 +41,38 @@
         </SunPosition>
         
         <Box>
-            <!-- grid vertex number in each direction -->
+            <!-- grid vertex number -->
             <nx value="400"/>
             <ny value="400"/>
             <nz value="80"/>
-            <!-- box edge in each direction -->
-            <x_min value="-20.0"/>
-            <x_max value="20.0"/>
-            <y_min value="-20.0"/>
-            <y_max value="20.0"/>
-            <z_min value="-4.0"/>
-            <z_max value="4.0"/>
+            <!-- box limit, in Galactic-centric frame -->
+            <x_min value="-20.0"/> <!-- kpc -->
+            <x_max value="20.0"/> <!-- kpc -->
+            <y_min value="-20.0"/> <!-- kpc -->
+            <y_max value="20.0"/> <!-- kpc -->
+            <z_min value="-4.0"/> <!-- kpc -->
+            <z_max value="4.0"/> <!-- kpc -->
         </Box>
-        <!-- LOS integration -->
+        <!-- LOS integration setting -->
         <Integration>
-            <shell value="1"/>
-            <nside_sim value="16"/>
-            <nside_min value="16"/>
-            <!-- maximum radius in earth/galactic centric frame -->
+            <shell value="1"/> <!-- total shell number -->
+            <nside_sim value="16"/> <!-- output map resolution -->
+            <nside_min value="16"/> <!-- inner most shell resolution -->
+            <!-- maximum radius in earth/Galactic centric frame -->
             <ec_r_max value="30.0"/> <!-- kpc -->
             <gc_r_max value="20.0"/> <!-- kpc -->
             <!-- maximum height in galactic centric frame -->
             <gc_z_max value="10.0"/> <!-- kpc -->
             <!-- radial resolution -->
             <ec_r_res value="0.1"/> <!-- kpc -->
-            <!-- lower limit on galactic latitude -->
+            <!-- galactic latitude lower limit -->
             <lat_lim value="0."/> <!-- [0,90] -->
         </Integration>
     </Grid>
     
-    <!-- GALAXY SETTINGS -->
+    <!-- galaxy settings -->
     <Galaxy>
-        <!-- MAGNETIC FIELDS -->
+        <!-- magnetic fields -->
         <MagneticField>
             <!-- regular fields -->
             <Regular type="WMAP">
@@ -93,7 +97,7 @@
                 <!-- isotropic -->
                 <Iso>
                     <rms value="1.0"/> <!-- norm at k0 -->
-                    <k0 value="0.5"/> <!-- k0 = 1/(Lambda in kpc) -->
+                    <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
                     <a0 value="1.7"/> <!-- 5/3, Kolmogrov -->
                 </Iso>
                 <!-- global anisotropy -->
@@ -104,7 +108,7 @@
                 <Anisolocal>
                     <beta value="1.0"/>
                 </Anisolocal>
-                <!-- rescaling -->
+                <!-- energy density rescaling -->
                 <Rescal>
                     <r0 value="8.0"/> <!-- in kpc -->
                     <z0 value="1.0"/> <!-- in kpc -->
@@ -112,7 +116,7 @@
             </Random>
         </MagneticField>
         
-        <!-- FREE ELECTRON -->
+        <!-- free electron field -->
         <FreeElectron type="YMW16">
             <!-- YMW16 -->
             <YMW16>
@@ -192,10 +196,10 @@
             <Random cue="0" type="Iso" seed="-1">
                 <Iso>
                     <rms value="1.0"/>
-                    <k0 value="2.0"/> <!-- k0 = 1/Lambda in kpc -->
+                    <k0 value="2.0"/> <!-- cutoff 1/Lambda in kpc -->
                     <a0 value="-1.7"/>
                 </Iso>
-                <!-- rescaling -->
+                <!-- field strength rescaling -->
                 <Rescal>
                     <r0 value="8.0"/> <!-- in kpc -->
                     <z0 value="1.0"/> <!-- in kpc -->
@@ -203,7 +207,7 @@
             </Random>
         </FreeElectron>
         
-        <!-- SPIRAL ARMS -->
+        <!-- spiral arms setting -->
         <SpiralArms type="HH14">
             <!-- Hou & Han, A&A 569 A125 (2014), used in YMW16, R0=8.3 -->
             <HH14>
@@ -227,35 +231,39 @@
         </SpiralArms>
     </Galaxy>
     
-    <!-- ANALYTICAL/NUMERICAL CRE -->
-    <CRE type="Analytic" freq="23.0"> <!-- frequency @ GHz -->
+    <!-- analytic/numeric CRE -->
+    <CRE type="Analytic">
         <Analytic>
+            <!-- CRE spectral index: -alpha+beta*r+theta*z, Galactic cylindric frame -->
             <alpha value="3.0"/>
             <beta value="0.0"/>
             <theta value="0.0"/>
+            
             <hr value="5.0"/>
             <hz value="1.0"/>
-            <je value="0.25"/>
+            <je value="0.25"/> <!-- local CRE flux norm factor @ 10GeV -->
         </Analytic>
         
         <Numeric type="2D">
-            <nr value="80"/>
-            <nx value="80"/>
-            <ny value="80"/>
+            <!-- 2D Galactic-centric cylindric frame -->
+            <nr value="80"/> <!-- silent if type="3D" -->
             <nz value="80"/>
+            <nx value="80"/> <!-- silent if type="2D" -->
+            <ny value="80"/> <!-- silent if type="2D" -->
             
-            <r_max value="20.0"/>
-            <x_min value="0.0"/>
-            <x_max value="0.0"/>
-            <y_min value="0.0"/>
-            <y_max value="0.0"/>
-            <z_min value="-4.0"/>
-            <z_max value="4.0"/>
+            <!-- box limit, in Galactic-centric frame -->
+            <r_max value="20.0"/> <!-- kpc -->
+            <x_min value="0.0"/> <!-- kpc -->
+            <x_max value="0.0"/> <!-- kpc -->
+            <y_min value="0.0"/> <!-- kpc -->
+            <y_max value="0.0"/> <!-- kpc -->
+            <z_min value="-4.0"/> <!-- kpc -->
+            <z_max value="4.0"/> <!-- kpc -->
             
             <!-- E_max = E_min*exp(nE*E_fact) -->
-            <E_min value="0.1"/>
-            <E_max value="100.0"/>
-            <E_fact value="0.1"/>
+            <E_min value="0.1"/> <!-- GeV -->
+            <E_max value="100.0"/> <!-- GeV -->
+            <E_fact value="0.1"/> <!-- dimensionless -->
         </Numeric>
     </CRE>
     

@@ -144,11 +144,11 @@ int main(int , char **argv) {
     // cre
     string cretype = doc->FirstChildElement("root")->FirstChildElement("CRE")->Attribute("type");
     if(cretype=="Analytic"){
-        cout<<"INFO: USING ANALYTICAL CRE MODEL"<<endl;
+        cout<<"INFO: USING ANALYTIC CRE"<<endl;
         cre = new CRE_ana();
     }
     else if(cretype=="Numeric"){
-        cout<<"INFO: USING CRE FROM DRAGON"<<endl;
+        cout<<"INFO: USING NUMERIC CRE"<<endl;
         grid_cre->import_grid();
         cre = new CRE_num();
     }
@@ -167,12 +167,28 @@ int main(int , char **argv) {
     cout<<"...PRODUCING MAPS..."<<endl;
     grid_int->export_grid();
     
+    
+    // INSERT MULTI_OUTPUT TAKEOVER LOOP
+    for(auto e = doc->FirstChildElement("root")->FirstChildElement("Output")->FirstChildElement("Sync")->NextSiblingElement("Sync");e!=NULL;e=e->NextSiblingElement("Sync")){
+        // stop producing dm and fd
+        grid_int->do_dm = false;
+        grid_int->do_fd = false;
+        par->sim_freq = e->DoubleAttribute("freq")*CGS_U_GHz;
+        grid_int->sim_sync_name = e->Attribute("filename");
+        
+        cout<<"...MULTI OUTPUT MODE..."<<endl;
+        intobj->write_grid(breg,brnd,fe,fernd,cre,grid_breg,grid_brnd,grid_fe,grid_fernd,grid_cre,grid_int,par);
+        cout<<"...PRODUCING MAPS..."<<endl;
+        grid_int->export_grid();
+    }
+    
+    
     // CLEANING
     cout<<"...ENDING HAMMURABI..."<<endl;
     delete par; delete grid_breg; delete grid_brnd;
     delete grid_fe;delete grid_fernd; delete grid_cre; delete grid_int;
     delete fe;delete fernd; delete breg; delete brnd;
-    delete cre; delete intobj; delete doc;
+    delete cre; delete doc; delete intobj;
     
     toolkit::timestamp();
     return EXIT_SUCCESS;
