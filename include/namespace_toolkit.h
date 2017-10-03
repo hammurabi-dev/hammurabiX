@@ -29,11 +29,9 @@ namespace toolkit {
      * get the unit vec, given the LOS direction
      */
     inline vec3 get_LOS_unit_vec(const double &the_los,const double &phi_los){
-        return vec3(
-                    cos(phi_los)*sin(the_los),
-                    sin(phi_los)*sin(the_los),
-                    cos(the_los)
-                    );
+        return vec3 {cos(phi_los)*sin(the_los),
+            sin(phi_los)*sin(the_los),
+            cos(the_los)};
     }
     /*@cart_coord2cyl_coord
      * convert coordinate between cartesian and sylindrical frame
@@ -45,9 +43,9 @@ namespace toolkit {
      * two frames share the same origin point
      */
     inline void Cyl2Cart(const double &phi,const vec3 &input, vec3 &output){
-        output.x = cos(phi)*input.x - sin(phi)*input.y;
-        output.y = sin(phi)*input.x + cos(phi)*input.y;
-        output.z = input.z;
+        output = vec3 {cos(phi)*input.x - sin(phi)*input.y,
+            sin(phi)*input.x + cos(phi)*input.y,
+            input.z};
     }
     inline void Cyl2Cart(const double &phi,const double input[3],double output[3]){
         output[0] = cos(phi)*input[0] - sin(phi)*input[1];
@@ -96,7 +94,7 @@ namespace toolkit {
      * formula get from Prog Theor Exp Phys (2014) 2014 (6): 06B109.
      */
     inline double temp_convert(const double &temp_br,const double &freq) {
-        double p = CGS_U_h_planck*freq/(CGS_U_kB*2.725);
+        const double p {CGS_U_h_planck*freq/(CGS_U_kB*2.725)};
         return temp_br*(exp(p)-1.)*(exp(p)-1.)/(p*p*exp(p));;
     }
     /*@warp

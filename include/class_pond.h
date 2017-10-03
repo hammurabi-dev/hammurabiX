@@ -18,10 +18,8 @@ class Pond {
     public:
     Pond(std::string);
     virtual ~Pond(void) = default;
-    
     // observer
     vec3 SunPosition;
-    
     // magnetic field
     // wmap3yr
     std::vector<double> bwmap;
@@ -35,8 +33,7 @@ class Pond {
     std::vector<double> brnd_anil;
     // rescaling parameters for random b
     std::vector<double> brnd_scal;
-    
-    // free electron
+    // FE
     // ymw16
     double R_warp, R0;
     double t0_Gamma_w, t0_z_Sun;
@@ -49,23 +46,23 @@ class Pond {
     double t7_nLI, t7_RLI, t7_WLI, t7_detthetaLI, t7_thetaLI;
     // gaussian random
     std::vector<double> fernd_iso;
-    // rescaling parameters for random fe
+    // rescaling parameters for turbulent FE
     std::vector<double> fernd_scal;
-    
-    // cre
+    // CRE
     // analytical
     double sim_freq;
     std::vector<double> creana;
     
     private:
+    void b_pond(XMLDocument *);
+    void fe_pond(XMLDocument *);
+    void cre_pond(XMLDocument *);
+    
+    // auxiliary functions
     std::string FetchString(XMLElement *,std::string);
     int FetchInt(XMLElement *,std::string);
     unsigned int FetchUnsigned(XMLElement *,std::string);
     bool FetchBool(XMLElement *,std::string);
     double FetchDouble(XMLElement *,std::string);
-    
-    void b_pond(XMLDocument *);
-    void fe_pond(XMLDocument *);
-    void cre_pond(XMLDocument *);
 };
 #endif

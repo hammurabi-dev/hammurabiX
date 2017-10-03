@@ -3,9 +3,6 @@
  *@author: Jiaxin Wang
  *@email: jiwang@sissa.it
  *@brief: line-of-sight integration calculator
- *@origin: https://sourceforge.net/projects/hammurabicode/
- * we add some new features inside
- * and delete which we don't need
  */
 #ifndef HAMMURABI_INT_H
 #define HAMMURABI_INT_H
@@ -13,7 +10,6 @@
 #include <omp.h>
 #include <string>
 #include <healpix_map.h>
-
 #include "class_breg.h"
 #include "class_brnd.h"
 #include "class_cre.h"

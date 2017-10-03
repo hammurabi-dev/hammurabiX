@@ -2,7 +2,7 @@
  *@file: class_brnd.h
  *@author: Jiaxin Wang
  *@email: jiwang@sissa.it
- *@brief: iso/aniso-tropic random magnetic field generator
+ *@brief: iso/aniso-tropic turbulent magnetic field generator
  */
 #ifndef HAMMURABI_BRND_H
 #define HAMMURABI_BRND_H
@@ -11,13 +11,11 @@
 #include <vec3.h>
 #include <vector>
 #include <gsl/gsl_integration.h>
-
 #include "class_pond.h"
 #include "class_grid.h"
 #include "cgs_units_file.h"
 #include "class_breg.h"
 
-/* base class */
 class Brnd{
     public:
     Brnd(void) = default;
@@ -52,8 +50,7 @@ class Brnd{
 };
 
 
-/* isotropic random field */
-// not final derived class
+// isotropic turbulent field
 class Brnd_iso : public Brnd{
     public:
     Brnd_iso(void) = default;
@@ -73,12 +70,11 @@ class Brnd_iso : public Brnd{
 };
 
 
-/* global anisotropic random field */
+// global anisotropic random field
 class Brnd_anig final : public Brnd_iso{
     public:
     Brnd_anig(void) = default;
     virtual ~Brnd_anig(void) = default;
-    // use Breg::breg function
     void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *) override;
     
     private:
@@ -88,7 +84,7 @@ class Brnd_anig final : public Brnd_iso{
     double anisotropy(const vec3 &,Pond *,Breg *,Grid_breg *);
 };
 
-/* local anisotropic random field */
+// local anisotropic random field
 /*
 class Brnd_anil final : public Brnd{
     public:
@@ -100,4 +96,5 @@ class Brnd_anil final : public Brnd{
 };
 */
 #endif
+
 // END

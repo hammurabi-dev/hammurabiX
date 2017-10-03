@@ -25,7 +25,7 @@ using namespace std;
 
 void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fe *gfe,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Pond *par) {
     // unsigned int, pre-calculated in gint
-    auto npix_sim = gint->npix_sim;
+    unsigned int npix_sim {gint->npix_sim};
     if (gint->do_dm) {
         gint->dm_map.SetNside(gint->nside_sim, NEST);
         gint->dm_map.fill(0.);
@@ -51,8 +51,8 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,G
         Healpix_Map<double> current_fd_map;
         Healpix_Map<double> current_dm_map;
         
-        auto current_nside = get_shell_nside(current_shell,gint->total_shell,gint->nside_min);
-        unsigned int current_npix = 12*current_nside*current_nside;
+        unsigned int current_nside {get_shell_nside(current_shell,gint->total_shell,gint->nside_min)};
+        unsigned int current_npix{12*current_nside*current_nside};
         if (gint->do_dm) {
             current_dm_map.SetNside(current_nside, NEST);
             current_dm_map.fill(0.);
@@ -146,18 +146,18 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,G
 
 void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, struct_observables &pixobs,Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fe *gfe,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Pond *par) {
     // pass in fd, zero others
-    double inner_shells_fd=0.;
+    double inner_shells_fd {0.};
     if (gint->do_fd or gint->do_sync) {inner_shells_fd=pixobs.fd;}
     pixobs.dm=0.;pixobs.fd=0.;
     pixobs.Is=0.;pixobs.Us=0.;pixobs.Qs=0.;
     // angular position
-    const double THE = ptg_in.theta;
-    const double PHI = ptg_in.phi;
+    const double THE {ptg_in.theta};
+    const double PHI {ptg_in.phi};
     if (check_simulation_lower_limit(fabs(0.5*CGS_U_pi-THE),gint->lat_lim)) {return;}
     // for calculating synchrotron emission
-    const double lambda_square = (CGS_U_C_light/par->sim_freq)*(CGS_U_C_light/par->sim_freq);
+    const double lambda_square{(CGS_U_C_light/par->sim_freq)*(CGS_U_C_light/par->sim_freq)};
     // convert intensity to brightness temperature and include j(omega) to j(nu)=2pi*j(omega)
-    const double i2bt = CGS_U_pi*CGS_U_C_light*CGS_U_C_light/(CGS_U_kB*par->sim_freq*par->sim_freq);
+    const double i2bt {CGS_U_pi*CGS_U_C_light*CGS_U_C_light/(CGS_U_kB*par->sim_freq*par->sim_freq)};
     
     // for Simpson's rule
     vector<double> F_dm;
@@ -166,26 +166,25 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
     // first iteration in distance
     for(double dist=shell_ref.d_start;dist<=shell_ref.d_stop;dist+=shell_ref.delta_d/2){
         // ec and gc position
-        vec3 pos, ec_pos;
-        ec_pos = toolkit::get_LOS_unit_vec(THE,PHI)*dist;
-        pos = ec_pos + par->SunPosition;
+        vec3 ec_pos {toolkit::get_LOS_unit_vec(THE,PHI)*dist};
+        vec3 pos {ec_pos + par->SunPosition};
         // check LOS depth limit
         if (check_simulation_upper_limit(pos.Length(),gint->gc_r_max)) {break;}
         if (check_simulation_upper_limit(fabs(pos.z),gint->gc_z_max)) {break;}
         if (check_simulation_upper_limit(ec_pos.Length(),gint->ec_r_max)) {break;}
         
         // B field
-        vec3 B_vec = breg->get_breg(pos,par,gbreg);
+        vec3 B_vec {breg->get_breg(pos,par,gbreg)};
         // add random field
         B_vec += brnd->get_brnd(pos,gbrnd);
         
-        const double B_par = toolkit::get_par2LOS(B_vec,THE,PHI);
+        const double B_par {toolkit::get_par2LOS(B_vec,THE,PHI)};
         // un-scaled B_per, if random B is active, we scale up this
         // in calculating emissivity, so it is not constant
-        double B_per = toolkit::get_perp2LOS(B_vec,THE,PHI);
+        double B_per {toolkit::get_perp2LOS(B_vec,THE,PHI)};
         
         // FE field
-        double te = fe->get_density(pos,par,gfe);
+        double te {fe->get_density(pos,par,gfe)};
         // add random field
         te += fernd->get_fernd(pos,gfernd);
         // to avoid negative value
@@ -206,7 +205,7 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
         }
         // Faraday depth
         if(gint->do_fd or gint->do_sync){
-            const double fd_forefactor = -(CGS_U_qe*CGS_U_qe*CGS_U_qe)/(2.*CGS_U_pi*CGS_U_MEC2*CGS_U_MEC2);
+            const double fd_forefactor {-(CGS_U_qe*CGS_U_qe*CGS_U_qe)/(2.*CGS_U_pi*CGS_U_MEC2*CGS_U_MEC2)};
             F_fd.push_back(te*B_par*fd_forefactor*shell_ref.delta_d);
         }
         
@@ -223,7 +222,7 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
     // second iteration in distance
     // applying Simpson's rule
     // be careful with the logic for assigining simpson_size!
-    int simpson_size=0;
+    int simpson_size{0};
     if(gint->do_dm){
         simpson_size = F_dm.size();
     }
@@ -248,7 +247,7 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
         // Sync
         if(gint->do_sync){
             // pol. angle after Faraday rotation
-            double qui = (inner_shells_fd+pixobs.fd)*lambda_square+intr_pol_ang[i];
+            double qui {(inner_shells_fd+pixobs.fd)*lambda_square+intr_pol_ang[i]};
 #ifndef NDEBUG
             if (abs(qui)>1e30) {
                 cerr<<"ERR: ODD VALUE"<<endl;
@@ -274,8 +273,8 @@ unsigned int Integrator::get_shell_nside(const unsigned int &shell_numb,const un
         cerr<<"INVALID shell_numb"<<endl;
         exit(1);
     }
-    auto difference = shell_numb-1;
-    auto shell_nside = nside_min;
+    unsigned int difference {shell_numb-1};
+    unsigned int shell_nside {nside_min};
     if (difference!=0){
         for (decltype(difference) n=0;n!=difference;++n){
             shell_nside *= 2;
@@ -290,7 +289,7 @@ double Integrator::get_max_shell_radius(const unsigned int &shell_numb,const uns
         cerr<<"INVALID shell_numb"<<endl;
         exit(1);
     }
-    double max_shell_radius = radius;
+    double max_shell_radius {radius};
     for (unsigned int n=total_shell;n!=shell_numb;--n) {
         max_shell_radius /= 2.;
     }
@@ -307,7 +306,7 @@ double Integrator::get_min_shell_radius(const unsigned int &shell_numb,const uns
     if(shell_numb==1){
         return 0.;
     }
-    double min_shell_radius = radius;
+    double min_shell_radius {radius};
     for (unsigned int n=total_shell;n!=(shell_numb-1);--n) {
         min_shell_radius /= 2.;
     }

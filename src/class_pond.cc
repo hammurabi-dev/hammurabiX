@@ -1,10 +1,4 @@
-/* generic parameter hoster, using TinyXML2
- 
- b field parameters
- analytical cre field parameters
- free electron parameters (of YMW16)
- 
- */
+/* generic parameter hoster */
 
 #include <string>
 #include <tinyxml2.h>
@@ -18,10 +12,10 @@ Pond::Pond(std::string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
     // gc sun position
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("SunPosition");
-    SunPosition.x = CGS_U_kpc*FetchDouble(ptr,"x");
-    SunPosition.y = CGS_U_kpc*FetchDouble(ptr,"y");
-    SunPosition.z = CGS_U_pc*FetchDouble(ptr,"z");
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("SunPosition")};
+    SunPosition = vec3 {CGS_U_kpc*FetchDouble(ptr,"x"),
+        CGS_U_kpc*FetchDouble(ptr,"y"),
+        CGS_U_pc*FetchDouble(ptr,"z")};
     
     b_pond(doc);
     fe_pond(doc);
@@ -30,11 +24,32 @@ Pond::Pond(std::string file_name){
     delete doc;
 }
 
+// auxiliary functions
+std::string Pond::FetchString(XMLElement* el, string obj){
+    return el->FirstChildElement(obj.c_str())->Attribute("value");
+}
+
+int Pond::FetchInt(XMLElement* el, string obj){
+    return el->FirstChildElement(obj.c_str())->IntAttribute("value");
+}
+
+unsigned int Pond::FetchUnsigned(XMLElement* el, string obj){
+    return el->FirstChildElement(obj.c_str())->UnsignedAttribute("value");
+}
+
+bool Pond::FetchBool(XMLElement* el, string obj){
+    return el->FirstChildElement(obj.c_str())->BoolAttribute("value");
+}
+
+double Pond::FetchDouble(XMLElement* el, string obj){
+    return el->FirstChildElement(obj.c_str())->DoubleAttribute("value");
+}
+
 // magnetic field
 void Pond::b_pond(XMLDocument *doc){
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField");
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")};
     // bwmap
-    XMLElement *subptr = ptr->FirstChildElement("Regular")->FirstChildElement("WMAP");
+    XMLElement *subptr {ptr->FirstChildElement("Regular")->FirstChildElement("WMAP")};
     bwmap.push_back(FetchDouble(subptr,"b0")); //microGauss
     bwmap.push_back(FetchDouble(subptr,"psi0")); //deg
     bwmap.push_back(FetchDouble(subptr,"psi1")); //deg
@@ -66,10 +81,10 @@ void Pond::b_pond(XMLDocument *doc){
 }
 
 void Pond::fe_pond(XMLDocument *doc){
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron");
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")};
     // YMW16
     // Warp_Sun
-    XMLElement *subptr = ptr->FirstChildElement("YMW16")->FirstChildElement("Warp");
+    XMLElement *subptr {ptr->FirstChildElement("YMW16")->FirstChildElement("Warp")};
     R_warp = FetchDouble(subptr,"R_warp")*CGS_U_kpc; //kpc
     R0 = FetchDouble(subptr,"R0")*CGS_U_kpc; //kpc
     t0_Gamma_w = FetchDouble(subptr,"Gamma_w");
@@ -156,10 +171,10 @@ void Pond::fe_pond(XMLDocument *doc){
 }
 
 void Pond::cre_pond(XMLDocument *doc){
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("CRE");
-    sim_freq = doc->FirstChildElement("root")->FirstChildElement("Output")->FirstChildElement("Sync")->DoubleAttribute("freq")*CGS_U_GHz;
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("CRE")};
+        sim_freq = doc->FirstChildElement("root")->FirstChildElement("Output")->FirstChildElement("Sync")->DoubleAttribute("freq")*CGS_U_GHz;
     // analytical
-    XMLElement *subptr = ptr->FirstChildElement("Analytic");
+    XMLElement *subptr {ptr->FirstChildElement("Analytic")};
     // the default parameter setting follows wmap3yr model
     creana.push_back(FetchDouble(subptr,"alpha"));
     creana.push_back(FetchDouble(subptr,"beta"));
@@ -168,32 +183,6 @@ void Pond::cre_pond(XMLDocument *doc){
     creana.push_back(FetchDouble(subptr,"hz")); //kpc
     // differential flux normalization factor at gamma 10
     creana.push_back(FetchDouble(subptr,"je"));
-}
-
-// auxiliary functions
-std::string Pond::FetchString(XMLElement* el, string obj){
-    XMLElement* el1 = el->FirstChildElement(obj.c_str());
-    return el1->Attribute("value");
-}
-
-int Pond::FetchInt(XMLElement* el, string obj){
-    XMLElement* el1 = el->FirstChildElement(obj.c_str());
-    return el1->IntAttribute("value");
-}
-
-unsigned int Pond::FetchUnsigned(XMLElement* el, string obj){
-    XMLElement* el1 = el->FirstChildElement(obj.c_str());
-    return el1->UnsignedAttribute("value");
-}
-
-bool Pond::FetchBool(XMLElement* el, string obj){
-    XMLElement* el1 = el->FirstChildElement(obj.c_str());
-    return el1->BoolAttribute("value");
-}
-
-double Pond::FetchDouble(XMLElement* el, string obj){
-    XMLElement* el1 = el->FirstChildElement(obj.c_str());
-    return el1->DoubleAttribute("value");
 }
 
 // END

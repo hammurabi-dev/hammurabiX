@@ -8,7 +8,6 @@
 #include <fstream>
 #include <healpix_map_fitsio.h>
 #include <fitsio.h>
-
 #include "class_grid.h"
 #include "cgs_units_file.h"
 #include "namespace_toolkit.h"
@@ -49,36 +48,30 @@ void Grid::import_grid(void){
 }
 
 // auxiliary functions
-std::string Grid::FetchString(XMLElement* el, std::string obj){
-    XMLElement* el1 = el->FirstChildElement(obj.c_str());
-    return el1->Attribute("value");
+std::string Grid::FetchString(XMLElement* el, string obj){
+    return el->FirstChildElement(obj.c_str())->Attribute("value");
 }
 
 int Grid::FetchInt(XMLElement* el, string obj){
-    XMLElement* el1 = el->FirstChildElement(obj.c_str());
-    return el1->IntAttribute("value");
+    return el->FirstChildElement(obj.c_str())->IntAttribute("value");
 }
 
 unsigned int Grid::FetchUnsigned(XMLElement* el, string obj){
-    XMLElement* el1 = el->FirstChildElement(obj.c_str());
-    return el1->UnsignedAttribute("value");
+    return el->FirstChildElement(obj.c_str())->UnsignedAttribute("value");
 }
 
 bool Grid::FetchBool(XMLElement* el, string obj){
-    XMLElement* el1 = el->FirstChildElement(obj.c_str());
-    return el1->BoolAttribute("value");
+    return el->FirstChildElement(obj.c_str())->BoolAttribute("value");
 }
 
 double Grid::FetchDouble(XMLElement* el, string obj){
-    XMLElement* el1 = el->FirstChildElement(obj.c_str());
-    return el1->DoubleAttribute("value");
+    return el->FirstChildElement(obj.c_str())->DoubleAttribute("value");
 }
 
-/* regular magnetic field */
 Grid_breg::Grid_breg(string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("breg_grid");
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("breg_grid")};
     read_permission = ptr->BoolAttribute("read");
     write_permission = ptr->BoolAttribute("write");
     // build up grid when have read or write permission
@@ -92,7 +85,7 @@ Grid_breg::Grid_breg(string file_name){
 }
 
 void Grid_breg::build_grid(XMLDocument *doc){
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box");
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box")};
     // Cartesian grid
     nx = FetchUnsigned(ptr,"nx");
     ny = FetchUnsigned(ptr,"ny");
@@ -106,7 +99,7 @@ void Grid_breg::build_grid(XMLDocument *doc){
     z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
     z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
     // memory check (double complex + double + double)
-    const double bytes = full_size*(3.*8.);
+    const double bytes {full_size*(3.*8.)};
     cout<<"INFO: BREG REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
     // real 3D regular b field
     reg_b_x = new double[full_size];
@@ -136,7 +129,7 @@ void Grid_breg::export_grid(void){
         <<"COULD NOT OPEN: "<<filename<<endl;
         exit(1);
     }
-    double tmp = 0.;
+    double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
         if (output.eof()) {
             cerr<<"ERR:"<<__FILE__
@@ -175,7 +168,7 @@ void Grid_breg::import_grid(void){
         <<"COULD NOT OPEN: "<<filename<<endl;
         exit(1);
     }
-    double tmp = 0.;
+    double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
         if (input.eof()) {
             cerr<<"ERR:"<<__FILE__
@@ -203,14 +196,13 @@ void Grid_breg::import_grid(void){
     input.close();
 }
 
-/* random magnetic field */
 Grid_brnd::Grid_brnd(string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random");
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")};
     // sometimes users don't want to write out random field
     // but generation of random field needs grid
-    bool build_permission = ptr->BoolAttribute("cue");
+    bool build_permission {ptr->BoolAttribute("cue")};
     ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("brnd_grid");
     read_permission = ptr->BoolAttribute("read");
     write_permission = ptr->BoolAttribute("write");
@@ -221,12 +213,11 @@ Grid_brnd::Grid_brnd(string file_name){
         cout<<"IFNO: GRID_BRND I/O ACTIVE"<<endl;
         filename = ptr->Attribute("filename");
     }
-    
     delete doc;
 }
 
 void Grid_brnd::build_grid(XMLDocument *doc){
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box");
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box")};
     // Cartesian grid
     nx = FetchUnsigned(ptr,"nx");
     ny = FetchUnsigned(ptr,"ny");
@@ -240,7 +231,7 @@ void Grid_brnd::build_grid(XMLDocument *doc){
     z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
     z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
     // memory check (double complex + double + double)
-    const double bytes = full_size*(3.*16.+3.*8.);
+    const double bytes {full_size*(3.*16.+3.*8.)};
     cout<<"INFO: BRND REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
     // real 3D random b field
     fftw_b_x = new double[full_size];
@@ -292,7 +283,7 @@ void Grid_brnd::export_grid(void){
         <<"COULD NOT OPEN: "<<filename<<endl;
         exit(1);
     }
-    double tmp = 0.;
+    double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
         if (output.eof()) {
             cerr<<"ERR:"<<__FILE__
@@ -331,7 +322,7 @@ void Grid_brnd::import_grid(void){
         <<"COULD NOT OPEN: "<<filename<<endl;
         exit(1);
     }
-    double tmp = 0.;
+    double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
         if (input.eof()) {
             cerr<<"ERR:"<<__FILE__
@@ -359,11 +350,10 @@ void Grid_brnd::import_grid(void){
     input.close();
 }
 
-/* free-electron density field */
 Grid_fe::Grid_fe(string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("fe_grid");
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("fe_grid")};
     read_permission = ptr->BoolAttribute("read");
     write_permission = ptr->BoolAttribute("write");
     if(read_permission or write_permission){
@@ -371,12 +361,11 @@ Grid_fe::Grid_fe(string file_name){
         filename = ptr->Attribute("filename");
         build_grid(doc);
     }
-    
     delete doc;
 }
 
 void Grid_fe::build_grid(XMLDocument *doc){
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box");
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box")};
     // Cartesian grid
     nx = FetchUnsigned(ptr,"nx");
     ny = FetchUnsigned(ptr,"ny");
@@ -390,9 +379,8 @@ void Grid_fe::build_grid(XMLDocument *doc){
     z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
     z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
     // memory check
-    const double bytes = full_size*8.;
+    const double bytes {full_size*8.};
     cout<<"INFO: FE REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
-    
     fe = new double[full_size];
 }
 
@@ -416,7 +404,7 @@ void Grid_fe::export_grid(void){
         <<"COULD NOT OPEN: "<<filename<<endl;
         exit(1);
     }
-    double tmp = 0.;
+    double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
         if (output.eof()) {
             cerr<<"ERR:"<<__FILE__
@@ -458,7 +446,7 @@ void Grid_fe::import_grid(void){
         <<"COULD NOT OPEN: "<<filename<<endl;
         exit(1);
     }
-    double tmp = 0.;
+    double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
         if (input.eof()) {
             cerr<<"ERR:"<<__FILE__
@@ -482,12 +470,12 @@ void Grid_fe::import_grid(void){
     input.close();
 }
 
-/* random free electron density field */
+// turbulent free electron density field
 Grid_fernd::Grid_fernd(string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random");
-    bool build_permission = ptr->BoolAttribute("cue");
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")};
+    bool build_permission {ptr->BoolAttribute("cue")};
     // sometimes users don't want to write out random field
     // but generation of random field needs grid
     ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("fernd_grid");
@@ -500,12 +488,11 @@ Grid_fernd::Grid_fernd(string file_name){
         cout<<"IFNO: FE_RND I/O ACTIVE"<<endl;
         filename = ptr->Attribute("filename");
     }
-    
     delete doc;
 }
 
 void Grid_fernd::build_grid(XMLDocument *doc){
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box");
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box")};
     // Cartesian grid
     nx = FetchUnsigned(ptr,"nx");
     ny = FetchUnsigned(ptr,"ny");
@@ -519,7 +506,7 @@ void Grid_fernd::build_grid(XMLDocument *doc){
     z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
     z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
     // memory check (double complex + double + double)
-    const double bytes = full_size*(16.+ 8.);
+    const double bytes {full_size*(16.+ 8.)};
     cout<<"INFO: FERND REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
     // real random fe field
     fftw_fe = new double[full_size];
@@ -551,7 +538,7 @@ void Grid_fernd::export_grid(void){
         <<"COULD NOT OPEN: "<<filename<<endl;
         exit(1);
     }
-    double tmp = 0.;
+    double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
         if (output.eof()) {
             cerr<<"ERR:"<<__FILE__
@@ -586,7 +573,7 @@ void Grid_fernd::import_grid(void){
         <<"COULD NOT OPEN: "<<filename<<endl;
         exit(1);
     }
-    double tmp = 0.;
+    double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
         if (input.eof()) {
             cerr<<"ERR:"<<__FILE__
@@ -611,15 +598,14 @@ void Grid_fernd::import_grid(void){
 }
 
 
-/* cosmic ray electron flux field */
 Grid_cre::Grid_cre(string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("cre_grid");
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("cre_grid")};
     read_permission = ptr->BoolAttribute("read");
     write_permission = ptr->BoolAttribute("write");
     // security check
-    string type_check = doc->FirstChildElement("root")->FirstChildElement("CRE")->Attribute("type");
+    string type_check {doc->FirstChildElement("root")->FirstChildElement("CRE")->Attribute("type")};
     if(read_permission and type_check=="Analytic"){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -632,13 +618,11 @@ Grid_cre::Grid_cre(string file_name){
         filename = ptr->Attribute("filename");
         build_grid(doc);
     }
-    
     delete doc;
 }
 
 void Grid_cre::build_grid(XMLDocument *doc){
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("CRE")->FirstChildElement("Numeric");
-    
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("CRE")->FirstChildElement("Numeric")};
     E_min = CGS_U_GeV*FetchDouble(ptr,"E_min");
     E_max = CGS_U_GeV*FetchDouble(ptr,"E_max");
     E_fact = FetchDouble(ptr,"E_fact");
@@ -648,12 +632,10 @@ void Grid_cre::build_grid(XMLDocument *doc){
         nr = FetchUnsigned(ptr,"nr");
         nz = FetchUnsigned(ptr,"nz");
         nx = 0; ny = 0;
-        
         r_max = CGS_U_kpc*FetchDouble(ptr,"r_max");
         z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
         z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
         x_max = 0.; x_min = 0.; y_max = 0.; y_min = 0.;
-        
         cre_size = nE*nr*nz;
     }
     // spatial 3D
@@ -662,7 +644,6 @@ void Grid_cre::build_grid(XMLDocument *doc){
         nz = FetchUnsigned(ptr,"nz");
         nx = FetchUnsigned(ptr,"nx");
         ny = FetchUnsigned(ptr,"ny");
-        
         x_max = CGS_U_kpc*FetchDouble(ptr,"x_max");
         x_min = CGS_U_kpc*FetchDouble(ptr,"x_min");
         y_max = CGS_U_kpc*FetchDouble(ptr,"y_max");
@@ -670,7 +651,6 @@ void Grid_cre::build_grid(XMLDocument *doc){
         z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
         z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
         r_max = 0.;
-        
         cre_size = nE*nx*ny*nz;
     }
     else{
@@ -681,9 +661,8 @@ void Grid_cre::build_grid(XMLDocument *doc){
         exit(1);
     }
     // memory check
-    const double bytes = cre_size*8.;
+    const double bytes {cre_size*8.};
     cout<<"INFO: CRE REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
-    
     cre_flux = new double[cre_size];
 }
 
@@ -707,7 +686,7 @@ void Grid_cre::export_grid(void){
         <<"COULD NOT OPEN: "<<filename<<endl;
         exit(1);
     }
-    double tmp = 0.;
+    double tmp;
     for(decltype(cre_size) i=0;i!=cre_size;++i){
         if (output.eof()) {
             cerr<<"ERR:"<<__FILE__
@@ -748,7 +727,7 @@ void Grid_cre::import_grid(void){
         <<"COULD NOT OPEN: "<<filename<<endl;
         exit(1);
     }
-    double tmp = 0.;
+    double tmp;
     for(decltype(cre_size) i=0;i!=cre_size;++i){
         if (input.eof()) {
             cerr<<"ERR:"<<__FILE__
@@ -782,8 +761,7 @@ Grid_int::Grid_int(string file_name){
 }
 
 void Grid_int::build_grid(XMLDocument *doc){
-    XMLElement *ptr = doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Integration");
-    
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Integration")};
     total_shell = FetchUnsigned(ptr,"shell");
     nside_sim = FetchUnsigned(ptr,"nside_sim");
     nside_min = FetchUnsigned(ptr,"nside_min");

@@ -4,7 +4,7 @@
 #define CGS_U_erg 1.
 #define CGS_U_cm 1.
 #define CGS_U_sec 1.
-#define CGS_U_Kelvin 1. /* set always to 1!! */
+#define CGS_U_Kelvin 1.
 
 #define CGS_U_gram (CGS_U_erg*CGS_U_sec*CGS_U_sec/(CGS_U_cm*CGS_U_cm))
 #define CGS_U_Joule (1.e7*CGS_U_erg)
@@ -39,11 +39,11 @@
 #define CGS_U_ccm  (CGS_U_cm*CGS_U_cm*CGS_U_cm)
 
 #define CGS_U_C_light   (2.99792458e+10* CGS_U_cm / CGS_U_sec)
-#define CGS_U_h_planck   (6.626075540e-27*CGS_U_erg*CGS_U_sec) /* Planck constant */
-#define CGS_U_hq  (1.05457266e-27*CGS_U_erg*CGS_U_sec)  /* Plancks constant/(2pi) */
+#define CGS_U_h_planck   (6.626075540e-27*CGS_U_erg*CGS_U_sec)  // Planck constant
+#define CGS_U_hq  (1.05457266e-27*CGS_U_erg*CGS_U_sec)  // Plancks constant/(2pi)
 #define CGS_U_qe  (4.8032068e-10*CGS_U_esu)
-#define CGS_U_MEC2  (0.51099907e-3 * CGS_U_GeV)     /* Electron Mass times c^2 */
-#define CGS_U_MPC2  (938.272310e-3 * CGS_U_GeV)     /* Proton   Mass times c^2 */
+#define CGS_U_MEC2  (0.51099907e-3 * CGS_U_GeV) // Electron Mass times c^2
+#define CGS_U_MPC2  (938.272310e-3 * CGS_U_GeV) // Proton   Mass times c^2
 #define CGS_U_ME    (CGS_U_MEC2 /(CGS_U_C_light*CGS_U_C_light))
 #define CGS_U_MEC   (CGS_U_MEC2 / CGS_U_C_light)
 #define CGS_U_MP    (CGS_U_MPC2 /(CGS_U_C_light*CGS_U_C_light))

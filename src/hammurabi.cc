@@ -25,7 +25,7 @@ using namespace tinyxml2;
 int main(int , char **argv) {
     toolkit::timestamp();
     cout<<"...STARTING HAMMURABI..."<<endl;
-    string file_name(argv[1]);
+    string file_name {argv[1]};
     
     // BUILD SPECIFIED MODULES
     Pond *par = new Pond(file_name);
@@ -43,7 +43,7 @@ int main(int , char **argv) {
     FE *fe; Breg *breg; FErnd *fernd; Brnd *brnd; CRE *cre;
     
     // regular FE field
-    string fetype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->Attribute("type");
+    string fetype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->Attribute("type")};
     // if import from file, no need to build specific fe class
     if(grid_fe->read_permission){
         grid_fe->import_grid();
@@ -62,7 +62,7 @@ int main(int , char **argv) {
     }
     
     // regular B field, must before random B field
-    string bregtype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Regular")->Attribute("type");
+    string bregtype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Regular")->Attribute("type")};
     if(grid_breg->read_permission){
         grid_breg->import_grid();
         breg = new Breg();
@@ -89,7 +89,7 @@ int main(int , char **argv) {
         fernd = new FErnd();
     }
     else if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->BoolAttribute("cue")){
-        string ferndtype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->Attribute("type");
+        string ferndtype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->Attribute("type")};
         if(ferndtype=="Iso"){
             cout<<"INFO: USING ISOTROPIC RANDOM FE MODEL"<<endl;
             cout<<"WAR: NOT FINISHED YET"<<endl;
@@ -115,7 +115,7 @@ int main(int , char **argv) {
         brnd = new Brnd();
     }
     else if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->BoolAttribute("cue")){
-        string brndtype = doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->Attribute("type");
+        string brndtype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->Attribute("type")};
         if(brndtype=="Iso"){
             cout<<"INFO: USING ISOTROPIC RANDOM B MODEL"<<endl;
             brnd = new Brnd_iso();
@@ -142,7 +142,7 @@ int main(int , char **argv) {
     }
     
     // cre
-    string cretype = doc->FirstChildElement("root")->FirstChildElement("CRE")->Attribute("type");
+    string cretype {doc->FirstChildElement("root")->FirstChildElement("CRE")->Attribute("type")};
     if(cretype=="Analytic"){
         cout<<"INFO: USING ANALYTIC CRE"<<endl;
         cre = new CRE_ana();

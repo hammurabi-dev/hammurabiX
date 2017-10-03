@@ -13,14 +13,14 @@ namespace toolkit {
     
     // calculate the perpendicular to LOS component of a vector
     double get_perp2LOS (const vec3 &input,const double &the_los,const double &phi_los){
-        const vec3 unit_vec = get_LOS_unit_vec(the_los, phi_los);
-        const vec3 perp_vec = crossprod(unit_vec,input);
+        const vec3 unit_vec {get_LOS_unit_vec(the_los, phi_los)};
+        const vec3 perp_vec {crossprod(unit_vec,input)};
         return perp_vec.Length();
     }
     
     // calculate the parallel to LOS component of a vector
     double get_par2LOS (const vec3 &input,const double &the_los,const double &phi_los){
-        const vec3 unit_vec = get_LOS_unit_vec(the_los, phi_los);
+        const vec3 unit_vec {get_LOS_unit_vec(the_los, phi_los)};
         return dotprod(unit_vec,input);
     }
     // calculate intrinsic polarization angle
@@ -28,19 +28,19 @@ namespace toolkit {
         vec3 sph_unit_v_the;
         vec3 sph_unit_v_phi;
         
-        sph_unit_v_the.x = cos(the_ec)*cos(phi_ec);
-        sph_unit_v_the.y = cos(the_ec)*sin(phi_ec);
-        sph_unit_v_the.z = -sin(the_ec);
+        sph_unit_v_the = vec3 {cos(the_ec)*cos(phi_ec),
+            cos(the_ec)*sin(phi_ec),
+            -sin(the_ec)};
         
-        sph_unit_v_phi.x = -sin(phi_ec);
-        sph_unit_v_phi.y = cos(phi_ec);
-        sph_unit_v_phi.z = 0.;
+        sph_unit_v_phi = vec3 {-sin(phi_ec),
+            cos(phi_ec),
+            0.};
         
         // IAU convention
-        const double y_component = - dotprod(sph_unit_v_the, input);
-        const double x_component = - dotprod(sph_unit_v_phi, input);
+        const double y_component {-dotprod(sph_unit_v_the, input)};
+        const double x_component {-dotprod(sph_unit_v_phi, input)};
         
-        double result = atan2(y_component, x_component);
+        double result {atan2(y_component, x_component)};
         /*
         if(result<0.) {result+=2.*CGS_U_pi;}
 #ifndef NDEBUG
@@ -57,21 +57,21 @@ namespace toolkit {
     
     // from cartesian coordiante to cylindrical coordinate
     void cart_coord2cyl_coord(const vec3 &input, double &r, double &phi, double &z){
-        r=sqrt(input.x*input.x+input.y*input.y);
-        phi=atan2(input.y,input.x);
+        r = sqrt(input.x*input.x+input.y*input.y);
+        phi = atan2(input.y,input.x);
         if(phi<0.) {phi+=2.*CGS_U_pi;}
-        z=input.z;
+        z = input.z;
     }
     // overload for vec3 to vec3
     void cart_coord2cyl_coord(const vec3 &input, vec3 &cyl_vec){
-        cyl_vec.x=sqrt(input.x*input.x+input.y*input.y);
-        cyl_vec.y=atan2(input.y,input.x);
+        cyl_vec.x = sqrt(input.x*input.x+input.y*input.y);
+        cyl_vec.y = atan2(input.y,input.x);
         if(cyl_vec.y<0.) {cyl_vec.y+=2.*CGS_U_pi;}
-        cyl_vec.z=input.z;
+        cyl_vec.z = input.z;
     }
     
     vec3 versor(const vec3 &b){
-        if(b.Length()==0.) {return vec3(0.,0.,0.);}
+        if(b.Length()==0.) {return vec3 {0.,0.,0.};}
         vec3 V = b;
         V.Normalize();
         return V;
@@ -79,7 +79,7 @@ namespace toolkit {
     
     // Mean for array
     double Mean(const double *arr,const unsigned long int &size){
-        double avg=0;
+        double avg {0};
         for(unsigned long int i=0;i!=size;++i) {
             avg += arr[i];
         }
@@ -92,7 +92,7 @@ namespace toolkit {
             cerr<<"ERR: EMPTY VECTOR"<<endl;
             exit(1);
         }
-        double avg=0;
+        double avg {0};
         for(auto &i : vect) {
             avg += i;
         }
@@ -102,8 +102,8 @@ namespace toolkit {
     
     // Variance for array
     double Variance(const double *arr,const unsigned long int &size){
-        const double avg=Mean(arr,size);
-        double var = 0.;
+        const double avg {Mean(arr,size)};
+        double var {0.};
         for(unsigned long int i=0;i!=size;++i){
             var += pow((arr[i]-avg),2.);
         }
@@ -116,8 +116,8 @@ namespace toolkit {
             cerr<<"ERR: EMPTY VECTOR"<<endl;
             exit(1);
         }
-        const double avg=Mean(vect);
-        double var = 0.;
+        const double avg {Mean(vect)};
+        double var {0.};
         for(auto &i : vect){
             var += pow((i-avg),2.);
         }
@@ -126,9 +126,9 @@ namespace toolkit {
     }
     // cov for array
     double Covariance (const double *arr1,const double *arr2,const unsigned long int &size){
-        double avg1 = Mean(arr1,size);
-        double avg2 = Mean(arr2,size);
-        double covar = 0.;
+        double avg1 {Mean(arr1,size)};
+        double avg2 {Mean(arr2,size)};
+        double covar {0.};
         for(unsigned long int m=0;m!=size;++m){
             covar += (arr1[m]-avg1)*(arr2[m]-avg2);
         }
@@ -141,9 +141,9 @@ namespace toolkit {
             cerr<<"ERR: NON EQUAL VECTOR SIZE"<<endl;
             exit(1);
         }
-        double avg1 = Mean(vect1);
-        double avg2 = Mean(vect2);
-        double covar = 0.;
+        double avg1 {Mean(vect1)};
+        double avg2 {Mean(vect2)};
+        double covar {0.};
         for(decltype(vect1.size())i=0;i!=vect1.size();++i){
             covar += (vect1[i]-avg1)*(vect2[i]-avg2);
         }
@@ -154,7 +154,7 @@ namespace toolkit {
     // get ranked array
     void Rank(double *arr,const unsigned long int &size){
         // get max and min
-        double max=arr[0];double min=arr[0];
+        double max {arr[0]}; double min {arr[0]};
         for(unsigned long int i=0;i!=size;++i){
             if(arr[i]>max) max=arr[i];
             else if(arr[i]<min) min=arr[i];
@@ -200,12 +200,12 @@ namespace toolkit {
     // with this module, we still do modelling in ordinary flat frame.
     // input, Cartesian gc_pos in cgs units, output, warp z in cgs units
     vec3 warp(const vec3 &gc_pos){
-        vec3 wpos = gc_pos;
-        const double R_w = 8.4*CGS_U_kpc;
-        const double sr = sqrt( gc_pos.x*gc_pos.x + gc_pos.y*gc_pos.y );
+        vec3 wpos {gc_pos};
+        const double R_w {8.4*CGS_U_kpc};
+        const double sr {sqrt( gc_pos.x*gc_pos.x + gc_pos.y*gc_pos.y )};
         if (sr >= R_w) {
-            const double gamma_w = 0.14;//using cgs units
-            const double theta = atan2(gc_pos.y,gc_pos.x);
+            const double gamma_w {0.14};//using cgs units
+            const double theta {atan2(gc_pos.y,gc_pos.x)};
             wpos.z -= gamma_w*(sr-R_w)*sin(theta);
         }
         return wpos;

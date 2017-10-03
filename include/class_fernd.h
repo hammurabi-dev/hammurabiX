@@ -3,7 +3,6 @@
  *@author: Jiaxin Wang
  *@email: jiwang@sissa.it
  *@brief: iso/aniso-tropic random free electron field generator
- *@note: this is just a scalar version of Brnd class
  */
 #ifndef HAMMURABI_FERND_H
 #define HAMMURABI_FERND_H
@@ -12,13 +11,11 @@
 #include <vec3.h>
 #include <vector>
 #include <gsl/gsl_integration.h>
-
 #include "class_pond.h"
 #include "class_grid.h"
 #include "cgs_units_file.h"
 #include "class_fe.h"
 
-/* base class */
 class FErnd{
     public:
     FErnd(void) = default;
@@ -36,7 +33,7 @@ class FErnd{
     double get_variance_rslt, get_missing_rslt;
 };
 
-/* gaussian random field */
+// gaussian random field
 class FEgrnd : public FErnd{
     public:
     FEgrnd(void) = default;
@@ -49,6 +46,6 @@ class FEgrnd : public FErnd{
     void complex2real(const fftw_complex *,double *,const unsigned long int &);
 };
 
-
 #endif
+
 // END

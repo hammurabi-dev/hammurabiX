@@ -10,11 +10,9 @@
 #include <fftw3.h>
 #include <vec3.h>
 #include <vector>
-
 #include "class_pond.h"
 #include "class_grid.h"
 
-/* base class */
 class Breg{
     public:
     Breg(void) = default;
@@ -33,34 +31,29 @@ class Breg{
     /*@read_grid
      * read from grid with trilinear interpolation
      */
-    virtual vec3 read_grid(const vec3 &, Grid_breg *);
+    virtual vec3 read_grid(const vec3 &,Grid_breg *);
     /*@write_grid
      * write to grid
      */
-    virtual void write_grid(Pond *, Grid_breg *);
+    virtual void write_grid(Pond *,Grid_breg *);
 };
 
-/* WMAP-3yr */
+// WMAP-3yr
 class Bwmap final : public Breg {
     public:
     Bwmap(void) = default;
     virtual ~Bwmap(void) = default;
-    /*@Bwmap(not void)
-     * reassign breg parameters in pond
-     * with given vector of values
-     */
-    //Bwmap(const std::vector<double>&, Pond *);
-    vec3 breg(const vec3 &, Pond *) override;
+    vec3 breg(const vec3 &,Pond *) override;
 };
 
-/* Local */
+// Local
 class Blocal final : public Breg {
     public:
     Blocal(void) = default;
     virtual ~Blocal(void) = default;
-    //Blocal(const std::vector<double>&, Pond *);
     vec3 breg(const vec3 &,Pond *) override;
 };
 
 #endif
+
 // END

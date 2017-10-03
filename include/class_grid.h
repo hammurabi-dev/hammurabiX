@@ -19,7 +19,6 @@
 
 using namespace tinyxml2;
 
-/* base */
 class Grid{
     public:
     Grid(void) = default;
@@ -50,7 +49,7 @@ class Grid{
     double FetchDouble(XMLElement *,std::string);
 };
 
-/* regular magnetic field */
+// regular magnetic field
 class Grid_breg final : public Grid{
     public:
     Grid_breg(std::string);
@@ -59,7 +58,6 @@ class Grid_breg final : public Grid{
     void clean_grid(void) override;
     void export_grid(void) override;
     void import_grid(void) override;
-    
     // 3D regular field arrays
     double *reg_b_x, *reg_b_y, *reg_b_z;
     
@@ -72,7 +70,7 @@ class Grid_breg final : public Grid{
     
 };
 
-/* random magnetic field */
+// turbulent magnetic field
 class Grid_brnd final : public Grid{
     public:
     Grid_brnd(std::string);
@@ -97,7 +95,7 @@ class Grid_brnd final : public Grid{
     unsigned long int full_size;
 };
 
-/* free electron density field */
+// free electron field
 class Grid_fe final : public Grid{
     public:
     Grid_fe(std::string);
@@ -117,7 +115,7 @@ class Grid_fe final : public Grid{
     unsigned long int full_size;
 };
 
-/* random free electron density field */
+// turbulent free electron field
 class Grid_fernd final : public Grid{
     public:
     Grid_fernd(std::string);
@@ -140,7 +138,7 @@ class Grid_fernd final : public Grid{
     unsigned long int full_size;
 };
 
-/* cosmic ray electron flux field */
+// cosmic ray electron field
 class Grid_cre final : public Grid{
     public:
     Grid_cre(std::string);
@@ -159,13 +157,12 @@ class Grid_cre final : public Grid{
     unsigned int nE, nr, nz;
     unsigned long int cre_size;
     double r_max, z_max, z_min, E_min, E_max, E_fact;
-    
     // or 3+1 dimension grid
     unsigned int nx,ny;
     double x_max, x_min, y_max, y_min;
 };
 
-/* line of signt integrator */
+// observable field
 class Grid_int final : public Grid{
     public:
     Grid_int(std::string);
@@ -192,5 +189,5 @@ class Grid_int final : public Grid{
 };
 
 #endif
-// END
 
+// END

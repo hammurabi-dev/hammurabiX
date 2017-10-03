@@ -11,11 +11,9 @@
 
 #include <iostream>
 #include <vec3.h>
-
 #include "class_pond.h"
 #include "class_grid.h"
 
-/* base class */
 class FE{
     public:
     FE(void) = default;
@@ -45,7 +43,7 @@ class FE{
     
 };
 
-/* YMW16 */
+// YMW16
 class YMW16 final : public FE{
     public:
     YMW16(void) = default;
@@ -53,7 +51,7 @@ class YMW16 final : public FE{
     double density(const vec3 &, Pond *) override;
     
     private:
-    // structures in MW (we ignore Fermi Bubble due to lack of observational data)
+    // structures in MW (ignore Fermi Bubble due to lack of observation)
     double thick(const double &,const double &,Pond *);
     double thin(const double &,const double &,Pond *);
     double spiral(const double &,const double &,const double &,const double &,Pond *);
@@ -70,7 +68,8 @@ class YMW16 final : public FE{
     }
 };
 
-/* NE2001 */
+// NE2001
 
 #endif
+
 // END

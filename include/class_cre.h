@@ -8,11 +8,9 @@
 #define HAMMURABI_CRE_H
 
 #include <gsl/gsl_sf_synchrotron.h>
-
 #include "class_pond.h"
 #include "class_grid.h"
 
-/* base class */
 class CRE{
     public:
     CRE(void) = default;
@@ -26,7 +24,7 @@ class CRE{
     
 };
 
-/* Analytical CRE flux */
+// Analytical CRE
 class CRE_ana : public CRE{
     public:
     CRE_ana(void) = default;
@@ -53,7 +51,7 @@ class CRE_ana : public CRE{
     void write_grid(Pond *,Grid_cre *) override;
 };
 
-/* Numerical CRE flux stored in grid_cre */
+// Numerical CRE flux stored in grid_cre
 class CRE_num final: public CRE{
     public:
     CRE_num(void) = default;
@@ -67,8 +65,9 @@ class CRE_num final: public CRE{
      * automatically select bi/trilinear interpolation according to
      * 2+1/3+1 spatial-spectral CRE flux grid
      */
-    double read_grid(const unsigned int &, const vec3 &,Grid_cre *) override;
+    double read_grid(const unsigned int &,const vec3 &,Grid_cre *) override;
     
 };
 #endif
+
 // END
