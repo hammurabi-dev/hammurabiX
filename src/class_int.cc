@@ -51,7 +51,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,G
         Healpix_Map<double> current_fd_map;
         Healpix_Map<double> current_dm_map;
         
-        unsigned int current_nside {get_shell_nside(current_shell,gint->total_shell,gint->nside_min)};
+        unsigned int current_nside {gint->nside_shell[current_shell-1]};
         unsigned int current_npix{12*current_nside*current_nside};
         if (gint->do_dm) {
             current_dm_map.SetNside(current_nside, NEST);
@@ -86,7 +86,6 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,G
         if (current_shell>1) {
             shell_ref.delta_d = (shell_ref.d_stop-shell_ref.d_start)/(gint->bin_num*(pow(2,current_shell-1)-pow(2,current_shell-2)));
         }
-        
 #pragma omp parallel for
         for (decltype(current_npix) ipix=0;ipix<current_npix;++ipix) {
             struct_observables observables;
@@ -222,19 +221,18 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
     // second iteration in distance
     // applying Simpson's rule
     // be careful with the logic for assigining simpson_size!
-    int simpson_size{0};
+    int simpson_size {0};
     if(gint->do_dm){
         simpson_size = F_dm.size();
     }
     if(gint->do_fd or gint->do_sync){
         simpson_size = F_fd.size();
     }
-#ifndef NDEBUG
+    // if nothing is calculated
     if(simpson_size==0){
-        cerr<<"ERR: EMPTY LOS INTERGATION"<<endl;
-        exit(1);
+        return;
     }
-#endif
+    
     for(decltype(simpson_size)i=1;i<simpson_size-1;i+=2){
         // DM
         if(gint->do_dm){
@@ -268,6 +266,7 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
 // TOOLS
 //---------------------------------------------------------
 // compute nside number at given shell
+/*
 unsigned int Integrator::get_shell_nside(const unsigned int &shell_numb,const unsigned int &total_shell,const unsigned int &nside_min) const{
     if (shell_numb<1 or shell_numb>total_shell){
         cerr<<"INVALID shell_numb"<<endl;
@@ -282,6 +281,7 @@ unsigned int Integrator::get_shell_nside(const unsigned int &shell_numb,const un
     }
     return shell_nside;
 }
+ */
 
 // compute upper radial boundary at given shell
 double Integrator::get_max_shell_radius(const unsigned int &shell_numb,const unsigned int &total_shell,const double &radius) const {

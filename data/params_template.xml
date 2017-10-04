@@ -55,9 +55,20 @@
         </Box>
         <!-- LOS integration setting -->
         <Integration>
-            <shell value="1"/> <!-- total shell number -->
+            <shell type="manual">
+                <!-- default setting of shells -->
+                <auto>
+                    <shell_num value="2"/> <!-- total shell number -->
+                    <nside_min value="16"/> <!-- inner most shell resolution -->
+                </auto>
+                <!-- set shell resolution from inside out -->
+                <!-- total shell number calculated automatically -->
+                <manual>
+                    <nside value="32"/> <!-- inner most shell Nside -->
+                    <nside value="16"/>
+                </manual>
+            </shell>
             <nside_sim value="16"/> <!-- output map resolution -->
-            <nside_min value="16"/> <!-- inner most shell resolution -->
             <!-- maximum radius in earth/Galactic centric frame -->
             <ec_r_max value="30.0"/> <!-- kpc -->
             <gc_r_max value="20.0"/> <!-- kpc -->

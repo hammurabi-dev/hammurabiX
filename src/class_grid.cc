@@ -3,6 +3,7 @@
 #include <fftw3.h>
 #include <array>
 #include <string>
+#include <vector>
 #include <tinyxml2.h>
 #include <fitshandle.h>
 #include <fstream>
@@ -762,9 +763,41 @@ Grid_int::Grid_int(string file_name){
 
 void Grid_int::build_grid(XMLDocument *doc){
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Integration")};
-    total_shell = FetchUnsigned(ptr,"shell");
+    // get shell Nside
+    string shell_type {ptr->FirstChildElement("shell")->Attribute("type")};
+    if(shell_type=="auto"){
+        XMLElement *subptr {ptr->FirstChildElement("shell")->FirstChildElement("auto")};
+        total_shell = FetchUnsigned(subptr,"shell_num");
+        unsigned int nside_min {FetchUnsigned(subptr,"nside_min")};
+        for(unsigned int i=0;i!=total_shell;++i){
+            nside_shell.push_back(pow(2,i)*nside_min);
+        }
+    }
+    else if(shell_type=="manual"){
+        XMLElement *subptr {ptr->FirstChildElement("shell")->FirstChildElement("manual")};
+        total_shell = 0;
+        for(auto e = subptr->FirstChildElement("nside");e!=NULL;e=e->NextSiblingElement("nside")){
+            total_shell++;
+            nside_shell.push_back(e->UnsignedAttribute("value"));
+        }
+#ifndef NDEBUG
+        if(nside_shell.size()!=total_shell){
+            cerr<<"ERR:"<<__FILE__
+            <<" : in function "<<__func__<<endl
+            <<" at line "<<__LINE__<<endl
+            <<"WRONG SHELL NUM"<<endl;
+            exit(1);
+        }
+#endif
+    }
+    else{
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"INVALID SHELL TYPE"<<endl;
+        exit(1);
+    }
     nside_sim = FetchUnsigned(ptr,"nside_sim");
-    nside_min = FetchUnsigned(ptr,"nside_min");
     npix_sim = 12*nside_sim*nside_sim;
     ec_r_max = CGS_U_kpc*FetchDouble(ptr,"ec_r_max");
     gc_r_max = FetchDouble(ptr,"gc_r_max")*CGS_U_kpc;
