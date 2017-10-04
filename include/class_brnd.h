@@ -81,7 +81,7 @@ class Brnd_anig final : public Brnd_iso{
     /*@anisotropy
      * calculate anisotropy at given point
      */
-    double anisotropy(const vec3 &,Pond *,Breg *,Grid_breg *);
+    double anisotropy(const vec3 &,vec3 &,Pond *,Breg *,Grid_breg *);
 };
 
 // local anisotropic random field

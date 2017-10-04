@@ -347,9 +347,11 @@ vec3 Brnd_iso::gramschmidt(const vec3 &k,const vec3 &b){
 
 
 // global anisotropic turbulent field
-double Brnd_anig::anisotropy(const vec3 &, Pond *par, Breg *, Grid_breg *){
+double Brnd_anig::anisotropy(const vec3 &pos,vec3 &H,Pond *par,Breg *breg,Grid_breg *gbreg){
     // the simplest case, const.
     return par->brnd_anig[0];
+    // H, direction of anisotropy
+    H = toolkit::versor(breg->get_breg(pos,par,gbreg));
 }
 
 void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
@@ -425,7 +427,9 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 vec3 b_im {grid->fftw_b_kx[idx][1],grid->fftw_b_ky[idx][1],grid->fftw_b_kz[idx][1]};
                 // get rescaling factor
                 double ratio {sqrt(rescal_fact(pos,par))*par->brnd_iso[0]*CGS_U_muGauss/sqrt(3.*b_var)};
-                double rho {anisotropy(pos,par,breg,gbreg)};
+                // impose anisotropy
+                vec3 H_versor;
+                double rho {anisotropy(pos,H_versor,par,breg,gbreg)};
 #ifndef NDEBUG
                 if(rho<0. or rho>1.){
                     cerr<<"ERR:"<<__FILE__
@@ -435,13 +439,11 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                     exit(1);
                 }
 #endif
-                // impose anisotropy
-                vec3 B_versor {toolkit::versor(breg->get_breg(pos,par,gbreg))};
-                if(B_versor.Length()!=0){
-                    vec3 b_re_par {B_versor*dotprod(B_versor,b_re)};
+                if(H_versor.Length()!=0){
+                    vec3 b_re_par {H_versor*dotprod(H_versor,b_re)};
                     vec3 b_re_perp {b_re - b_re_par};
                     b_re = toolkit::versor(b_re_par*rho + b_re_perp*(1-rho))*(b_re.Length()*ratio);
-                    vec3 b_im_par {B_versor*dotprod(B_versor,b_im)};
+                    vec3 b_im_par {H_versor*dotprod(H_versor,b_im)};
                     vec3 b_im_perp {b_im - b_im_par};
                     b_im = toolkit::versor(b_im_par*rho + b_im_perp*(1-rho))*(b_im.Length()*ratio);
                 }
