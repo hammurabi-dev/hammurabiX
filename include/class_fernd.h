@@ -22,27 +22,23 @@ class FErnd{
     virtual ~FErnd(void) = default;
     virtual double get_fernd(const vec3 &,Grid_fernd *);
     virtual double read_grid(const vec3 &,Grid_fernd *);
-    virtual void write_grid(Pond *,Grid_fernd *);
-    
-    virtual double fe_spec(const double &k,Pond *);
+    virtual void write_grid_iso(Pond *,Grid_fernd *);
+    virtual void write_grid_ani(Pond *,FE *,Grid_fe *,Grid_fernd *);
+    virtual double fe_spec(const double &,Pond *);
     /*@rescal_fact
      * spatial rescaling factor for variance <n^2>
      */
     virtual double rescal_fact(const vec3 &,Pond *);
-    
-    double get_variance_rslt, get_missing_rslt;
 };
 
-// gaussian random field
-class FEgrnd : public FErnd{
+// isotropic turbulent field
+class FErnd_iso : public FErnd{
     public:
-    FEgrnd(void) = default;
-    virtual ~FEgrnd(void) = default;
-    
+    FErnd_iso(void) = default;
+    virtual ~FErnd_iso(void) = default;
     double get_fernd(const vec3 &,Grid_fernd *) override;
-    void write_grid(Pond *,Grid_fernd *) override;
+    void write_grid_iso(Pond *,Grid_fernd *) override;
     protected:
-    void hermiticity(fftw_complex *,const unsigned int &,const unsigned int &,const unsigned int &);
     void complex2real(const fftw_complex *,double *,const unsigned long int &);
 };
 

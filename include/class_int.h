@@ -48,7 +48,6 @@ class Integrator {
     void radial_integration(struct_shell &,pointing &,struct_observables &,Breg *,Brnd *,FE *,FErnd *,CRE *,Grid_breg *,Grid_brnd *,Grid_fe *,Grid_fernd *,Grid_cre *,Grid_int *,Pond *);
     
     // auxiliary functions
-    unsigned int get_shell_nside(const unsigned int &,const unsigned int &,const unsigned int &) const;
     double get_max_shell_radius(const unsigned int &,const unsigned int &,const double &) const;
     double get_min_shell_radius(const unsigned int &,const unsigned int &,const double &) const;
     

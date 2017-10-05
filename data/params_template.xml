@@ -55,10 +55,10 @@
         </Box>
         <!-- LOS integration setting -->
         <Integration>
-            <shell type="manual">
+            <shell type="auto">
                 <!-- default setting of shells -->
                 <auto>
-                    <shell_num value="2"/> <!-- total shell number -->
+                    <shell_num value="1"/> <!-- total shell number -->
                     <nside_min value="16"/> <!-- inner most shell resolution -->
                 </auto>
                 <!-- set shell resolution from inside out -->
@@ -107,7 +107,7 @@
             <Random cue="0" type="Iso" seed="-1">
                 <!-- isotropic -->
                 <Iso>
-                    <rms value="1.0"/> <!-- norm at k0 -->
+                    <rms value="0.1"/> <!-- norm at k0 -->
                     <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
                     <a0 value="1.7"/> <!-- 5/3, Kolmogrov -->
                 </Iso>

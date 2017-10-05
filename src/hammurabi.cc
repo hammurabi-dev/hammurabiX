@@ -92,11 +92,10 @@ int main(int , char **argv) {
         string ferndtype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->Attribute("type")};
         if(ferndtype=="Iso"){
             cout<<"INFO: USING ISOTROPIC RANDOM FE MODEL"<<endl;
-            cout<<"WAR: NOT FINISHED YET"<<endl;
             // non default constructor
-            fernd = new FEgrnd();
+            fernd = new FErnd_iso();
             // fill grid with random fields
-            fernd->write_grid(par,grid_fernd);
+            fernd->write_grid_iso(par,grid_fernd);
         }
         else{return EXIT_FAILURE;}
     }

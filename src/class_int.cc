@@ -265,23 +265,6 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
 
 // TOOLS
 //---------------------------------------------------------
-// compute nside number at given shell
-/*
-unsigned int Integrator::get_shell_nside(const unsigned int &shell_numb,const unsigned int &total_shell,const unsigned int &nside_min) const{
-    if (shell_numb<1 or shell_numb>total_shell){
-        cerr<<"INVALID shell_numb"<<endl;
-        exit(1);
-    }
-    unsigned int difference {shell_numb-1};
-    unsigned int shell_nside {nside_min};
-    if (difference!=0){
-        for (decltype(difference) n=0;n!=difference;++n){
-            shell_nside *= 2;
-        }
-    }
-    return shell_nside;
-}
- */
 
 // compute upper radial boundary at given shell
 double Integrator::get_max_shell_radius(const unsigned int &shell_numb,const unsigned int &total_shell,const double &radius) const {

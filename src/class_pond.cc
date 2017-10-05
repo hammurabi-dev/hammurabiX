@@ -154,7 +154,7 @@ void Pond::fe_pond(XMLDocument *doc){
     t7_detthetaLI = FetchDouble(subptr,"detthetaLI");//deg
     t7_thetaLI = FetchDouble(subptr,"thetaLI");//deg
     
-    // gaussian random
+    // isotropic turbulent
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Iso");
     // nomalization
     fernd_iso.push_back(FetchDouble(subptr,"rms"));
