@@ -36,11 +36,15 @@ int main(int , char **argv) {
     Grid_cre *grid_cre = new Grid_cre(file_name);
     Grid_int *grid_int = new Grid_int(file_name);
     cout<<"INFO: ALL GRIDS BUILT"<<endl;
-    
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
-    
     FE *fe; Breg *breg; FErnd *fernd; Brnd *brnd; CRE *cre;
+    // reminder for cleaning up allocated grid memory
+    bool fe_reminder {false};
+    bool breg_reminder {false};
+    bool fernd_reminder {false};
+    bool brnd_reminder {false};
+    bool cre_reminder {false};
     
     // regular FE field
     string fetype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->Attribute("type")};
@@ -48,6 +52,7 @@ int main(int , char **argv) {
     if(grid_fe->read_permission){
         grid_fe->import_grid();
         fe = new FE();
+        fe_reminder = true;
     }
     else if(fetype=="YMW16"){
         cout<<"INFO: USING YMW16 FE MODEL"<<endl;
@@ -66,6 +71,7 @@ int main(int , char **argv) {
     if(grid_breg->read_permission){
         grid_breg->import_grid();
         breg = new Breg();
+        breg_reminder = true;
     }
     else if(bregtype=="WMAP"){
         cout<<"INFO: USING WMAP3YR REGUALR B MODEL"<<endl;
@@ -87,6 +93,7 @@ int main(int , char **argv) {
     if(grid_fernd->read_permission){
         grid_fernd->import_grid();
         fernd = new FErnd();
+        fernd_reminder = true;
     }
     else if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->BoolAttribute("cue")){
         string ferndtype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->Attribute("type")};
@@ -96,6 +103,7 @@ int main(int , char **argv) {
             fernd = new FErnd_iso();
             // fill grid with random fields
             fernd->write_grid_iso(par,grid_fernd);
+            fernd_reminder = true;
         }
         else{return EXIT_FAILURE;}
     }
@@ -112,6 +120,7 @@ int main(int , char **argv) {
     if(grid_brnd->read_permission){
         grid_brnd->import_grid();
         brnd = new Brnd();
+        brnd_reminder = true;
     }
     else if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->BoolAttribute("cue")){
         string brndtype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->Attribute("type")};
@@ -120,12 +129,14 @@ int main(int , char **argv) {
             brnd = new Brnd_iso();
             // fill grid with random fields
             brnd->write_grid_iso(par,grid_brnd);
+            brnd_reminder = true;
         }
         else if(brndtype=="Anisoglob"){
             cout<<"INFO: USING GLOBAL ANISOTROPIC RANDOM B MODEL"<<endl;
             brnd = new Brnd_anig();
             // fill grid with random fields
             brnd->write_grid_ani(par,breg,grid_breg,grid_brnd);
+            brnd_reminder = true;
         }
         else{return EXIT_FAILURE;}
         
@@ -150,6 +161,7 @@ int main(int , char **argv) {
         cout<<"INFO: USING NUMERIC CRE"<<endl;
         grid_cre->import_grid();
         cre = new CRE_num();
+        cre_reminder = true;
     }
     else{return EXIT_FAILURE;}
     // if export to file
@@ -184,6 +196,11 @@ int main(int , char **argv) {
     
     // CLEANING
     cout<<"...ENDING HAMMURABI..."<<endl;
+    if(breg_reminder) grid_breg->clean_grid();
+    if(brnd_reminder) grid_brnd->clean_grid();
+    if(fe_reminder) grid_fe->clean_grid();
+    if(fernd_reminder) grid_fernd->clean_grid();
+    if(cre_reminder) grid_cre->clean_grid();
     delete par; delete grid_breg; delete grid_brnd;
     delete grid_fe;delete grid_fernd; delete grid_cre; delete grid_int;
     delete fe;delete fernd; delete breg; delete brnd;
