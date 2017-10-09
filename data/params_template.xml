@@ -117,7 +117,10 @@
                 </Anisoglob>
                 <!-- local turbulent -->
                 <Anisolocal>
-                    <beta value="1.0"/>
+                    <beta value="0.1"/> <!-- plasma beta -->
+                    <Ma value="0.5"/> <!-- Alfven Mach number -->
+                    <rf value="1.0"/> <!-- fast to Alfven ratio -->
+                    <rs value="1.0"/> <!-- slow to Alfven ratio -->
                 </Anisolocal>
                 <!-- energy density rescaling -->
                 <Rescal>

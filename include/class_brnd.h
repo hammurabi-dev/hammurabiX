@@ -85,16 +85,21 @@ class Brnd_anig final : public Brnd_iso{
 };
 
 // local anisotropic random field
-/*
-class Brnd_anil final : public Brnd{
+
+class Brnd_anil final : public Brnd_iso{
     public:
     Brnd_anil(void) = default;
-    // anisotropic power spectrum
-    double b_spec(const double &,Pond *) override;
+    virtual ~Brnd_anil(void) = default;
     // use Breg::breg function
-    void write_grid_anil(Pond *,Breg *,Grid_breg *,Grid_brnd *) override;
+    void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *) override;
+    
+    private:
+    /*@anisotropy
+     * offer anisotropy tensor
+     */
+    void anisotropy(double *,Pond *,Breg *,Grid_breg *);
 };
-*/
+
 #endif
 
 // END

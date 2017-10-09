@@ -73,7 +73,10 @@ void Pond::b_pond(XMLDocument *doc){
     brnd_anig.push_back(FetchDouble(subptr,"rho"));
     // brnd_aniso_local
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Anisolocal");
-    brnd_anig.push_back(FetchDouble(subptr,"beta"));
+    brnd_anil.push_back(FetchDouble(subptr,"beta"));
+    brnd_anil.push_back(FetchDouble(subptr,"Ma"));
+    brnd_anil.push_back(FetchDouble(subptr,"rf"));
+    brnd_anil.push_back(FetchDouble(subptr,"rs"));
     // rescaling parameters
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Rescal");
     brnd_scal.push_back(FetchDouble(subptr,"r0"));
