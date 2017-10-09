@@ -18,12 +18,18 @@
 #include "class_fe.h"
 #include "class_fernd.h"
 #include "namespace_toolkit.h"
+// timer
+#include <sys/time.h>
+#include <sys/resource.h>
+#define RCPU_TIME (getrusage(RUSAGE_SELF,&ruse), ruse.ru_utime.tv_sec + 1e-6 * ruse.ru_utime.tv_usec)
 
 using namespace std;
 using namespace tinyxml2;
 
 int main(int , char **argv) {
-    toolkit::timestamp();
+    struct rusage ruse; // timer
+    const double t_start {RCPU_TIME};
+    
     cout<<"...STARTING HAMMURABI..."<<endl;
     string file_name {argv[1]};
     
@@ -206,7 +212,7 @@ int main(int , char **argv) {
     delete fe;delete fernd; delete breg; delete brnd;
     delete cre; delete doc; delete intobj;
     
-    toolkit::timestamp();
+    cout<<"INFO:TIME ELAPSE "<<RCPU_TIME-t_start<<"sec"<<endl;
     return EXIT_SUCCESS;
 }
 

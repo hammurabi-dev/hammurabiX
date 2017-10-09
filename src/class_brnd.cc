@@ -13,6 +13,10 @@
 #include "class_breg.h"
 #include "cgs_units_file.h"
 #include "namespace_toolkit.h"
+// timer
+#include <sys/time.h>
+#include <sys/resource.h>
+#define RCPU_TIME (getrusage(RUSAGE_SELF,&ruse), ruse.ru_utime.tv_sec + 1e-6 * ruse.ru_utime.tv_usec)
 
 using namespace std;
 
@@ -160,7 +164,11 @@ vec3 Brnd_iso::get_brnd(const vec3 &pos, Grid_brnd *grid){
     return read_grid(pos,grid);
 }
 
+// we tried to optimize the calc time cost for this function
 void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
+    // timer
+    struct rusage ruse;
+    const double t_start {RCPU_TIME};
     // PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
     // initialize random seed
@@ -170,45 +178,45 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};
     double lz {grid->z_max-grid->z_min};
+    // physical k in 1/kpc dimension
     for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
+        double kx {CGS_U_kpc*i/lx};
+        if(i>=grid->nx/2) kx -= CGS_U_kpc*grid->nx/lx;
         for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
+            double ky {CGS_U_kpc*j/ly};
+            if(j>=grid->ny/2) ky -= CGS_U_kpc*grid->ny/ly;
             for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
                 unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 // FFT expects up to n/2 positive while n/2 to n negative
-                // physical k in 1/kpc dimension
-                double kx {i/(lx/CGS_U_kpc)};
-                double ky {j/(ly/CGS_U_kpc)};
-                double kz {l/(lz/CGS_U_kpc)};
-                if(i>=grid->nx/2) kx -= grid->nx/(lx/CGS_U_kpc);
-                if(j>=grid->ny/2) ky -= grid->ny/(ly/CGS_U_kpc);
-                if(l>=grid->nz/2) kz -= grid->nz/(lz/CGS_U_kpc);
+                double kz {CGS_U_kpc*l/lz};
+                if(l>=grid->nz/2) kz -= CGS_U_kpc*grid->nz/lz;
                 const double k {sqrt(kx*kx + ky*ky + kz*kz)};
                 // physical dk^3
-                const double dk3 {pow(CGS_U_kpc,3.)/(lx*ly*lz)};
+                const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
                 // simpson's rule
                 double element {2.*b_spec(k,par)/3.};
-                const double halfdk {0.5*sqrt(pow(CGS_U_kpc/lx,2)+pow(CGS_U_kpc/ly,2)+pow(CGS_U_kpc/lz,2))};
+                const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
                 element += b_spec(k+halfdk,par)/6.;
                 element += b_spec(k-halfdk,par)/6.;
                 // amplitude, dividing by two because equal allocation to Re and Im parts
-                const double sigma {sqrt(element*dk3/2.0)};
+                const double sigma {sqrt(0.5*element*dk3)};
                 grid->fftw_b_kx[idx][0] = gsl_ran_gaussian(r,sigma);
                 grid->fftw_b_ky[idx][0] = gsl_ran_gaussian(r,sigma);
                 grid->fftw_b_kz[idx][0] = gsl_ran_gaussian(r,sigma);
                 grid->fftw_b_kx[idx][1] = gsl_ran_gaussian(r,sigma);
                 grid->fftw_b_ky[idx][1] = gsl_ran_gaussian(r,sigma);
                 grid->fftw_b_kz[idx][1] = gsl_ran_gaussian(r,sigma);
-                if(i==0 and j==0 and l==0) {
-                    grid->fftw_b_kx[idx][0] = 0.;
-                    grid->fftw_b_ky[idx][0] = 0.;
-                    grid->fftw_b_kz[idx][0] = 0.;
-                    grid->fftw_b_kx[idx][1] = 0.;
-                    grid->fftw_b_ky[idx][1] = 0.;
-                    grid->fftw_b_kz[idx][1] = 0.;
-                }
             }// l
         }// j
     }// i
+    // fix the very 0th
+    grid->fftw_b_kx[0][0] = 0.;
+    grid->fftw_b_ky[0][0] = 0.;
+    grid->fftw_b_kz[0][0] = 0.;
+    grid->fftw_b_kx[0][1] = 0.;
+    grid->fftw_b_ky[0][1] = 0.;
+    grid->fftw_b_kz[0][1] = 0.;
+    
     // free random memory
     gsl_rng_free(r);
     // no Hermiticity fixing, complex 2 complex
@@ -220,12 +228,12 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     // RESCALING FIELD PROFILE IN REAL SPACE
     double b_var {toolkit::Variance(grid->fftw_b_kx[0], grid->full_size)};
     for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
+        vec3 pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
         for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
+            pos.y = j*ly/(grid->ny-1) + grid->y_min;
             for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
                 // get physical position
-                vec3 pos {i*lx/(grid->nx-1) + grid->x_min,
-                    j*ly/(grid->ny-1) + grid->y_min,
-                    l*lz/(grid->nz-1) + grid->z_min};
+                pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
                 double ratio {sqrt(rescal_fact(pos,par))*par->brnd_iso[0]*CGS_U_muGauss/sqrt(3.*b_var)};
                 // add anisotropic field to random one
@@ -247,18 +255,18 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     // RE-ORTHOGONALIZING IN FOURIER SPACE
     // Gram-Schmidt process
     for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
+        vec3 tmp_k {CGS_U_kpc*i/lx,0,0};
+        if(i>=grid->nx/2) tmp_k.x -= CGS_U_kpc*grid->nx/lx;
         for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
+            tmp_k.y = CGS_U_kpc*j/ly;
+            if(j>=grid->ny/2) tmp_k.y -= CGS_U_kpc*grid->ny/ly;
             for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
                 unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 // FFT expects up to n/2 positive while n/2 to n negative
                 // physical k in cgs dimension
-                vec3 tmp_k {i/(lx/CGS_U_kpc),
-                    j/(ly/CGS_U_kpc),
-                    l/(lz/CGS_U_kpc)};
-                if(i>=grid->nx/2) tmp_k.x -= grid->nx/(lx/CGS_U_kpc);
-                if(j>=grid->ny/2) tmp_k.y -= grid->ny/(ly/CGS_U_kpc);
-                if(l>=grid->nz/2) tmp_k.z -= grid->nz/(lz/CGS_U_kpc);
-
+                tmp_k.z = CGS_U_kpc*l/lz;
+                if(l>=grid->nz/2) tmp_k.z -= CGS_U_kpc*grid->nz/lz;
+                
                 const vec3 tmp_b_re {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};
                 const vec3 tmp_b_im {grid->fftw_b_kx[idx][1],grid->fftw_b_ky[idx][1],grid->fftw_b_kz[idx][1]};
                 
@@ -271,18 +279,17 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
                 grid->fftw_b_kx[idx][1] = free_b_im.x;
                 grid->fftw_b_ky[idx][1] = free_b_im.y;
                 grid->fftw_b_kz[idx][1] = free_b_im.z;
-                
-                if(i==0 and j==0 and l==0) {
-                    grid->fftw_b_kx[idx][0] = 0.;
-                    grid->fftw_b_ky[idx][0] = 0.;
-                    grid->fftw_b_kz[idx][0] = 0.;
-                    grid->fftw_b_kx[idx][1] = 0.;
-                    grid->fftw_b_ky[idx][1] = 0.;
-                    grid->fftw_b_kz[idx][1] = 0.;
-                }
             }// l
         }// j
     }// i
+    // fixing the very 0th
+    grid->fftw_b_kx[0][0] = 0.;
+    grid->fftw_b_ky[0][0] = 0.;
+    grid->fftw_b_kz[0][0] = 0.;
+    grid->fftw_b_kx[0][1] = 0.;
+    grid->fftw_b_ky[0][1] = 0.;
+    grid->fftw_b_kz[0][1] = 0.;
+    
     // execute DFT backward plan
     fftw_execute(grid->fftw_px_bw);
     fftw_execute(grid->fftw_py_bw);
@@ -293,12 +300,15 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     complex2real(grid->fftw_b_kz, grid->fftw_b_z, grid->full_size);
     // according to FFTW3 manual
     // transform forward followed by backword scale up array by nx*ny*nz
+    double inv_grid_size = 1.0/grid->full_size;
     for(unsigned long int i=0;i!=grid->full_size;++i){
-        grid->fftw_b_x[i] /= grid->full_size;
-        grid->fftw_b_y[i] /= grid->full_size;
-        grid->fftw_b_z[i] /= grid->full_size;
+        grid->fftw_b_x[i] *= inv_grid_size;
+        grid->fftw_b_y[i] *= inv_grid_size;
+        grid->fftw_b_z[i] *= inv_grid_size;
     }
-
+    // timer
+    cout<<"BRND: TIME ELAPSE "<<RCPU_TIME-t_start<<"sec"<<endl;
+    /*
 #ifndef NDEBUG
     // check RMS
     b_var = toolkit::Variance(grid->fftw_b_x, grid->full_size);
@@ -322,6 +332,7 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     }
     cout<<"BRND: Averaged divergence: "<<div/(CGS_U_muGauss*grid->nx*grid->ny*grid->nz)<<" microG/grid"<<endl;
 #endif
+    */
 }
 
 // get real components from fftw_complex arrays
@@ -337,9 +348,10 @@ vec3 Brnd_iso::gramschmidt(const vec3 &k,const vec3 &b){
     if(k.Length()==0 or b.Length()==0){
         return vec3 {0,0,0};
     }
-    vec3 b_free {b.x - k.x*dotprod(k,b)/k.SquaredLength(),
-        b.y - k.y*dotprod(k,b)/k.SquaredLength(),
-        b.z - k.z*dotprod(k,b)/k.SquaredLength()};
+    const double inv_k_mod = 1./k.SquaredLength();
+    vec3 b_free {b.x - k.x*dotprod(k,b)*inv_k_mod,
+        b.y - k.y*dotprod(k,b)*inv_k_mod,
+        b.z - k.z*dotprod(k,b)*inv_k_mod};
     
     b_free = toolkit::versor(b_free)*b.Length();
     return b_free;
@@ -544,10 +556,12 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
 
 //local anisotropic turbulent field
 void Brnd_anil::anisotropy(double *tensor, Pond *par, Breg *breg, Grid_breg *gbreg){
-    
+    exit(1);
 }
 
 void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
+    exit(1);
+    /*
     // initialize random seed
     gsl_rng *r {gsl_rng_alloc(gsl_rng_taus)};
     gsl_rng_set(r, toolkit::random_seed());
@@ -574,7 +588,7 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 element += b_spec(k+halfdk,par)/6.;
                 element += b_spec(k-halfdk,par)/6.;
                 
-                /* UNFINISHED */
+                // UNFINISHED
                 }
             }// l
         }// j
@@ -615,6 +629,7 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
     }
     cout<<"BRND: Averaged divergence: "<<div/(CGS_U_muGauss*grid->nx*grid->ny*grid->nz)<<" microG/grid"<<endl;
 #endif
+    */
 }
 
 // END

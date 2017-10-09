@@ -224,8 +224,8 @@ namespace toolkit {
     
     // offer time stamp
     void timestamp(void){
-        time_t ltime; /* calendar time */
-        ltime = time(NULL); /* get current cal time */
+        time_t ltime; // calendar time
+        ltime = time(NULL); // get current cal time
         cout<<asctime(localtime(&ltime))<<endl;
     }
     

@@ -104,7 +104,7 @@
                 </Local>
             </Regular>
             <!-- turbulent fields -->
-            <Random cue="0" type="Iso" seed="-1">
+            <Random cue="1" type="Iso" seed="-1">
                 <!-- isotropic -->
                 <Iso>
                     <rms value="0.1"/> <!-- norm at k0 -->
