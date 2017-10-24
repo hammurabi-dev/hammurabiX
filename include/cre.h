@@ -8,8 +8,8 @@
 #define HAMMURABI_CRE_H
 
 #include <gsl/gsl_sf_synchrotron.h>
-#include "class_pond.h"
-#include "class_grid.h"
+#include "pond.h"
+#include "grid.h"
 
 class CRE{
     public:

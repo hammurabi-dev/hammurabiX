@@ -2,11 +2,10 @@
 GSL = /usr
 FFTW = /vol/optcoma/fftw-3.3.6
 CFITSIO = /usr
-HEALPIX = /vol/optcoma/Healpix_3.31
-HEALPIX_TARGET = optimized_gcc
+HEALPIX = /vol/optcoma/Healpix_3.31/src/cxx/optimized_gcc
 
-# INTERNAL DIR
-BASE = /vol/optcoma/hammurabi-x
+# EXECUTABLE NAME
+EXE = hammurabi
 
 # COMPILER
 CXX = g++ -std=c++11
@@ -15,47 +14,59 @@ CXX = g++ -std=c++11
 DEBUG = -g #-NDEBUG
 
 # COMPILE OPTIONS
-CXXFLAGS = -m64 -O2 -fopenmp -Wall -fPIC -Wno-deprecated -pthread $(DEBUG)
+CXXFLAGS = -m64 -O3 -fopenmp -Wall -fPIC -Wno-deprecated -pthread $(DEBUG)
 
-# RULE
-$(BASE)/src/%.o : %.cc
-	$(CXX) $(CXXFLAGS)  -o $@ $<
-
-# HAMMURABI STAND ALONE
-hammurabi: EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
-	-I$(HEALPIX)/src/cxx/$(HEALPIX_TARGET)/include \
-	-I$(BASE)/include -I.
-hammurabi: CXXFLAGS += $(EXT_INC)
+EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
+	-I$(HEALPIX)/include \
+	-I include -I.
+CXXFLAGS += $(EXT_INC)
  
-hammurabi: ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
-	-L$(HEALPIX)/src/cxx/$(HEALPIX_TARGET)/lib \
-	-L$(BASE)/lib -L. 
-hammurabi: LFLAGS = $(ALL_L) \
+ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
+	-L$(HEALPIX)/lib \
+	-L lib -L. 
+LFLAGS = $(ALL_L) \
 	-lhammurabi \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
 	-lgsl -lgslcblas -lm -lfftw3 -fopenmp
 
-hammurabi_OBJ = $(addprefix $(BASE)/src/, tinyxml2.o class_grid.o class_pond.o namespace_toolkit.o class_fe.o class_fernd.o class_breg.o class_brnd.o class_cre.o class_int.o hammurabi.o) 
+# DEPENDENCIES
+OBJ = $(addprefix src/, pond.o)
+OBJ += $(addprefix src/grids/, grid.o grid_breg.o grid_brnd.o grid_cre.o grid_fe.o grid_fernd.o grid_int.o)
+OBJ += $(addprefix src/fields/cre/, cre.o cre_ana.o cre_num.o)
+OBJ += $(addprefix src/fields/fe/, fe.o fe_ymw16.o fernd.o fernd_iso.o)
+OBJ += $(addprefix src/fields/gmf/, breg.o brnd.o brnd_anig.o brnd_anil.o brnd_iso.o breg_wmap.o)
+OBJ += $(addprefix src/tools/, namespace_toolkit.o tinyxml2.o)
+OBJ += $(addprefix src/integrators/, integrator.o)
 
-$(hammurabi_OBJ): $(addprefix $(BASE)/include/, cgs_units_file.h class*.h namespace_toolkit.h tinyxml2.h)
+HEADS = $(addprefix include/, *.h) 
 
-$(BASE)/lib/libhammurabi.a: $(hammurabi_OBJ)
-	ar cr $(BASE)/lib/libhammurabi.a $(hammurabi_OBJ)
 
-hammurabi: $(hammurabi_OBJ) $(BASE)/lib/libhammurabi.a run $(BASE)/src/hammurabi.o
-	$(CXX) -o $(BASE)/run/hammurabi $(BASE)/src/hammurabi.o $(LFLAGS)
 
-# ALIAS
-default:
-	make hammurabi
+# RULES
+
+default: $(EXE)
+
+src/hammurabi.o: src/hammurabi.cc $(OBJ)
+
+$(EXE): $(OBJ) src/hammurabi.o lib/libhammurabi.a
+	rm -rf bin; mkdir bin
+	$(CXX) $^ -o bin/$(EXE) $(LFLAGS)
+	cp data/* bin
+
+%.o: %.cc $(HEADS)
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
+
+
+lib/libhammurabi.a: $(OBJ) src/hammurabi.o
+	ar cr $@ $^
+
+help:
+	echo $(OBJ)
 
 .PHONY: clean
 clean:
-	rm $(BASE)/lib/*.a $(BASE)/src/*.o; rm -rf $(BASE)/run
+	rm lib/*.a src/*.o src/grids/*.o src/fields/cre/*.o src/fields/fe/*.o src/fields/gmf/*.o src/integrators/*.o src/tools/*.o; rm -rf bin
 .PHONY: tar 
 tar:
-	tar cfv NUWA.tar.gz makefile* include data src wrapper fit
-.PHONY: run
-run:
-	rm -rf $(BASE)/run ; mkdir $(BASE)/run; cp $(BASE)/data/* $(BASE)/run; cp $(BASE)/python_utils/* $(BASE)/run
+	tar cfv HamX.tar.gz makefile* include src
 # END

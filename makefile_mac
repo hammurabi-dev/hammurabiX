@@ -18,7 +18,7 @@ CXX = g++-7 -std=c++11
 DEBUG = -g #-NDEBUG
 
 # COMPILE OPTIONS
-CXXFLAGS = -O0 -Wall -Wextra -fPIC -Wno-deprecated $(DEBUG) -fopenmp -pthread
+CXXFLAGS = -O3 -Wall -Wextra -fPIC -Wno-deprecated $(DEBUG) -fopenmp -pthread
 
 EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
 	-I$(HEALPIX)/include \
@@ -34,9 +34,15 @@ LFLAGS = $(ALL_L) \
 	-lgsl -lgslcblas -lm -lfftw3 -fopenmp
 
 # DEPENDENCIES
-OBJ = $(addprefix src/, tinyxml2.o class_grid.o class_pond.o namespace_toolkit.o class_fe.o class_fernd.o class_breg.o class_brnd.o class_cre.o class_int.o)
+OBJ = $(addprefix src/, pond.o)
+OBJ += $(addprefix src/grids/, grid.o grid_breg.o grid_brnd.o grid_cre.o grid_fe.o grid_fernd.o grid_int.o)
+OBJ += $(addprefix src/fields/cre/, cre.o cre_ana.o cre_num.o)
+OBJ += $(addprefix src/fields/fe/, fe.o fe_ymw16.o fernd.o fernd_iso.o)
+OBJ += $(addprefix src/fields/gmf/, breg.o brnd.o brnd_anig.o brnd_anil.o brnd_iso.o breg_wmap.o)
+OBJ += $(addprefix src/tools/, namespace_toolkit.o tinyxml2.o)
+OBJ += $(addprefix src/integrators/, integrator.o)
 
-HEADS = $(addprefix include/, cgs_units_file.h class*.h namespace_toolkit.h tinyxml2.h) 
+HEADS = $(addprefix include/, *.h) 
 
 
 
@@ -54,6 +60,7 @@ $(EXE): $(OBJ) src/hammurabi.o lib/libhammurabi.a
 %.o: %.cc $(HEADS)
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
+
 lib/libhammurabi.a: $(OBJ) src/hammurabi.o
 	ar cr $@ $^
 
@@ -62,7 +69,7 @@ help:
 
 .PHONY: clean
 clean:
-	rm lib/*.a src/*.o; rm -rf bin
+	rm lib/*.a src/*.o src/grids/*.o src/fields/cre/*.o src/fields/fe/*.o src/fields/gmf/*.o src/integrators/*.o src/tools/*.o; rm -rf bin
 .PHONY: tar 
 tar:
 	tar cfv HamX.tar.gz makefile* include src

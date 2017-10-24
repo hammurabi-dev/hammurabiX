@@ -11,8 +11,8 @@
 
 #include <iostream>
 #include <vec3.h>
-#include "class_pond.h"
-#include "class_grid.h"
+#include "pond.h"
+#include "grid.h"
 
 class FE{
     public:

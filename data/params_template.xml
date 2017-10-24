@@ -94,14 +94,7 @@
                     <psi1 value="0.9"/>
                     <chi0 value="25.0"/>
                 </WMAP>
-                <!-- Local testing -->
-                <Local>
-                    <bd value="5"/>
-                    <l0 value="70"/>
-                    <z0 value="1.0"/>
-                    <bn value="-2"/>
-                    <bs value="2"/>
-                </Local>
+                
             </Regular>
             <!-- turbulent fields -->
             <Random cue="1" type="Iso" seed="-1">

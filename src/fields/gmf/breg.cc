@@ -4,9 +4,9 @@
 #include <array>
 #include <cmath>
 
-#include "class_pond.h"
-#include "class_grid.h"
-#include "class_breg.h"
+#include "pond.h"
+#include "grid.h"
+#include "breg.h"
 #include "cgs_units_file.h"
 #include "namespace_toolkit.h"
 
@@ -113,11 +113,11 @@ void Breg::write_grid(Pond *par, Grid_breg *grid){
     double ly {grid->y_max-grid->y_min};
     double lz {grid->z_max-grid->z_min};
     for(decltype(grid->nx) i=0;i!=grid->nx;++i){
+        gc_pos.x = i*lx/(grid->nx-1) + grid->x_min;
         for(decltype(grid->ny) j=0;j!=grid->ny;++j){
+            gc_pos.y = j*ly/(grid->ny-1) + grid->y_min;
             for(decltype(grid->nz) k=0;k!=grid->nz;++k){
-                gc_pos = vec3 {i*lx/(grid->nx-1) + grid->x_min,
-                    j*ly/(grid->ny-1) + grid->y_min,
-                    k*lz/(grid->nz-1) + grid->z_min};
+                gc_pos.z = k*lz/(grid->nz-1) + grid->z_min;
                 tmp_vec = breg(gc_pos,par);
                 unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k)};
                 grid->reg_b_x[idx] = tmp_vec.x;
@@ -126,68 +126,6 @@ void Breg::write_grid(Pond *par, Grid_breg *grid){
             }
         }
     }
-}
-
-/* wmap-3yr */
-vec3 Bwmap::breg(const vec3 &pos,Pond *par){
-    vec3 b_vec3 {0.,0.,0.};
-    const double r {sqrt(pos.x*pos.x + pos.y*pos.y)};
-    if (r>(20.*CGS_U_kpc) or r<(3.*CGS_U_kpc )) {
-        return b_vec3;
-    }
-    // units
-    const double b0 {par->bwmap[0]*CGS_U_muGauss};
-    const double psi0 {par->bwmap[1]*CGS_U_pi/180.};
-    const double psi1 {par->bwmap[2]*CGS_U_pi/180.};
-    const double chi0 {par->bwmap[3]*CGS_U_pi/180.};
-    const double phi {atan2(pos.y,pos.x)};
-    const double psi {psi0 + psi1*log(r/(8.*CGS_U_kpc))};
-    const double chi {chi0*tanh(pos.z/(1.*CGS_U_kpc))};
-    const vec3 b_cyl {b0*sin(psi)*cos(chi),
-        b0*cos(psi)*cos(chi),
-        b0*sin(chi)};
-    toolkit::Cyl2Cart(phi,b_cyl,b_vec3);
-    return b_vec3;
-}
-
-/* local */
-vec3 Blocal::breg(const vec3 &pos, Pond *par){
-    // units
-    const double bd {par->blocal[0]*CGS_U_muGauss};
-    const double l0 {par->blocal[1]*CGS_U_pi/180.};
-    const double z0 {par->blocal[2]*CGS_U_kpc};
-    const double bn {par->blocal[3]*CGS_U_muGauss};
-    const double bs {par->blocal[4]*CGS_U_muGauss};
-    // sylindrical coordinates
-    double r_cyl, phi, z;
-    toolkit::cart_coord2cyl_coord(pos,r_cyl,phi,z);
-    // disk-halo scaling
-    const double L {exp(-fabs(z)/z0)};
-    // disk
-    // we ignore global r scaling of disk field
-    vec3 b_tot {bd*L*cos(l0),
-        bd*L*sin(l0),
-        0};
-    // poloidal
-    // constant field, 2 param
-    if(z>0){
-        b_tot.z += bn;
-    }
-    else{
-        b_tot.z += bs;
-    }
-    //toroidal
-    /*
-    if(z>0){
-        b_tot.x += -bn*sin(phi)*(1.-L);
-        b_tot.y += bn*cos(phi)*(1.-L);
-    }
-    else{
-        b_tot.x += -bs*sin(phi)*(1.-L);
-        b_tot.y += bs*cos(phi)*(1.-L);
-    }
-    */
-    return b_tot;
 }
 
 // END

@@ -10,8 +10,8 @@
 #include <fftw3.h>
 #include <vec3.h>
 #include <vector>
-#include "class_pond.h"
-#include "class_grid.h"
+#include "pond.h"
+#include "grid.h"
 
 class Breg{
     public:
@@ -43,14 +43,6 @@ class Bwmap final : public Breg {
     public:
     Bwmap(void) = default;
     virtual ~Bwmap(void) = default;
-    vec3 breg(const vec3 &,Pond *) override;
-};
-
-// Local
-class Blocal final : public Breg {
-    public:
-    Blocal(void) = default;
-    virtual ~Blocal(void) = default;
     vec3 breg(const vec3 &,Pond *) override;
 };
 

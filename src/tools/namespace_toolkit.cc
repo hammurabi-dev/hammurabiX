@@ -222,12 +222,5 @@ namespace toolkit {
         return (th_id + tv.tv_sec + tv.tv_usec);
     }
     
-    // offer time stamp
-    void timestamp(void){
-        time_t ltime; // calendar time
-        ltime = time(NULL); // get current cal time
-        cout<<asctime(localtime(&ltime))<<endl;
-    }
-    
 }
 // END

@@ -104,7 +104,6 @@ namespace toolkit {
     vec3 warp(const vec3 &);
     
     unsigned long int random_seed(void);
-    void timestamp(void);
 }
 
 #endif

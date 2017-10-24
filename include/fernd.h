@@ -11,10 +11,10 @@
 #include <vec3.h>
 #include <vector>
 #include <gsl/gsl_integration.h>
-#include "class_pond.h"
-#include "class_grid.h"
+#include "pond.h"
+#include "grid.h"
 #include "cgs_units_file.h"
-#include "class_fe.h"
+#include "fe.h"
 
 class FErnd{
     public:

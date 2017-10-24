@@ -9,14 +9,14 @@
 #include <cstdlib>
 #include <memory>
 
-#include "class_pond.h"
-#include "class_grid.h"
-#include "class_int.h"
-#include "class_breg.h"
-#include "class_brnd.h"
-#include "class_cre.h"
-#include "class_fe.h"
-#include "class_fernd.h"
+#include "pond.h"
+#include "grid.h"
+#include "integrator.h"
+#include "breg.h"
+#include "brnd.h"
+#include "cre.h"
+#include "fe.h"
+#include "fernd.h"
 #include "namespace_toolkit.h"
 // timer
 #include <sys/time.h>
@@ -82,10 +82,6 @@ int main(int , char **argv) {
     else if(bregtype=="WMAP"){
         cout<<"INFO: USING WMAP3YR REGUALR B MODEL"<<endl;
         breg = new Bwmap();
-    }
-    else if(bregtype=="Local"){
-        cout<<"INFO: USING LOCAL REGULAR B TESTING MODEL"<<endl;
-        breg = new Blocal();
     }
     else{return EXIT_FAILURE;}
     // if export to file

@@ -10,12 +10,12 @@
 #include <omp.h>
 #include <string>
 #include <healpix_map.h>
-#include "class_breg.h"
-#include "class_brnd.h"
-#include "class_cre.h"
-#include "class_fe.h"
-#include "class_fernd.h"
-#include "class_pond.h"
+#include "breg.h"
+#include "brnd.h"
+#include "cre.h"
+#include "fe.h"
+#include "fernd.h"
+#include "pond.h"
 
 
 class Integrator {
