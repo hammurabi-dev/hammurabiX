@@ -6,7 +6,7 @@
 #include <gsl/gsl_randist.h>
 #include <string>
 #include <fstream>
-#include "fe.h"
+#include "fereg.h"
 #include "pond.h"
 #include "grid.h"
 #include "namespace_toolkit.h"
@@ -14,7 +14,7 @@
 
 using namespace std;
 
-double FE::get_density(const vec3 &pos, Pond *par, Grid_fe *grid){
+double FEreg::get_density(const vec3 &pos, Pond *par, Grid_fereg *grid){
     if(grid->read_permission){
         return read_grid(pos,grid);
     }
@@ -26,7 +26,7 @@ double FE::get_density(const vec3 &pos, Pond *par, Grid_fe *grid){
 // not recommended to use without enough computing source
 // recommend to use this once (replace density in write_grid) if no
 // free parameters in FE
-double FE::density_blur(const vec3 &pos, Pond *par, Grid_fe *grid){
+double FEreg::density_blur(const vec3 &pos, Pond *par, Grid_fereg *grid){
     double ne_blur {0.};
     // element value in each thread
     double element {0.};
@@ -57,7 +57,7 @@ double FE::density_blur(const vec3 &pos, Pond *par, Grid_fe *grid){
     return ne_blur/step;
 }
 
-double FE::density(const vec3 &, Pond *){
+double FEreg::density(const vec3 &, Pond *){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -66,7 +66,7 @@ double FE::density(const vec3 &, Pond *){
     return 0.;
 }
 
-double FE::read_grid(const vec3 &pos, Grid_fe *grid){
+double FEreg::read_grid(const vec3 &pos, Grid_fereg *grid){
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
     if (tmp<1 or tmp>grid->nx-1) { return 0.;}
     decltype(grid->nx) xl {(unsigned int)floor(tmp)};
@@ -124,7 +124,7 @@ double FE::read_grid(const vec3 &pos, Grid_fe *grid){
     return fe;
 }
 
-void FE::write_grid(Pond *par, Grid_fe *grid){
+void FEreg::write_grid(Pond *par, Grid_fereg *grid){
     if(!grid->write_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl

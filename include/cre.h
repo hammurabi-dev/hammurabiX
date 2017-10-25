@@ -12,7 +12,7 @@
 #include "grid.h"
 
 class CRE{
-    public:
+public:
     CRE(void) = default;
     virtual ~CRE(void) = default;
     /*@get_emissivity
@@ -24,9 +24,21 @@ class CRE{
     
 };
 
+// verification
+class CRE_verify : public CRE{
+public:
+    CRE_verify(void) = default;
+    virtual ~CRE_verify(void) = default;
+    double get_emissivity(const vec3 &,Pond *,Grid_cre *,const double &,const bool &) override;
+private:
+    double flux(const vec3 &,Pond *,const double &);
+    void flux_param(const vec3 &,Pond *,double &,double &);
+    void write_grid(Pond *,Grid_cre *) override;
+};
+
 // Analytical CRE
 class CRE_ana : public CRE{
-    public:
+public:
     CRE_ana(void) = default;
     virtual ~CRE_ana(void) = default;
     /*@CRE_ana(vector)
@@ -34,7 +46,7 @@ class CRE_ana : public CRE{
      */
     //CRE_ana(const std::vector<double>&,Pond *);
     double get_emissivity(const vec3 &,Pond *,Grid_cre *,const double &,const bool &) override;
-    private:
+private:
     /*@flux
      * return CRE flux at given CRE energy
      * input CRE energy at CGS units
@@ -53,11 +65,11 @@ class CRE_ana : public CRE{
 
 // Numerical CRE flux stored in grid_cre
 class CRE_num final: public CRE{
-    public:
+public:
     CRE_num(void) = default;
     virtual ~CRE_num(void) = default;
     double get_emissivity(const vec3 &,Pond *,Grid_cre *,const double &,const bool &) override;
-    private:
+private:
     /*@read_grid
      * read CRE flux from grid at given position
      * (E_index, sylindrical_r, sylindrical_z) with {r,z} in cgs units

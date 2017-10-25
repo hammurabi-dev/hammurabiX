@@ -14,16 +14,16 @@
 #include "pond.h"
 #include "grid.h"
 #include "cgs_units_file.h"
-#include "fe.h"
+#include "fereg.h"
 
 class FErnd{
-    public:
+public:
     FErnd(void) = default;
     virtual ~FErnd(void) = default;
     virtual double get_fernd(const vec3 &,Grid_fernd *);
     virtual double read_grid(const vec3 &,Grid_fernd *);
     virtual void write_grid_iso(Pond *,Grid_fernd *);
-    virtual void write_grid_ani(Pond *,FE *,Grid_fe *,Grid_fernd *);
+    virtual void write_grid_ani(Pond *,FEreg *,Grid_fereg *,Grid_fernd *);
     virtual double fe_spec(const double &,Pond *);
     /*@rescal_fact
      * spatial rescaling factor for variance <n^2>
@@ -33,12 +33,12 @@ class FErnd{
 
 // isotropic turbulent field
 class FErnd_iso : public FErnd{
-    public:
+public:
     FErnd_iso(void) = default;
     virtual ~FErnd_iso(void) = default;
     double get_fernd(const vec3 &,Grid_fernd *) override;
     void write_grid_iso(Pond *,Grid_fernd *) override;
-    protected:
+protected:
     void complex2real(const fftw_complex *,double *,const unsigned long int &);
 };
 

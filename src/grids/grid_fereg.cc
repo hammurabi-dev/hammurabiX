@@ -16,7 +16,7 @@
 using namespace tinyxml2;
 using namespace std;
 
-Grid_fe::Grid_fe(string file_name){
+Grid_fereg::Grid_fereg(string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("fe_grid")};
@@ -31,7 +31,7 @@ Grid_fe::Grid_fe(string file_name){
     doc = nullptr;
 }
 
-void Grid_fe::build_grid(XMLDocument *doc){
+void Grid_fereg::build_grid(XMLDocument *doc){
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box")};
     // Cartesian grid
     nx = FetchUnsigned(ptr,"nx");
@@ -51,12 +51,12 @@ void Grid_fe::build_grid(XMLDocument *doc){
     fe = new double[full_size];
 }
 
-void Grid_fe::clean_grid(void){
+void Grid_fereg::clean_grid(void){
     delete [] fe;
     fe = nullptr;
 }
 
-void Grid_fe::export_grid(void){
+void Grid_fereg::export_grid(void){
     if(filename.empty()){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -98,7 +98,7 @@ void Grid_fe::export_grid(void){
     exit(0);
 }
 
-void Grid_fe::import_grid(void){
+void Grid_fereg::import_grid(void){
     if(filename.empty()){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl

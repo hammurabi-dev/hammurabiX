@@ -10,7 +10,7 @@
 #include "pond.h"
 #include "grid.h"
 #include "fernd.h"
-#include "fe.h"
+#include "fereg.h"
 #include "cgs_units_file.h"
 #include "namespace_toolkit.h"
 

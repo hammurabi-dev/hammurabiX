@@ -94,10 +94,16 @@
                     <psi1 value="0.9"/>
                     <chi0 value="25.0"/>
                 </WMAP>
-                
+                <!-- verification -->
+                <Verify>
+                    <b0 value="2.0"/>
+                    <l0 value="70"/>
+                    <r value="0.3"/>
+                </Verify>
             </Regular>
             <!-- turbulent fields -->
-            <Random cue="1" type="Iso" seed="-1">
+            <!-- seed works for IMAGINE -->
+            <Random cue="0" type="Iso" seed="-1">
                 <!-- isotropic -->
                 <Iso>
                     <rms value="0.1"/> <!-- norm at k0 -->
@@ -124,81 +130,88 @@
         </MagneticField>
         
         <!-- free electron field -->
-        <FreeElectron type="YMW16">
-            <!-- YMW16 -->
-            <YMW16>
-                <Warp>
-                    <R_warp value="8.4"/>
-                    <Gamma_w value="0.14"/>
-                    <R0 value="8.3"/>
-                </Warp>
-                <ThickDisk>
-                    <Ad value="2500"/>
-                    <Bd value="15000"/>
-                    <n1 value="0.01132"/>
-                    <H1 value="1673"/>
-                </ThickDisk>
-                <ThinDisk>
-                    <A2 value="1200"/>
-                    <B2 value="4000"/>
-                    <n2 value="0.404"/>
-                    <K2 value="1.54"/>
-                </ThinDisk>
-                <!-- using HH14 SpiralArms -->
-                <SpiralArm>
-                    <B2s value="4000"/>
-                    <Ele_arm_0 value="0.135000"/>
-                    <Ele_arm_1 value="0.129000"/>
-                    <Ele_arm_2 value="0.103000"/>
-                    <Ele_arm_3 value="0.116000"/>
-                    <Ele_arm_4 value="0.005700"/>
-                    <Wid_arm_0 value="300"/>
-                    <Wid_arm_1 value="500"/>
-                    <Wid_arm_2 value="300"/>
-                    <Wid_arm_3 value="500"/>
-                    <Wid_arm_4 value="300"/>
-                    <Aa value="11680"/>
-                    <Ka value="5.015"/>
-                    <ncn value="2.4"/>
-                    <wcn value="8.2"/>
-                    <thetacn value="109"/>
-                    <nsg value="0.626"/>
-                    <wsg value="20"/>
-                    <thetasg value="75.8"/>
-                </SpiralArm>
-                <GalCenter>
-                    <ngc value="6.2"/>
-                    <Agc value="160"/>
-                    <Hgc value="35"/>
-                </GalCenter>
-                <GumNebula>
-                    <ngn value="1.84"/>
-                    <Wgn value="15.1"/>
-                    <Agn value="125.8"/>
-                    <Kgn value="1.4"/>
-                </GumNebula>
-                <LocalBubble>
-                    <J_LB value="0.480"/>
-                    <nlb1 value="1.094"/>
-                    <detlb1 value="28.4"/>
-                    <wlb1 value="14.2"/>
-                    <hlb1 value="112.9"/>
-                    <thetalb1 value="195.4"/>
-                    <nlb2 value="2.33"/>
-                    <detlb2 value="14.7"/>
-                    <wlb2 value="15.6"/>
-                    <hlb2 value="43.6"/>
-                    <thetalb2 value="278.2"/>
-                </LocalBubble>
-                <LoopI>
-                    <nLI value="1.907"/>
-                    <RLI value="80.0"/>
-                    <WLI value="15.0"/>
-                    <detthetaLI value="30.0"/>
-                    <thetaLI value="40.0"/>
-                </LoopI>
-                
-            </YMW16>
+        <FreeElectron>
+            <Regular type="YMW16">
+                <!-- YMW16 -->
+                <YMW16>
+                    <Warp>
+                        <R_warp value="8.4"/>
+                        <Gamma_w value="0.14"/>
+                        <R0 value="8.3"/>
+                    </Warp>
+                    <ThickDisk>
+                        <Ad value="2500"/>
+                        <Bd value="15000"/>
+                        <n1 value="0.01132"/>
+                        <H1 value="1673"/>
+                    </ThickDisk>
+                    <ThinDisk>
+                        <A2 value="1200"/>
+                        <B2 value="4000"/>
+                        <n2 value="0.404"/>
+                        <K2 value="1.54"/>
+                    </ThinDisk>
+                    <!-- using HH14 SpiralArms -->
+                    <SpiralArm>
+                        <B2s value="4000"/>
+                        <Ele_arm_0 value="0.135000"/>
+                        <Ele_arm_1 value="0.129000"/>
+                        <Ele_arm_2 value="0.103000"/>
+                        <Ele_arm_3 value="0.116000"/>
+                        <Ele_arm_4 value="0.005700"/>
+                        <Wid_arm_0 value="300"/>
+                        <Wid_arm_1 value="500"/>
+                        <Wid_arm_2 value="300"/>
+                        <Wid_arm_3 value="500"/>
+                        <Wid_arm_4 value="300"/>
+                        <Aa value="11680"/>
+                        <Ka value="5.015"/>
+                        <ncn value="2.4"/>
+                        <wcn value="8.2"/>
+                        <thetacn value="109"/>
+                        <nsg value="0.626"/>
+                        <wsg value="20"/>
+                        <thetasg value="75.8"/>
+                    </SpiralArm>
+                    <GalCenter>
+                        <ngc value="6.2"/>
+                        <Agc value="160"/>
+                        <Hgc value="35"/>
+                    </GalCenter>
+                    <GumNebula>
+                        <ngn value="1.84"/>
+                        <Wgn value="15.1"/>
+                        <Agn value="125.8"/>
+                        <Kgn value="1.4"/>
+                    </GumNebula>
+                    <LocalBubble>
+                        <J_LB value="0.480"/>
+                        <nlb1 value="1.094"/>
+                        <detlb1 value="28.4"/>
+                        <wlb1 value="14.2"/>
+                        <hlb1 value="112.9"/>
+                        <thetalb1 value="195.4"/>
+                        <nlb2 value="2.33"/>
+                        <detlb2 value="14.7"/>
+                        <wlb2 value="15.6"/>
+                        <hlb2 value="43.6"/>
+                        <thetalb2 value="278.2"/>
+                    </LocalBubble>
+                    <LoopI>
+                        <nLI value="1.907"/>
+                        <RLI value="80.0"/>
+                        <WLI value="15.0"/>
+                        <detthetaLI value="30.0"/>
+                        <thetaLI value="40.0"/>
+                    </LoopI>
+                </YMW16>
+                <!-- verification -->
+                <Verify>
+                    <n0 value="0.01"/> <!-- pccm -->
+                    <r0 value="20.0"/> <!-- kpc -->
+                    <z0 value="0.1"/> <!-- kpc -->
+                </Verify>
+            </Regular>
             <!-- turbulent free electron -->
             <Random cue="0" type="Iso" seed="-1">
                 <Iso>
@@ -240,14 +253,21 @@
     
     <!-- analytic/numeric CRE -->
     <CRE type="Analytic">
+        <!-- verification -->
+        <Verify>
+            <alpha value="3.0"/>
+            <r0 value="20.0"/> <!-- kpc -->
+            <z0 value="1.0"/> <!-- kpc -->
+            <je value="0.25"/> <!-- local CRE flux norm factor @ 10GeV -->
+        </Verify>
+        
         <Analytic>
             <!-- CRE spectral index: -alpha+beta*r+theta*z, Galactic cylindric frame -->
             <alpha value="3.0"/>
             <beta value="0.0"/>
             <theta value="0.0"/>
-            
-            <hr value="5.0"/>
-            <hz value="1.0"/>
+            <hr value="5.0"/> <!-- kpc -->
+            <hz value="1.0"/> <!-- kpc -->
             <je value="0.25"/> <!-- local CRE flux norm factor @ 10GeV -->
         </Analytic>
         

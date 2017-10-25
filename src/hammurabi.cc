@@ -15,7 +15,7 @@
 #include "breg.h"
 #include "brnd.h"
 #include "cre.h"
-#include "fe.h"
+#include "fereg.h"
 #include "fernd.h"
 #include "namespace_toolkit.h"
 // timer
@@ -35,7 +35,7 @@ int main(int , char **argv) {
     
     // BUILD SPECIFIED MODULES
     Pond *par = new Pond(file_name);
-    Grid_fe *grid_fe = new Grid_fe(file_name);
+    Grid_fereg *grid_fereg = new Grid_fereg(file_name);
     Grid_breg *grid_breg = new Grid_breg(file_name);
     Grid_brnd *grid_brnd = new Grid_brnd(file_name);
     Grid_fernd *grid_fernd = new Grid_fernd(file_name);
@@ -44,32 +44,36 @@ int main(int , char **argv) {
     cout<<"INFO: ALL GRIDS BUILT"<<endl;
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
-    FE *fe; Breg *breg; FErnd *fernd; Brnd *brnd; CRE *cre;
+    FEreg *fereg; Breg *breg; FErnd *fernd; Brnd *brnd; CRE *cre;
     // reminder for cleaning up allocated grid memory
-    bool fe_reminder {false};
+    bool fereg_reminder {false};
     bool breg_reminder {false};
     bool fernd_reminder {false};
     bool brnd_reminder {false};
     bool cre_reminder {false};
     
     // regular FE field
-    string fetype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->Attribute("type")};
+    string fetype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Regular")->Attribute("type")};
     // if import from file, no need to build specific fe class
-    if(grid_fe->read_permission){
-        grid_fe->import_grid();
-        fe = new FE();
-        fe_reminder = true;
+    if(grid_fereg->read_permission){
+        grid_fereg->import_grid();
+        fereg = new FEreg();
+        fereg_reminder = true;
     }
     else if(fetype=="YMW16"){
         cout<<"INFO: USING YMW16 FE MODEL"<<endl;
-        fe = new YMW16();
+        fereg = new FEreg_ymw16();
+    }
+    else if(fetype=="Verify"){
+        cout<<"INFO: USING VERIFICATION FE MODEL"<<endl;
+        fereg = new FEreg_verify();
     }
     else{return EXIT_FAILURE;}
     // if export to file
-    if(grid_fe->write_permission){
+    if(grid_fereg->write_permission){
         // write out binary file and exit
-        fe->write_grid(par,grid_fe);
-        grid_fe->export_grid();
+        fereg->write_grid(par,grid_fereg);
+        grid_fereg->export_grid();
     }
     
     // regular B field, must before random B field
@@ -81,7 +85,11 @@ int main(int , char **argv) {
     }
     else if(bregtype=="WMAP"){
         cout<<"INFO: USING WMAP3YR REGUALR B MODEL"<<endl;
-        breg = new Bwmap();
+        breg = new Breg_wmap();
+    }
+    else if(bregtype=="Verify"){
+        cout<<"INFO: USING VERIFICATION REGUALR B MODEL"<<endl;
+        breg = new Breg_verify();
     }
     else{return EXIT_FAILURE;}
     // if export to file
@@ -159,6 +167,10 @@ int main(int , char **argv) {
         cout<<"INFO: USING ANALYTIC CRE"<<endl;
         cre = new CRE_ana();
     }
+    else if(cretype=="Verify"){
+        cout<<"INFO: USING VERIFICATION CRE"<<endl;
+        cre = new CRE_verify();
+    }
     else if(cretype=="Numeric"){
         cout<<"INFO: USING NUMERIC CRE"<<endl;
         grid_cre->import_grid();
@@ -176,7 +188,7 @@ int main(int , char **argv) {
     Integrator *intobj = new Integrator();
     cout<<"...ALL MODULES BUILT..."<<endl;
     
-    intobj->write_grid(breg,brnd,fe,fernd,cre,grid_breg,grid_brnd,grid_fe,grid_fernd,grid_cre,grid_int,par);
+    intobj->write_grid(breg,brnd,fereg,fernd,cre,grid_breg,grid_brnd,grid_fereg,grid_fernd,grid_cre,grid_int,par);
     cout<<"...PRODUCING MAPS..."<<endl;
     grid_int->export_grid();
     
@@ -190,7 +202,7 @@ int main(int , char **argv) {
         grid_int->sim_sync_name = e->Attribute("filename");
         
         cout<<"...MULTI OUTPUT MODE..."<<endl;
-        intobj->write_grid(breg,brnd,fe,fernd,cre,grid_breg,grid_brnd,grid_fe,grid_fernd,grid_cre,grid_int,par);
+        intobj->write_grid(breg,brnd,fereg,fernd,cre,grid_breg,grid_brnd,grid_fereg,grid_fernd,grid_cre,grid_int,par);
         cout<<"...PRODUCING MAPS..."<<endl;
         grid_int->export_grid();
     }
@@ -200,12 +212,12 @@ int main(int , char **argv) {
     cout<<"...ENDING HAMMURABI..."<<endl;
     if(breg_reminder) grid_breg->clean_grid();
     if(brnd_reminder) grid_brnd->clean_grid();
-    if(fe_reminder) grid_fe->clean_grid();
+    if(fereg_reminder) grid_fereg->clean_grid();
     if(fernd_reminder) grid_fernd->clean_grid();
     if(cre_reminder) grid_cre->clean_grid();
     delete par; delete grid_breg; delete grid_brnd;
-    delete grid_fe;delete grid_fernd; delete grid_cre; delete grid_int;
-    delete fe;delete fernd; delete breg; delete brnd;
+    delete grid_fereg;delete grid_fernd; delete grid_cre; delete grid_int;
+    delete fereg;delete fernd; delete breg; delete brnd;
     delete cre; delete doc; delete intobj;
     
     cout<<"INFO:TIME ELAPSE "<<RCPU_TIME-t_start<<"sec"<<endl;

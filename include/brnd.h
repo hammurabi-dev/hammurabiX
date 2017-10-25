@@ -17,7 +17,7 @@
 #include "breg.h"
 
 class Brnd{
-    public:
+public:
     Brnd(void) = default;
     virtual ~Brnd(void) = default;
     /*@get_brnd
@@ -52,13 +52,13 @@ class Brnd{
 
 // isotropic turbulent field
 class Brnd_iso : public Brnd{
-    public:
+public:
     Brnd_iso(void) = default;
     virtual ~Brnd_iso(void) = default;
     vec3 get_brnd(const vec3 &,Grid_brnd *) override;
     void write_grid_iso(Pond *,Grid_brnd *) override;
     
-    protected:
+protected:
     /*@complex2real
      * fetch real b(x) values from in-plane DFT
      */
@@ -72,12 +72,12 @@ class Brnd_iso : public Brnd{
 
 // global anisotropic random field
 class Brnd_anig final : public Brnd_iso{
-    public:
+public:
     Brnd_anig(void) = default;
     virtual ~Brnd_anig(void) = default;
     void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *) override;
     
-    private:
+private:
     /*@anisotropy
      * calculate anisotropy at given point
      */
@@ -87,13 +87,13 @@ class Brnd_anig final : public Brnd_iso{
 // local anisotropic random field
 
 class Brnd_anil final : public Brnd_iso{
-    public:
+public:
     Brnd_anil(void) = default;
     virtual ~Brnd_anil(void) = default;
     // use Breg::breg function
     void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *) override;
     
-    private:
+private:
     /*@anisotropy
      * offer anisotropy tensor
      */

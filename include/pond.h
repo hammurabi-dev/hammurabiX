@@ -15,7 +15,7 @@
 using namespace tinyxml2;
 
 class Pond {
-    public:
+public:
     Pond(std::string);
     virtual ~Pond(void) = default;
     // observer
@@ -28,7 +28,13 @@ class Pond {
         double psi0;
         double psi1;
         double chi0;
-    }bwmap;
+    }breg_wmap;
+    // verify
+    struct param_breg_verify{
+        double b0;
+        double l0;
+        double r;
+    }breg_verify;
     // isotropic
     //std::vector<double> brnd_iso;
     struct param_brnd_iso{
@@ -57,7 +63,7 @@ class Pond {
     }brnd_scal;
     // FE
     // ymw16
-    struct param_fe_ymw16{
+    struct param_fereg_ymw16{
         double R_warp, R0;
         double t0_Gamma_w;
         double t1_Ad, t1_Bd, t1_n1, t1_H1;
@@ -67,7 +73,12 @@ class Pond {
         double t5_Kgn, t5_ngn, t5_Wgn, t5_Agn;
         double t6_J_LB, t6_nlb1, t6_detlb1, t6_wlb1, t6_hlb1, t6_thetalb1, t6_nlb2, t6_detlb2, t6_wlb2, t6_hlb2, t6_thetalb2;
         double t7_nLI, t7_RLI, t7_WLI, t7_detthetaLI, t7_thetaLI;
-    }fe_ymw16;
+    }fereg_ymw16;
+    struct param_fereg_verify{
+        double n0;
+        double z0;
+        double r0;
+    }fereg_verify;
     // gaussian random
     //std::vector<double> fernd_iso;
     struct param_fernd_iso{
@@ -93,8 +104,14 @@ class Pond {
         double hz;
         double je;
     }cre_ana;
+    struct param_cre_verify{
+        double alpha;
+        double r0;
+        double z0;
+        double je;
+    }cre_verify;
     
-    private:
+private:
     void b_pond(XMLDocument *);
     void fe_pond(XMLDocument *);
     void cre_pond(XMLDocument *);

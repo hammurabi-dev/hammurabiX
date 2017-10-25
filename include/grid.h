@@ -21,7 +21,7 @@
 using namespace tinyxml2;
 
 class Grid{
-    public:
+public:
     Grid(void) = default;
     virtual ~Grid(void) = default;
     /*@build_grid
@@ -41,7 +41,7 @@ class Grid{
      */
     virtual void import_grid(void);
     
-    protected:
+protected:
     //auxiliary functions
     std::string FetchString(XMLElement *,std::string);
     int FetchInt(XMLElement *,std::string);
@@ -52,7 +52,7 @@ class Grid{
 
 // regular magnetic field
 class Grid_breg final : public Grid{
-    public:
+public:
     Grid_breg(std::string);
     virtual ~Grid_breg(void) = default;
     void build_grid(XMLDocument *) override;
@@ -73,7 +73,7 @@ class Grid_breg final : public Grid{
 
 // turbulent magnetic field
 class Grid_brnd final : public Grid{
-    public:
+public:
     Grid_brnd(std::string);
     virtual ~Grid_brnd(void) = default;
     void build_grid(XMLDocument *) override;
@@ -97,10 +97,10 @@ class Grid_brnd final : public Grid{
 };
 
 // free electron field
-class Grid_fe final : public Grid{
-    public:
-    Grid_fe(std::string);
-    virtual ~Grid_fe(void) = default;
+class Grid_fereg final : public Grid{
+public:
+    Grid_fereg(std::string);
+    virtual ~Grid_fereg(void) = default;
     void build_grid(XMLDocument *) override;
     void clean_grid(void) override;
     void export_grid(void) override;
@@ -118,7 +118,7 @@ class Grid_fe final : public Grid{
 
 // turbulent free electron field
 class Grid_fernd final : public Grid{
-    public:
+public:
     Grid_fernd(std::string);
     virtual ~Grid_fernd(void) = default;
     void build_grid(XMLDocument *) override;
@@ -141,7 +141,7 @@ class Grid_fernd final : public Grid{
 
 // cosmic ray electron field
 class Grid_cre final : public Grid{
-    public:
+public:
     Grid_cre(std::string);
     virtual ~Grid_cre(void) = default;
     void build_grid(XMLDocument *) override;
@@ -165,7 +165,7 @@ class Grid_cre final : public Grid{
 
 // observable field
 class Grid_int final : public Grid{
-    public:
+public:
     Grid_int(std::string);
     virtual ~Grid_int(void) = default;
     void build_grid(XMLDocument *) override;

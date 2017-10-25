@@ -14,10 +14,10 @@
 #include "grid.h"
 
 class Breg{
-    public:
+public:
     Breg(void) = default;
     virtual ~Breg(void) = default;
-    /* 
+    /*
      *@get_breg
      * get regular magnetic field at gc position
      * read_grid regardless of field type if permitted
@@ -38,11 +38,19 @@ class Breg{
     virtual void write_grid(Pond *,Grid_breg *);
 };
 
+// verify
+class Breg_verify final : public Breg{
+public:
+    Breg_verify(void) = default;
+    virtual ~Breg_verify(void) = default;
+    vec3 breg(const vec3 &,Pond *) override;
+};
+
 // WMAP-3yr
-class Bwmap final : public Breg {
-    public:
-    Bwmap(void) = default;
-    virtual ~Bwmap(void) = default;
+class Breg_wmap final : public Breg {
+public:
+    Breg_wmap(void) = default;
+    virtual ~Breg_wmap(void) = default;
     vec3 breg(const vec3 &,Pond *) override;
 };
 

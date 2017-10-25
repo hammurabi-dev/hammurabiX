@@ -17,58 +17,61 @@ using namespace std;
 // analytical CRE flux
 // give values to spectral index and norm factor, in cgs units
 // analytical CRE integration use N(\gamma)
-void CRE_ana::flux_param(const vec3 &pos,Pond *par,double &index,double &norm){
+void CRE_verify::flux_param(const vec3 &pos,Pond *par,double &index,double &norm){
+    if(fabs(pos.z) > par->cre_verify.z0*CGS_U_kpc){
+        index = 0;
+        norm = 0;
+        return;
+    }
+    else if(pos.x*pos.x+pos.y*pos.y > par->cre_verify.r0*CGS_U_kpc*par->cre_verify.r0*CGS_U_kpc){
+        index = 0.;
+        norm = 0.;
+        return;
+    }
     // units
-    const double alpha {par->cre_ana.alpha};
-    const double beta {par->cre_ana.beta};
-    const double theta {par->cre_ana.theta};
-    const double hr {par->cre_ana.hr*CGS_U_kpc};
-    const double hz {par->cre_ana.hz*CGS_U_kpc};
+    const double alpha {par->cre_verify.alpha};
+    //const double r0 {par->cre_verify.r0*CGS_U_kpc};
+    //const double z0 {par->cre_verify.z0*CGS_U_kpc};
     // je is in [GeV m^2 s sr]^-1 units
-    const double je {par->cre_ana.je};
-    const double R0 {sqrt(par->SunPosition.x*par->SunPosition.x+par->SunPosition.y*par->SunPosition.y)};
-    const double r {sqrt(pos.x*pos.x+pos.y*pos.y)};
-    const double z {fabs(pos.z)};
+    const double je {par->cre_verify.je};
     const double cre_gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
     const double cre_beta_10 {sqrt(1.-1./cre_gamma_10)};
     // from PHI(E) to N(\gamma) convertion
     const double unit_factor {(4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*cre_beta_10)};
     // MODEL DEPENDENT PARAMETERS
-    const double norm_factor {je*pow(cre_gamma_10,alpha-beta*R0)*exp(R0/hr)};
-    const double scal_factor {exp(-r/hr)*(1./pow(cosh(z/hz),2.))};
+    const double norm_factor {je*pow(cre_gamma_10,alpha)};
+    //const double scal_factor {exp(-r/hr)*(1./pow(cosh(z/hz),2.))};
     // this is changeable by users
-    index = -alpha+beta*r+theta*z;
+    index = -alpha;
     
-    norm = norm_factor*scal_factor*unit_factor;
+    norm = norm_factor*unit_factor;
 }
 
 // analytical modeling use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
-double CRE_ana::flux(const vec3 &pos,Pond *par,const double &En){
+double CRE_verify::flux(const vec3 &pos,Pond *par,const double &En){
+    if(fabs(pos.z) > par->cre_verify.z0*CGS_U_kpc){
+        return 0.;
+    }
+    else if(pos.x*pos.x+pos.y*pos.y > par->cre_verify.r0*CGS_U_kpc*par->cre_verify.r0*CGS_U_kpc){
+        return 0.;
+    }
     // units
-    const double alpha {par->cre_ana.alpha};
-    const double beta {par->cre_ana.beta};
-    const double theta {par->cre_ana.theta};
-    const double hr {par->cre_ana.hr*CGS_U_kpc};
-    const double hz {par->cre_ana.hz*CGS_U_kpc};
+    const double alpha {par->cre_verify.alpha};
     // je is in [GeV m^2 s sr]^-1 units
-    const double je {par->cre_ana.je};
-    const double R0 {sqrt(par->SunPosition.x*par->SunPosition.x+par->SunPosition.y*par->SunPosition.y)};
-    const double r {sqrt(pos.x*pos.x+pos.y*pos.y)};
-    const double z {fabs(pos.z)};
+    const double je {par->cre_verify.je};
     const double gamma {En/CGS_U_MEC2};
     const double cre_gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
     // converting from N to PHI
-    const double unit_factor {sqrt((1.-1./gamma)/(1.-1./cre_gamma_10))};
+    const double unit_factor {sqrt((gamma-1.)*cre_gamma_10/((cre_gamma_10-1.)*gamma))};
     // MODEL DEPENDENT PARAMETERS
     // CRE flux normalizaton factor at earth, model dependent
-    const double norm_factor {je*pow(cre_gamma_10,alpha-beta*R0)*exp(R0/hr)};
-    const double scal_factor {exp(-r/hr)*(1./pow(cosh(z/hz),2.))};
+    const double norm_factor {je*pow(cre_gamma_10,alpha)};
     
-    return norm_factor*scal_factor*unit_factor*pow(gamma,-alpha+beta*r+theta*z);
+    return norm_factor*unit_factor*pow(gamma,-alpha);
 }
 
-double CRE_ana::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper,const bool &cue){
+double CRE_verify::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper,const bool &cue){
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -101,7 +104,7 @@ double CRE_ana::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const do
 }
 
 // writing out CRE DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
-void CRE_ana::write_grid(Pond *par, Grid_cre *grid){
+void CRE_verify::write_grid(Pond *par, Grid_cre *grid){
     if(!grid->write_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl

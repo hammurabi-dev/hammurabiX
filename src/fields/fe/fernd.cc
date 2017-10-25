@@ -10,7 +10,7 @@
 #include "pond.h"
 #include "grid.h"
 #include "fernd.h"
-#include "fe.h"
+#include "fereg.h"
 #include "cgs_units_file.h"
 #include "namespace_toolkit.h"
 
@@ -125,7 +125,7 @@ void FErnd::write_grid_iso(Pond *,Grid_fernd *){
     exit(1);
 }
 
-void FErnd::write_grid_ani(Pond *,FE *,Grid_fe *,Grid_fernd *){
+void FErnd::write_grid_ani(Pond *,FEreg *,Grid_fereg *,Grid_fernd *){
     cerr<<"WAR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl

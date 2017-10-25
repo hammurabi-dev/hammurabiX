@@ -14,7 +14,7 @@
 #include "brnd.h"
 #include "cre.h"
 #include "integrator.h"
-#include "fe.h"
+#include "fereg.h"
 #include "fernd.h"
 #include "pond.h"
 #include "grid.h"
@@ -23,7 +23,7 @@
 
 using namespace std;
 
-void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fe *gfe,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Pond *par) {
+void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fereg *gfereg,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Pond *par) {
     // unsigned int, pre-calculated in gint
     unsigned int npix_sim {gint->npix_sim};
     if (gint->do_dm) {
@@ -104,7 +104,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,G
             }
             
             // core function!
-            radial_integration(shell_ref,ptg,observables,breg,brnd,fe,fernd,cre,gbreg,gbrnd,gfe,gfernd,gcre,gint,par);
+            radial_integration(shell_ref,ptg,observables,breg,brnd,fereg,fernd,cre,gbreg,gbrnd,gfereg,gfernd,gcre,gint,par);
             
             // assembling new shell
             if (gint->do_dm) {
@@ -143,7 +143,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,G
 }
 
 
-void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, struct_observables &pixobs,Breg *breg,Brnd *brnd,FE *fe,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fe *gfe,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Pond *par) {
+void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, struct_observables &pixobs,Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fereg *gfereg,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Pond *par) {
     // pass in fd, zero others
     double inner_shells_fd {0.};
     if (gint->do_fd or gint->do_sync) {inner_shells_fd=pixobs.fd;}
@@ -183,7 +183,7 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
         double B_per {toolkit::get_perp2LOS(B_vec,THE,PHI)};
         
         // FE field
-        double te {fe->get_density(pos,par,gfe)};
+        double te {fereg->get_density(pos,par,gfereg)};
         // add random field
         te += fernd->get_fernd(pos,gfernd);
         // to avoid negative value
