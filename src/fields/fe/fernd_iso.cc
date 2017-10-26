@@ -86,12 +86,12 @@ void FErnd_iso::write_grid_iso(Pond *par, Grid_fernd *grid){
         }
     }
     // get real elements, use auxiliary function
-    complex2real(grid->fftw_fe_k, grid->fftw_fe, grid->full_size);
+    complex2real(grid->fftw_fe_k, grid->fftw_fe.get(), grid->full_size);
     
 #ifndef NDEBUG
-    fe_var = toolkit::Variance(grid->fftw_fe, grid->full_size);
+    fe_var = toolkit::Variance(grid->fftw_fe.get(), grid->full_size);
     cout<< "FERND: Numerical RMS: "<<sqrt(fe_var)<<" pccm"<<endl;
-    //double fe_mean = toolkit::Mean(grid->fftw_fe,grid->full_size);
+    //double fe_mean = toolkit::Mean(grid->fftw_fe.get(),grid->full_size);
     //cout<<"FERND: Numrerical MEAN: "<<fe_mean<<"pccm"<<endl;
 #endif
 }

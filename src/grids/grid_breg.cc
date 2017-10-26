@@ -1,5 +1,6 @@
 #include <sstream>
 #include <iostream>
+#include <memory>
 #include <fftw3.h>
 #include <array>
 #include <string>
@@ -17,20 +18,19 @@ using namespace tinyxml2;
 using namespace std;
 
 Grid_breg::Grid_breg(string file_name){
-    XMLDocument *doc = new XMLDocument();
+    unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
     doc->LoadFile(file_name.c_str());
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("breg_grid")};
     read_permission = ptr->BoolAttribute("read");
     write_permission = ptr->BoolAttribute("write");
     // build up grid when have read or write permission
     if(read_permission or write_permission){
+#ifndef NDEBUG
         cout<<"IFNO: GRID_BREG I/O ACTIVE"<<endl;
+#endif
         filename = ptr->Attribute("filename");
-        build_grid(doc);
+        build_grid(doc.get());
     }
-    
-    delete doc;
-    doc = nullptr;
 }
 
 void Grid_breg::build_grid(XMLDocument *doc){
@@ -47,22 +47,15 @@ void Grid_breg::build_grid(XMLDocument *doc){
     y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
     z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
     z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
+#ifndef NDEBUG
     // memory check (double complex + double + double)
     const double bytes {full_size*(3.*8.)};
     cout<<"INFO: BREG REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
+#endif
     // real 3D regular b field
-    reg_b_x = new double[full_size];
-    reg_b_y = new double[full_size];
-    reg_b_z = new double[full_size];
-}
-
-void Grid_breg::clean_grid(void){
-    delete [] reg_b_x;
-    reg_b_x = nullptr;
-    delete [] reg_b_y;
-    reg_b_y = nullptr;
-    delete [] reg_b_z;
-    reg_b_z = nullptr;
+    reg_b_x = unique_ptr<double[]> (new double[full_size]);
+    reg_b_y = unique_ptr<double[]> (new double[full_size]);
+    reg_b_z = unique_ptr<double[]> (new double[full_size]);
 }
 
 void Grid_breg::export_grid(void){
@@ -99,8 +92,9 @@ void Grid_breg::export_grid(void){
     }
     output.close();
     // exit program
-    clean_grid();
+#ifndef NDEBUG
     cout<<"...REGULAR MAGNETIC FIELD EXPORTED AND CLEANED..."<<endl;
+#endif
     exit(0);
 }
 

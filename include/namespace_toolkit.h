@@ -1,10 +1,6 @@
 /*
  *@file: namespace_toolkit.h
- *@author: Jiaxin Wang
- *@email: jiwang@sissa.it
  *@brief: numerical tools
- *@origin: https://sourceforge.net/projects/hammurabicode/
- * we made several corrections/updates add several new tools
  */
 #ifndef HAMMURABI_TOOLKIT_H
 #define HAMMURABI_TOOLKIT_H

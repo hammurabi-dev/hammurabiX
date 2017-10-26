@@ -24,14 +24,6 @@ void Grid::build_grid(XMLDocument *){
     exit(1);
 }
 
-void Grid::clean_grid(void){
-    cerr<<"ERR:"<<__FILE__
-    <<" : in function "<<__func__<<endl
-    <<" at line "<<__LINE__<<endl
-    <<"DYNAMIC BINDING FAILURE"<<endl;
-    exit(1);
-}
-
 void Grid::export_grid(void){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl

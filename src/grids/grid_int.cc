@@ -1,5 +1,6 @@
 #include <sstream>
 #include <iostream>
+#include <memory>
 #include <fftw3.h>
 #include <array>
 #include <string>
@@ -18,12 +19,9 @@ using namespace std;
 
 /* line of sight integrator */
 Grid_int::Grid_int(string file_name){
-    XMLDocument *doc = new XMLDocument();
+    unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
     doc->LoadFile(file_name.c_str());
-    build_grid(doc);
-    
-    delete doc;
-    doc = nullptr;
+    build_grid(doc.get());
 }
 
 void Grid_int::build_grid(XMLDocument *doc){

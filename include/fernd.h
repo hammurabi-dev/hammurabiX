@@ -1,7 +1,5 @@
 /*
- *@file: class_fernd.h
- *@author: Jiaxin Wang
- *@email: jiwang@sissa.it
+ *@file: fernd.h
  *@brief: iso/aniso-tropic random free electron field generator
  */
 #ifndef HAMMURABI_FERND_H

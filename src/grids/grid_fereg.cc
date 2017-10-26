@@ -1,5 +1,6 @@
 #include <sstream>
 #include <iostream>
+#include <memory>
 #include <fftw3.h>
 #include <array>
 #include <string>
@@ -17,18 +18,18 @@ using namespace tinyxml2;
 using namespace std;
 
 Grid_fereg::Grid_fereg(string file_name){
-    XMLDocument *doc = new XMLDocument();
+    unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
     doc->LoadFile(file_name.c_str());
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("fe_grid")};
     read_permission = ptr->BoolAttribute("read");
     write_permission = ptr->BoolAttribute("write");
     if(read_permission or write_permission){
+#ifndef NDEBUG
         cout<<"IFNO: FE I/O ACTIVE"<<endl;
+#endif
         filename = ptr->Attribute("filename");
-        build_grid(doc);
+        build_grid(doc.get());
     }
-    delete doc;
-    doc = nullptr;
 }
 
 void Grid_fereg::build_grid(XMLDocument *doc){
@@ -45,15 +46,12 @@ void Grid_fereg::build_grid(XMLDocument *doc){
     y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
     z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
     z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
+#ifndef NDEBUG
     // memory check
     const double bytes {full_size*8.};
     cout<<"INFO: FE REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
-    fe = new double[full_size];
-}
-
-void Grid_fereg::clean_grid(void){
-    delete [] fe;
-    fe = nullptr;
+#endif
+    fe = unique_ptr<double[]> (new double[full_size]);
 }
 
 void Grid_fereg::export_grid(void){
@@ -93,8 +91,9 @@ void Grid_fereg::export_grid(void){
     }
     output.close();
     // exit program
-    clean_grid();
+#ifndef NDEBUG
     cout<<"...FREE ELECTRON FIELD EXPORTED AND CLEANED..."<<endl;
+#endif
     exit(0);
 }
 

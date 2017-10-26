@@ -69,15 +69,15 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
      fftw_execute(grid->fftw_pz);
      
      // get real elements, use auxiliary function
-     complex2real(grid->fftw_b_kx, grid->fftw_b_x, grid->full_size);
-     complex2real(grid->fftw_b_ky, grid->fftw_b_y, grid->full_size);
-     complex2real(grid->fftw_b_kz, grid->fftw_b_z, grid->full_size);
+     complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
+     complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
+     complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
      
      #ifndef NDEBUG
      double b_var;
-     b_var = toolkit::Variance(grid->fftw_b_x, grid->full_size);
-     b_var +=toolkit::Variance(grid->fftw_b_y, grid->full_size);
-     b_var +=toolkit::Variance(grid->fftw_b_z, grid->full_size);
+     b_var = toolkit::Variance(grid->fftw_b_x.get(), grid->full_size);
+     b_var +=toolkit::Variance(grid->fftw_b_y.get(), grid->full_size);
+     b_var +=toolkit::Variance(grid->fftw_b_z.get(), grid->full_size);
      cout<< "BRND: Numerical RMS: "<<sqrt(b_var)/CGS_U_muGauss<<" microG"<<endl;
      // check average divergence
      double div=0;

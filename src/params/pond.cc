@@ -1,5 +1,3 @@
-/* generic parameter hoster */
-
 #include <string>
 #include <tinyxml2.h>
 #include "pond.h"

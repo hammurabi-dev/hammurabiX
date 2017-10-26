@@ -1,5 +1,6 @@
 #include <sstream>
 #include <iostream>
+#include <memory>
 #include <fftw3.h>
 #include <array>
 #include <string>
@@ -18,24 +19,24 @@ using namespace std;
 
 // turbulent free electron density field
 Grid_fernd::Grid_fernd(string file_name){
-    XMLDocument *doc = new XMLDocument();
+    unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
     doc->LoadFile(file_name.c_str());
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")};
-    bool build_permission {ptr->BoolAttribute("cue")};
+    build_permission = ptr->BoolAttribute("cue");
     // sometimes users don't want to write out random field
     // but generation of random field needs grid
     ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("fernd_grid");
     read_permission = ptr->BoolAttribute("read");
     write_permission = ptr->BoolAttribute("write");
     if(build_permission or read_permission){
-        build_grid(doc);
+        build_grid(doc.get());
     }
     if(read_permission or write_permission){
+#ifndef NDEBUG
         cout<<"IFNO: FE_RND I/O ACTIVE"<<endl;
+#endif
         filename = ptr->Attribute("filename");
     }
-    delete doc;
-    doc = nullptr;
 }
 
 void Grid_fernd::build_grid(XMLDocument *doc){
@@ -52,22 +53,17 @@ void Grid_fernd::build_grid(XMLDocument *doc){
     y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
     z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
     z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
+#ifndef NDEBUG
     // memory check (double complex + double + double)
     const double bytes {full_size*(16.+ 8.)};
     cout<<"INFO: FERND REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
+#endif
     // real random fe field
-    fftw_fe = new double[full_size];
+    fftw_fe = unique_ptr<double[]> (new double[full_size]);
     // complex random b field in k-space
     fftw_fe_k = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*full_size));
     // DFT plan
     fftw_p = fftw_plan_dft_3d(nx,ny,nz,fftw_fe_k,fftw_fe_k,FFTW_BACKWARD,FFTW_MEASURE);
-}
-
-void Grid_fernd::clean_grid(void){
-    fftw_destroy_plan(fftw_p);
-    fftw_free(fftw_fe_k);
-    delete [] fftw_fe;
-    fftw_fe = nullptr;
 }
 
 void Grid_fernd::export_grid(void){
@@ -100,8 +96,9 @@ void Grid_fernd::export_grid(void){
     }
     output.close();
     // exit program
-    clean_grid();
+#ifndef NDEBUG
     cout<<"...RANDOM FREE ELECTRON FIELD EXPORTED AND CLEANED..."<<endl;
+#endif
     exit(0);
 }
 
@@ -144,3 +141,5 @@ void Grid_fernd::import_grid(void){
     }
     input.close();
 }
+
+// END

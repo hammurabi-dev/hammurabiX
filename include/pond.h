@@ -1,7 +1,5 @@
 /*
- *@file: class_pond.h
- *@author: Jiaxin Wang
- *@email: jiwang@sissa.it
+ *@file: pond.h
  *@brief: storing parameters (fixed or free) for various physical models
  */
 #ifndef GENERIC_POND_H

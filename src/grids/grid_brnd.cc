@@ -1,5 +1,6 @@
 #include <sstream>
 #include <iostream>
+#include <memory>
 #include <fftw3.h>
 #include <array>
 #include <string>
@@ -17,24 +18,24 @@ using namespace tinyxml2;
 using namespace std;
 
 Grid_brnd::Grid_brnd(string file_name){
-    XMLDocument *doc = new XMLDocument();
+    unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
     doc->LoadFile(file_name.c_str());
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")};
     // sometimes users don't want to write out random field
     // but generation of random field needs grid
-    bool build_permission {ptr->BoolAttribute("cue")};
+    build_permission = ptr->BoolAttribute("cue");
     ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("brnd_grid");
     read_permission = ptr->BoolAttribute("read");
     write_permission = ptr->BoolAttribute("write");
     if(build_permission or read_permission){
-        build_grid(doc);
+        build_grid(doc.get());
     }
     if(read_permission or write_permission){
+#ifndef NDEBUG
         cout<<"IFNO: GRID_BRND I/O ACTIVE"<<endl;
+#endif
         filename = ptr->Attribute("filename");
     }
-    delete doc;
-    doc = nullptr;
 }
 
 void Grid_brnd::build_grid(XMLDocument *doc){
@@ -51,13 +52,15 @@ void Grid_brnd::build_grid(XMLDocument *doc){
     y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
     z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
     z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
+#ifndef NDEBUG
     // memory check (double complex + double + double)
     const double bytes {full_size*(3.*16.+3.*8.)};
     cout<<"INFO: BRND REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
+#endif
     // real 3D random b field
-    fftw_b_x = new double[full_size];
-    fftw_b_y = new double[full_size];
-    fftw_b_z = new double[full_size];
+    fftw_b_x = unique_ptr<double[]> (new double[full_size]);
+    fftw_b_y = unique_ptr<double[]> (new double[full_size]);
+    fftw_b_z = unique_ptr<double[]> (new double[full_size]);
     // complex random b field in k-space
     fftw_b_kx = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*full_size));
     fftw_b_ky = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*full_size));
@@ -71,24 +74,6 @@ void Grid_brnd::build_grid(XMLDocument *doc){
     fftw_px_fw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_kx,fftw_b_kx,FFTW_FORWARD,FFTW_ESTIMATE);
     fftw_py_fw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_ky,fftw_b_ky,FFTW_FORWARD,FFTW_ESTIMATE);
     fftw_pz_fw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_kz,fftw_b_kz,FFTW_FORWARD,FFTW_ESTIMATE);
-}
-
-void Grid_brnd::clean_grid(void){
-    fftw_destroy_plan(fftw_px_bw);
-    fftw_destroy_plan(fftw_py_bw);
-    fftw_destroy_plan(fftw_pz_bw);
-    fftw_destroy_plan(fftw_px_fw);
-    fftw_destroy_plan(fftw_py_fw);
-    fftw_destroy_plan(fftw_pz_fw);
-    fftw_free(fftw_b_kx);
-    fftw_free(fftw_b_ky);
-    fftw_free(fftw_b_kz);
-    delete [] fftw_b_x;
-    fftw_b_x = nullptr;
-    delete [] fftw_b_y;
-    fftw_b_y = nullptr;
-    delete [] fftw_b_z;
-    fftw_b_z = nullptr;
 }
 
 void Grid_brnd::export_grid(void){
@@ -125,8 +110,9 @@ void Grid_brnd::export_grid(void){
     }
     output.close();
     // exit program
-    clean_grid();
+#ifndef NDEBUG
     cout<<"...RANDOM MAGNETIC FIELD EXPORTED AND CLEANED..."<<endl;
+#endif
     exit(0);
 }
 

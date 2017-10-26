@@ -1,5 +1,6 @@
 #include <sstream>
 #include <iostream>
+#include <memory>
 #include <fftw3.h>
 #include <array>
 #include <string>
@@ -17,7 +18,7 @@ using namespace tinyxml2;
 using namespace std;
 
 Grid_cre::Grid_cre(string file_name){
-    XMLDocument *doc = new XMLDocument();
+    unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
     doc->LoadFile(file_name.c_str());
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("cre_grid")};
     read_permission = ptr->BoolAttribute("read");
@@ -32,12 +33,12 @@ Grid_cre::Grid_cre(string file_name){
         exit(1);
     }
     if(read_permission or write_permission){
+#ifndef NDEBUG
         cout<<"IFNO: CRE I/O ACTIVE"<<endl;
+#endif
         filename = ptr->Attribute("filename");
-        build_grid(doc);
+        build_grid(doc.get());
     }
-    delete doc;
-    doc = nullptr;
 }
 
 void Grid_cre::build_grid(XMLDocument *doc){
@@ -80,14 +81,11 @@ void Grid_cre::build_grid(XMLDocument *doc){
         exit(1);
     }
     // memory check
+#ifndef NDEBUG
     const double bytes {cre_size*8.};
     cout<<"INFO: CRE REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
-    cre_flux = new double[cre_size];
-}
-
-void Grid_cre::clean_grid(void){
-    delete [] cre_flux;
-    cre_flux = nullptr;
+#endif
+    cre_flux = unique_ptr<double[]> (new double[cre_size]);
 }
 
 void Grid_cre::export_grid(void){
@@ -120,7 +118,7 @@ void Grid_cre::export_grid(void){
     }
     output.close();
     // exit program
-    clean_grid();
+#ifndef NDEBUG
     if(nx!=0){
         cout<<"...COSMIC-RAY ELECTRON IN 4D GRID..."<<endl;
     }
@@ -128,6 +126,7 @@ void Grid_cre::export_grid(void){
         cout<<"...COSMIC-RAY ELECTRON IN 3D GRID..."<<endl;
     }
     cout<<"...FIELD EXPORTED AND CLEANED..."<<endl;
+#endif
     exit(0);
 }
 

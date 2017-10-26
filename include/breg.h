@@ -1,7 +1,5 @@
 /*
- *@file: class_breg.h
- *@author: Jiaxin Wang
- *@email: jiwang@sissa.it
+ *@file: breg.h
  *@brief: regular magnetic field generator
  */
 #ifndef HAMMURABI_BREG_H

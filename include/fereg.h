@@ -1,7 +1,5 @@
 /*
- *@file: class_fe.h
- *@author: Jiaxin Wang
- *@email: jiwang@sissa.it
+ *@file: fereg.h
  *@brief: free electron density distribution
  *@YMW16 origin: http://www.atnf.csiro.au/research/pulsar/ymw16/
  * updated to version1.2.3

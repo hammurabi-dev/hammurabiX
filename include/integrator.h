@@ -1,7 +1,5 @@
 /*
- *@file: class_int.h
- *@author: Jiaxin Wang
- *@email: jiwang@sissa.it
+ *@file: integrator.h
  *@brief: line-of-sight integration calculator
  */
 #ifndef HAMMURABI_INT_H

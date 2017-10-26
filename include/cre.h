@@ -1,7 +1,5 @@
 /*
- *@file: class_cre.h
- *@author: Jiaxin Wang
- *@email: jiwang@sissa.it
+ *@file: cre.h
  *@brief: synchrotron emissivity calculator
  */
 #ifndef HAMMURABI_CRE_H
@@ -44,7 +42,6 @@ public:
     /*@CRE_ana(vector)
      * reassign parameters in pond
      */
-    //CRE_ana(const std::vector<double>&,Pond *);
     double get_emissivity(const vec3 &,Pond *,Grid_cre *,const double &,const bool &) override;
 private:
     /*@flux

@@ -1,12 +1,11 @@
 /*
- *@file: class_brnd.h
- *@author: Jiaxin Wang
- *@email: jiwang@sissa.it
+ *@file: brnd.h
  *@brief: iso/aniso-tropic turbulent magnetic field generator
  */
 #ifndef HAMMURABI_BRND_H
 #define HAMMURABI_BRND_H
 
+#include <memory>
 #include <fftw3.h>
 #include <vec3.h>
 #include <vector>

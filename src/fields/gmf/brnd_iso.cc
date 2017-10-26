@@ -3,6 +3,7 @@
 #include <vector>
 #include <array>
 #include <cmath>
+#include <memory>
 #include <omp.h>
 #include <fftw3.h>
 #include <gsl/gsl_randist.h>
@@ -162,9 +163,9 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     fftw_execute(grid->fftw_py_bw);
     fftw_execute(grid->fftw_pz_bw);
     // get real elements, use auxiliary function
-    complex2real(grid->fftw_b_kx, grid->fftw_b_x, grid->full_size);
-    complex2real(grid->fftw_b_ky, grid->fftw_b_y, grid->full_size);
-    complex2real(grid->fftw_b_kz, grid->fftw_b_z, grid->full_size);
+    complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
+    complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
+    complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
     // according to FFTW3 manual
     // transform forward followed by backword scale up array by nx*ny*nz
     double inv_grid_size = 1.0/grid->full_size;
@@ -179,9 +180,9 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     /*
      #ifndef NDEBUG
      // check RMS
-     b_var = toolkit::Variance(grid->fftw_b_x, grid->full_size);
-     b_var +=toolkit::Variance(grid->fftw_b_y, grid->full_size);
-     b_var +=toolkit::Variance(grid->fftw_b_z, grid->full_size);
+     b_var = toolkit::Variance(grid->fftw_b_x.get(), grid->full_size);
+     b_var +=toolkit::Variance(grid->fftw_b_y.get(), grid->full_size);
+     b_var +=toolkit::Variance(grid->fftw_b_z.get(), grid->full_size);
      cout<< "BRND: Numerical RMS: "<<sqrt(b_var)/CGS_U_muGauss<<" microG"<<endl;
      // check average divergence
      double div {0};

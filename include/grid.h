@@ -1,10 +1,7 @@
 /*
- *@file: class_grid.h
- *@author: Jiaxin Wang
- *@email: jiwang@sissa.it
+ *@file: grid.h
  *@brief: allocating/storing/reading/writing physical fields/observables
  * we use TinyXML2 as parameter parser
- 
  *@special note: <bool>permission is cue for allocating and im/exporting grid
  * in random field cases, permission is cue for im/exporting only
  */
@@ -17,6 +14,7 @@
 #include <vector>
 #include <tinyxml2.h>
 #include <healpix_map.h>
+#include <memory>
 
 using namespace tinyxml2;
 
@@ -28,10 +26,6 @@ public:
      * build up grid and allocate memory
      */
     virtual void build_grid(XMLDocument *);
-    /*@clean_grid
-     * clean up grid memory
-     */
-    virtual void clean_grid(void);
     /*@export_grid
      * export grid to file
      */
@@ -56,11 +50,10 @@ public:
     Grid_breg(std::string);
     virtual ~Grid_breg(void) = default;
     void build_grid(XMLDocument *) override;
-    void clean_grid(void) override;
     void export_grid(void) override;
     void import_grid(void) override;
     // 3D regular field arrays
-    double *reg_b_x, *reg_b_y, *reg_b_z;
+    std::unique_ptr<double[]> reg_b_x, reg_b_y, reg_b_z;
     
     std::string filename;
     bool read_permission, write_permission;
@@ -75,13 +68,24 @@ public:
 class Grid_brnd final : public Grid{
 public:
     Grid_brnd(std::string);
-    virtual ~Grid_brnd(void) = default;
+    virtual ~Grid_brnd(void) {
+        if(build_permission or read_permission){
+            fftw_destroy_plan(fftw_px_bw);
+            fftw_destroy_plan(fftw_py_bw);
+            fftw_destroy_plan(fftw_pz_bw);
+            fftw_destroy_plan(fftw_px_fw);
+            fftw_destroy_plan(fftw_py_fw);
+            fftw_destroy_plan(fftw_pz_fw);
+            fftw_free(fftw_b_kx);
+            fftw_free(fftw_b_ky);
+            fftw_free(fftw_b_kz);
+        }
+    };
     void build_grid(XMLDocument *) override;
-    void clean_grid(void) override;
     void export_grid(void) override;
     void import_grid(void) override;
     // spatial space
-    double *fftw_b_x, *fftw_b_y, *fftw_b_z;
+    std::unique_ptr<double[]> fftw_b_x, fftw_b_y, fftw_b_z;
     // Fourier space
     fftw_complex *fftw_b_kx, *fftw_b_ky, *fftw_b_kz;
     // for/backward plans
@@ -89,7 +93,7 @@ public:
     fftw_plan fftw_px_fw, fftw_py_fw, fftw_pz_fw;
     
     std::string filename;
-    bool read_permission, write_permission;
+    bool read_permission, write_permission, build_permission;
     
     double x_max, x_min, y_max, y_min, z_max, z_min;
     unsigned int nx, ny, nz;
@@ -102,11 +106,10 @@ public:
     Grid_fereg(std::string);
     virtual ~Grid_fereg(void) = default;
     void build_grid(XMLDocument *) override;
-    void clean_grid(void) override;
     void export_grid(void) override;
     void import_grid(void) override;
     
-    double *fe;
+    std::unique_ptr<double[]> fe;
     
     std::string filename;
     bool read_permission, write_permission;
@@ -120,19 +123,23 @@ public:
 class Grid_fernd final : public Grid{
 public:
     Grid_fernd(std::string);
-    virtual ~Grid_fernd(void) = default;
+    virtual ~Grid_fernd(void) {
+        if(build_permission or read_permission){
+            fftw_destroy_plan(fftw_p);
+            fftw_free(fftw_fe_k);
+        }
+    };
     void build_grid(XMLDocument *) override;
-    void clean_grid(void) override;
     void export_grid(void) override;
     void import_grid(void) override;
     
-    double *fftw_fe;
+    std::unique_ptr<double[]> fftw_fe;
     
     fftw_complex *fftw_fe_k;
     fftw_plan fftw_p;
     
     std::string filename;
-    bool read_permission, write_permission;
+    bool read_permission, write_permission, build_permission;
     
     double x_max, x_min, y_max, y_min, z_max, z_min;
     unsigned int nx, ny, nz;
@@ -145,11 +152,10 @@ public:
     Grid_cre(std::string);
     virtual ~Grid_cre(void) = default;
     void build_grid(XMLDocument *) override;
-    void clean_grid(void) override;
     void export_grid(void) override;
     void import_grid(void) override;
     
-    double *cre_flux;
+    std::unique_ptr<double[]> cre_flux;
     
     std::string filename;
     bool read_permission, write_permission;
