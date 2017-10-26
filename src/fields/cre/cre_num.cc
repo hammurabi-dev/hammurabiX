@@ -1,4 +1,5 @@
 #include <iostream>
+#include <memory>
 #include <vec3.h>
 #include <vector>
 #include <array>
@@ -142,10 +143,10 @@ double CRE_num::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const do
         exit(1);
     }
     // allocate energy grid
-    double KE[grid->nE] {0.};
+    unique_ptr<double[]> KE = unique_ptr<double[]> (new double[grid->nE] {0.});
     // we need F(x[E]) and G(x[E]) in spectral integration
-    double x[grid->nE] {0.};
-    double beta[grid->nE] {0.};
+    unique_ptr<double[]> x = unique_ptr<double[]> (new double[grid->nE] {0.});
+    unique_ptr<double[]> beta = unique_ptr<double[]> (new double[grid->nE] {0.});
     // consts used in loop, using cgs units
     const double x_fact {(2.*CGS_U_MEC*CGS_U_MEC2*CGS_U_MEC2*2.*CGS_U_pi*par->sim_freq)/(3.*CGS_U_qe*Bper)};
     // KE in cgs units
