@@ -18,20 +18,13 @@ using namespace std;
 // give values to spectral index and norm factor, in cgs units
 // analytical CRE integration use N(\gamma)
 void CRE_verify::flux_param(const vec3 &pos,Pond *par,double &index,double &norm){
-    if(fabs(pos.z) > par->cre_verify.z0*CGS_U_kpc){
-        index = 0;
-        norm = 0;
-        return;
-    }
-    else if(pos.x*pos.x+pos.y*pos.y > par->cre_verify.r0*CGS_U_kpc*par->cre_verify.r0*CGS_U_kpc){
+    if((pos-par->SunPosition).Length() > par->cre_verify.r0*CGS_U_kpc){
         index = 0.;
         norm = 0.;
         return;
     }
     // units
     const double alpha {par->cre_verify.alpha};
-    //const double r0 {par->cre_verify.r0*CGS_U_kpc};
-    //const double z0 {par->cre_verify.z0*CGS_U_kpc};
     // je is in [GeV m^2 s sr]^-1 units
     const double je {par->cre_verify.je};
     const double cre_gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
@@ -43,17 +36,13 @@ void CRE_verify::flux_param(const vec3 &pos,Pond *par,double &index,double &norm
     //const double scal_factor {exp(-r/hr)*(1./pow(cosh(z/hz),2.))};
     // this is changeable by users
     index = -alpha;
-    
     norm = norm_factor*unit_factor;
 }
 
 // analytical modeling use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
 double CRE_verify::flux(const vec3 &pos,Pond *par,const double &En){
-    if(fabs(pos.z) > par->cre_verify.z0*CGS_U_kpc){
-        return 0.;
-    }
-    else if(pos.x*pos.x+pos.y*pos.y > par->cre_verify.r0*CGS_U_kpc*par->cre_verify.r0*CGS_U_kpc){
+    if((pos-par->SunPosition).Length() > par->cre_verify.r0*CGS_U_kpc){
         return 0.;
     }
     // units
@@ -67,7 +56,6 @@ double CRE_verify::flux(const vec3 &pos,Pond *par,const double &En){
     // MODEL DEPENDENT PARAMETERS
     // CRE flux normalizaton factor at earth, model dependent
     const double norm_factor {je*pow(cre_gamma_10,alpha)};
-    
     return norm_factor*unit_factor*pow(gamma,-alpha);
 }
 

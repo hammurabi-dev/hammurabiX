@@ -70,7 +70,7 @@
             </shell>
             <nside_sim value="16"/> <!-- output map resolution -->
             <!-- maximum radius in earth/Galactic centric frame -->
-            <ec_r_max value="30.0"/> <!-- kpc -->
+            <ec_r_max value="3.0"/> <!-- kpc -->
             <gc_r_max value="20.0"/> <!-- kpc -->
             <!-- maximum height in galactic centric frame -->
             <gc_z_max value="10.0"/> <!-- kpc -->
@@ -86,7 +86,7 @@
         <!-- magnetic fields -->
         <MagneticField>
             <!-- regular fields -->
-            <Regular type="WMAP">
+            <Regular type="Verify">
                 <!-- WMAP3yr -->
                 <WMAP>
                     <b0 value="2.0"/>
@@ -131,7 +131,7 @@
         
         <!-- free electron field -->
         <FreeElectron>
-            <Regular type="YMW16">
+            <Regular type="Verify">
                 <!-- YMW16 -->
                 <YMW16>
                     <Warp>
@@ -208,8 +208,7 @@
                 <!-- verification -->
                 <Verify>
                     <n0 value="0.01"/> <!-- pccm -->
-                    <r0 value="20.0"/> <!-- kpc -->
-                    <z0 value="0.1"/> <!-- kpc -->
+                    <r0 value="5.0"/> <!-- kpc -->
                 </Verify>
             </Regular>
             <!-- turbulent free electron -->
@@ -256,8 +255,7 @@
         <!-- verification -->
         <Verify>
             <alpha value="3.0"/>
-            <r0 value="20.0"/> <!-- kpc -->
-            <z0 value="1.0"/> <!-- kpc -->
+            <r0 value="5.0"/> <!-- kpc -->
             <je value="0.25"/> <!-- local CRE flux norm factor @ 10GeV -->
         </Verify>
         

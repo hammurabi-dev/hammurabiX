@@ -156,7 +156,6 @@ void Pond::fe_pond(XMLDocument *doc){
     subptr = ptr->FirstChildElement("Regular")->FirstChildElement("Verify");
     fereg_verify.n0 = FetchDouble(subptr,"n0");
     fereg_verify.r0 = FetchDouble(subptr,"r0"); //kpc
-    fereg_verify.z0 = FetchDouble(subptr,"z0"); //kpc
     
     // isotropic turbulent
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Iso");
@@ -171,7 +170,6 @@ void Pond::fe_pond(XMLDocument *doc){
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Rescal");
     fernd_scal.r0 = FetchDouble(subptr,"r0"); //kpc
     fernd_scal.z0 = FetchDouble(subptr,"z0"); //kpc
-    
 }
 
 void Pond::cre_pond(XMLDocument *doc){
@@ -191,7 +189,6 @@ void Pond::cre_pond(XMLDocument *doc){
     subptr = ptr->FirstChildElement("Verify");
     cre_verify.alpha = FetchDouble(subptr,"alpha");
     cre_verify.r0 = FetchDouble(subptr,"r0"); //kpc
-    cre_verify.z0 = FetchDouble(subptr,"z0"); //kpc
     cre_verify.je = FetchDouble(subptr,"je");
 }
 

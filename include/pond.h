@@ -74,7 +74,6 @@ public:
     }fereg_ymw16;
     struct param_fereg_verify{
         double n0;
-        double z0;
         double r0;
     }fereg_verify;
     // gaussian random
@@ -105,7 +104,6 @@ public:
     struct param_cre_verify{
         double alpha;
         double r0;
-        double z0;
         double je;
     }cre_verify;
     
