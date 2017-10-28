@@ -1,11 +1,28 @@
-# EXTERNAL LIB
-GSL = /usr
-FFTW = /vol/optcoma/fftw-3.3.6
-CFITSIO = /usr
-HEALPIX = /vol/optcoma/Healpix_3.31/src/cxx/optimized_gcc
+# EXTERNAL LIBRARIES
+ifeq ($(GSL),)
+GSL := /usr/local
+endif
+
+ifeq ($(FFTW),)
+FFTW := /usr/local
+endif
+
+ifeq ($(CFITSIO),)
+CFITSIO := /usr/local
+endif
+
+ifeq ($(HEALPIX),)
+$(error "HEALPIX variable must be set")
+endif
+
+ifeq ($(HEALPIX_TARGET),)
+$(error "HEALPIX_TARGET variable must be set")
+endif
+
+HEALPIX_FULL = $(HEALPIX)/src/cxx/$(HEALPIX_TARGET)
 
 # EXECUTABLE NAME
-EXE = hammurabi
+EXE = hamx
 
 # COMPILER
 CXX = g++ -std=c++11

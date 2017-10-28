@@ -31,10 +31,7 @@ void CRE_verify::flux_param(const vec3 &pos,Pond *par,double &index,double &norm
     const double cre_beta_10 {sqrt(1.-1./cre_gamma_10)};
     // from PHI(E) to N(\gamma) convertion
     const double unit_factor {(4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*cre_beta_10)};
-    // MODEL DEPENDENT PARAMETERS
     const double norm_factor {je*pow(cre_gamma_10,alpha)};
-    //const double scal_factor {exp(-r/hr)*(1./pow(cosh(z/hz),2.))};
-    // this is changeable by users
     index = -alpha;
     norm = norm_factor*unit_factor;
 }
@@ -53,13 +50,12 @@ double CRE_verify::flux(const vec3 &pos,Pond *par,const double &En){
     const double cre_gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
     // converting from N to PHI
     const double unit_factor {sqrt((gamma-1.)*cre_gamma_10/((cre_gamma_10-1.)*gamma))};
-    // MODEL DEPENDENT PARAMETERS
-    // CRE flux normalizaton factor at earth, model dependent
     const double norm_factor {je*pow(cre_gamma_10,alpha)};
     return norm_factor*unit_factor*pow(gamma,-alpha);
 }
 
-double CRE_verify::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper,const bool &cue){
+// J_tot(\nu)
+double CRE_verify::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -72,19 +68,37 @@ double CRE_verify::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const
     double index, norm;
     flux_param(pos,par,index,norm);
     // coefficients which do not attend integration
-    norm *= sqrt(3)*pow(CGS_U_qe,3)*fabs(Bper)/(4*CGS_U_pi*CGS_U_MEC2);
+    norm *= sqrt(3)*(CGS_U_qe*CGS_U_qe*CGS_U_qe)*fabs(Bper)/(2.*CGS_U_MEC2);
     // synchrotron integration
-    const double A {sqrt(2.*CGS_U_MEC*2.*CGS_U_pi*par->sim_freq)/sqrt(3.*CGS_U_qe*fabs(Bper))};
+    const double A {4.*CGS_U_MEC*CGS_U_pi*par->sim_freq/(3.*CGS_U_qe*fabs(Bper))};
+    const double mu {-0.5*(3.+index)};
+    return norm*( pow(A,0.5*(index+1))*pow(2,mu+1)*gsl_sf_gamma(0.5*mu+7./3.)*gsl_sf_gamma(0.5*mu+2./3.)/(mu+2.) )/(4.*CGS_U_pi);
+    /* the last 4pi comes from solid-angle integration/deviation,
+     check eq(6.16) in Ribiki-Lightman's where Power is defined,
+     we need isotropic power which means we need a 1/4pi factor!
+     */
+}
+
+// J_pol(\nu)
+double CRE_verify::get_emissivity_p(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
+    if(grid->read_permission){
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"WRONG MODULE"<<endl;
+        exit(1);
+    }
+    // allocating values to index, norm according to user defined model
+    // user may consider building derived class from CRE_ana
+    double index, norm;
+    flux_param(pos,par,index,norm);
+    // coefficients which do not attend integration
+    norm *= sqrt(3)*(CGS_U_qe*CGS_U_qe*CGS_U_qe)*fabs(Bper)/(2.*CGS_U_MEC2);
+    // synchrotron integration
+    const double A {4.*CGS_U_MEC*CGS_U_pi*par->sim_freq/(3.*CGS_U_qe*fabs(Bper))};
     const double mu {-0.5*(3.+index)};
     
-    if(cue){
-        double J {pow(A,index+1)*pow(2,mu+1)*gsl_sf_gamma(0.5*mu+7./3.)*gsl_sf_gamma(0.5*mu+2./3.)/(mu+2.)};
-        return norm*J/(4.*CGS_U_pi);
-    }
-    else{
-        double J {pow(A,index+1)*pow(2,mu)*gsl_sf_gamma(0.5*mu+4./3.)*gsl_sf_gamma(0.5*mu+2./3.)};
-        return norm*J/(4.*CGS_U_pi);
-    }
+    return norm*( pow(A,0.5*(index+1))*pow(2,mu)*gsl_sf_gamma(0.5*mu+4./3.)*gsl_sf_gamma(0.5*mu+2./3.) )/(4.*CGS_U_pi);
     /* the last 4pi comes from solid-angle integration/deviation,
      check eq(6.16) in Ribiki-Lightman's where Power is defined,
      we need isotropic power which means we need a 1/4pi factor!

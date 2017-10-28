@@ -251,7 +251,7 @@
     </Galaxy>
     
     <!-- analytic/numeric CRE -->
-    <CRE type="Analytic">
+    <CRE type="Verify">
         <!-- verification -->
         <Verify>
             <alpha value="3.0"/>

@@ -14,7 +14,15 @@
 
 using namespace std;
 
-double CRE::get_emissivity(const vec3 &,Pond *,Grid_cre *,const double &,const bool &){
+double CRE::get_emissivity_t(const vec3 &,Pond *,Grid_cre *,const double &){
+    cerr<<"ERR:"<<__FILE__
+    <<" : in function "<<__func__<<endl
+    <<" at line "<<__LINE__<<endl
+    <<"DYNAMIC BINDING FAILURE"<<endl;
+    exit(1);
+}
+
+double CRE::get_emissivity_p(const vec3 &,Pond *,Grid_cre *,const double &){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl

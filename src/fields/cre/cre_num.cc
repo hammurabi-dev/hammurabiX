@@ -133,7 +133,8 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3 &pos,Grid_cre *gr
     }
 }
 
-double CRE_num::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper,const bool &cue){
+// J_tot(\nu)
+double CRE_num::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
     double J {0.};
     if(!grid->read_permission){
         cerr<<"ERR:"<<__FILE__
@@ -159,7 +160,7 @@ double CRE_num::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const do
     // unit_factor for DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
     // n(E,pos) = \phi(E,pos)*(4\pi/\beta*c), the relatin between flux \phi and density n
     // ref: "Cosmic rays n' particle physics", A3
-    const double fore_factor {2.*sqrt(3.)*pow(CGS_U_qe,3.)*abs(Bper)/(CGS_U_MEC2*CGS_U_C_light*CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec)};
+    const double fore_factor {4.*CGS_U_pi*sqrt(3.)*(CGS_U_qe*CGS_U_qe*CGS_U_qe)*abs(Bper)/(CGS_U_MEC2*CGS_U_C_light*CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec)};
     for(decltype(grid->nE) i=0;i!=grid->nE-1;++i){
         const double xv {(x[i+1]+x[i])/2.};
         // avoid underflow in gsl functions
@@ -176,12 +177,56 @@ double CRE_num::get_emissivity(const vec3 &pos,Pond *par,Grid_cre *grid,const do
             exit(1);
         }
 #endif
-        if(cue){
-            J += gsl_sf_synchrotron_1(xv)*de*dE;
+        J += gsl_sf_synchrotron_1(xv)*de*dE;
+    }
+    return fore_factor*J/(4.*CGS_U_pi);
+}
+
+// J_pol(\nu)
+double CRE_num::get_emissivity_p(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
+    double J {0.};
+    if(!grid->read_permission){
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"NO INPUT"<<endl;
+        exit(1);
+    }
+    // allocate energy grid
+    unique_ptr<double[]> KE = unique_ptr<double[]> (new double[grid->nE] {0.});
+    // we need F(x[E]) and G(x[E]) in spectral integration
+    unique_ptr<double[]> x = unique_ptr<double[]> (new double[grid->nE] {0.});
+    unique_ptr<double[]> beta = unique_ptr<double[]> (new double[grid->nE] {0.});
+    // consts used in loop, using cgs units
+    const double x_fact {(2.*CGS_U_MEC*CGS_U_MEC2*CGS_U_MEC2*2.*CGS_U_pi*par->sim_freq)/(3.*CGS_U_qe*Bper)};
+    // KE in cgs units
+    for(decltype(grid->nE) i=0;i!=grid->nE;++i){
+        KE[i] = grid->E_min*exp(i*grid->E_fact);
+        x[i] = x_fact/(KE[i]*KE[i]);
+        beta[i] = sqrt(1-CGS_U_MEC2/KE[i]);
+    }
+    // do energy spectrum integration at given position
+    // unit_factor for DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
+    // n(E,pos) = \phi(E,pos)*(4\pi/\beta*c), the relatin between flux \phi and density n
+    // ref: "Cosmic rays n' particle physics", A3
+    const double fore_factor {4.*CGS_U_pi*sqrt(3.)*(CGS_U_qe*CGS_U_qe*CGS_U_qe)*abs(Bper)/(CGS_U_MEC2*CGS_U_C_light*CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec)};
+    for(decltype(grid->nE) i=0;i!=grid->nE-1;++i){
+        const double xv {(x[i+1]+x[i])/2.};
+        // avoid underflow in gsl functions
+        if(xv>100) {continue;}
+        const double dE {fabs(KE[i+1]-KE[i])};
+        // we put beta here
+        const double de {(read_grid(i+1,pos,grid)/beta[i+1]+read_grid(i,pos,grid)/beta[i])/2.};
+#ifndef NDEBUG
+        if(de<0){
+            cerr<<"ERR:"<<__FILE__
+            <<" : in function "<<__func__<<endl
+            <<" at line "<<__LINE__<<endl
+            <<"NEGATIVE CRE DENSITY"<<endl;
+            exit(1);
         }
-        else{
-            J += gsl_sf_synchrotron_2(xv)*de*dE;
-        }
+#endif
+        J += gsl_sf_synchrotron_2(xv)*de*dE;
     }
     return fore_factor*J/(4.*CGS_U_pi);
 }

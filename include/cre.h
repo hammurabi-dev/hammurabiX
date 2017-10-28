@@ -14,9 +14,10 @@ public:
     CRE(void) = default;
     virtual ~CRE(void) = default;
     /*@get_emissivity
-     * get J_tot(cue=1)/J_pol(cue=0) at given position
+     * get J_tot or J_pol at given position
      */
-    virtual double get_emissivity(const vec3 &,Pond *,Grid_cre *,const double &,const bool &);
+    virtual double get_emissivity_t(const vec3 &,Pond *,Grid_cre *,const double &);
+    virtual double get_emissivity_p(const vec3 &,Pond *,Grid_cre *,const double &);
     virtual double read_grid(const unsigned int &, const vec3 &,Grid_cre *);
     virtual void write_grid(Pond *,Grid_cre *);
     
@@ -27,7 +28,8 @@ class CRE_verify : public CRE{
 public:
     CRE_verify(void) = default;
     virtual ~CRE_verify(void) = default;
-    double get_emissivity(const vec3 &,Pond *,Grid_cre *,const double &,const bool &) override;
+    double get_emissivity_t(const vec3 &,Pond *,Grid_cre *,const double &) override;
+    double get_emissivity_p(const vec3 &,Pond *,Grid_cre *,const double &) override;
 private:
     double flux(const vec3 &,Pond *,const double &);
     void flux_param(const vec3 &,Pond *,double &,double &);
@@ -42,7 +44,8 @@ public:
     /*@CRE_ana(vector)
      * reassign parameters in pond
      */
-    double get_emissivity(const vec3 &,Pond *,Grid_cre *,const double &,const bool &) override;
+    double get_emissivity_t(const vec3 &,Pond *,Grid_cre *,const double &) override;
+    double get_emissivity_p(const vec3 &,Pond *,Grid_cre *,const double &) override;
 private:
     /*@flux
      * return CRE flux at given CRE energy
@@ -65,7 +68,8 @@ class CRE_num final: public CRE{
 public:
     CRE_num(void) = default;
     virtual ~CRE_num(void) = default;
-    double get_emissivity(const vec3 &,Pond *,Grid_cre *,const double &,const bool &) override;
+    double get_emissivity_t(const vec3 &,Pond *,Grid_cre *,const double &) override;
+    double get_emissivity_p(const vec3 &,Pond *,Grid_cre *,const double &) override;
 private:
     /*@read_grid
      * read CRE flux from grid at given position

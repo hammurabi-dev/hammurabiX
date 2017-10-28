@@ -155,8 +155,8 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
     if (check_simulation_lower_limit(fabs(0.5*CGS_U_pi-THE),gint->lat_lim)) {return;}
     // for calculating synchrotron emission
     const double lambda_square{(CGS_U_C_light/par->sim_freq)*(CGS_U_C_light/par->sim_freq)};
-    // convert intensity to brightness temperature and include j(omega) to j(nu)=2pi*j(omega)
-    const double i2bt {CGS_U_pi*CGS_U_C_light*CGS_U_C_light/(CGS_U_kB*par->sim_freq*par->sim_freq)};
+    // convert intensity(freq) to brightness temperature, Rayleigh-Jeans law
+    const double i2bt {CGS_U_C_light*CGS_U_C_light/(2.*CGS_U_kB*par->sim_freq*par->sim_freq)};
     
     // for Simpson's rule
     vector<double> F_dm;
@@ -210,9 +210,9 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
         
         // Synchrotron Emission
         if(gint->do_sync){
-            F_Jtot.push_back(cre->get_emissivity(pos,par,gcre,B_per,1)*shell_ref.delta_d*i2bt);
+            F_Jtot.push_back(cre->get_emissivity_t(pos,par,gcre,B_per)*shell_ref.delta_d*i2bt);
             // J_pol receive no contribution from missing random
-            F_Jpol.push_back(cre->get_emissivity(pos,par,gcre,B_per,0)*shell_ref.delta_d*i2bt);
+            F_Jpol.push_back(cre->get_emissivity_p(pos,par,gcre,B_per)*shell_ref.delta_d*i2bt);
             // intrinsic polarization angle, following IAU definition
             intr_pol_ang.push_back(toolkit::get_intr_pol_ang(B_vec,THE,PHI));
         }

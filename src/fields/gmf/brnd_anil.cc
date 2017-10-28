@@ -22,11 +22,11 @@
 using namespace std;
 
 //local anisotropic turbulent field
-void Brnd_anil::anisotropy(double *tensor, Pond *par, Breg *breg, Grid_breg *gbreg){
+void Brnd_anil::anisotropy(double */*tensor*/, Pond */*par*/, Breg */*breg*/, Grid_breg */*gbreg*/){
     exit(1);
 }
 
-void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
+void Brnd_anil::write_grid_ani(Pond */*par*/, Breg */*breg*/, Grid_breg */*gbreg*/, Grid_brnd */*grid*/){
     exit(1);
     /*
      // initialize random seed
