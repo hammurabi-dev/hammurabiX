@@ -75,17 +75,8 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
         shell_ref.shell_num = current_shell;
         shell_ref.d_start = get_min_shell_radius(current_shell,gint->total_shell,gint->ec_r_max);
         shell_ref.d_stop = get_max_shell_radius(current_shell,gint->total_shell,gint->ec_r_max);
-        shell_ref.delta_d = (shell_ref.d_stop-shell_ref.d_start)/gint->bin_num;
-        /*
-         * logic for bin number calculation for each shell
-         * if only one shell, bin number is set by bin_num
-         * if more than one shells, first inner shell set by bin_num
-         * outer shells are set by maintaining the same bin length
-         * for example the 2nd inner shell set by bin_num, while the 3rd inner shell set by 2*bin_num
-         */
-        if (current_shell>1) {
-            shell_ref.delta_d = (shell_ref.d_stop-shell_ref.d_start)/(gint->bin_num*(pow(2,current_shell-1)-pow(2,current_shell-2)));
-        }
+        shell_ref.delta_d = gint->radial_res;
+        
 #pragma omp parallel for
         for (decltype(current_npix) ipix=0;ipix<current_npix;++ipix) {
             struct_observables observables;
@@ -163,14 +154,14 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
     vector<double> F_fd;
     vector<double> F_Jtot, F_Jpol, intr_pol_ang;
     // first iteration in distance
-    for(double dist=shell_ref.d_start;dist<=shell_ref.d_stop;dist+=shell_ref.delta_d/2){
+    shell_ref.d_stop = min(shell_ref.d_stop,gint->ec_r_max);
+    for(double dist=shell_ref.d_start;dist<shell_ref.d_stop+0.5*shell_ref.delta_d;dist+=0.5*shell_ref.delta_d){
         // ec and gc position
         vec3 ec_pos {toolkit::get_LOS_unit_vec(THE,PHI)*dist};
         vec3 pos {ec_pos + par->SunPosition};
         // check LOS depth limit
         if (check_simulation_upper_limit(pos.Length(),gint->gc_r_max)) {break;}
         if (check_simulation_upper_limit(fabs(pos.z),gint->gc_z_max)) {break;}
-        if (check_simulation_upper_limit(ec_pos.Length(),gint->ec_r_max)) {break;}
         
         // B field
         vec3 B_vec {breg->get_breg(pos,par,gbreg)};
@@ -236,11 +227,11 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
     for(decltype(simpson_size)i=1;i<simpson_size-1;i+=2){
         // DM
         if(gint->do_dm){
-            pixobs.dm += (F_dm[i-1]+4.*F_dm[i]+F_dm[i+1])/6.;
+            pixobs.dm += (F_dm[i-1]+4.*F_dm[i]+F_dm[i+1])*0.16666667;
         }
         // FD
         if(gint->do_fd or gint->do_sync){
-            pixobs.fd += (F_fd[i-1]+4.*F_fd[i]+F_fd[i+1])/6.;
+            pixobs.fd += (F_fd[i-1]+4.*F_fd[i]+F_fd[i+1])*0.16666667;
         }
         // Sync
         if(gint->do_sync){
@@ -256,9 +247,9 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
                 exit(1);
             }
 #endif
-            pixobs.Is += (F_Jtot[i-1]+4.*F_Jtot[i]+F_Jtot[i+1])/6.;
-            pixobs.Qs += cos(2.*qui)*(F_Jpol[i-1]+4.*F_Jpol[i]+F_Jpol[i+1])/6.;
-            pixobs.Us += sin(2.*qui)*(F_Jpol[i-1]+4.*F_Jpol[i]+F_Jpol[i+1])/6.;
+            pixobs.Is += (F_Jtot[i-1]+4.*F_Jtot[i]+F_Jtot[i+1])*0.16666667;
+            pixobs.Qs += cos(2.*qui)*(F_Jpol[i-1]+4.*F_Jpol[i]+F_Jpol[i+1])*0.16666667;
+            pixobs.Us += sin(2.*qui)*(F_Jpol[i-1]+4.*F_Jpol[i]+F_Jpol[i+1])*0.16666667;
         }
     }
 }//end of radial_integrate
@@ -274,7 +265,7 @@ double Integrator::get_max_shell_radius(const unsigned int &shell_numb,const uns
     }
     double max_shell_radius {radius};
     for (unsigned int n=total_shell;n!=shell_numb;--n) {
-        max_shell_radius /= 2.;
+        max_shell_radius *= 0.5;
     }
     return max_shell_radius;
 }
@@ -291,7 +282,7 @@ double Integrator::get_min_shell_radius(const unsigned int &shell_numb,const uns
     }
     double min_shell_radius {radius};
     for (unsigned int n=total_shell;n!=(shell_numb-1);--n) {
-        min_shell_radius /= 2.;
+        min_shell_radius *= 0.5;
     }
     return min_shell_radius;
 }

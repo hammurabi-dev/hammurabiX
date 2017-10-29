@@ -65,7 +65,7 @@ void Grid_int::build_grid(XMLDocument *doc){
     ec_r_max = CGS_U_kpc*FetchDouble(ptr,"ec_r_max");
     gc_r_max = FetchDouble(ptr,"gc_r_max")*CGS_U_kpc;
     gc_z_max = FetchDouble(ptr,"gc_z_max")*CGS_U_kpc;
-    bin_num = floor((ec_r_max/(FetchDouble(ptr,"ec_r_res")*CGS_U_kpc))/pow(2.,total_shell-1));
+    radial_res = FetchDouble(ptr,"ec_r_res")*CGS_U_kpc;
     lat_lim = FetchDouble(ptr,"lat_lim")*CGS_U_pi/180.;
     // output file name
     

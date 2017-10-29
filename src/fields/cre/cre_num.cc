@@ -136,6 +136,7 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3 &pos,Grid_cre *gr
 // J_tot(\nu)
 double CRE_num::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
     double J {0.};
+#ifndef NDEBUG
     if(!grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -143,6 +144,7 @@ double CRE_num::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,const 
         <<"NO INPUT"<<endl;
         exit(1);
     }
+#endif
     // allocate energy grid
     unique_ptr<double[]> KE = unique_ptr<double[]> (new double[grid->nE] {0.});
     // we need F(x[E]) and G(x[E]) in spectral integration
@@ -185,6 +187,7 @@ double CRE_num::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,const 
 // J_pol(\nu)
 double CRE_num::get_emissivity_p(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
     double J {0.};
+#ifndef NDEBUG
     if(!grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -192,6 +195,7 @@ double CRE_num::get_emissivity_p(const vec3 &pos,Pond *par,Grid_cre *grid,const 
         <<"NO INPUT"<<endl;
         exit(1);
     }
+#endif
     // allocate energy grid
     unique_ptr<double[]> KE = unique_ptr<double[]> (new double[grid->nE] {0.});
     // we need F(x[E]) and G(x[E]) in spectral integration

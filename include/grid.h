@@ -184,10 +184,10 @@ public:
     Healpix_Map<double> fd_map;
     
     // shell parameters
-    unsigned int nside_sim, npix_sim, total_shell, bin_num;
+    unsigned int nside_sim, npix_sim, total_shell;
     std::vector<unsigned int> nside_shell;
     // shell boundary
-    double gc_r_max, ec_r_max, gc_z_max, lat_lim;
+    double gc_r_max, ec_r_max, gc_z_max, radial_res, lat_lim;
     // switches
     bool do_dm, do_sync, do_fd;
     

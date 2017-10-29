@@ -17,12 +17,7 @@ using namespace std;
 // analytical CRE flux
 // give values to spectral index and norm factor, in cgs units
 // analytical CRE integration use N(\gamma)
-void CRE_verify::flux_param(const vec3 &pos,Pond *par,double &index,double &norm){
-    if((pos-par->SunPosition).Length() > par->cre_verify.r0*CGS_U_kpc){
-        index = 0.;
-        norm = 0.;
-        return;
-    }
+void CRE_verify::flux_param(const vec3 &/*pos*/,Pond *par,double &index,double &norm){
     // units
     const double alpha {par->cre_verify.alpha};
     // je is in [GeV m^2 s sr]^-1 units
@@ -56,12 +51,17 @@ double CRE_verify::flux(const vec3 &pos,Pond *par,const double &En){
 
 // J_tot(\nu)
 double CRE_verify::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
+#ifndef NDEBUG
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
         <<" at line "<<__LINE__<<endl
         <<"WRONG MODULE"<<endl;
         exit(1);
+    }
+#endif
+    if((pos-par->SunPosition).Length() > par->cre_verify.r0*CGS_U_kpc){
+        return 0.;
     }
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
@@ -81,12 +81,17 @@ double CRE_verify::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,con
 
 // J_pol(\nu)
 double CRE_verify::get_emissivity_p(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
+#ifndef NDEBUG
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
         <<" at line "<<__LINE__<<endl
         <<"WRONG MODULE"<<endl;
         exit(1);
+    }
+#endif
+    if((pos-par->SunPosition).Length() > par->cre_verify.r0*CGS_U_kpc){
+        return 0.;
     }
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
@@ -107,6 +112,7 @@ double CRE_verify::get_emissivity_p(const vec3 &pos,Pond *par,Grid_cre *grid,con
 
 // writing out CRE DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
 void CRE_verify::write_grid(Pond *par, Grid_cre *grid){
+#ifndef NDEBUG
     if(!grid->write_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -114,6 +120,7 @@ void CRE_verify::write_grid(Pond *par, Grid_cre *grid){
         <<"NO PERMISSION"<<endl;
         exit(1);
     }
+#endif
     vec3 gc_pos {0.,0.,0.};
     // 2D grid
     if(grid->nr!=0){

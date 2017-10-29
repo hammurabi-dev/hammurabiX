@@ -70,6 +70,7 @@ double CRE_ana::flux(const vec3 &pos,Pond *par,const double &En){
 
 // J_tot(\nu)
 double CRE_ana::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
+#ifndef NDEBUG
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -77,6 +78,7 @@ double CRE_ana::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,const 
         <<"WRONG MODULE"<<endl;
         exit(1);
     }
+#endif
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
     double index, norm;
@@ -96,6 +98,7 @@ double CRE_ana::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,const 
 
 // J_pol(\nu)
 double CRE_ana::get_emissivity_p(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
+#ifndef NDEBUG
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -103,6 +106,7 @@ double CRE_ana::get_emissivity_p(const vec3 &pos,Pond *par,Grid_cre *grid,const 
         <<"WRONG MODULE"<<endl;
         exit(1);
     }
+#endif
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
     double index, norm;
@@ -122,6 +126,7 @@ double CRE_ana::get_emissivity_p(const vec3 &pos,Pond *par,Grid_cre *grid,const 
 
 // writing out CRE DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
 void CRE_ana::write_grid(Pond *par, Grid_cre *grid){
+#ifndef NDEBUG
     if(!grid->write_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -129,6 +134,7 @@ void CRE_ana::write_grid(Pond *par, Grid_cre *grid){
         <<"NO PERMISSION"<<endl;
         exit(1);
     }
+#endif
     vec3 gc_pos {0.,0.,0.};
     // 2D grid
     if(grid->nr!=0){
