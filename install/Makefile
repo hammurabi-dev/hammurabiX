@@ -34,12 +34,12 @@ DEBUG = -g #-DNDEBUG
 CXXFLAGS = -m64 -O3 -fopenmp -Wall -fPIC -Wno-deprecated -pthread $(DEBUG)
 
 EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
-	-I$(HEALPIX)/include \
+	-I$(HEALPIX_FULL)/include \
 	-I include -I.
 CXXFLAGS += $(EXT_INC)
  
 ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
-	-L$(HEALPIX)/lib \
+	-L$(HEALPIX_FULL)/lib \
 	-L lib -L. 
 LFLAGS = $(ALL_L) \
 	-lhammurabi \
