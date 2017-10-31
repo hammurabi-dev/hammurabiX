@@ -174,7 +174,13 @@ void Pond::fe_pond(XMLDocument *doc){
 
 void Pond::cre_pond(XMLDocument *doc){
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("CRE")};
-        sim_freq = doc->FirstChildElement("root")->FirstChildElement("Output")->FirstChildElement("Sync")->DoubleAttribute("freq")*CGS_U_GHz;
+    if (doc->FirstChildElement("root")->FirstChildElement("Output")->FirstChildElement("Sync") != 0){
+		sim_freq = doc->FirstChildElement("root")->FirstChildElement("Output")->FirstChildElement("Sync")->DoubleAttribute("freq")*CGS_U_GHz;
+	}
+	else
+	{
+		sim_freq = 1.;
+	}
     // analytical
     XMLElement *subptr {ptr->FirstChildElement("Analytic")};
     // the default parameter setting follows wmap3yr model

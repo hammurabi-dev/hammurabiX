@@ -35,8 +35,10 @@ int main(int , char **argv) {
     string file_name {argv[1]};
     
     // BUILD SPECIFIED MODULES
+	cout<<"blub"<<endl;
     unique_ptr<Pond> par = unique_ptr<Pond> (new Pond(file_name));
-    unique_ptr<Grid_fereg> grid_fereg = unique_ptr<Grid_fereg> (new Grid_fereg(file_name));
+	cout<<"blub"<<endl;
+    unique_ptr<Grid_fereg> grid_fereg = unique_ptr<Grid_fereg> (new Grid_fereg(file_name));	
     unique_ptr<Grid_breg> grid_breg = unique_ptr<Grid_breg> (new Grid_breg(file_name));
     unique_ptr<Grid_brnd> grid_brnd = unique_ptr<Grid_brnd> (new Grid_brnd(file_name));
     unique_ptr<Grid_fernd> grid_fernd = unique_ptr<Grid_fernd> (new Grid_fernd(file_name));
@@ -215,21 +217,24 @@ int main(int , char **argv) {
     grid_int->export_grid();
     
     // INSERT MULTI_OUTPUT TAKEOVER LOOP
-    for(auto e = doc->FirstChildElement("root")->FirstChildElement("Output")->FirstChildElement("Sync")->NextSiblingElement("Sync");e!=NULL;e=e->NextSiblingElement("Sync")){
-        // stop producing dm and fd
-        grid_int->do_dm = false;
-        grid_int->do_fd = false;
-        par->sim_freq = e->DoubleAttribute("freq")*CGS_U_GHz;
-        grid_int->sim_sync_name = e->Attribute("filename");
-#ifndef NDEBUG
-        cout<<"...MULTI OUTPUT MODE..."<<endl;
-#endif
-        intobj->write_grid(breg.get(),brnd.get(),fereg.get(),fernd.get(),cre.get(),grid_breg.get(),grid_brnd.get(),grid_fereg.get(),grid_fernd.get(),grid_cre.get(),grid_int.get(),par.get());
-#ifndef NDEBUG
-        cout<<"...PRODUCING MAPS..."<<endl;
-#endif
-        grid_int->export_grid();
-    }
+	if (doc->FirstChildElement("root")->FirstChildElement("Output")->FirstChildElement("Sync") != 0){
+	    for(auto e = doc->FirstChildElement("root")->FirstChildElement("Output")->FirstChildElement("Sync")->NextSiblingElement("Sync");e!=NULL;e=e->NextSiblingElement("Sync")){
+	        // stop producing dm and fd
+	        grid_int->do_dm = false;
+	        grid_int->do_fd = false;
+			grid_int->do_sync = e->BoolAttribute("cue");
+	        par->sim_freq = e->DoubleAttribute("freq")*CGS_U_GHz;
+	        grid_int->sim_sync_name = e->Attribute("filename");
+	#ifndef NDEBUG
+	        cout<<"...MULTI OUTPUT MODE..."<<endl;
+	#endif
+	        intobj->write_grid(breg.get(),brnd.get(),fereg.get(),fernd.get(),cre.get(),grid_breg.get(),grid_brnd.get(),grid_fereg.get(),grid_fernd.get(),grid_cre.get(),grid_int.get(),par.get());
+	#ifndef NDEBUG
+	        cout<<"...PRODUCING MAPS..."<<endl;
+	#endif
+	        grid_int->export_grid();
+	    }
+	}
     
     // CLEANING
 #ifndef NDEBUG

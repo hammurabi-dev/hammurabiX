@@ -70,18 +70,49 @@ void Grid_int::build_grid(XMLDocument *doc){
     // output file name
     
     ptr = doc->FirstChildElement("root")->FirstChildElement("Output");
-    
-    do_dm = ptr->FirstChildElement("DM")->BoolAttribute("cue");
-    do_fd = ptr->FirstChildElement("Faraday")->BoolAttribute("cue");
-    do_sync = ptr->FirstChildElement("Sync")->BoolAttribute("cue");
+    cout<<"Starting"<<endl;
+	cout<<ptr->FirstChildElement("DM")<<endl;
+	
+	if (ptr->FirstChildElement("DM") != 0) {
+		do_dm = ptr->FirstChildElement("DM")->BoolAttribute("cue");
+		sim_dm_name = ptr->FirstChildElement("DM")->Attribute("filename");
+		cout<<"dm"<<endl;
+	}
+	else
+	{
+		do_dm = false;
+		cout<<"no_dm"<<endl;
+	}
+	
+	if (ptr->FirstChildElement("Faraday") != NULL) {
+		do_fd = ptr->FirstChildElement("Faraday")->BoolAttribute("cue");
+		sim_fd_name = ptr->FirstChildElement("Faraday")->Attribute("filename");
+		cout<<"fd"<<endl;
+	}
+	else
+	{
+		do_fd = false;
+		cout<<"no_fd"<<endl;		
+	}
+	
+	if (ptr->FirstChildElement("Sync") != NULL) {
+		do_sync = ptr->FirstChildElement("Sync")->BoolAttribute("cue");
+		sim_sync_name = ptr->FirstChildElement("Sync")->Attribute("filename");
+		cout<<"sync"<<endl;
+	}
+	else
+	{
+		do_sync = false;
+		cout<<"no_sync"<<endl;		
+	}
     
     if (not (do_dm or do_fd or do_sync)) {
         cerr<<"PEACE: NO OUTPUT REQUIRED"<<endl;
         exit(1);
     }
-    sim_dm_name = ptr->FirstChildElement("DM")->Attribute("filename");
-    sim_sync_name = ptr->FirstChildElement("Sync")->Attribute("filename");
-    sim_fd_name = ptr->FirstChildElement("Faraday")->Attribute("filename");
+    
+    
+
     
 }
 
