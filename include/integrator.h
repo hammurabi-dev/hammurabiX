@@ -8,12 +8,15 @@
 #include <omp.h>
 #include <string>
 #include <healpix_map.h>
+#include <memory>
+
 #include "breg.h"
 #include "brnd.h"
 #include "cre.h"
 #include "fereg.h"
 #include "fernd.h"
 #include "pond.h"
+#include "cgs_units_file.h"
 
 
 class Integrator {
@@ -39,6 +42,8 @@ private:
         double d_start;
         double d_stop;
         double delta_d;
+        unsigned long int step;
+        std::vector<double> dist;
     };
     /*@radial_integration
      * commit LOS integration in one pixel one shell

@@ -42,7 +42,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
         gint->fd_map.SetNside(gint->nside_sim, NEST);
         gint->fd_map.fill(0.);
     }
-    
+    struct_shell shell_ref;
     for (decltype(gint->total_shell) current_shell=1;current_shell!=(gint->total_shell+1);++current_shell) {
         cout<<"INTEGRATOR: AT SHELL "<<current_shell<<endl;
         Healpix_Map<double> current_Is_map;
@@ -69,14 +69,18 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
             current_fd_map.SetNside(current_nside, NEST);
             current_fd_map.fill(0.);
         }
-        
-        struct_shell shell_ref;
         // setting for radial_integration
         shell_ref.shell_num = current_shell;
         shell_ref.d_start = get_min_shell_radius(current_shell,gint->total_shell,gint->ec_r_max);
         shell_ref.d_stop = get_max_shell_radius(current_shell,gint->total_shell,gint->ec_r_max);
         shell_ref.delta_d = gint->radial_res;
-        
+        // rounding down is not precise, why?
+        shell_ref.step=0;
+        for(double itr=shell_ref.d_start;itr<shell_ref.d_stop+0.5*shell_ref.delta_d;itr+=0.5*shell_ref.delta_d){
+            shell_ref.dist.push_back(itr);
+            shell_ref.step++;
+        }
+        //shell_ref.step = (2.*shell_ref.d_stop + shell_ref.delta_d - 2.*shell_ref.d_start)/(shell_ref.delta_d);
 #pragma omp parallel for
         for (decltype(current_npix) ipix=0;ipix<current_npix;++ipix) {
             struct_observables observables;
@@ -93,7 +97,6 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
                 ptg = current_fd_map.pix2ang(ipix);
                 observables.fd = gint->fd_map.interpolated_value(ptg);
             }
-            
             // core function!
             radial_integration(shell_ref,ptg,observables,breg,brnd,fereg,fernd,cre,gbreg,gbrnd,gfereg,gfernd,gcre,gint,par);
             
@@ -133,7 +136,6 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
     
 }
 
-
 void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, struct_observables &pixobs,Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fereg *gfereg,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Pond *par) {
     // pass in fd, zero others
     double inner_shells_fd {0.};
@@ -148,83 +150,55 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
     const double lambda_square{(CGS_U_C_light/par->sim_freq)*(CGS_U_C_light/par->sim_freq)};
     // convert intensity(freq) to brightness temperature, Rayleigh-Jeans law
     const double i2bt {CGS_U_C_light*CGS_U_C_light/(2.*CGS_U_kB*par->sim_freq*par->sim_freq)};
-    
+    const double fd_forefactor {-(CGS_U_qe*CGS_U_qe*CGS_U_qe)/(2.*CGS_U_pi*CGS_U_MEC2*CGS_U_MEC2)};
     // for Simpson's rule
-    vector<double> F_dm;
-    vector<double> F_fd;
-    vector<double> F_Jtot, F_Jpol, intr_pol_ang;
-    // first iteration in distance
-    shell_ref.d_stop = min(shell_ref.d_stop,gint->ec_r_max);
-    for(double dist=shell_ref.d_start;dist<shell_ref.d_stop+0.5*shell_ref.delta_d;dist+=0.5*shell_ref.delta_d){
+    std::unique_ptr<double[]> F_dm = unique_ptr<double[]> (new double[shell_ref.step]());
+    std::unique_ptr<double[]> F_fd = unique_ptr<double[]> (new double[shell_ref.step]());
+    std::unique_ptr<double[]> F_Jtot = unique_ptr<double[]> (new double[shell_ref.step]());
+    std::unique_ptr<double[]> F_Jpol = unique_ptr<double[]> (new double[shell_ref.step]());
+    std::unique_ptr<double[]> intr_pol_ang = unique_ptr<double[]> (new double[shell_ref.step]());
+    for(decltype(shell_ref.step)i=0;i<shell_ref.step;++i){
         // ec and gc position
-        vec3 ec_pos {toolkit::get_LOS_unit_vec(THE,PHI)*dist};
+        vec3 ec_pos {toolkit::get_LOS_unit_vec(THE,PHI)*shell_ref.dist[i]};
         vec3 pos {ec_pos + par->SunPosition};
         // check LOS depth limit
         if (check_simulation_upper_limit(pos.Length(),gint->gc_r_max)) {break;}
         if (check_simulation_upper_limit(fabs(pos.z),gint->gc_z_max)) {break;}
-        
         // B field
         vec3 B_vec {breg->get_breg(pos,par,gbreg)};
         // add random field
         B_vec += brnd->get_brnd(pos,gbrnd);
-        
         const double B_par {toolkit::get_par2LOS(B_vec,THE,PHI)};
         // un-scaled B_per, if random B is active, we scale up this
         // in calculating emissivity, so it is not constant
         double B_per {toolkit::get_perp2LOS(B_vec,THE,PHI)};
-        
         // FE field
         double te {fereg->get_density(pos,par,gfereg)};
         // add random field
         te += fernd->get_fernd(pos,gfernd);
         // to avoid negative value
         if(te<0){
-            /*
-             cerr<<"ERR:"<<__FILE__
-             <<" : in function "<<__func__<<endl
-             <<" at line "<<__LINE__<<endl
-             <<" NEGATIVE FE DENSITY"<<endl;
-             exit(1);
-             */
             te = 0.;
         }
-        
         // DM
         if(gint->do_dm){
-            F_dm.push_back(te*shell_ref.delta_d);
+            F_dm[i] = (te*shell_ref.delta_d);
         }
         // Faraday depth
         if(gint->do_fd or gint->do_sync){
-            const double fd_forefactor {-(CGS_U_qe*CGS_U_qe*CGS_U_qe)/(2.*CGS_U_pi*CGS_U_MEC2*CGS_U_MEC2)};
-            F_fd.push_back(te*B_par*fd_forefactor*shell_ref.delta_d);
+            F_fd[i] = (te*B_par*fd_forefactor*shell_ref.delta_d);
         }
-        
         // Synchrotron Emission
         if(gint->do_sync){
-            F_Jtot.push_back(cre->get_emissivity_t(pos,par,gcre,B_per)*shell_ref.delta_d*i2bt);
+            F_Jtot[i] = (cre->get_emissivity_t(pos,par,gcre,B_per)*shell_ref.delta_d*i2bt);
             // J_pol receive no contribution from missing random
-            F_Jpol.push_back(cre->get_emissivity_p(pos,par,gcre,B_per)*shell_ref.delta_d*i2bt);
+            F_Jpol[i] = (cre->get_emissivity_p(pos,par,gcre,B_per)*shell_ref.delta_d*i2bt);
             // intrinsic polarization angle, following IAU definition
-            intr_pol_ang.push_back(toolkit::get_intr_pol_ang(B_vec,THE,PHI));
+            intr_pol_ang[i] = (toolkit::get_intr_pol_ang(B_vec,THE,PHI));
         }
     }// first iteration end
-    
-    // second iteration in distance
     // applying Simpson's rule
-    // be careful with the logic for assigining simpson_size!
-    int simpson_size {0};
-    if(gint->do_dm){
-        simpson_size = F_dm.size();
-    }
-    if(gint->do_fd or gint->do_sync){
-        simpson_size = F_fd.size();
-    }
-    // if nothing is calculated
-    if(simpson_size==0){
-        return;
-    }
-    
-    for(decltype(simpson_size)i=1;i<simpson_size-1;i+=2){
+    for(decltype(shell_ref.step)i=1;i<shell_ref.step-1;i+=2){
         // DM
         if(gint->do_dm){
             pixobs.dm += (F_dm[i-1]+4.*F_dm[i]+F_dm[i+1])*0.16666667;
@@ -236,7 +210,7 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
         // Sync
         if(gint->do_sync){
             // pol. angle after Faraday rotation
-            double qui {(inner_shells_fd+pixobs.fd)*lambda_square+intr_pol_ang[i]};
+            double qui {(inner_shells_fd+pixobs.fd)*lambda_square+(intr_pol_ang[i-1]+4.*intr_pol_ang[i]+intr_pol_ang[i+1])*0.16666667};
 #ifndef NDEBUG
             if (abs(qui)>1e30) {
                 cerr<<"ERR: ODD VALUE"<<endl;

@@ -88,7 +88,6 @@ double CRE_ana::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,const 
     // synchrotron integration
     const double A {4.*CGS_U_MEC*CGS_U_pi*par->sim_freq/(3.*CGS_U_qe*fabs(Bper))};
     const double mu {-0.5*(3.+index)};
-    
     return norm*( pow(A,0.5*(index+1))*pow(2,mu+1)*gsl_sf_gamma(0.5*mu+7./3.)*gsl_sf_gamma(0.5*mu+2./3.)/(mu+2.) )/(4.*CGS_U_pi);
     /* the last 4pi comes from solid-angle integration/deviation,
      check eq(6.16) in Ribiki-Lightman's where Power is defined,
@@ -116,7 +115,6 @@ double CRE_ana::get_emissivity_p(const vec3 &pos,Pond *par,Grid_cre *grid,const 
     // synchrotron integration
     const double A {4.*CGS_U_MEC*CGS_U_pi*par->sim_freq/(3.*CGS_U_qe*fabs(Bper))};
     const double mu {-0.5*(3.+index)};
-    
     return norm*( pow(A,0.5*(index+1))*pow(2,mu)*gsl_sf_gamma(0.5*mu+4./3.)*gsl_sf_gamma(0.5*mu+2./3.) )/(4.*CGS_U_pi);
     /* the last 4pi comes from solid-angle integration/deviation,
      check eq(6.16) in Ribiki-Lightman's where Power is defined,
