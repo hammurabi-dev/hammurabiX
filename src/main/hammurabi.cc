@@ -35,9 +35,7 @@ int main(int , char **argv) {
     string file_name {argv[1]};
     
     // BUILD SPECIFIED MODULES
-	cout<<"blub"<<endl;
     unique_ptr<Pond> par = unique_ptr<Pond> (new Pond(file_name));
-	cout<<"blub"<<endl;
     unique_ptr<Grid_fereg> grid_fereg = unique_ptr<Grid_fereg> (new Grid_fereg(file_name));	
     unique_ptr<Grid_breg> grid_breg = unique_ptr<Grid_breg> (new Grid_breg(file_name));
     unique_ptr<Grid_brnd> grid_brnd = unique_ptr<Grid_brnd> (new Grid_brnd(file_name));
