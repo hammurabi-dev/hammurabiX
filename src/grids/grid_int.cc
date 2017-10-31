@@ -69,19 +69,41 @@ void Grid_int::build_grid(XMLDocument *doc){
     lat_lim = FetchDouble(ptr,"lat_lim")*CGS_U_pi/180.;
     // output file name
     
-    ptr = doc->FirstChildElement("root")->FirstChildElement("Output");
-    
-    do_dm = ptr->FirstChildElement("DM")->BoolAttribute("cue");
-    do_fd = ptr->FirstChildElement("Faraday")->BoolAttribute("cue");
-    do_sync = ptr->FirstChildElement("Sync")->BoolAttribute("cue");
+    ptr = doc->FirstChildElement("root")->FirstChildElement("Output");	
+	if (ptr->FirstChildElement("DM") != 0) {
+		do_dm = ptr->FirstChildElement("DM")->BoolAttribute("cue");
+		sim_dm_name = ptr->FirstChildElement("DM")->Attribute("filename");
+	}
+	else
+	{
+		do_dm = false;
+	}
+	
+	if (ptr->FirstChildElement("Faraday") != NULL) {
+		do_fd = ptr->FirstChildElement("Faraday")->BoolAttribute("cue");
+		sim_fd_name = ptr->FirstChildElement("Faraday")->Attribute("filename");
+	}
+	else
+	{
+		do_fd = false;	
+	}
+	
+	if (ptr->FirstChildElement("Sync") != NULL) {
+		do_sync = ptr->FirstChildElement("Sync")->BoolAttribute("cue");
+		sim_sync_name = ptr->FirstChildElement("Sync")->Attribute("filename");
+	}
+	else
+	{
+		do_sync = false;	
+	}
     
     if (not (do_dm or do_fd or do_sync)) {
         cerr<<"PEACE: NO OUTPUT REQUIRED"<<endl;
         exit(1);
     }
-    sim_dm_name = ptr->FirstChildElement("DM")->Attribute("filename");
-    sim_sync_name = ptr->FirstChildElement("Sync")->Attribute("filename");
-    sim_fd_name = ptr->FirstChildElement("Faraday")->Attribute("filename");
+    
+    
+
     
 }
 
