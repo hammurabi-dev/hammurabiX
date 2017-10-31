@@ -69,7 +69,7 @@ help:
 
 .PHONY: clean
 clean:
-	rm lib/*.a src/*.o src/grids/*.o src/fields/cre/*.o src/fields/fe/*.o src/fields/gmf/*.o src/integrators/*.o src/tools/*.o; rm -rf bin
+	rm lib/*.a src/main/*.o src/params/*.o src/grids/*.o src/fields/cre/*.o src/fields/fe/*.o src/fields/gmf/*.o src/integrators/*.o src/tools/*.o; rm -rf bin
 .PHONY: tar 
 tar:
 	tar cfv HamX.tar.gz AUTHROS COPYING include install lib readme.md src templates
