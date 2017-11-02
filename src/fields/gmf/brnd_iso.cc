@@ -82,7 +82,6 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     grid->fftw_b_kx[0][1] = 0.;
     grid->fftw_b_ky[0][1] = 0.;
     grid->fftw_b_kz[0][1] = 0.;
-    
     // free random memory
     gsl_rng_free(r);
     // no Hermiticity fixing, complex 2 complex
@@ -131,7 +130,7 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
                 unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 // FFT expects up to n/2 positive while n/2 to n negative
-                // physical k in cgs dimension
+                // physical k in 1/kpc
                 tmp_k.z = CGS_U_kpc*l/lz;
                 if(l>=grid->nz/2) tmp_k.z -= CGS_U_kpc*grid->nz/lz;
                 

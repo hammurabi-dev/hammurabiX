@@ -53,8 +53,7 @@ with package dependencies:
 #### compiling:
 ```
 $ cd [package root]
-$ cp install/[makefile] ./
-$ make -f [makefile]
+$ make -f install/[makefile]
 ```
 
 #### running:

@@ -23,10 +23,10 @@ using namespace std;
 
 // global anisotropic turbulent field
 double Brnd_anig::anisotropy(const vec3 &pos,vec3 &H,Pond *par,Breg *breg,Grid_breg *gbreg){
-    // the simplest case, const.
-    return par->brnd_anig.rho;
     // H, direction of anisotropy
     H = toolkit::versor(breg->get_breg(pos,par,gbreg));
+    // the simplest case, const.
+    return par->brnd_anig.rho;
 }
 
 void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
@@ -68,17 +68,16 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 grid->fftw_b_kx[idx][1] = gsl_ran_gaussian(r,sigma);
                 grid->fftw_b_ky[idx][1] = gsl_ran_gaussian(r,sigma);
                 grid->fftw_b_kz[idx][1] = gsl_ran_gaussian(r,sigma);
-                if(i==0 and j==0 and l==0) {
-                    grid->fftw_b_kx[idx][0] = 0.;
-                    grid->fftw_b_ky[idx][0] = 0.;
-                    grid->fftw_b_kz[idx][0] = 0.;
-                    grid->fftw_b_kx[idx][1] = 0.;
-                    grid->fftw_b_ky[idx][1] = 0.;
-                    grid->fftw_b_kz[idx][1] = 0.;
-                }
             }// l
         }// j
     }// i
+    // fix the very 0th
+    grid->fftw_b_kx[0][0] = 0.;
+    grid->fftw_b_ky[0][0] = 0.;
+    grid->fftw_b_kz[0][0] = 0.;
+    grid->fftw_b_kx[0][1] = 0.;
+    grid->fftw_b_ky[0][1] = 0.;
+    grid->fftw_b_kz[0][1] = 0.;
     // free random memory
     gsl_rng_free(r);
     // no Hermiticity fixing, complex 2 complex
@@ -88,22 +87,21 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
     fftw_execute(grid->fftw_pz_bw);
     // PHASE II
     // RESCALING FIELD PROFILE IN REAL SPACE
-    // isotropicity has been checked
     double b_var {toolkit::Variance(grid->fftw_b_kx[0], grid->full_size)};
 #pragma omp parallel for
-    for (decltype(grid->nx) i=0;i<grid->nx;++i) {
+    for (decltype(grid->nx) i=0;i<grid->nx;++i){
         vec3 pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
-        for (decltype(grid->ny) j=0;j<grid->ny;++j) {
+        for (decltype(grid->ny) j=0;j<grid->ny;++j){
             pos.y = j*ly/(grid->ny-1) + grid->y_min;
-            for (decltype(grid->nz) l=0;l<grid->nz;++l) {
+            for (decltype(grid->nz) l=0;l<grid->nz;++l){
                 // get physical position
                 pos.z = l*lz/(grid->nz-1) + grid->z_min;
-                // assemble b_Re and b_Im
-                unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-                vec3 b_re {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};
-                vec3 b_im {grid->fftw_b_kx[idx][1],grid->fftw_b_ky[idx][1],grid->fftw_b_kz[idx][1]};
                 // get rescaling factor
                 double ratio {sqrt(rescal_fact(pos,par))*par->brnd_iso.rms*CGS_U_muGauss/sqrt(3.*b_var)};
+                // assemble b_Re and b_Im
+                unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+                vec3 b_re {grid->fftw_b_kx[idx][0]*ratio,grid->fftw_b_ky[idx][0]*ratio,grid->fftw_b_kz[idx][0]*ratio};
+                vec3 b_im {grid->fftw_b_kx[idx][1]*ratio,grid->fftw_b_ky[idx][1]*ratio,grid->fftw_b_kz[idx][1]*ratio};
                 // impose anisotropy
                 vec3 H_versor {0.,0.,0.,};
                 double rho {anisotropy(pos,H_versor,par,breg,gbreg)};
@@ -116,14 +114,18 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                     exit(1);
                 }
 #endif
-                if(H_versor.Length()!=0){
-                    vec3 b_re_par {H_versor*dotprod(H_versor,b_re)};
-                    vec3 b_re_perp {b_re - b_re_par};
-                    b_re = toolkit::versor(b_re_par*rho + b_re_perp*(1-rho))*(b_re.Length()*ratio);
-                    vec3 b_im_par {H_versor*dotprod(H_versor,b_im)};
-                    vec3 b_im_perp {b_im - b_im_par};
-                    b_im = toolkit::versor(b_im_par*rho + b_im_perp*(1-rho))*(b_im.Length()*ratio);
+                if(H_versor.Length()==0){
+                    break;
                 }
+                vec3 b_re_par {H_versor*dotprod(H_versor,b_re)};
+                vec3 b_re_perp {b_re - b_re_par};
+                b_re = toolkit::versor(b_re_par*rho + b_re_perp*(1-rho))*b_re.Length();
+                vec3 test1 {toolkit::versor(b_re_par + b_re_perp)};
+                vec3 test2 {toolkit::versor(b_re_par*rho + b_re_perp*(1-rho))};
+                vec3 b_im_par {H_versor*dotprod(H_versor,b_im)};
+                vec3 b_im_perp {b_im - b_im_par};
+                b_im = toolkit::versor(b_im_par*rho + b_im_perp*(1-rho))*b_im.Length();
+                
                 // add anisotropic field to random one
                 grid->fftw_b_kx[idx][0] = b_re.x;
                 grid->fftw_b_ky[idx][0] = b_re.y;
@@ -144,16 +146,15 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
 #pragma omp parallel for
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         vec3 tmp_k {CGS_U_kpc*i/lx,0,0};
+        if(i>=grid->nx/2) tmp_k.x -= CGS_U_kpc*grid->nx/lx;
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             tmp_k.y = CGS_U_kpc*j/ly;
+            if(j>=grid->ny/2) tmp_k.y -= CGS_U_kpc*grid->ny/ly;
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
                 unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 // FFT expects up to n/2 positive while n/2 to n negative
                 // physical k in 1/kpc
                 tmp_k.z = CGS_U_kpc*l/lz;
-                
-                if(i>=grid->nx/2) tmp_k.x -= CGS_U_kpc*grid->nx/lx;
-                if(j>=grid->ny/2) tmp_k.y -= CGS_U_kpc*grid->ny/ly;
                 if(l>=grid->nz/2) tmp_k.z -= CGS_U_kpc*grid->nz/lz;
                 
                 const vec3 tmp_b_re {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};
@@ -168,18 +169,17 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 grid->fftw_b_kx[idx][1] = free_b_im.x;
                 grid->fftw_b_ky[idx][1] = free_b_im.y;
                 grid->fftw_b_kz[idx][1] = free_b_im.z;
-                
-                if(i==0 and j==0 and l==0) {
-                    grid->fftw_b_kx[idx][0] = 0.;
-                    grid->fftw_b_ky[idx][0] = 0.;
-                    grid->fftw_b_kz[idx][0] = 0.;
-                    grid->fftw_b_kx[idx][1] = 0.;
-                    grid->fftw_b_ky[idx][1] = 0.;
-                    grid->fftw_b_kz[idx][1] = 0.;
-                }
             }// l
         }// j
     }// i
+    // fixing the very 0th
+    grid->fftw_b_kx[0][0] = 0.;
+    grid->fftw_b_ky[0][0] = 0.;
+    grid->fftw_b_kz[0][0] = 0.;
+    grid->fftw_b_kx[0][1] = 0.;
+    grid->fftw_b_ky[0][1] = 0.;
+    grid->fftw_b_kz[0][1] = 0.;
+    
     // execute DFT backward plan
     fftw_execute(grid->fftw_px_bw);
     fftw_execute(grid->fftw_py_bw);
@@ -205,7 +205,7 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
      b_var +=toolkit::Variance(grid->fftw_b_z.get(), grid->full_size);
      cout<< "BRND: Numerical RMS: "<<sqrt(b_var)/CGS_U_muGauss<<" microG"<<endl;
      // check average divergence
-     double div=0;
+     double div {0};
      for(decltype(grid->nx) i=2;i!=grid->nx-2;++i) {
      for(decltype(grid->ny) j=2;j!=grid->ny-2;++j) {
      for(decltype(grid->nz) k=2;k!=grid->nz-2;++k) {
