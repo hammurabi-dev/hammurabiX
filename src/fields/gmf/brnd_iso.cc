@@ -23,7 +23,7 @@
 using namespace std;
 
 // isotropic turbulent field
-vec3 Brnd_iso::get_brnd(const vec3 &pos, Grid_brnd *grid){
+vec3_t<double> Brnd_iso::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
     // interpolate written grid to given position
     // check if you have called ::write_grid
     return read_grid(pos,grid);
@@ -94,7 +94,7 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     double b_var {toolkit::Variance(grid->fftw_b_kx[0], grid->full_size)};
 #pragma omp parallel for
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
-        vec3 pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
+        vec3_t<double> pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             pos.y = j*ly/(grid->ny-1) + grid->y_min;
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
@@ -122,7 +122,7 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     // Gram-Schmidt process
 #pragma omp parallel for
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
-        vec3 tmp_k {CGS_U_kpc*i/lx,0,0};
+        vec3_t<double> tmp_k {CGS_U_kpc*i/lx,0,0};
         if(i>=grid->nx/2) tmp_k.x -= CGS_U_kpc*grid->nx/lx;
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             tmp_k.y = CGS_U_kpc*j/ly;
@@ -134,11 +134,11 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
                 tmp_k.z = CGS_U_kpc*l/lz;
                 if(l>=grid->nz/2) tmp_k.z -= CGS_U_kpc*grid->nz/lz;
                 
-                const vec3 tmp_b_re {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};
-                const vec3 tmp_b_im {grid->fftw_b_kx[idx][1],grid->fftw_b_ky[idx][1],grid->fftw_b_kz[idx][1]};
+                const vec3_t<double> tmp_b_re {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};
+                const vec3_t<double> tmp_b_im {grid->fftw_b_kx[idx][1],grid->fftw_b_ky[idx][1],grid->fftw_b_kz[idx][1]};
                 
-                const vec3 free_b_re {gramschmidt(tmp_k,tmp_b_re)};
-                const vec3 free_b_im {gramschmidt(tmp_k,tmp_b_im)};
+                const vec3_t<double> free_b_re {gramschmidt(tmp_k,tmp_b_re)};
+                const vec3_t<double> free_b_im {gramschmidt(tmp_k,tmp_b_im)};
                 
                 grid->fftw_b_kx[idx][0] = free_b_re.x;
                 grid->fftw_b_ky[idx][0] = free_b_re.y;
@@ -212,12 +212,12 @@ void Brnd_iso::complex2real(const fftw_complex *input,double *output,const unsig
 
 // Gram-Schimdt, rewritten using Healpix vec3 library
 // tiny error caused by machine is inevitable
-vec3 Brnd_iso::gramschmidt(const vec3 &k,const vec3 &b){
+vec3_t<double> Brnd_iso::gramschmidt(const vec3_t<double> &k,const vec3_t<double> &b){
     if(k.Length()==0 or b.Length()==0){
-        return vec3 {0,0,0};
+        return vec3_t<double> {0,0,0};
     }
     const double inv_k_mod = 1./k.SquaredLength();
-    vec3 b_free {b.x - k.x*dotprod(k,b)*inv_k_mod,
+    vec3_t<double> b_free {b.x - k.x*dotprod(k,b)*inv_k_mod,
         b.y - k.y*dotprod(k,b)*inv_k_mod,
         b.z - k.z*dotprod(k,b)*inv_k_mod};
     

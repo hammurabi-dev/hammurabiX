@@ -1,4 +1,5 @@
 #include <string>
+#include <vec3.h>
 #include <tinyxml2.h>
 #include "pond.h"
 #include "cgs_units_file.h"
@@ -11,7 +12,7 @@ Pond::Pond(std::string file_name){
     doc->LoadFile(file_name.c_str());
     // gc sun position
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("SunPosition")};
-    SunPosition = vec3 {CGS_U_kpc*FetchDouble(ptr,"x"),
+    SunPosition = vec3_t<double> {CGS_U_kpc*FetchDouble(ptr,"x"),
         CGS_U_kpc*FetchDouble(ptr,"y"),
         CGS_U_pc*FetchDouble(ptr,"z")};
     

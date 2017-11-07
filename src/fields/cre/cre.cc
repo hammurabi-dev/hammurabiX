@@ -14,7 +14,7 @@
 
 using namespace std;
 
-double CRE::get_emissivity_t(const vec3 &,Pond *,Grid_cre *,const double &){
+double CRE::get_emissivity_t(const vec3_t<double> &,Pond *,Grid_cre *,const double &){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -22,7 +22,7 @@ double CRE::get_emissivity_t(const vec3 &,Pond *,Grid_cre *,const double &){
     exit(1);
 }
 
-double CRE::get_emissivity_p(const vec3 &,Pond *,Grid_cre *,const double &){
+double CRE::get_emissivity_p(const vec3_t<double> &,Pond *,Grid_cre *,const double &){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -30,7 +30,7 @@ double CRE::get_emissivity_p(const vec3 &,Pond *,Grid_cre *,const double &){
     exit(1);
 }
 
-double CRE::read_grid(const unsigned int &,const vec3 &,Grid_cre *){
+double CRE::read_grid(const unsigned int &,const vec3_t<double> &,Grid_cre *){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl

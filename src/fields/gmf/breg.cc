@@ -12,7 +12,7 @@
 
 using namespace std;
 
-vec3 Breg::get_breg(const vec3 &pos, Pond *par, Grid_breg *grid){
+vec3_t<double> Breg::get_breg(const vec3_t<double> &pos, Pond *par, Grid_breg *grid){
     if(grid->read_permission){
         return read_grid(pos,grid);
     }
@@ -21,26 +21,26 @@ vec3 Breg::get_breg(const vec3 &pos, Pond *par, Grid_breg *grid){
     }
 }
 
-vec3 Breg::breg(const vec3 &, Pond *){
+vec3_t<double> Breg::breg(const vec3_t<double> &, Pond *){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
     <<"DYNAMIC BINDING FAILURE"<<endl;
     exit(1);
-    return vec3 {0.,0.,0.};
+    return vec3_t<double> {0.,0.,0.};
 }
 
-vec3 Breg::read_grid(const vec3 &pos, Grid_breg *grid){
+vec3_t<double> Breg::read_grid(const vec3_t<double> &pos, Grid_breg *grid){
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
-    if (tmp<0 or tmp>grid->nx-1) { return vec3(0.,0.,0.);}
+    if (tmp<0 or tmp>grid->nx-1) { return vec3_t<double>(0.,0.,0.);}
     decltype(grid->nx) xl {(unsigned int)floor(tmp)};
     const double xd {tmp - xl};
     tmp = (grid->ny-1)*(pos.y-grid->y_min)/(grid->y_max-grid->y_min);
-    if (tmp<0 or tmp>grid->ny-1) { return vec3(0.,0.,0.);}
+    if (tmp<0 or tmp>grid->ny-1) { return vec3_t<double>(0.,0.,0.);}
     decltype(grid->nx) yl {(unsigned int)floor(tmp)};
     const double yd {tmp - yl};
     tmp = (grid->nz-1)*(pos.z-grid->z_min)/(grid->z_max-grid->z_min);
-    if (tmp<0 or tmp>grid->nz-1) { return vec3(0.,0.,0.);}
+    if (tmp<0 or tmp>grid->nz-1) { return vec3_t<double>(0.,0.,0.);}
     decltype(grid->nx) zl {(unsigned int)floor(tmp)};
     const double zd {tmp - zl};
 #ifndef NDEBUG
@@ -52,40 +52,40 @@ vec3 Breg::read_grid(const vec3 &pos, Grid_breg *grid){
         exit(1);
     }
 #endif
-    vec3 b_vec3;
+    vec3_t<double> b_vec3;
     // trilinear interpolation
     if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
         // interpolate along z direction, there are four interpolated vectors
         unsigned long int idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         unsigned long int idx2 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
-        vec3 i1 = {grid->reg_b_x[idx1]*(1.-zd) + grid->reg_b_x[idx2]*zd,
+        vec3_t<double> i1 = {grid->reg_b_x[idx1]*(1.-zd) + grid->reg_b_x[idx2]*zd,
             grid->reg_b_y[idx1]*(1.-zd) + grid->reg_b_y[idx2]*zd,
             grid->reg_b_z[idx1]*(1.-zd) + grid->reg_b_z[idx2]*zd};
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl);
         idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl+1);
-        vec3 i2 {grid->reg_b_x[idx1]*(1.-zd) + grid->reg_b_x[idx2]*zd,
+        vec3_t<double> i2 {grid->reg_b_x[idx1]*(1.-zd) + grid->reg_b_x[idx2]*zd,
             grid->reg_b_y[idx1]*(1.-zd) + grid->reg_b_y[idx2]*zd,
             grid->reg_b_z[idx1]*(1.-zd) + grid->reg_b_z[idx2]*zd};
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl,zl);
         idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl,zl+1);
-        vec3 j1 {grid->reg_b_x[idx1]*(1.-zd) + grid->reg_b_x[idx2]*zd,
+        vec3_t<double> j1 {grid->reg_b_x[idx1]*(1.-zd) + grid->reg_b_x[idx2]*zd,
             grid->reg_b_y[idx1]*(1.-zd) + grid->reg_b_y[idx2]*zd,
             grid->reg_b_z[idx1]*(1.-zd) + grid->reg_b_z[idx2]*zd};
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl+1,zl);
         idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl+1,zl+1);
-        vec3 j2 {grid->reg_b_x[idx1]*(1.-zd) + grid->reg_b_x[idx2]*zd,
+        vec3_t<double> j2 {grid->reg_b_x[idx1]*(1.-zd) + grid->reg_b_x[idx2]*zd,
             grid->reg_b_y[idx1]*(1.-zd) + grid->reg_b_y[idx2]*zd,
             grid->reg_b_z[idx1]*(1.-zd) + grid->reg_b_z[idx2]*zd};
         // interpolate along y direction, two interpolated vectors
-        vec3 w1 {i1*(1.-yd) + i2*yd};
-        vec3 w2 {j1*(1.-yd) + j2*yd};
+        vec3_t<double> w1 {i1*(1.-yd) + i2*yd};
+        vec3_t<double> w2 {j1*(1.-yd) + j2*yd};
         // interpolate along x direction
         b_vec3 = w1*(1.-xd) + w2*xd;
     }
     // no interpolation
     else {
         unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
-        b_vec3 = vec3 {grid->reg_b_x[idx],grid->reg_b_y[idx],grid->reg_b_z[idx]};
+        b_vec3 = vec3_t<double> {grid->reg_b_x[idx],grid->reg_b_y[idx],grid->reg_b_z[idx]};
     }
 #ifndef NDEBUG
     if (b_vec3.Length()>50.*CGS_U_muGauss) {
@@ -108,7 +108,7 @@ void Breg::write_grid(Pond *par, Grid_breg *grid){
         <<"NO PERMISSION"<<endl;
         exit(1);
     }
-    vec3 gc_pos, tmp_vec;
+    vec3_t<double> gc_pos, tmp_vec;
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};
     double lz {grid->z_max-grid->z_min};

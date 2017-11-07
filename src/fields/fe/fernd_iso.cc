@@ -17,7 +17,7 @@
 using namespace std;
 
 // isotropic turbulent field
-double FErnd_iso::get_fernd(const vec3 &pos, Grid_fernd *grid){
+double FErnd_iso::get_fernd(const vec3_t<double> &pos, Grid_fernd *grid){
     // interpolate written grid to given position
     // check if you have called ::write_grid
     return read_grid(pos,grid);
@@ -75,7 +75,7 @@ void FErnd_iso::write_grid_iso(Pond *par, Grid_fernd *grid){
         for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
             for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
                 // get physical position
-                vec3 pos {i*lx/(grid->nx-1) + grid->x_min,
+                vec3_t<double> pos {i*lx/(grid->nx-1) + grid->x_min,
                     j*ly/(grid->ny-1) + grid->y_min,
                     l*lz/(grid->nz-1) + grid->z_min};
                 // get rescaling factor

@@ -17,7 +17,7 @@ public:
     Pond(std::string);
     virtual ~Pond(void) = default;
     // observer
-    vec3 SunPosition;
+    vec3_t<double> SunPosition;
     // magnetic field
     // wmap3yr
     //std::vector<double> bwmap;

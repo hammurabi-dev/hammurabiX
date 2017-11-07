@@ -23,12 +23,12 @@ public:
      * base class version returns zero field
      * derived class version call read_grid
      */
-    virtual vec3 get_brnd(const vec3 &,Grid_brnd *);
+    virtual vec3_t<double> get_brnd(const vec3_t<double> &,Grid_brnd *);
     /*@read_grid
      * read field from grid with trilinear interpolation
      * user has to write_grid ahead
      */
-    virtual vec3 read_grid(const vec3 &,Grid_brnd *);
+    virtual vec3_t<double> read_grid(const vec3_t<double> &,Grid_brnd *);
     /*@write_grid_iso
      * write field to grid (model dependent)
      * user can export_grid to binary file with Grid_xxx::export_grid
@@ -45,7 +45,7 @@ public:
     /*@rescal_fact
      * field energy density rescal factor
      */
-    virtual double rescal_fact(const vec3 &,Pond *);
+    virtual double rescal_fact(const vec3_t<double> &,Pond *);
 };
 
 
@@ -54,7 +54,7 @@ class Brnd_iso : public Brnd{
 public:
     Brnd_iso(void) = default;
     virtual ~Brnd_iso(void) = default;
-    vec3 get_brnd(const vec3 &,Grid_brnd *) override;
+    vec3_t<double> get_brnd(const vec3_t<double> &,Grid_brnd *) override;
     void write_grid_iso(Pond *,Grid_brnd *) override;
     
 protected:
@@ -65,7 +65,7 @@ protected:
     /*@gramschmidt
      * orthogonalization process
      */
-    vec3 gramschmidt(const vec3 &,const vec3 &);
+    vec3_t<double> gramschmidt(const vec3_t<double> &,const vec3_t<double> &);
 };
 
 
@@ -80,7 +80,7 @@ private:
     /*@anisotropy
      * calculate anisotropy at given point
      */
-    double anisotropy(const vec3 &,vec3 &,Pond *,Breg *,Grid_breg *);
+    double anisotropy(const vec3_t<double> &,vec3_t<double> &,Pond *,Breg *,Grid_breg *);
 };
 
 // local anisotropic random field

@@ -22,7 +22,7 @@
 using namespace std;
 
 // global anisotropic turbulent field
-double Brnd_anig::anisotropy(const vec3 &pos,vec3 &H,Pond *par,Breg *breg,Grid_breg *gbreg){
+double Brnd_anig::anisotropy(const vec3_t<double> &pos,vec3_t<double> &H,Pond *par,Breg *breg,Grid_breg *gbreg){
     // H, direction of anisotropy
     H = toolkit::versor(breg->get_breg(pos,par,gbreg));
     // the simplest case, const.
@@ -90,7 +90,7 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
     double b_var {toolkit::Variance(grid->fftw_b_kx[0], grid->full_size)};
 #pragma omp parallel for
     for (decltype(grid->nx) i=0;i<grid->nx;++i){
-        vec3 pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
+        vec3_t<double> pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
         for (decltype(grid->ny) j=0;j<grid->ny;++j){
             pos.y = j*ly/(grid->ny-1) + grid->y_min;
             for (decltype(grid->nz) l=0;l<grid->nz;++l){
@@ -100,10 +100,10 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 double ratio {sqrt(rescal_fact(pos,par))*par->brnd_iso.rms*CGS_U_muGauss/sqrt(3.*b_var)};
                 // assemble b_Re and b_Im
                 unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-                vec3 b_re {grid->fftw_b_kx[idx][0]*ratio,grid->fftw_b_ky[idx][0]*ratio,grid->fftw_b_kz[idx][0]*ratio};
-                vec3 b_im {grid->fftw_b_kx[idx][1]*ratio,grid->fftw_b_ky[idx][1]*ratio,grid->fftw_b_kz[idx][1]*ratio};
+                vec3_t<double> b_re {grid->fftw_b_kx[idx][0]*ratio,grid->fftw_b_ky[idx][0]*ratio,grid->fftw_b_kz[idx][0]*ratio};
+                vec3_t<double> b_im {grid->fftw_b_kx[idx][1]*ratio,grid->fftw_b_ky[idx][1]*ratio,grid->fftw_b_kz[idx][1]*ratio};
                 // impose anisotropy
-                vec3 H_versor {0.,0.,0.,};
+                vec3_t<double> H_versor {0.,0.,0.,};
                 double rho {anisotropy(pos,H_versor,par,breg,gbreg)};
 #ifndef NDEBUG
                 if(rho<0. or rho>1.){
@@ -117,13 +117,13 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 if(H_versor.Length()==0){
                     break;
                 }
-                vec3 b_re_par {H_versor*dotprod(H_versor,b_re)};
-                vec3 b_re_perp {b_re - b_re_par};
+                vec3_t<double> b_re_par {H_versor*dotprod(H_versor,b_re)};
+                vec3_t<double> b_re_perp {b_re - b_re_par};
                 b_re = toolkit::versor(b_re_par*rho + b_re_perp*(1-rho))*b_re.Length();
-                vec3 test1 {toolkit::versor(b_re_par + b_re_perp)};
-                vec3 test2 {toolkit::versor(b_re_par*rho + b_re_perp*(1-rho))};
-                vec3 b_im_par {H_versor*dotprod(H_versor,b_im)};
-                vec3 b_im_perp {b_im - b_im_par};
+                vec3_t<double> test1 {toolkit::versor(b_re_par + b_re_perp)};
+                vec3_t<double> test2 {toolkit::versor(b_re_par*rho + b_re_perp*(1-rho))};
+                vec3_t<double> b_im_par {H_versor*dotprod(H_versor,b_im)};
+                vec3_t<double> b_im_perp {b_im - b_im_par};
                 b_im = toolkit::versor(b_im_par*rho + b_im_perp*(1-rho))*b_im.Length();
                 
                 // add anisotropic field to random one
@@ -145,7 +145,7 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
     // Gram-Schmidt process
 #pragma omp parallel for
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
-        vec3 tmp_k {CGS_U_kpc*i/lx,0,0};
+        vec3_t<double> tmp_k {CGS_U_kpc*i/lx,0,0};
         if(i>=grid->nx/2) tmp_k.x -= CGS_U_kpc*grid->nx/lx;
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             tmp_k.y = CGS_U_kpc*j/ly;
@@ -157,11 +157,11 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 tmp_k.z = CGS_U_kpc*l/lz;
                 if(l>=grid->nz/2) tmp_k.z -= CGS_U_kpc*grid->nz/lz;
                 
-                const vec3 tmp_b_re {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};
-                const vec3 tmp_b_im {grid->fftw_b_kx[idx][1],grid->fftw_b_ky[idx][1],grid->fftw_b_kz[idx][1]};
+                const vec3_t<double> tmp_b_re {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};
+                const vec3_t<double> tmp_b_im {grid->fftw_b_kx[idx][1],grid->fftw_b_ky[idx][1],grid->fftw_b_kz[idx][1]};
                 
-                const vec3 free_b_re {gramschmidt(tmp_k,tmp_b_re)};
-                const vec3 free_b_im {gramschmidt(tmp_k,tmp_b_im)};
+                const vec3_t<double> free_b_re {gramschmidt(tmp_k,tmp_b_re)};
+                const vec3_t<double> free_b_im {gramschmidt(tmp_k,tmp_b_im)};
                 
                 grid->fftw_b_kx[idx][0] = free_b_re.x;
                 grid->fftw_b_ky[idx][0] = free_b_re.y;

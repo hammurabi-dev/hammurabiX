@@ -160,13 +160,13 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
     std::unique_ptr<double[]> intr_pol_ang = unique_ptr<double[]> (new double[shell_ref.step]());
     for(decltype(shell_ref.step)i=0;i<shell_ref.step;++i){
         // ec and gc position
-        vec3 ec_pos {toolkit::get_LOS_unit_vec(THE,PHI)*shell_ref.dist[i]};
-        vec3 pos {ec_pos + par->SunPosition};
+        vec3_t<double> ec_pos {toolkit::get_LOS_unit_vec(THE,PHI)*shell_ref.dist[i]};
+        vec3_t<double> pos {ec_pos + par->SunPosition};
         // check LOS depth limit
         if (check_simulation_upper_limit(pos.Length(),gint->gc_r_max)) {break;}
         if (check_simulation_upper_limit(fabs(pos.z),gint->gc_z_max)) {break;}
         // B field
-        vec3 B_vec {breg->get_breg(pos,par,gbreg)};
+        vec3_t<double> B_vec {breg->get_breg(pos,par,gbreg)};
         // add random field
         B_vec += brnd->get_brnd(pos,gbrnd);
         const double B_par {toolkit::get_par2LOS(B_vec,THE,PHI)};

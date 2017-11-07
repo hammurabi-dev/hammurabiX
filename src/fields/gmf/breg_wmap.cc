@@ -13,8 +13,8 @@
 using namespace std;
 
 /* wmap-3yr */
-vec3 Breg_wmap::breg(const vec3 &pos,Pond *par){
-    vec3 b_vec3 {0.,0.,0.};
+vec3_t<double> Breg_wmap::breg(const vec3_t<double> &pos,Pond *par){
+    vec3_t<double> b_vec3 {0.,0.,0.};
     const double r {sqrt(pos.x*pos.x + pos.y*pos.y)};
     if (r>(20.*CGS_U_kpc) or r<(3.*CGS_U_kpc )) {
         return b_vec3;
@@ -27,7 +27,7 @@ vec3 Breg_wmap::breg(const vec3 &pos,Pond *par){
     const double phi {atan2(pos.y,pos.x)};
     const double psi {psi0 + psi1*log(r/(8.*CGS_U_kpc))};
     const double chi {chi0*tanh(pos.z/(1.*CGS_U_kpc))};
-    const vec3 b_cyl {b0*sin(psi)*cos(chi),
+    const vec3_t<double> b_cyl {b0*sin(psi)*cos(chi),
         b0*cos(psi)*cos(chi),
         b0*sin(chi)};
     toolkit::Cyl2Cart(phi,b_cyl,b_vec3);

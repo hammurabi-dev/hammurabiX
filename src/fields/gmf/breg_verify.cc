@@ -12,10 +12,10 @@
 
 using namespace std;
 
-vec3 Breg_verify::breg(const vec3 &,Pond *par){
+vec3_t<double> Breg_verify::breg(const vec3_t<double> &,Pond *par){
     // units
     const double b0 {par->breg_verify.b0*CGS_U_muGauss};
     const double l0 {par->breg_verify.l0*CGS_U_pi/180.};
     const double r {par->breg_verify.r};
-    return vec3 {b0*cos(l0),b0*sin(l0),b0*r};
+    return vec3_t<double> {b0*cos(l0),b0*sin(l0),b0*r};
 }

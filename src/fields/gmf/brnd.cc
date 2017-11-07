@@ -21,14 +21,14 @@
 
 using namespace std;
 
-vec3 Brnd::get_brnd(const vec3 &pos, Grid_brnd *grid){
+vec3_t<double> Brnd::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
     if(grid->read_permission){
         return read_grid(pos,grid);
     }
     // if no specific random field model is called
     // base class will return zero vector
     else{
-        return vec3 {0.,0.,0.};
+        return vec3_t<double> {0.,0.,0.};
     }
 }
 
@@ -56,7 +56,7 @@ double Brnd::b_spec(const double &k, Pond *par){
 
 // galactic scaling of random field energy density
 // set to 1 at observer's place
-double Brnd::rescal_fact(const vec3 &pos, Pond *par){
+double Brnd::rescal_fact(const vec3_t<double> &pos, Pond *par){
     const double r_cyl {(sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x))/CGS_U_kpc};
     const double z {(fabs(pos.z) - fabs(par->SunPosition.z))/CGS_U_kpc};
     const double r0 {par->brnd_scal.r0};
@@ -67,19 +67,19 @@ double Brnd::rescal_fact(const vec3 &pos, Pond *par){
     }
 }
 
-vec3 Brnd::read_grid(const vec3 &pos, Grid_brnd *grid){
+vec3_t<double> Brnd::read_grid(const vec3_t<double> &pos, Grid_brnd *grid){
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
-    if (tmp<0 or tmp>grid->nx-1) { return vec3 {0.,0.,0.};}
+    if (tmp<0 or tmp>grid->nx-1) { return vec3_t<double> {0.,0.,0.};}
     decltype(grid->nx) xl {(unsigned int)floor(tmp)};
     const double xd {tmp - xl};
     
     tmp = (grid->ny-1)*(pos.y-grid->y_min)/(grid->y_max-grid->y_min);
-    if (tmp<0 or tmp>grid->ny-1) { return vec3 {0.,0.,0.};}
+    if (tmp<0 or tmp>grid->ny-1) { return vec3_t<double> {0.,0.,0.};}
     decltype(grid->nx) yl {(unsigned int)floor(tmp)};
     const double yd {tmp - yl};
     
     tmp = (grid->nz-1)*(pos.z-grid->z_min)/(grid->z_max-grid->z_min);
-    if (tmp<0 or tmp>grid->nz-1) { return vec3 {0.,0.,0.};}
+    if (tmp<0 or tmp>grid->nz-1) { return vec3_t<double> {0.,0.,0.};}
     decltype(grid->nx) zl {(unsigned int)floor(tmp)};
     const double zd {tmp - zl};
 #ifndef NDEBUG
@@ -91,42 +91,42 @@ vec3 Brnd::read_grid(const vec3 &pos, Grid_brnd *grid){
         exit(1);
     }
 #endif
-    vec3 b_vec3;
+    vec3_t<double> b_vec3;
     //trilinear interpolation
     if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
         unsigned long int idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         unsigned long int idx2 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
-        vec3 i1 {grid->fftw_b_x[idx1]*(1.-zd) + grid->fftw_b_x[idx2]*zd,
+        vec3_t<double> i1 {grid->fftw_b_x[idx1]*(1.-zd) + grid->fftw_b_x[idx2]*zd,
             grid->fftw_b_y[idx1]*(1.-zd) + grid->fftw_b_y[idx2]*zd,
             grid->fftw_b_z[idx1]*(1.-zd) + grid->fftw_b_z[idx2]*zd};
         
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl);
         idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl+1);
-        vec3 i2 {grid->fftw_b_x[idx1]*(1.-zd) + grid->fftw_b_x[idx2]*zd,
+        vec3_t<double> i2 {grid->fftw_b_x[idx1]*(1.-zd) + grid->fftw_b_x[idx2]*zd,
             grid->fftw_b_y[idx1]*(1.-zd) + grid->fftw_b_y[idx2]*zd,
             grid->fftw_b_z[idx1]*(1.-zd) + grid->fftw_b_z[idx2]*zd};
         
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl,zl);
         idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl,zl+1);
-        vec3 j1 {grid->fftw_b_x[idx1]*(1.-zd) + grid->fftw_b_x[idx2]*zd,
+        vec3_t<double> j1 {grid->fftw_b_x[idx1]*(1.-zd) + grid->fftw_b_x[idx2]*zd,
             grid->fftw_b_y[idx1]*(1.-zd) + grid->fftw_b_y[idx2]*zd,
             grid->fftw_b_z[idx1]*(1.-zd) + grid->fftw_b_z[idx2]*zd};
         
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl+1,zl);
         idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl+1,zl+1);
-        vec3 j2 {grid->fftw_b_x[idx1]*(1.-zd) + grid->fftw_b_x[idx2]*zd,
+        vec3_t<double> j2 {grid->fftw_b_x[idx1]*(1.-zd) + grid->fftw_b_x[idx2]*zd,
             grid->fftw_b_y[idx1]*(1.-zd) + grid->fftw_b_y[idx2]*zd,
             grid->fftw_b_z[idx1]*(1.-zd) + grid->fftw_b_z[idx2]*zd};
         // interpolate along y direction, two interpolated vectors
-        vec3 w1 {i1*(1.-yd) + i2*yd};
-        vec3 w2 {j1*(1.-yd) + j2*yd};
+        vec3_t<double> w1 {i1*(1.-yd) + i2*yd};
+        vec3_t<double> w2 {j1*(1.-yd) + j2*yd};
         // interpolate along x direction
         b_vec3 = w1*(1.-xd) + w2*xd;
     }
     // on the boundary
     else {
         unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
-        b_vec3 = vec3 {grid->fftw_b_x[idx],grid->fftw_b_y[idx],grid->fftw_b_z[idx]};
+        b_vec3 = vec3_t<double> {grid->fftw_b_x[idx],grid->fftw_b_y[idx],grid->fftw_b_z[idx]};
     }
 #ifndef NDEBUG
     if (b_vec3.Length()>50.*CGS_U_muGauss) {

@@ -12,27 +12,27 @@ using namespace std;
 namespace toolkit {
     
     // calculate the perpendicular to LOS component of a vector
-    double get_perp2LOS (const vec3 &input,const double &the_los,const double &phi_los){
-        const vec3 unit_vec {get_LOS_unit_vec(the_los, phi_los)};
-        const vec3 perp_vec {crossprod(unit_vec,input)};
+    double get_perp2LOS (const vec3_t<double> &input,const double &the_los,const double &phi_los){
+        const vec3_t<double> unit_vec {get_LOS_unit_vec(the_los, phi_los)};
+        const vec3_t<double> perp_vec {crossprod(unit_vec,input)};
         return perp_vec.Length();
     }
     
     // calculate the parallel to LOS component of a vector
-    double get_par2LOS (const vec3 &input,const double &the_los,const double &phi_los){
-        const vec3 unit_vec {get_LOS_unit_vec(the_los, phi_los)};
+    double get_par2LOS (const vec3_t<double> &input,const double &the_los,const double &phi_los){
+        const vec3_t<double> unit_vec {get_LOS_unit_vec(the_los, phi_los)};
         return dotprod(unit_vec,input);
     }
     // calculate intrinsic polarization angle
-    double get_intr_pol_ang(const vec3 &input,const double &the_ec,const double &phi_ec){
-        vec3 sph_unit_v_the;
-        vec3 sph_unit_v_phi;
+    double get_intr_pol_ang(const vec3_t<double> &input,const double &the_ec,const double &phi_ec){
+        vec3_t<double> sph_unit_v_the;
+        vec3_t<double> sph_unit_v_phi;
         
-        sph_unit_v_the = vec3 {cos(the_ec)*cos(phi_ec),
+        sph_unit_v_the = vec3_t<double> {cos(the_ec)*cos(phi_ec),
             cos(the_ec)*sin(phi_ec),
             -sin(the_ec)};
         
-        sph_unit_v_phi = vec3 {-sin(phi_ec),
+        sph_unit_v_phi = vec3_t<double> {-sin(phi_ec),
             cos(phi_ec),
             0.};
         
@@ -56,23 +56,23 @@ namespace toolkit {
     }
     
     // from cartesian coordiante to cylindrical coordinate
-    void cart_coord2cyl_coord(const vec3 &input, double &r, double &phi, double &z){
+    void cart_coord2cyl_coord(const vec3_t<double> &input, double &r, double &phi, double &z){
         r = sqrt(input.x*input.x+input.y*input.y);
         phi = atan2(input.y,input.x);
         if(phi<0.) {phi+=2.*CGS_U_pi;}
         z = input.z;
     }
     // overload for vec3 to vec3
-    void cart_coord2cyl_coord(const vec3 &input, vec3 &cyl_vec){
+    void cart_coord2cyl_coord(const vec3_t<double> &input, vec3_t<double> &cyl_vec){
         cyl_vec.x = sqrt(input.x*input.x+input.y*input.y);
         cyl_vec.y = atan2(input.y,input.x);
         if(cyl_vec.y<0.) {cyl_vec.y+=2.*CGS_U_pi;}
         cyl_vec.z = input.z;
     }
     
-    vec3 versor(const vec3 &b){
-        if(b.Length()==0.) {return vec3 {0.,0.,0.};}
-        vec3 V = b;
+    vec3_t<double> versor(const vec3_t<double> &b){
+        if(b.Length()==0.) {return vec3_t<double> {0.,0.,0.};}
+        vec3_t<double> V = b;
         V.Normalize();
         return V;
     }
@@ -182,14 +182,14 @@ namespace toolkit {
         }
     }
     
-    void Cart2LOS(const double &lat,const double &lon,const vec3 &infield,vec3 &outfield){
+    void Cart2LOS(const double &lat,const double &lon,const vec3_t<double> &infield,vec3_t<double> &outfield){
         // Jennifer's final modified transform
         outfield.x=	infield.x*cos(lat)*cos(lon)		+ infield.y*cos(lat)*sin(lon) + infield.z*sin(lat);
         outfield.y=	-1.*infield.x*sin(lon)			+ infield.y*cos(lon);
         outfield.z=	-1.*infield.x*sin(lat)*cos(lon)	- infield.y*sin(lat)*sin(lon) + infield.z*cos(lat);
     }
     // Inverse tranformation, whichis just the transpose (or swap the sign of the angles):
-    void LOS2Cart(const double &lat,const double &lon,const vec3 &infield,vec3 &outfield){
+    void LOS2Cart(const double &lat,const double &lon,const vec3_t<double> &infield,vec3_t<double> &outfield){
         // Jennifer's final modified transform
         outfield.x=	infield.x*cos(lat)*cos(lon)		- infield.y*sin(lon)	- infield.z*sin(lat)*cos(lon);
         outfield.y=	infield.x*cos(lat)*sin(lon)		+ infield.y*cos(lon)	- infield.z*sin(lat)*sin(lon);
@@ -199,8 +199,8 @@ namespace toolkit {
     // galactic warp of cartesian coordinate
     // with this module, we still do modelling in ordinary flat frame.
     // input, Cartesian gc_pos in cgs units, output, warp z in cgs units
-    vec3 warp(const vec3 &gc_pos){
-        vec3 wpos {gc_pos};
+    vec3_t<double> warp(const vec3_t<double> &gc_pos){
+        vec3_t<double> wpos {gc_pos};
         const double R_w {8.4*CGS_U_kpc};
         const double sr {sqrt( gc_pos.x*gc_pos.x + gc_pos.y*gc_pos.y )};
         if (sr >= R_w) {

@@ -15,9 +15,9 @@
 using namespace std;
 
 // YMW16
-double FEreg_ymw16::density(const vec3 &pos, Pond *par){
+double FEreg_ymw16::density(const vec3_t<double> &pos, Pond *par){
     // YMW16 using a different Cartesian frame from our default one
-    vec3 gc_pos {pos.y,-pos.x,pos.z};
+    vec3_t<double> gc_pos {pos.y,-pos.x,pos.z};
     // sylindrical r
     double r_cyl {sqrt(gc_pos.x*gc_pos.x+gc_pos.y*gc_pos.y)};
     // warp

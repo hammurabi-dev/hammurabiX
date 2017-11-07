@@ -17,7 +17,7 @@ using namespace std;
 
 // numerical CRE flux
 // use bilinear/trilinear interpolationi according to the dimension of CRE flux grid
-double CRE_num::read_grid(const unsigned int &Eidx, const vec3 &pos,Grid_cre *grid){
+double CRE_num::read_grid(const unsigned int &Eidx, const vec3_t<double> &pos,Grid_cre *grid){
     // if grid in spatial 2D
     if(grid->nr!=0){
         // sylindrical galactic centric position
@@ -134,7 +134,7 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3 &pos,Grid_cre *gr
 }
 
 // J_tot(\nu)
-double CRE_num::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
+double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Pond *par,Grid_cre *grid,const double &Bper){
     double J {0.};
 #ifndef NDEBUG
     if(!grid->read_permission){
@@ -185,7 +185,7 @@ double CRE_num::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,const 
 }
 
 // J_pol(\nu)
-double CRE_num::get_emissivity_p(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
+double CRE_num::get_emissivity_p(const vec3_t<double> &pos,Pond *par,Grid_cre *grid,const double &Bper){
     double J {0.};
 #ifndef NDEBUG
     if(!grid->read_permission){

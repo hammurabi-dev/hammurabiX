@@ -14,7 +14,7 @@
 
 using namespace std;
 
-double FEreg::get_density(const vec3 &pos, Pond *par, Grid_fereg *grid){
+double FEreg::get_density(const vec3_t<double> &pos, Pond *par, Grid_fereg *grid){
     if(grid->read_permission){
         return read_grid(pos,grid);
     }
@@ -26,7 +26,7 @@ double FEreg::get_density(const vec3 &pos, Pond *par, Grid_fereg *grid){
 // not recommended to use without enough computing source
 // recommend to use this once (replace density in write_grid) if no
 // free parameters in FE
-double FEreg::density_blur(const vec3 &pos, Pond *par, Grid_fereg *grid){
+double FEreg::density_blur(const vec3_t<double> &pos, Pond *par, Grid_fereg *grid){
     double ne_blur {0.};
     // element value in each thread
     double element {0.};
@@ -37,7 +37,7 @@ double FEreg::density_blur(const vec3 &pos, Pond *par, Grid_fereg *grid){
     double blur_scale_y {(grid->y_max-grid->y_min)/(grid->ny*CGS_U_kpc)};
     double blur_scale_z {(grid->z_max-grid->z_min)/(grid->nz*CGS_U_kpc)};
     // sample position
-    vec3 pos_s;
+    vec3_t<double> pos_s;
     gsl_rng *r {gsl_rng_alloc(gsl_rng_taus)};
     gsl_rng_set(r, toolkit::random_seed());
 #pragma omp parallel sections private(element) reduction(+:ne_blur)
@@ -45,7 +45,7 @@ double FEreg::density_blur(const vec3 &pos, Pond *par, Grid_fereg *grid){
 #pragma omp section
         {
             for(decltype(step)i=0;i!=step;++i){
-                pos_s = pos + vec3 {gsl_ran_gaussian(r,(blur_scale_x/2.355))*CGS_U_kpc,
+                pos_s = pos + vec3_t<double> {gsl_ran_gaussian(r,(blur_scale_x/2.355))*CGS_U_kpc,
                     gsl_ran_gaussian(r,(blur_scale_y/2.355))*CGS_U_kpc,
                     gsl_ran_gaussian(r,(blur_scale_z/2.355))*CGS_U_kpc};
                 element = density(pos_s,par);
@@ -57,7 +57,7 @@ double FEreg::density_blur(const vec3 &pos, Pond *par, Grid_fereg *grid){
     return ne_blur/step;
 }
 
-double FEreg::density(const vec3 &, Pond *){
+double FEreg::density(const vec3_t<double> &, Pond *){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -66,7 +66,7 @@ double FEreg::density(const vec3 &, Pond *){
     return 0.;
 }
 
-double FEreg::read_grid(const vec3 &pos, Grid_fereg *grid){
+double FEreg::read_grid(const vec3_t<double> &pos, Grid_fereg *grid){
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
     if (tmp<1 or tmp>grid->nx-1) { return 0.;}
     decltype(grid->nx) xl {(unsigned int)floor(tmp)};
@@ -133,7 +133,7 @@ void FEreg::write_grid(Pond *par, Grid_fereg *grid){
         exit(1);
     }
     cout<<"...FE: WRITING OUTPUT..."<<endl;
-    vec3 gc_pos;
+    vec3_t<double> gc_pos;
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};
     double lz {grid->z_max-grid->z_min};

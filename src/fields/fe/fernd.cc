@@ -16,7 +16,7 @@
 
 using namespace std;
 
-double FErnd::get_fernd(const vec3 &pos,Grid_fernd *grid){
+double FErnd::get_fernd(const vec3_t<double> &pos,Grid_fernd *grid){
     if(grid->read_permission){
         return read_grid(pos,grid);
     }
@@ -49,7 +49,7 @@ double FErnd::fe_spec(const double &k, Pond *par){
     return P*unit;
 }
 
-double FErnd::rescal_fact(const vec3 &pos, Pond *par){
+double FErnd::rescal_fact(const vec3_t<double> &pos, Pond *par){
     const double r_cyl {(sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x))/CGS_U_kpc};
     const double z {(fabs(pos.z) - fabs(par->SunPosition.z))/CGS_U_kpc};
     const double r0 {par->fernd_scal.r0};
@@ -60,7 +60,7 @@ double FErnd::rescal_fact(const vec3 &pos, Pond *par){
     }
 }
 
-double FErnd::read_grid(const vec3 &pos, Grid_fernd *grid){
+double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
     if (tmp<0 or tmp>grid->nx-1) { return 0.;}
     decltype(grid->nx) xl {(unsigned int)floor(tmp)};

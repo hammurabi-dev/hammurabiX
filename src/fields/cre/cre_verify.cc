@@ -17,7 +17,7 @@ using namespace std;
 // analytical CRE flux
 // give values to spectral index and norm factor, in cgs units
 // analytical CRE integration use N(\gamma)
-void CRE_verify::flux_param(const vec3 &/*pos*/,Pond *par,double &index,double &norm){
+void CRE_verify::flux_param(const vec3_t<double> &/*pos*/,Pond *par,double &index,double &norm){
     // units
     const double alpha {par->cre_verify.alpha};
     // je is in [GeV m^2 s sr]^-1 units
@@ -33,7 +33,7 @@ void CRE_verify::flux_param(const vec3 &/*pos*/,Pond *par,double &index,double &
 
 // analytical modeling use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
-double CRE_verify::flux(const vec3 &pos,Pond *par,const double &En){
+double CRE_verify::flux(const vec3_t<double> &pos,Pond *par,const double &En){
     if((pos-par->SunPosition).Length() > par->cre_verify.r0*CGS_U_kpc){
         return 0.;
     }
@@ -50,7 +50,7 @@ double CRE_verify::flux(const vec3 &pos,Pond *par,const double &En){
 }
 
 // J_tot(\nu)
-double CRE_verify::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
+double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Pond *par,Grid_cre *grid,const double &Bper){
 #ifndef NDEBUG
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
@@ -80,7 +80,7 @@ double CRE_verify::get_emissivity_t(const vec3 &pos,Pond *par,Grid_cre *grid,con
 }
 
 // J_pol(\nu)
-double CRE_verify::get_emissivity_p(const vec3 &pos,Pond *par,Grid_cre *grid,const double &Bper){
+double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,Pond *par,Grid_cre *grid,const double &Bper){
 #ifndef NDEBUG
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
@@ -120,7 +120,7 @@ void CRE_verify::write_grid(Pond *par, Grid_cre *grid){
         exit(1);
     }
 #endif
-    vec3 gc_pos {0.,0.,0.};
+    vec3_t<double> gc_pos {0.,0.,0.};
     // 2D grid
     if(grid->nr!=0){
         double lr {grid->r_max};

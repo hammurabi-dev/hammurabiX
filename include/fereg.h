@@ -21,11 +21,11 @@ public:
      * read from grid if granted
      * or calculate directly from density function
      */
-    virtual double get_density(const vec3 &,Pond *,Grid_fereg *);
+    virtual double get_density(const vec3_t<double> &,Pond *,Grid_fereg *);
     /*@read_grid
      * read from grid with trilinear interpolation
      */
-    virtual double read_grid(const vec3 &,Grid_fereg *);
+    virtual double read_grid(const vec3_t<double> &,Grid_fereg *);
     /*@write_grid
      * write to grid
      */
@@ -33,11 +33,11 @@ public:
     /*@density
      * calculate FE density at given gc position
      */
-    virtual double density(const vec3 &,Pond *);
+    virtual double density(const vec3_t<double> &,Pond *);
     /*@density_blur
      * gaussian blur FE density (grid elemental scale as FWHM)
      */
-    virtual double density_blur(const vec3 &,Pond *,Grid_fereg *);
+    virtual double density_blur(const vec3_t<double> &,Pond *,Grid_fereg *);
     
 };
 
@@ -46,7 +46,7 @@ class FEreg_verify final : public FEreg{
 public:
     FEreg_verify(void) = default;
     virtual ~FEreg_verify(void) = default;
-    double density(const vec3 &, Pond *) override;
+    double density(const vec3_t<double> &, Pond *) override;
 };
 
 // YMW16
@@ -54,7 +54,7 @@ class FEreg_ymw16 final : public FEreg{
 public:
     FEreg_ymw16(void) = default;
     virtual ~FEreg_ymw16(void) = default;
-    double density(const vec3 &, Pond *) override;
+    double density(const vec3_t<double> &, Pond *) override;
     
 private:
     // structures in MW (ignore Fermi Bubble due to lack of observation)

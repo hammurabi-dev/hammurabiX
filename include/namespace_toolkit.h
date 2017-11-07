@@ -15,31 +15,31 @@ namespace toolkit {
     /*@get_perp2LOS/per2LOS
      * calculate perpendicular/parallel components w.r.t. LOS direction
      */
-    double get_perp2LOS (const vec3 &,const double &,const double &);
-    double get_par2LOS (const vec3 &,const double &,const double &);
+    double get_perp2LOS (const vec3_t<double> &,const double &,const double &);
+    double get_par2LOS (const vec3_t<double> &,const double &,const double &);
     /*@get_intr_pol_ang
      * intrinsic polarization angle
      */
-    double get_intr_pol_ang(const vec3 &,const double &,const double &);
+    double get_intr_pol_ang(const vec3_t<double> &,const double &,const double &);
     /*@get_LOS_unit_vec
      * get the unit vec, given the LOS direction
      */
-    inline vec3 get_LOS_unit_vec(const double &the_los,const double &phi_los){
-        return vec3 {cos(phi_los)*sin(the_los),
+    inline vec3_t<double> get_LOS_unit_vec(const double &the_los,const double &phi_los){
+        return vec3_t<double> {cos(phi_los)*sin(the_los),
             sin(phi_los)*sin(the_los),
             cos(the_los)};
     }
     /*@cart_coord2cyl_coord
      * convert coordinate between cartesian and sylindrical frame
      */
-    void cart_coord2cyl_coord(const vec3 &, double &, double &, double &);
-    void cart_coord2cyl_coord(const vec3 &, vec3 &);
+    void cart_coord2cyl_coord(const vec3_t<double> &, double &, double &, double &);
+    void cart_coord2cyl_coord(const vec3_t<double> &, vec3_t<double> &);
     /*@Cyl2Cart
      * map a vector from cylindrical frame into cartesian frame
      * two frames share the same origin point
      */
-    inline void Cyl2Cart(const double &phi,const vec3 &input, vec3 &output){
-        output = vec3 {cos(phi)*input.x - sin(phi)*input.y,
+    inline void Cyl2Cart(const double &phi,const vec3_t<double> &input, vec3_t<double> &output){
+        output = vec3_t<double> {cos(phi)*input.x - sin(phi)*input.y,
             sin(phi)*input.x + cos(phi)*input.y,
             input.z};
     }
@@ -51,7 +51,7 @@ namespace toolkit {
     /*@versor
      * get versor of given vector
      */
-    vec3 versor(const vec3 &);
+    vec3_t<double> versor(const vec3_t<double> &);
     
     /*@Index3d
      * find index of 3D grid
@@ -81,8 +81,8 @@ namespace toolkit {
     void Rank(double *,const unsigned long int &);
     void Rank(std::vector<double> &);
     
-    void Cart2LOS(const double &,const double &,const vec3 &,vec3 &);
-    void LOS2Cart(const double &,const double &,const vec3 &,vec3 &);
+    void Cart2LOS(const double &,const double &,const vec3_t<double> &,vec3_t<double> &);
+    void LOS2Cart(const double &,const double &,const vec3_t<double> &,vec3_t<double> &);
     
     /*@temp_convert
      * converting brightness temp into thermal temp
@@ -97,7 +97,7 @@ namespace toolkit {
      * convert cartesian coordiante into frame with galacitc warp
      * fields built in warpped frame as in ordinary frame
      */
-    vec3 warp(const vec3 &);
+    vec3_t<double> warp(const vec3_t<double> &);
     
     unsigned long int random_seed(void);
 }

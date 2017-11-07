@@ -16,7 +16,7 @@
 #define CGS_U_arcsec (2.*CGS_U_pi/(360.*60.*60.))
 #define CGS_U_sterad (4.* CGS_U_pi)
 #define CGS_U_esu sqrt(CGS_U_erg*CGS_U_cm)
-#define CGS_U_Coulomb 2997924579.99957*CGS_U_esu
+#define CGS_U_Coulomb (2997924579.99957*CGS_U_esu)
 #define CGS_U_Year (365.25*24.*3600.*CGS_U_sec)
 #define CGS_U_m (1.e2 * CGS_U_cm)
 #define CGS_U_km  (1.e5 * CGS_U_cm)
@@ -42,7 +42,7 @@
 #define CGS_U_C_light   (2.99792458e+10* CGS_U_cm / CGS_U_sec)
 #define CGS_U_h_planck   (6.626075540e-27*CGS_U_erg*CGS_U_sec)  // Planck constant
 #define CGS_U_hq  (1.05457266e-27*CGS_U_erg*CGS_U_sec)  // Plancks constant/(2pi)
-#define CGS_U_qe  (4.8032068e-10*CGS_U_esu)
+#define CGS_U_qe  (4.80320425e-10*CGS_U_esu)
 #define CGS_U_MEC2  (0.51099907e-3 * CGS_U_GeV) // Electron Mass times c^2
 #define CGS_U_MPC2  (938.272310e-3 * CGS_U_GeV) // Proton   Mass times c^2
 #define CGS_U_ME    (CGS_U_MEC2 /(CGS_U_C_light*CGS_U_C_light))
@@ -50,11 +50,6 @@
 #define CGS_U_MP    (CGS_U_MPC2 /(CGS_U_C_light*CGS_U_C_light))
 #define CGS_U_sigmaT (0.66524616*CGS_U_barn)
 #define CGS_U_kB     (1.380622e-16*CGS_U_erg/CGS_U_Kelvin)
-#define CGS_U_re     (2.81794092e-13*CGS_U_cm)
+#define CGS_U_re     (2.81794092e-13*CGS_U_cm) // classical electron radius
 
-#define CGS_U_h_50  1.
-#define CGS_U_Ho    (50.* CGS_U_km /CGS_U_sec /CGS_U_Mpc * CGS_U_h_50)
-
-#define CGS_U_MSol (1.98892e+33* CGS_U_gram)
-#define CGS_U_LSol (3.826e+33*CGS_U_erg/CGS_U_sec)
-#define CGS_U_RSol (6.9599e+10*CGS_U_cm)
+#define CGS_U_GV (CGS_U_GeV/CGS_U_qe) //rigidity for cosmic-rays
