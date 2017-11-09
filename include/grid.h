@@ -60,7 +60,7 @@ public:
     
     double x_max, x_min, y_max, y_min, z_max, z_min;
     unsigned int nx, ny, nz;
-    unsigned long int full_size;
+    std::size_t full_size;
     
 };
 
@@ -97,7 +97,7 @@ public:
     
     double x_max, x_min, y_max, y_min, z_max, z_min;
     unsigned int nx, ny, nz;
-    unsigned long int full_size;
+    std::size_t full_size;
 };
 
 // free electron field
@@ -116,7 +116,7 @@ public:
     
     double x_max, x_min, y_max, y_min, z_max, z_min;
     unsigned int nx, ny, nz;
-    unsigned long int full_size;
+    std::size_t full_size;
 };
 
 // turbulent free electron field
@@ -143,7 +143,7 @@ public:
     
     double x_max, x_min, y_max, y_min, z_max, z_min;
     unsigned int nx, ny, nz;
-    unsigned long int full_size;
+    std::size_t full_size;
 };
 
 // cosmic ray electron field
@@ -162,7 +162,7 @@ public:
     
     // 2-D spatial 1-D spectral grid
     unsigned int nE, nr, nz;
-    unsigned long int cre_size;
+    std::size_t cre_size;
     double r_max, z_max, z_min, E_min, E_max, E_fact;
     // or 3+1 dimension grid
     unsigned int nx,ny;

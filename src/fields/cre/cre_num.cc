@@ -43,8 +43,8 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3_t<double> &pos,Gr
 #endif
         double cre;
         if(rl+1<grid->nr and zl+1<grid->nz){
-            unsigned long int idx1 {toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl,zl)};
-            unsigned long int idx2 {toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl+1,zl)};
+            std::size_t idx1 {toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl,zl)};
+            std::size_t idx2 {toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl+1,zl)};
             double i1 {grid->cre_flux[idx1]*(1-rd) + grid->cre_flux[idx2]*rd};
             idx1 = toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl,zl+1);
             idx2 = toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl+1,zl+1);
@@ -52,7 +52,7 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3_t<double> &pos,Gr
             cre = (i1*(1-zd)+i2*zd);
         }
         else{
-            unsigned long int idx1 {toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl,zl)};
+            std::size_t idx1 {toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl,zl)};
             cre = grid->cre_flux[idx1];
         }
 #ifndef NDEBUG
@@ -92,8 +92,8 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3_t<double> &pos,Gr
 #endif
         double cre;
         if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
-            unsigned long int idx1 {toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,Eidx,xl,yl,zl)};
-            unsigned long int idx2 {toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,Eidx,xl,yl,zl+1)};
+            std::size_t idx1 {toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,Eidx,xl,yl,zl)};
+            std::size_t idx2 {toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,Eidx,xl,yl,zl+1)};
             const double i1 {grid->cre_flux[idx1]*(1.-zd) + grid->cre_flux[idx2]*zd};
             idx1 = toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,Eidx,xl,yl+1,zl);
             idx2 = toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,Eidx,xl,yl+1,zl+1);
@@ -110,7 +110,7 @@ double CRE_num::read_grid(const unsigned int &Eidx, const vec3_t<double> &pos,Gr
             
         }
         else {
-            unsigned long int idx1 {toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,Eidx,xl,yl,zl)};
+            std::size_t idx1 {toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,Eidx,xl,yl,zl)};
             cre = grid->cre_flux[idx1];
         }
 #ifndef NDEBUG

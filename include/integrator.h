@@ -42,7 +42,7 @@ private:
         double d_start;
         double d_stop;
         double delta_d;
-        unsigned long int step;
+        std::size_t step;
         std::vector<double> dist;
     };
     /*@radial_integration

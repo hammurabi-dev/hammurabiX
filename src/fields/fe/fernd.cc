@@ -88,8 +88,8 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     //trilinear interpolation
     if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
         //interpolate along z direction, there are four interpolated vectors
-        unsigned long int idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
-        unsigned long int idx2 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
+        std::size_t idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
+        std::size_t idx2 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
         double i1 {grid->fftw_fe[idx1]*(1.-zd) + grid->fftw_fe[idx2]*zd};
         
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl);
@@ -111,7 +111,7 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     }
     // on the boundary
     else {
-        unsigned long int idx{toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
+        std::size_t idx{toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         density = grid->fftw_fe[idx];
     }
     return density;

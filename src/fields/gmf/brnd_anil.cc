@@ -36,7 +36,7 @@ void Brnd_anil::write_grid_ani(Pond */*par*/, Breg */*breg*/, Grid_breg */*gbreg
      for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
      for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
      for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
-     unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+     std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
      // FFT expects up to n/2 positive while n/2 to n negative
      // physical k in 1/kpc dimension
      double kx {i/(lx/CGS_U_kpc)};

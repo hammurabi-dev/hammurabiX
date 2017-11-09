@@ -56,29 +56,29 @@ namespace toolkit {
     /*@Index3d
      * find index of 3D grid
      */
-    inline unsigned long int Index3d(const unsigned int &/* n1 */,const unsigned int &n2,const unsigned int &n3,const unsigned int &i,const unsigned int &j,const unsigned int &l){
+    inline std::size_t Index3d(const unsigned int &/* n1 */,const unsigned int &n2,const unsigned int &n3,const unsigned int &i,const unsigned int &j,const unsigned int &l){
         return (i*n2*n3 + j*n3 + l);
     }
     /*@Index4d
      * find index for 4D grid
      */
-    inline unsigned long int Index4d(const unsigned int &/* n1 */,const unsigned int &n2,const unsigned int &n3,const unsigned int &n4,const unsigned int &e,const unsigned int &i,const unsigned int &j,const unsigned int &l){
+    inline std::size_t Index4d(const unsigned int &/* n1 */,const unsigned int &n2,const unsigned int &n3,const unsigned int &n4,const unsigned int &e,const unsigned int &i,const unsigned int &j,const unsigned int &l){
         return (e*n2*n3*n4 + i*n3*n4 + j*n4 + l);
     }
     
-    double Mean (const double *,const unsigned long int &); //for array
+    double Mean (const double *,const std::size_t &); //for array
     double Mean(const std::vector<double> &);
     
-    double Variance (const double *,const unsigned long int &);
+    double Variance (const double *,const std::size_t &);
     double Variance(const std::vector<double> &);
     
-    double Covariance (const double *,const double *,const unsigned long int &);
+    double Covariance (const double *,const double *,const std::size_t &);
     double Covariance(const std::vector<double> &,const std::vector<double> &);
     
     /*@Rank
      * convert an array/vector into rank array/vector
      */
-    void Rank(double *,const unsigned long int &);
+    void Rank(double *,const std::size_t &);
     void Rank(std::vector<double> &);
     
     void Cart2LOS(const double &,const double &,const vec3_t<double> &,vec3_t<double> &);
@@ -99,7 +99,7 @@ namespace toolkit {
      */
     vec3_t<double> warp(const vec3_t<double> &);
     
-    unsigned long int random_seed(void);
+    std::size_t random_seed(void);
 }
 
 #endif

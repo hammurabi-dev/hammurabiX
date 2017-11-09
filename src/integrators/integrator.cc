@@ -80,7 +80,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
             shell_ref.step++;
         }
         // dividing inside rounding is problematic
-        //unsigned long int bad_step = floor(2.*shell_ref.d_stop + shell_ref.delta_d - 2.*shell_ref.d_start)/(shell_ref.delta_d);
+        //std::size_t bad_step = floor(2.*shell_ref.d_stop + shell_ref.delta_d - 2.*shell_ref.d_start)/(shell_ref.delta_d);
         //cout<< shell_ref.step - bad_step<< endl;
 #pragma omp parallel for
         for (decltype(current_npix) ipix=0;ipix<current_npix;++ipix) {

@@ -61,7 +61,7 @@ protected:
     /*@complex2real
      * fetch real b(x) values from in-plane DFT
      */
-    void complex2real(const fftw_complex *,double *,const unsigned long int &);
+    void complex2real(const fftw_complex *,double *,const std::size_t &);
     /*@gramschmidt
      * orthogonalization process
      */

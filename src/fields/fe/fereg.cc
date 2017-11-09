@@ -92,8 +92,8 @@ double FEreg::read_grid(const vec3_t<double> &pos, Grid_fereg *grid){
 #endif
     double fe;
     if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
-        unsigned long int idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
-        unsigned long int idx2 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
+        std::size_t idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
+        std::size_t idx2 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
         double i1 {grid->fe[idx1]*(1.-zd) + grid->fe[idx2]*zd};
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl);
         idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl+1);
@@ -109,7 +109,7 @@ double FEreg::read_grid(const vec3_t<double> &pos, Grid_fereg *grid){
         fe = (w1*(1-xd)+w2*xd);
     }
     else {
-        unsigned long int idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
+        std::size_t idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         fe = grid->fe[idx1];
     }
 #ifndef NDEBUG
@@ -142,7 +142,7 @@ void FEreg::write_grid(Pond *par, Grid_fereg *grid){
         for(decltype(grid->ny) j=0;j!=grid->ny;++j){
             gc_pos.y = ly*j/(grid->ny-1) + grid->y_min;
             for(decltype(grid->nz) k=0;k!=grid->nz;++k){
-                unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k)};
+                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k)};
                 gc_pos.z = lz*k/(grid->nz-1) + grid->z_min;
                 // two solutions
                 //grid->fe[idx] = density_blur(gc_pos, par, grid);

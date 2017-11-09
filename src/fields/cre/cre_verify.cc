@@ -132,7 +132,7 @@ void CRE_verify::write_grid(Pond *par, Grid_cre *grid){
                 for(decltype(grid->nz) k=0;k!=grid->nz;++k){
                     // on y=0 2D slide
                     gc_pos.z = lz*k/(grid->nz-1) + grid->z_min;
-                    unsigned long int idx {toolkit::Index3d(grid->nE,grid->nr,grid->nz,i,j,k)};
+                    std::size_t idx {toolkit::Index3d(grid->nE,grid->nr,grid->nz,i,j,k)};
                     grid->cre_flux[idx] = flux(gc_pos,par,E);
                 }
             }
@@ -151,7 +151,7 @@ void CRE_verify::write_grid(Pond *par, Grid_cre *grid){
                     gc_pos.y = ly*k/(grid->ny-1) + grid->y_min;
                     for(decltype(grid->nz) m=0;m!=grid->nz;++m){
                         gc_pos.z = lz*m/(grid->nz-1) + grid->z_min;
-                        unsigned long int idx {toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,i,j,k,m)};
+                        std::size_t idx {toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,i,j,k,m)};
                         grid->cre_flux[idx] = flux(gc_pos,par,E);
                     }
                 }

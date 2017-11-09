@@ -78,9 +78,9 @@ namespace toolkit {
     }
     
     // Mean for array
-    double Mean(const double *arr,const unsigned long int &size){
+    double Mean(const double *arr,const std::size_t &size){
         double avg {0};
-        for(unsigned long int i=0;i!=size;++i) {
+        for(std::size_t i=0;i!=size;++i) {
             avg += arr[i];
         }
         avg/=size;
@@ -101,10 +101,10 @@ namespace toolkit {
     }
     
     // Variance for array
-    double Variance(const double *arr,const unsigned long int &size){
+    double Variance(const double *arr,const std::size_t &size){
         const double avg {Mean(arr,size)};
         double var {0.};
-        for(unsigned long int i=0;i!=size;++i){
+        for(std::size_t i=0;i!=size;++i){
             var += pow((arr[i]-avg),2.);
         }
         var/=size;
@@ -125,11 +125,11 @@ namespace toolkit {
         return var;
     }
     // cov for array
-    double Covariance (const double *arr1,const double *arr2,const unsigned long int &size){
+    double Covariance (const double *arr1,const double *arr2,const std::size_t &size){
         double avg1 {Mean(arr1,size)};
         double avg2 {Mean(arr2,size)};
         double covar {0.};
-        for(unsigned long int m=0;m!=size;++m){
+        for(std::size_t m=0;m!=size;++m){
             covar += (arr1[m]-avg1)*(arr2[m]-avg2);
         }
         covar /= size;
@@ -152,15 +152,15 @@ namespace toolkit {
     }
     
     // get ranked array
-    void Rank(double *arr,const unsigned long int &size){
+    void Rank(double *arr,const std::size_t &size){
         // get max and min
         double max {arr[0]}; double min {arr[0]};
-        for(unsigned long int i=0;i!=size;++i){
+        for(std::size_t i=0;i!=size;++i){
             if(arr[i]>max) max=arr[i];
             else if(arr[i]<min) min=arr[i];
         }
         // get elements ranked
-        for(unsigned long int i=0;i!=size;++i){
+        for(std::size_t i=0;i!=size;++i){
             arr[i] = (arr[i]-min)/(max-min);
         }
     }
@@ -212,7 +212,7 @@ namespace toolkit {
     }
     
     // offer random seed
-    unsigned long int random_seed(void){
+    std::size_t random_seed(void){
         struct timeval tv;
         gettimeofday(&tv,0);
         // casting thread id into unsinged long

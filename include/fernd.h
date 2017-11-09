@@ -37,7 +37,7 @@ public:
     double get_fernd(const vec3_t<double> &,Grid_fernd *) override;
     void write_grid_iso(Pond *,Grid_fernd *) override;
 protected:
-    void complex2real(const fftw_complex *,double *,const unsigned long int &);
+    void complex2real(const fftw_complex *,double *,const std::size_t &);
 };
 
 #endif

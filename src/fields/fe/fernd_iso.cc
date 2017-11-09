@@ -36,7 +36,7 @@ void FErnd_iso::write_grid_iso(Pond *par, Grid_fernd *grid){
     for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
         for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
             for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
-                unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 // FFT expects up to n/2 positive while n/2 to n negative
                 // physical k in 1/kpc dimension
                 double kx {i/(lx/CGS_U_kpc)};
@@ -80,7 +80,7 @@ void FErnd_iso::write_grid_iso(Pond *par, Grid_fernd *grid){
                     l*lz/(grid->nz-1) + grid->z_min};
                 // get rescaling factor
                 double ratio {sqrt(rescal_fact(pos,par))*par->fernd_iso.rms/sqrt(fe_var)};
-                unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 grid->fftw_fe_k[idx][0] *= ratio;
             }
         }
@@ -98,8 +98,8 @@ void FErnd_iso::write_grid_iso(Pond *par, Grid_fernd *grid){
 
 
 // get real components from fftw_complex arrays
-void FErnd_iso::complex2real(const fftw_complex *input,double *output,const unsigned long int &size) {
-    for(unsigned long int i=0;i!=size;++i){
+void FErnd_iso::complex2real(const fftw_complex *input,double *output,const std::size_t &size) {
+    for(std::size_t i=0;i!=size;++i){
         output[i] = input[i][0];
     }
 }

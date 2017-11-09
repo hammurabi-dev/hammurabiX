@@ -52,7 +52,7 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
             double ky {CGS_U_kpc*j/ly};
             if(j>=grid->ny/2) ky -= CGS_U_kpc*grid->ny/ly;
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
-                unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 // FFT expects up to n/2 positive while n/2 to n negative
                 double kz {CGS_U_kpc*l/lz};
                 if(l>=grid->nz/2) kz -= CGS_U_kpc*grid->nz/lz;
@@ -103,7 +103,7 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
                 // get rescaling factor
                 double ratio {sqrt(rescal_fact(pos,par))*par->brnd_iso.rms*CGS_U_muGauss/sqrt(3.*b_var)};
                 // add anisotropic field to random one
-                unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 grid->fftw_b_kx[idx][0] *= ratio;
                 grid->fftw_b_ky[idx][0] *= ratio;
                 grid->fftw_b_kz[idx][0] *= ratio;
@@ -128,7 +128,7 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
             tmp_k.y = CGS_U_kpc*j/ly;
             if(j>=grid->ny/2) tmp_k.y -= CGS_U_kpc*grid->ny/ly;
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
-                unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 // FFT expects up to n/2 positive while n/2 to n negative
                 // physical k in 1/kpc
                 tmp_k.z = CGS_U_kpc*l/lz;
@@ -169,7 +169,7 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     // transform forward followed by backword scale up array by nx*ny*nz
     double inv_grid_size = 1.0/grid->full_size;
 #pragma omp parallel for
-    for(unsigned long int i=0;i<grid->full_size;++i){
+    for(std::size_t i=0;i<grid->full_size;++i){
         grid->fftw_b_x[i] *= inv_grid_size;
         grid->fftw_b_y[i] *= inv_grid_size;
         grid->fftw_b_z[i] *= inv_grid_size;
@@ -188,12 +188,12 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
      for(decltype(grid->nx) i=2;i!=grid->nx-2;++i) {
      for(decltype(grid->ny) j=2;j!=grid->ny-2;++j) {
      for(decltype(grid->nz) k=2;k!=grid->nz-2;++k) {
-     unsigned long int idxf {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i+1,j,k)};
-     unsigned long int idxb {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i-1,j,k)};
-     unsigned long int idyf {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j+1,k)};
-     unsigned long int idyb {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j-1,k)};
-     unsigned long int idzf {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k+1)};
-     unsigned long int idzb {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k-1)};
+     std::size_t idxf {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i+1,j,k)};
+     std::size_t idxb {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i-1,j,k)};
+     std::size_t idyf {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j+1,k)};
+     std::size_t idyb {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j-1,k)};
+     std::size_t idzf {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k+1)};
+     std::size_t idzb {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k-1)};
      div += fabs( (grid->fftw_b_x[idxf]-grid->fftw_b_x[idxb]) + (grid->fftw_b_y[idyf]-grid->fftw_b_y[idyb]) + (grid->fftw_b_z[idzf]-grid->fftw_b_z[idzb]) );
      }
      }
@@ -204,8 +204,8 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
 }
 
 // get real components from fftw_complex arrays
-void Brnd_iso::complex2real(const fftw_complex *input,double *output,const unsigned long int &size) {
-    for(unsigned long int i=0;i!=size;++i){
+void Brnd_iso::complex2real(const fftw_complex *input,double *output,const std::size_t &size) {
+    for(std::size_t i=0;i!=size;++i){
         output[i] = input[i][0];
     }
 }

@@ -56,8 +56,8 @@ vec3_t<double> Breg::read_grid(const vec3_t<double> &pos, Grid_breg *grid){
     // trilinear interpolation
     if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
         // interpolate along z direction, there are four interpolated vectors
-        unsigned long int idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
-        unsigned long int idx2 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
+        std::size_t idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
+        std::size_t idx2 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
         vec3_t<double> i1 = {grid->reg_b_x[idx1]*(1.-zd) + grid->reg_b_x[idx2]*zd,
             grid->reg_b_y[idx1]*(1.-zd) + grid->reg_b_y[idx2]*zd,
             grid->reg_b_z[idx1]*(1.-zd) + grid->reg_b_z[idx2]*zd};
@@ -84,7 +84,7 @@ vec3_t<double> Breg::read_grid(const vec3_t<double> &pos, Grid_breg *grid){
     }
     // no interpolation
     else {
-        unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
+        std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         b_vec3 = vec3_t<double> {grid->reg_b_x[idx],grid->reg_b_y[idx],grid->reg_b_z[idx]};
     }
 #ifndef NDEBUG
@@ -119,7 +119,7 @@ void Breg::write_grid(Pond *par, Grid_breg *grid){
             for(decltype(grid->nz) k=0;k!=grid->nz;++k){
                 gc_pos.z = k*lz/(grid->nz-1) + grid->z_min;
                 tmp_vec = breg(gc_pos,par);
-                unsigned long int idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k)};
+                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k)};
                 grid->reg_b_x[idx] = tmp_vec.x;
                 grid->reg_b_y[idx] = tmp_vec.y;
                 grid->reg_b_z[idx] = tmp_vec.z;
