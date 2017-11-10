@@ -214,7 +214,7 @@ namespace toolkit {
     // offer random seed
     std::size_t random_seed(void){
         struct timeval tv;
-        gettimeofday(&tv,0);
+        gettimeofday(&tv,nullptr);
         // casting thread id into unsinged long
         stringstream ss;
         ss << this_thread::get_id();
@@ -222,5 +222,10 @@ namespace toolkit {
         return (th_id + tv.tv_sec + tv.tv_usec);
     }
     
+    double timestamp(void){
+        struct timeval tv;
+        gettimeofday(&tv,nullptr);
+        return tv.tv_sec + tv.tv_usec*1e-6;
+    }
 }
 // END

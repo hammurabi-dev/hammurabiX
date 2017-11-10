@@ -15,20 +15,13 @@
 #include "fernd.h"
 #include "namespace_toolkit.h"
 
-#ifndef DEBUG
-// timer
-#include <sys/time.h>
-#include <sys/resource.h>
-#define RCPU_TIME (getrusage(RUSAGE_SELF,&ruse), ruse.ru_utime.tv_sec + 1e-6 * ruse.ru_utime.tv_usec)
-#endif
 
 using namespace std;
 using namespace tinyxml2;
 
 int main(int , char **argv) {
 #ifndef NDEBUG
-    struct rusage ruse; // timer
-    const double t_start {RCPU_TIME};
+    double time = toolkit::timestamp();
     cout<<"...STARTING HAMMURABI..."<<endl;
 #endif
     
@@ -237,7 +230,7 @@ int main(int , char **argv) {
     // CLEANING
 #ifndef NDEBUG
     cout<<"...ENDING HAMMURABI..."<<endl
-    <<"INFO:TIME ELAPSE "<<RCPU_TIME-t_start<<"sec"<<endl;
+    <<"INFO:TIME ELAPSE "<<(toolkit::timestamp()-time)<<"sec"<<endl;
 #endif 
     return EXIT_SUCCESS;
 }

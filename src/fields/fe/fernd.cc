@@ -39,9 +39,6 @@ double FErnd::fe_spec(const double &k, Pond *par){
     if(k<=0.){
         return 0.;
     }
-    // modified Giacalone-Jokipii model
-    //const double P = 2*p0*pow(k/k0,a0)/(1.+pow(k/k0,a0-a1));
-    // power law
     double P {0.};
     if(k>k0){
         P = p0*pow(k/k0,a0);
@@ -49,12 +46,14 @@ double FErnd::fe_spec(const double &k, Pond *par){
     return P*unit;
 }
 
+// galactic scaling of random field energy density
+// set to 1 at observer's place
 double FErnd::rescal_fact(const vec3_t<double> &pos, Pond *par){
     const double r_cyl {(sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x))/CGS_U_kpc};
     const double z {(fabs(pos.z) - fabs(par->SunPosition.z))/CGS_U_kpc};
     const double r0 {par->fernd_scal.r0};
     const double z0 {par->fernd_scal.z0};
-    if(r_cyl==0. or z==0) {return 1.;}
+    if(r_cyl==0 or z==0) {return 1.;}
     else{
         return exp(-r_cyl/r0)*exp(-z/z0);
     }

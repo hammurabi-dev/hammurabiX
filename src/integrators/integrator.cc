@@ -82,7 +82,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
         // dividing inside rounding is problematic
         //std::size_t bad_step = floor(2.*shell_ref.d_stop + shell_ref.delta_d - 2.*shell_ref.d_start)/(shell_ref.delta_d);
         //cout<< shell_ref.step - bad_step<< endl;
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
         for (decltype(current_npix) ipix=0;ipix<current_npix;++ipix) {
             struct_observables observables;
             observables.Is = observables.Qs = observables.Us = 0.;
@@ -115,7 +115,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
             }
         }
         //adding up new shell map to sim map
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
         for (decltype(npix_sim) ipix=0;ipix<npix_sim;++ipix) {
             pointing ptg;
             if (gint->do_dm) {

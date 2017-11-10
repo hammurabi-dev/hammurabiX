@@ -15,10 +15,6 @@
 #include "breg.h"
 #include "cgs_units_file.h"
 #include "namespace_toolkit.h"
-// timer
-//#include <sys/time.h>
-//#include <sys/resource.h>
-//#define RCPU_TIME (getrusage(RUSAGE_SELF,&ruse), ruse.ru_utime.tv_sec + 1e-6 * ruse.ru_utime.tv_usec)
 
 using namespace std;
 
@@ -31,9 +27,6 @@ vec3_t<double> Brnd_iso::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
 
 // we tried to optimize the calc time cost for this function
 void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
-    // timer
-    //struct rusage ruse;
-    //const double t_start {RCPU_TIME};
     // PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
     // initialize random seed
@@ -44,6 +37,9 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     double ly {grid->y_max-grid->y_min};
     double lz {grid->z_max-grid->z_min};
     // physical k in 1/kpc dimension
+    // physical dk^3
+    const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
+    const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
 #pragma omp parallel for
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         double kx {CGS_U_kpc*i/lx};
@@ -57,11 +53,9 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
                 double kz {CGS_U_kpc*l/lz};
                 if(l>=grid->nz/2) kz -= CGS_U_kpc*grid->nz/lz;
                 const double k {sqrt(kx*kx + ky*ky + kz*kz)};
-                // physical dk^3
-                const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
+                
                 // simpson's rule
                 double element {2.*b_spec(k,par)/3.};
-                const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
                 element += b_spec(k+halfdk,par)/6.;
                 element += b_spec(k-halfdk,par)/6.;
                 // amplitude, dividing by two because equal allocation to Re and Im parts
@@ -174,33 +168,6 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
         grid->fftw_b_y[i] *= inv_grid_size;
         grid->fftw_b_z[i] *= inv_grid_size;
     }
-    // timer
-    //cout<<"BRND: TIME ELAPSE "<<RCPU_TIME-t_start<<"sec"<<endl;
-    /*
-     #ifndef NDEBUG
-     // check RMS
-     b_var = toolkit::Variance(grid->fftw_b_x.get(), grid->full_size);
-     b_var +=toolkit::Variance(grid->fftw_b_y.get(), grid->full_size);
-     b_var +=toolkit::Variance(grid->fftw_b_z.get(), grid->full_size);
-     cout<< "BRND: Numerical RMS: "<<sqrt(b_var)/CGS_U_muGauss<<" microG"<<endl;
-     // check average divergence
-     double div {0};
-     for(decltype(grid->nx) i=2;i!=grid->nx-2;++i) {
-     for(decltype(grid->ny) j=2;j!=grid->ny-2;++j) {
-     for(decltype(grid->nz) k=2;k!=grid->nz-2;++k) {
-     std::size_t idxf {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i+1,j,k)};
-     std::size_t idxb {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i-1,j,k)};
-     std::size_t idyf {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j+1,k)};
-     std::size_t idyb {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j-1,k)};
-     std::size_t idzf {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k+1)};
-     std::size_t idzb {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k-1)};
-     div += fabs( (grid->fftw_b_x[idxf]-grid->fftw_b_x[idxb]) + (grid->fftw_b_y[idyf]-grid->fftw_b_y[idyb]) + (grid->fftw_b_z[idzf]-grid->fftw_b_z[idzb]) );
-     }
-     }
-     }
-     cout<<"BRND: Averaged divergence: "<<div/(CGS_U_muGauss*grid->nx*grid->ny*grid->nz)<<" microG/grid"<<endl;
-     #endif
-     */
 }
 
 // get real components from fftw_complex arrays
