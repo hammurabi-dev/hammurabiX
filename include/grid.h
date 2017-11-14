@@ -1,10 +1,6 @@
-/*
- *@file: grid.h
- *@brief: allocating/storing/reading/writing physical fields/observables
- * we use TinyXML2 as parameter parser
- *@special note: <bool>permission is cue for allocating and im/exporting grid
- * in random field cases, permission is cue for im/exporting only
- */
+///
+/// allocating/storing/reading/writing physical fields/observables
+///
 #ifndef GENERIC_GRID_H
 #define GENERIC_GRID_H
 
@@ -22,17 +18,17 @@ class Grid{
 public:
     Grid(void) = default;
     virtual ~Grid(void) = default;
-    /*@build_grid
-     * build up grid and allocate memory
-     */
+    ///
+    /// build up grid and allocate memory
+    ///
     virtual void build_grid(XMLDocument *);
-    /*@export_grid
-     * export grid to file
-     */
+    ///
+    /// export grid to file
+    ///
     virtual void export_grid(void);
-    /*@import_grid
-     * import file to grid
-     */
+    ///
+    /// import file to grid
+    ///
     virtual void import_grid(void);
     
 protected:
@@ -44,7 +40,9 @@ protected:
     double FetchDouble(XMLElement *,std::string);
 };
 
-// regular magnetic field
+///
+/// regular magnetic field grid
+///
 class Grid_breg final : public Grid{
 public:
     Grid_breg(std::string);
@@ -52,8 +50,7 @@ public:
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
     void import_grid(void) override;
-    // 3D regular field arrays
-    std::unique_ptr<double[]> reg_b_x, reg_b_y, reg_b_z;
+    std::unique_ptr<double[]> reg_b_x, reg_b_y, reg_b_z; ///< 3D regular field arrays
     
     std::string filename;
     bool read_permission, write_permission;
@@ -64,7 +61,9 @@ public:
     
 };
 
-// turbulent magnetic field
+///
+/// turbulent magnetic field grid
+///
 class Grid_brnd final : public Grid{
 public:
     Grid_brnd(std::string);
@@ -100,7 +99,9 @@ public:
     std::size_t full_size;
 };
 
-// free electron field
+///
+/// free electron field grid
+///
 class Grid_fereg final : public Grid{
 public:
     Grid_fereg(std::string);
@@ -119,7 +120,9 @@ public:
     std::size_t full_size;
 };
 
-// turbulent free electron field
+///
+/// turbulent free electron field grid
+///
 class Grid_fernd final : public Grid{
 public:
     Grid_fernd(std::string);
@@ -146,7 +149,9 @@ public:
     std::size_t full_size;
 };
 
-// cosmic ray electron field
+///
+/// cosmic ray electron field grid
+///
 class Grid_cre final : public Grid{
 public:
     Grid_cre(std::string);
@@ -169,7 +174,9 @@ public:
     double x_max, x_min, y_max, y_min;
 };
 
-// observable field
+///
+/// observable field grid
+///
 class Grid_int final : public Grid{
 public:
     Grid_int(std::string);
@@ -177,11 +184,11 @@ public:
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
     
-    Healpix_Map<double> dm_map;
-    Healpix_Map<double> Is_map;
-    Healpix_Map<double> Qs_map;
-    Healpix_Map<double> Us_map;
-    Healpix_Map<double> fd_map;
+    Healpix_Map<double> dm_map; ///< dispersion measure
+    Healpix_Map<double> Is_map; ///< synchrotron total intensity
+    Healpix_Map<double> Qs_map; ///< synchrotron Sotkes Q
+    Healpix_Map<double> Us_map; ///< synchrotron Stokes U
+    Healpix_Map<double> fd_map; ///< Faraday depth
     
     // shell parameters
     unsigned int nside_sim, npix_sim, total_shell;

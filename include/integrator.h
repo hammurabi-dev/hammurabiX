@@ -1,7 +1,6 @@
-/*
- *@file: integrator.h
- *@brief: line-of-sight integration calculator
- */
+///
+/// line-of-sight integration calculator
+///
 #ifndef HAMMURABI_INT_H
 #define HAMMURABI_INT_H
 
@@ -24,9 +23,9 @@ public:
     
     Integrator(void) = default;
     virtual ~Integrator(void) = default;
-    /*@write_grid
-     * assmebling pixels/shells into Healpix map
-     */
+    ///
+    /// assmebling pixels/shells into Healpix map
+    ///
     void write_grid(Breg *,Brnd *,FEreg *,FErnd *,CRE *,Grid_breg *,Grid_brnd *,Grid_fereg *,Grid_fernd *,Grid_cre *,Grid_int *,Pond *);
     
 private:
@@ -45,9 +44,9 @@ private:
         std::size_t step;
         std::vector<double> dist;
     };
-    /*@radial_integration
-     * commit LOS integration in one pixel one shell
-     */
+    ///
+    /// conduct LOS integration in one pixel at given shell
+    ///
     void radial_integration(struct_shell &,pointing &,struct_observables &,Breg *,Brnd *,FEreg *,FErnd *,CRE *,Grid_breg *,Grid_brnd *,Grid_fereg *,Grid_fernd *,Grid_cre *,Grid_int *,Pond *);
     
     // auxiliary functions

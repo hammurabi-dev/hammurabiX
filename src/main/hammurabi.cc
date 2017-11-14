@@ -152,6 +152,14 @@ int main(int , char **argv) {
             // fill grid with random fields
             brnd->write_grid_ani(par.get(),breg.get(),grid_breg.get(),grid_brnd.get());
         }
+        else if(brndtype=="Anisolocal"){
+#ifndef NDEBUG
+            cout<<"INFO: USING LOCAL ANISOTROPIC RANDOM B MODEL"<<endl;
+#endif
+            brnd = unique_ptr<Brnd> (new Brnd_anil());
+            // fill grid with random fields
+            brnd->write_grid_ani(par.get(),breg.get(),grid_breg.get(),grid_brnd.get());
+        }
         else{return EXIT_FAILURE;}
         
     }

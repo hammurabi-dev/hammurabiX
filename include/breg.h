@@ -1,7 +1,6 @@
-/*
- *@file: breg.h
- *@brief: regular magnetic field generator
- */
+///
+/// regular Galactic magnetic field generator(s)
+///
 #ifndef HAMMURABI_BREG_H
 #define HAMMURABI_BREG_H
 
@@ -11,32 +10,35 @@
 #include "pond.h"
 #include "grid.h"
 
+///
+/// read_grid and write_grid are implemented in base class
+///
 class Breg{
 public:
     Breg(void) = default;
     virtual ~Breg(void) = default;
-    /*
-     *@get_breg
-     * get regular magnetic field at gc position
-     * read_grid regardless of field type if permitted
-     * or calculate directly
-     */
+    ///
+    /// get regular magnetic field at galactic-centric position,
+    /// inovke read_grid regardless of field type if is permitted, otherwise invoke breg
+    ///
     virtual vec3_t<double> get_breg(const vec3_t<double> &,Pond *,Grid_breg *);
-    /*@breg
-     * regular field builder specified in derived class
-     */
+    ///
+    /// field assembler specified only in derived class
+    ///
     virtual vec3_t<double> breg(const vec3_t<double> &,Pond *);
-    /*@read_grid
-     * read from grid with trilinear interpolation
-     */
+    ///
+    /// read from field grid with trilinear interpolation
+    ///
     virtual vec3_t<double> read_grid(const vec3_t<double> &,Grid_breg *);
-    /*@write_grid
-     * write to grid
-     */
+    ///
+    /// write to field grid
+    ///
     virtual void write_grid(Pond *,Grid_breg *);
 };
 
-// verify
+///
+/// derived class for verification only
+///
 class Breg_verify final : public Breg{
 public:
     Breg_verify(void) = default;
@@ -44,7 +46,9 @@ public:
     vec3_t<double> breg(const vec3_t<double> &,Pond *) override;
 };
 
-// WMAP-3yr
+///
+/// WMAP-3yr field modeling
+///
 class Breg_wmap final : public Breg {
 public:
     Breg_wmap(void) = default;

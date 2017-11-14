@@ -1,7 +1,6 @@
-/*
- *@file: pond.h
- *@brief: storing parameters (fixed or free) for various physical models
- */
+///
+/// storing parameters (fixed or free) for various physical models
+///
 #ifndef GENERIC_POND_H
 #define GENERIC_POND_H
 
@@ -48,10 +47,17 @@ public:
     // local aniso
     //std::vector<double> brnd_anil;
     struct param_brnd_anil{
-        double beta;
-        double Ma;
+        double rms;
         double rf;
         double rs;
+        
+        double aa0;
+        double af0;
+        double as0;
+        double k0;
+        
+        double ma;
+        double beta;
     }brnd_anil;
     // rescaling parameters for random b
     //std::vector<double> brnd_scal;

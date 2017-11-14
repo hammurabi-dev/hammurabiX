@@ -103,12 +103,12 @@
             </Regular>
             <!-- turbulent fields -->
             <!-- seed works for IMAGINE -->
-            <Random cue="0" type="Iso" seed="-1">
+            <Random cue="0" type="Anisolocal" seed="-1">
                 <!-- isotropic -->
                 <Iso>
                     <rms value="0.1"/> <!-- norm at k0 -->
                     <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
-                    <a0 value="1.7"/> <!-- 5/3, Kolmogrov -->
+                    <a0 value="1.7"/> <!-- 5/3, Kolmogorov -->
                 </Iso>
                 <!-- global anisotropy -->
                 <Anisoglob>
@@ -116,10 +116,15 @@
                 </Anisoglob>
                 <!-- local turbulent -->
                 <Anisolocal>
-                    <beta value="0.1"/> <!-- plasma beta -->
-                    <Ma value="0.5"/> <!-- Alfven Mach number -->
+                    <rms  value="1"/> <!-- Alfven RMS -->
                     <rf value="1.0"/> <!-- fast to Alfven ratio -->
                     <rs value="1.0"/> <!-- slow to Alfven ratio -->
+                    <aa0 value="1.7"/> <!-- Kolmogorov -->
+                    <af0 value="1.5"/>
+                    <as0 value="1.7"/>
+                    <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
+                    <beta value="0.1"/> <!-- plasma beta -->
+                    <ma value="0.5"/> <!-- Alfven Mach number -->
                 </Anisolocal>
                 <!-- energy density rescaling -->
                 <Rescal>

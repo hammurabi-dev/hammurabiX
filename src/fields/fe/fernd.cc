@@ -27,38 +27,6 @@ double FErnd::get_fernd(const vec3_t<double> &pos,Grid_fernd *grid){
     }
 }
 
-// since we are using rms normalization
-// p0 is hidden and not affecting anything
-double FErnd::fe_spec(const double &k, Pond *par){
-    //units fixing
-    const double p0 {par->fernd_iso.rms}; //pccm
-    const double k0 {par->fernd_iso.k0};
-    const double a0 {par->fernd_iso.a0};
-    const double unit = 1./(4*CGS_U_pi*k*k);
-    // avoid nan
-    if(k<=0.){
-        return 0.;
-    }
-    double P {0.};
-    if(k>k0){
-        P = p0*pow(k/k0,a0);
-    }
-    return P*unit;
-}
-
-// galactic scaling of random field energy density
-// set to 1 at observer's place
-double FErnd::rescal_fact(const vec3_t<double> &pos, Pond *par){
-    const double r_cyl {(sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x))/CGS_U_kpc};
-    const double z {(fabs(pos.z) - fabs(par->SunPosition.z))/CGS_U_kpc};
-    const double r0 {par->fernd_scal.r0};
-    const double z0 {par->fernd_scal.z0};
-    if(r_cyl==0 or z==0) {return 1.;}
-    else{
-        return exp(-r_cyl/r0)*exp(-z/z0);
-    }
-}
-
 double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
     if (tmp<0 or tmp>grid->nx-1) { return 0.;}

@@ -14,10 +14,6 @@
 #include "breg.h"
 #include "cgs_units_file.h"
 #include "namespace_toolkit.h"
-// timer
-//#include <sys/time.h>
-//#include <sys/resource.h>
-//#define RCPU_TIME (getrusage(RUSAGE_SELF,&ruse), ruse.ru_utime.tv_sec + 1e-6 * ruse.ru_utime.tv_usec)
 
 using namespace std;
 
@@ -29,41 +25,6 @@ vec3_t<double> Brnd::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
     // base class will return zero vector
     else{
         return vec3_t<double> {0.,0.,0.};
-    }
-}
-
-// since we are using rms normalization
-// p0 is hidden and not affecting anything
-double Brnd::b_spec(const double &k, Pond *par){
-    //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_iso.rms*pow(CGS_U_muGauss,2)};
-    const double k0 {par->brnd_iso.k0};
-    const double a0 {par->brnd_iso.a0};
-    const double unit = 1./(4*CGS_U_pi*k*k);
-    // avoid nan
-    if(k<=0.){
-        return 0.;
-    }
-    // Giacalone-Jokipii
-    //const double P = 2*p0/(1.+pow(k/k0,a0));
-    // power law
-    double P{0.};
-    if(k>k0){
-        P = p0/pow(k/k0,a0);
-    }
-    return P*unit;
-}
-
-// galactic scaling of random field energy density
-// set to 1 at observer's place
-double Brnd::rescal_fact(const vec3_t<double> &pos, Pond *par){
-    const double r_cyl {(sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x))/CGS_U_kpc};
-    const double z {(fabs(pos.z) - fabs(par->SunPosition.z))/CGS_U_kpc};
-    const double r0 {par->brnd_scal.r0};
-    const double z0 {par->brnd_scal.z0};
-    if(r_cyl==0. or z==0){return 1.;}
-    else{
-    	return exp(-r_cyl/r0)*exp(-z/z0);
     }
 }
 
