@@ -9,19 +9,13 @@
 #include "grid.h"
 
 ///
-/// base class
+/// base class, all functions are implemented in derived class
 ///
 class CRE{
 public:
     CRE(void) = default;
     virtual ~CRE(void) = default;
-    ///
-    /// calculate total emissivity at given position
-    ///
     virtual double get_emissivity_t(const vec3_t<double> &,Pond *,Grid_cre *,const double &);
-    ///
-    /// calculate polarized emissivity at given position
-    ///
     virtual double get_emissivity_p(const vec3_t<double> &,Pond *,Grid_cre *,const double &);
     virtual double read_grid(const unsigned int &, const vec3_t<double> &,Grid_cre *);
     virtual void write_grid(Pond *,Grid_cre *);
@@ -38,11 +32,13 @@ public:
     double get_emissivity_p(const vec3_t<double> &,Pond *,Grid_cre *,const double &) override;
 private:
     ///
-    /// calculate CRE differential flux
+    /// CRE flux at given CRE energy,
+    /// input CRE energy at CGS units,
+    /// output at [GeV m^2 s sr]^-1 units
     ///
     double flux(const vec3_t<double> &,Pond *,const double &);
     ///
-    /// calculate flux index and normalization wrt Lorentz factor at given position
+    /// flux index and normalization wrt Lorentz factor at given position
     ///
     void flux_param(const vec3_t<double> &,Pond *,double &,double &);
     ///
@@ -62,7 +58,9 @@ public:
     double get_emissivity_p(const vec3_t<double> &,Pond *,Grid_cre *,const double &) override;
 private:
     ///
-    /// calculate CRE flux at given CRE energy, input CRE energy at CGS units, output at [GeV m^2 s sr]^-1 units
+    /// CRE flux at given CRE energy,
+    /// input CRE energy at CGS units,
+    /// output at [GeV m^2 s sr]^-1 units
     ///
     double flux(const vec3_t<double> &,Pond *,const double &);
     ///
@@ -86,7 +84,11 @@ public:
     double get_emissivity_p(const vec3_t<double> &,Pond *,Grid_cre *,const double &) override;
 private:
     ///
-    /// read CRE flux from grid at given position (E_index, sylindrical_r, sylindrical_z) with {r,z} in cgs units, actual value of E is calculated from {E_index,Ek_min,Ek_fact} in get_emissivity automatically select bi/trilinear interpolation according to 2+1/3+1 spatial-spectral CRE flux grid
+    /// read CRE flux from grid at given position
+    /// (E_index, sylindrical_r, sylindrical_z) with {r,z} in cgs units,
+    /// actual value of E is calculated from {E_index,Ek_min,Ek_fact}
+    /// in get_emissivity automatically select bi/trilinear interpolation
+    /// according to 2+1/3+1 spatial-spectral CRE flux grid
     ///
     double read_grid(const unsigned int &,const vec3_t<double> &,Grid_cre *) override;
     

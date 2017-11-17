@@ -1,5 +1,5 @@
 ///
-/// storing parameters (fixed or free) for various physical models
+/// storing parameters (fixed or free) for physical models
 ///
 #ifndef GENERIC_POND_H
 #define GENERIC_POND_H

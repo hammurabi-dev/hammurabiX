@@ -133,31 +133,6 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
     complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
     complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
     complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
-    /*
-#ifndef NDEBUG
-    double b_var;
-    b_var = toolkit::Variance(grid->fftw_b_x.get(), grid->full_size);
-    b_var +=toolkit::Variance(grid->fftw_b_y.get(), grid->full_size);
-    b_var +=toolkit::Variance(grid->fftw_b_z.get(), grid->full_size);
-    cout<< "BRND: Numerical RMS: "<<sqrt(b_var)/CGS_U_muGauss<<" microG"<<endl;
-    // check average divergence
-    double div=0;
-    for(decltype(grid->nx) i=2;i!=grid->nx-2;++i){
-        for(decltype(grid->ny) j=2;j!=grid->ny-2;++j){
-            for(decltype(grid->nz) k=2;k!=grid->nz-2;++k){
-                auto idxf = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i+1,j,k);
-                auto idxb = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i-1,j,k);
-                auto idyf = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j+1,k);
-                auto idyb = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j-1,k);
-                auto idzf = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k+1);
-                auto idzb = toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k-1);
-                div += fabs( (grid->fftw_b_x[idxf]-grid->fftw_b_x[idxb]) + (grid->fftw_b_y[idyf]-grid->fftw_b_y[idyb]) + (grid->fftw_b_z[idzf]-grid->fftw_b_z[idzb]) );
-            }
-        }
-    }
-    cout<<"BRND: Averaged divergence: "<<div/(CGS_U_muGauss*grid->nx*grid->ny*grid->nz)<<" microG/grid"<<endl;
-#endif
-    */
 }
 
 // PRIVATE FUNCTIONS FOR LOW-BETA SUB-ALFVENIC PLASMA
@@ -212,11 +187,11 @@ double Brnd_anil::hf(const double &beta,const double &cosa){
 }
 
 double Brnd_anil::fa(const double &ma,const double &cosa){
-    return exp( -pow(ma,1.33333333)*cosa*cosa/pow(1-cosa*cosa,0.66666667) );
+    return exp( -pow(ma,-1.33333333)*cosa*cosa/pow(1-cosa*cosa,0.66666667) );
 }
 
 double Brnd_anil::fs(const double &ma,const double &cosa){
-    return exp( -pow(ma,1.33333333)*cosa*cosa/pow(1-cosa*cosa,0.66666667) );
+    return exp( -pow(ma,-1.33333333)*cosa*cosa/pow(1-cosa*cosa,0.66666667) );
 }
 
 double Brnd_anil::speca(const double &k,Pond *par){

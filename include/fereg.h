@@ -14,7 +14,9 @@ public:
     FEreg(void) = default;
     virtual ~FEreg(void) = default;
     ///
-    /// get free electron density, read from grid if granted, otherwise, calculate directly from density function
+    /// get free electron density,
+    /// read from grid if granted, otherwise,
+    /// calculate directly from density function
     ///
     virtual double get_density(const vec3_t<double> &,Pond *,Grid_fereg *);
     ///
@@ -26,11 +28,12 @@ public:
     ///
     virtual void write_grid(Pond *,Grid_fereg *);
     ///
-    /// calculate free electron density at given position
+    /// assemble free electron density at given position
     ///
     virtual double density(const vec3_t<double> &,Pond *);
     ///
-    /// gaussian blur free electron density (grid elemental scale as FWHM)
+    /// gaussian blur free electron density (grid elemental scale as FWHM),
+    /// computing time consuming function based on \p density
     ///
     virtual double density_blur(const vec3_t<double> &,Pond *,Grid_fereg *);
     
@@ -56,20 +59,34 @@ public:
     double density(const vec3_t<double> &, Pond *) override;
     
 private:
+    ///
+    /// thick disk
+    ///
     double thick(const double &,const double &,Pond *);
+    ///
+    /// thin disk
+    ///
     double thin(const double &,const double &,Pond *);
+    ///
+    /// spiral arms
+    ///
     double spiral(const double &,const double &,const double &,const double &,Pond *);
+    ///
+    /// galactic center
+    ///
     double galcen(const double &,const double &,const double&,Pond *);
+    ///
+    /// gum nebula
+    ///
     double gum(const double &,const double &,const double &,Pond *);
+    ///
+    /// local bubble
+    ///
     double localbubble(const double &,const double &,const double &,const double &,const double &,Pond *);
+    ///
+    /// northern polar spurs
+    ///
     double nps(const double &,const double &,const double &,Pond *);
-    // auxiliary functions
-    inline double max(const double &a, const double &b){
-        return (a>b) ? a : b;
-    }
-    inline double min(const double &a, const double &b){
-        return (a<b) ? a : b;
-    }
 };
 
 #endif

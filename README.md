@@ -56,6 +56,12 @@ $ cd [package root]
 $ make -f install/[makefile]
 ```
 
+#### documentation:
+```
+$ cd [package root]
+$ make documentation -f install/[makefile]
+```
+
 #### running:
 ```
 $ cd bin/

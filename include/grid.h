@@ -1,5 +1,5 @@
 ///
-/// allocating/storing/reading/writing physical fields/observables
+/// allocating physical/observable fields
 ///
 #ifndef GENERIC_GRID_H
 #define GENERIC_GRID_H
@@ -41,7 +41,7 @@ protected:
 };
 
 ///
-/// regular magnetic field grid
+/// regular GMF grid
 ///
 class Grid_breg final : public Grid{
 public:
@@ -50,7 +50,7 @@ public:
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
     void import_grid(void) override;
-    std::unique_ptr<double[]> reg_b_x, reg_b_y, reg_b_z; ///< 3D regular field arrays
+    std::unique_ptr<double[]> reg_b_x, reg_b_y, reg_b_z; ///< 3D regular GMF arrays
     
     std::string filename;
     bool read_permission, write_permission;
@@ -62,7 +62,7 @@ public:
 };
 
 ///
-/// turbulent magnetic field grid
+/// turbulent GMF grid
 ///
 class Grid_brnd final : public Grid{
 public:
@@ -100,7 +100,7 @@ public:
 };
 
 ///
-/// free electron field grid
+/// regular free electron field grid
 ///
 class Grid_fereg final : public Grid{
 public:
@@ -150,7 +150,7 @@ public:
 };
 
 ///
-/// cosmic ray electron field grid
+/// CRE grid
 ///
 class Grid_cre final : public Grid{
 public:

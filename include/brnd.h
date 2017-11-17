@@ -1,5 +1,5 @@
 ///
-/// iso/aniso-tropic turbulent Galactic magnetic field generator(s)
+/// iso/aniso-tropic turbulent Galactic magnetic field generators
 ///
 #ifndef HAMMURABI_BRND_H
 #define HAMMURABI_BRND_H
@@ -15,24 +15,25 @@
 #include "breg.h"
 
 ///
-/// base class with read_grid implemented, get_brnd is invoked when no specific derived class object is instantiated
+/// base class with \p read_grid implemented,
+/// \p get_brnd is invoked when no specific derived class object is instantiated
 ///
 class Brnd{
 public:
     Brnd(void) = default;
     virtual ~Brnd(void) = default;
     ///
-    /// return zero field instead of calling read_grid
+    /// return empty field without invoking \p read_grid
     ///
     virtual vec3_t<double> get_brnd(const vec3_t<double> &,Grid_brnd *);
     ///
-    /// read field from grid with trilinear interpolation
-    /// user has to call write_grid ahead
+    /// read field from grid with trilinear interpolation,
+    /// user has to call \p write_grid ahead
     ///
     virtual vec3_t<double> read_grid(const vec3_t<double> &,Grid_brnd *);
     ///
-    /// write field to grid (model dependent)
-    /// user can export_grid to binary file with Grid_xxx::export_grid
+    /// write field to grid (model dependent),
+    /// user can \p export_grid to binary file with \p Grid_xxx::export_grid
     ///
     virtual void write_grid_iso(Pond *,Grid_brnd *);
     ///
@@ -42,7 +43,7 @@ public:
 };
 
 ///
-/// global isotropic turbulent field with strength rescaling
+/// global isotropic turbulent GMF with strength rescaling
 ///
 class Brnd_iso : public Brnd{
 public:
@@ -58,13 +59,13 @@ public:
     ///
     virtual double b_spec(const double &,Pond *);
     ///
-    /// field energy density rescal factor
+    /// field energy density rescaling factor
     ///
     virtual double rescal_fact(const vec3_t<double> &,Pond *);
     
 protected:
     ///
-    /// fetch real value of each element from a complex array
+    /// get real part of each element from a complex array
     ///
     void complex2real(const fftw_complex *,double *,const std::size_t &);
     ///
@@ -74,26 +75,27 @@ protected:
 };
 
 ///
-/// global anisotropic random field
+/// global anisotropic turbulent GMF,
+/// inheret isotropic spectrum and density rescaling from \p Brnd_iso class
 ///
 class Brnd_anig final : public Brnd_iso{
 public:
     Brnd_anig(void) = default;
     virtual ~Brnd_anig(void) = default;
     ///
-    /// triple Fourier transform scheme, with anisotropy inserting
+    /// triple Fourier transform scheme
     ///
     void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *) override;
     
 private:
     ///
-    /// calculate anisotropy factor at given point
+    /// anisotropy factor at given point
     ///
     double anisotropy(const vec3_t<double> &,vec3_t<double> &,Pond *,Breg *,Grid_breg *);
 };
 
 ///
-/// local anisotropic random field
+/// local anisotropic turbulent GMF, in compressive MHD plasma
 ///
 class Brnd_anil final : public Brnd{
 public:
@@ -101,7 +103,8 @@ public:
     virtual ~Brnd_anil(void) = default;
     vec3_t<double> get_brnd(const vec3_t<double> &,Grid_brnd *) override;
     ///
-    /// vector field decomposition scheme
+    /// vector field decomposition scheme,
+    /// using regular GMF at Sun position
     ///
     void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *) override;
     
@@ -128,11 +131,11 @@ private:
     double fs(const double &,const double &);
     
     ///
-    /// cosine alpha, where alpha is pitch angle between wavevector and regular magnetic field
+    /// cosine alpha, where alpha is pitch angle between wavevector and regular GMF
     ///
     double cosa(const vec3_t<double> &,const vec3_t<double> &);
     ///
-    /// direction of Alfvenic mode
+    /// direction of Alfven mode
     ///
     vec3_t<double> eplus(const vec3_t<double> &,const vec3_t<double> &);
     ///

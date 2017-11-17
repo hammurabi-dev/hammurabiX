@@ -1,5 +1,5 @@
 ///
-/// regular Galactic magnetic field generator(s)
+/// regular GMF generators
 ///
 #ifndef HAMMURABI_BREG_H
 #define HAMMURABI_BREG_H
@@ -11,19 +11,20 @@
 #include "grid.h"
 
 ///
-/// read_grid and write_grid are implemented in base class
+/// base class of GMF generator,
+/// \p read_grid and \p write_grid are implemented here
 ///
 class Breg{
 public:
     Breg(void) = default;
     virtual ~Breg(void) = default;
     ///
-    /// get regular magnetic field at galactic-centric position,
-    /// inovke read_grid regardless of field type if is permitted, otherwise invoke breg
+    /// fetch regular magnetic field,
+    /// inovke \p read_grid regardless of field type if permitted, otherwise invoke \p breg
     ///
     virtual vec3_t<double> get_breg(const vec3_t<double> &,Pond *,Grid_breg *);
     ///
-    /// field assembler specified only in derived class
+    /// field assembler, specified only in derived class
     ///
     virtual vec3_t<double> breg(const vec3_t<double> &,Pond *);
     ///
@@ -37,7 +38,7 @@ public:
 };
 
 ///
-/// derived class for verification only
+/// designed for verification
 ///
 class Breg_verify final : public Breg{
 public:

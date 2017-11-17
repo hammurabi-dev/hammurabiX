@@ -103,29 +103,19 @@ void Grid_int::export_grid(void){
         // in units pc/cm^3, conventional units
         dm_map.Scale(CGS_U_ccm/CGS_U_pc);
         fitshandle out_dm;
-        std::stringstream outfname_dm;
-        // cleanup content of outfname
-        outfname_dm.str("");
-        // give content to outfname
-        outfname_dm << sim_dm_name;
-        std::ifstream in_dm(outfname_dm.str().data());
-        if(in_dm.is_open()){
-            out_dm.delete_file(outfname_dm.str());
+        if(ifstream(sim_dm_name.c_str())){
+            remove(sim_dm_name.c_str());
         }
-        out_dm.create(outfname_dm.str());
+        out_dm.create(sim_dm_name);
         write_Healpix_map_to_fits(out_dm, dm_map, PLANCK_FLOAT64);
         out_dm.close();
     }
     if(do_sync){
         fitshandle out_sc;
-        std::stringstream outfname_sc;
-        outfname_sc.str("");
-        outfname_sc << sim_sync_name;
-        std::ifstream in_sc(outfname_sc.str().data());
-        if (in_sc.is_open()) {
-            out_sc.delete_file(outfname_sc.str());
+        if(ifstream(sim_sync_name.c_str())){
+            remove(sim_sync_name.c_str());
         }
-        out_sc.create(outfname_sc.str());
+        out_sc.create(sim_sync_name);
         write_Healpix_map_to_fits(out_sc, Is_map, Qs_map, Us_map, PLANCK_FLOAT64);
         out_sc.close();
     }
@@ -133,14 +123,10 @@ void Grid_int::export_grid(void){
         // FD units is rad*m^(-2) in our calculation
         fd_map.Scale(CGS_U_m*CGS_U_m);
         fitshandle out_fd;
-        std::stringstream outfname_fd;
-        outfname_fd.str("");
-        outfname_fd << sim_fd_name;
-        std::ifstream in_fd(outfname_fd.str().data());
-        if (in_fd.is_open()) {
-            out_fd.delete_file(outfname_fd.str());
+        if(ifstream(sim_fd_name.c_str())){
+            remove(sim_fd_name.c_str());
         }
-        out_fd.create(outfname_fd.str());
+        out_fd.create(sim_fd_name);
         write_Healpix_map_to_fits(out_fd, fd_map, PLANCK_FLOAT64);
         out_fd.close();
     }

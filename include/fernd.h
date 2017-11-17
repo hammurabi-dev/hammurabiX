@@ -21,12 +21,11 @@ public:
     FErnd(void) = default;
     virtual ~FErnd(void) = default;
     ///
-    /// return 0 if no specific field is instantiated
+    /// return 0 if no derived class is instantiated
     ///
     virtual double get_fernd(const vec3_t<double> &,Grid_fernd *);
     virtual double read_grid(const vec3_t<double> &,Grid_fernd *);
     virtual void write_grid_iso(Pond *,Grid_fernd *);
-    virtual void write_grid_ani(Pond *,FEreg *,Grid_fereg *,Grid_fernd *);
 };
 
 ///
@@ -37,13 +36,16 @@ public:
     FErnd_iso(void) = default;
     virtual ~FErnd_iso(void) = default;
     double get_fernd(const vec3_t<double> &,Grid_fernd *) override;
+    ///
+    /// trivial Fourier transform, with rescaling applied in spatial space
+    ///
     void write_grid_iso(Pond *,Grid_fernd *) override;
     ///
     /// isotropic turubulent power spectrum
     ///
     virtual double fe_spec(const double &,Pond *);
     ///
-    /// calculate rescaling factor
+    /// density variance rescaling factor
     ///
     virtual double rescal_fact(const vec3_t<double> &,Pond *);
     
