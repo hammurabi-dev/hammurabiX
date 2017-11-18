@@ -236,7 +236,7 @@ double Integrator::get_max_shell_radius(const unsigned int &shell_numb,const uns
         exit(1);
     }
     double max_shell_radius {radius};
-    for (decltype(shell_numb) n=total_shell;n!=shell_numb;--n) {
+    for (unsigned int n=total_shell;n!=shell_numb;--n) {
         max_shell_radius *= 0.5;
     }
     return max_shell_radius;
@@ -253,7 +253,7 @@ double Integrator::get_min_shell_radius(const unsigned int &shell_numb,const uns
         return 0.;
     }
     double min_shell_radius {radius};
-    for (decltype(shell_numb) n=total_shell;n!=(shell_numb-1);--n) {
+    for (unsigned int n=total_shell;n!=(shell_numb-1);--n) {
         min_shell_radius *= 0.5;
     }
     return min_shell_radius;
