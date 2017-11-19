@@ -30,7 +30,7 @@ double CRE::get_emissivity_p(const vec3_t<double> &,Pond *,Grid_cre *,const doub
     exit(1);
 }
 
-double CRE::read_grid(const unsigned int &,const vec3_t<double> &,Grid_cre *){
+double CRE::read_grid(const std::size_t &,const vec3_t<double> &,Grid_cre *){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl

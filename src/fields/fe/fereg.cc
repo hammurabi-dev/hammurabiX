@@ -29,7 +29,7 @@ double FEreg::get_density(const vec3_t<double> &pos, Pond *par, Grid_fereg *grid
 double FEreg::density_blur(const vec3_t<double> &pos, Pond *par, Grid_fereg *grid){
     double ne_blur {0.};
     // sampling point number
-    unsigned int step {1000};
+    std::size_t step {1000};
     // gaussian blur scale
     double blur_scale_x {(grid->x_max-grid->x_min)/(grid->nx*CGS_U_kpc)};
     double blur_scale_y {(grid->y_max-grid->y_min)/(grid->ny*CGS_U_kpc)};
@@ -61,17 +61,17 @@ double FEreg::density(const vec3_t<double> &, Pond *){
 double FEreg::read_grid(const vec3_t<double> &pos, Grid_fereg *grid){
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
     if (tmp<1 or tmp>grid->nx-1) { return 0.;}
-    decltype(grid->nx) xl {(unsigned int)floor(tmp)};
+    decltype(grid->nx) xl {(std::size_t)floor(tmp)};
     const double xd = tmp - xl;
     
     tmp = (grid->ny-1)*(pos.y-grid->y_min)/(grid->y_max-grid->y_min);
     if (tmp<1 or tmp>grid->ny-1) { return 0.;}
-    decltype(grid->nx) yl {(unsigned int)floor(tmp)};
+    decltype(grid->nx) yl {(std::size_t)floor(tmp)};
     const double yd = tmp - yl;
     
     tmp = (grid->nz-1)*(pos.z-grid->z_min)/(grid->z_max-grid->z_min);
     if (tmp<1 or tmp>grid->nz-1) { return 0.;}
-    decltype(grid->nx) zl {(unsigned int)floor(tmp)};
+    decltype(grid->nx) zl {(std::size_t)floor(tmp)};
     const double zd = tmp - zl;
 #ifndef NDEBUG
     if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){

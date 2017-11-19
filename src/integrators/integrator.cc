@@ -26,7 +26,7 @@ using namespace std;
 
 void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fereg *gfereg,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Pond *par) {
     // unsigned int, pre-calculated in gint
-    auto npix_sim {gint->npix_sim};
+    size_t npix_sim {gint->npix_sim};
     if (gint->do_dm) {
         gint->dm_map.SetNside(gint->nside_sim, NEST);
         gint->dm_map.fill(0.);
@@ -52,8 +52,8 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
         Healpix_Map<double> current_fd_map;
         Healpix_Map<double> current_dm_map;
         
-        auto current_nside {gint->nside_shell[current_shell-1]};
-        auto current_npix {12*current_nside*current_nside};
+        size_t current_nside {gint->nside_shell[current_shell-1]};
+        size_t current_npix {12*current_nside*current_nside};
         if (gint->do_dm) {
             current_dm_map.SetNside(current_nside, NEST);
             current_dm_map.fill(0.);
@@ -230,20 +230,20 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
 //---------------------------------------------------------
 
 // compute upper radial boundary at given shell
-double Integrator::get_max_shell_radius(const unsigned int &shell_numb,const unsigned int &total_shell,const double &radius) const {
+double Integrator::get_max_shell_radius(const size_t &shell_numb,const size_t &total_shell,const double &radius) const {
     if (shell_numb<1 or shell_numb>(total_shell)) {
         cerr<<"INVALID shell_numb"<<endl;
         exit(1);
     }
     double max_shell_radius {radius};
-    for (unsigned int n=total_shell;n!=shell_numb;--n) {
+    for (size_t n=total_shell;n!=shell_numb;--n) {
         max_shell_radius *= 0.5;
     }
     return max_shell_radius;
 }
 
 // compute lower radial boundary at given shell
-double Integrator::get_min_shell_radius(const unsigned int &shell_numb,const unsigned int &total_shell,const double &radius) const {
+double Integrator::get_min_shell_radius(const size_t &shell_numb,const size_t &total_shell,const double &radius) const {
     if (shell_numb<1 or shell_numb>total_shell) {
         cerr<<"INVALID shell_numb"<<endl;
         exit(1);
@@ -253,7 +253,7 @@ double Integrator::get_min_shell_radius(const unsigned int &shell_numb,const uns
         return 0.;
     }
     double min_shell_radius {radius};
-    for (unsigned int n=total_shell;n!=(shell_numb-1);--n) {
+    for (size_t n=total_shell;n!=(shell_numb-1);--n) {
         min_shell_radius *= 0.5;
     }
     return min_shell_radius;

@@ -56,9 +56,7 @@ public:
     bool read_permission, write_permission;
     
     double x_max, x_min, y_max, y_min, z_max, z_min;
-    unsigned int nx, ny, nz;
-    std::size_t full_size;
-    
+    std::size_t nx, ny, nz, full_size;
 };
 
 ///
@@ -95,8 +93,7 @@ public:
     bool read_permission, write_permission, build_permission;
     
     double x_max, x_min, y_max, y_min, z_max, z_min;
-    unsigned int nx, ny, nz;
-    std::size_t full_size;
+    std::size_t nx, ny, nz, full_size;
 };
 
 ///
@@ -116,7 +113,7 @@ public:
     bool read_permission, write_permission;
     
     double x_max, x_min, y_max, y_min, z_max, z_min;
-    unsigned int nx, ny, nz;
+    std::size_t nx, ny, nz;
     std::size_t full_size;
 };
 
@@ -145,7 +142,7 @@ public:
     bool read_permission, write_permission, build_permission;
     
     double x_max, x_min, y_max, y_min, z_max, z_min;
-    unsigned int nx, ny, nz;
+    std::size_t nx, ny, nz;
     std::size_t full_size;
 };
 
@@ -166,11 +163,11 @@ public:
     bool read_permission, write_permission;
     
     // 2-D spatial 1-D spectral grid
-    unsigned int nE, nr, nz;
+    std::size_t nE, nr, nz;
     std::size_t cre_size;
     double r_max, z_max, z_min, E_min, E_max, E_fact;
     // or 3+1 dimension grid
-    unsigned int nx,ny;
+    std::size_t nx,ny;
     double x_max, x_min, y_max, y_min;
 };
 
@@ -191,8 +188,8 @@ public:
     Healpix_Map<double> fd_map; ///< Faraday depth
     
     // shell parameters
-    unsigned int nside_sim, npix_sim, total_shell;
-    std::vector<unsigned int> nside_shell;
+    std::size_t nside_sim, npix_sim, total_shell;
+    std::vector<std::size_t> nside_shell;
     // shell boundary
     double gc_r_max, ec_r_max, gc_z_max, radial_res, lat_lim;
     // switches

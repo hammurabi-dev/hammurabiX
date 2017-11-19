@@ -17,7 +17,7 @@ public:
     virtual ~CRE(void) = default;
     virtual double get_emissivity_t(const vec3_t<double> &,Pond *,Grid_cre *,const double &);
     virtual double get_emissivity_p(const vec3_t<double> &,Pond *,Grid_cre *,const double &);
-    virtual double read_grid(const unsigned int &, const vec3_t<double> &,Grid_cre *);
+    virtual double read_grid(const std::size_t &, const vec3_t<double> &,Grid_cre *);
     virtual void write_grid(Pond *,Grid_cre *);
 };
 
@@ -90,7 +90,7 @@ private:
     /// in get_emissivity automatically select bi/trilinear interpolation
     /// according to 2+1/3+1 spatial-spectral CRE flux grid
     ///
-    double read_grid(const unsigned int &,const vec3_t<double> &,Grid_cre *) override;
+    double read_grid(const std::size_t &,const vec3_t<double> &,Grid_cre *) override;
     
 };
 #endif

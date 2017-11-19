@@ -60,13 +60,13 @@ namespace toolkit {
     ///
     /// find index of 3D grid
     ///
-    inline std::size_t Index3d(const unsigned int &/* n1 */,const unsigned int &n2,const unsigned int &n3,const unsigned int &i,const unsigned int &j,const unsigned int &l){
+    inline std::size_t Index3d(const std::size_t &/* n1 */,const std::size_t &n2,const std::size_t &n3,const std::size_t &i,const std::size_t &j,const std::size_t &l){
         return (i*n2*n3 + j*n3 + l);
     }
     ///
     /// find index for 4D grid
     ///
-    inline std::size_t Index4d(const unsigned int &/* n1 */,const unsigned int &n2,const unsigned int &n3,const unsigned int &n4,const unsigned int &e,const unsigned int &i,const unsigned int &j,const unsigned int &l){
+    inline std::size_t Index4d(const std::size_t &/* n1 */,const std::size_t &n2,const std::size_t &n3,const std::size_t &n4,const std::size_t &e,const std::size_t &i,const std::size_t &j,const std::size_t &l){
         return (e*n2*n3*n4 + i*n3*n4 + j*n4 + l);
     }
     

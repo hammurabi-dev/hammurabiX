@@ -30,17 +30,17 @@ double FErnd::get_fernd(const vec3_t<double> &pos,Grid_fernd *grid){
 double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
     if (tmp<0 or tmp>grid->nx-1) { return 0.;}
-    decltype(grid->nx) xl {(unsigned int)floor(tmp)};
+    decltype(grid->nx) xl {(std::size_t)floor(tmp)};
     const double xd {tmp - xl};
     
     tmp = (grid->ny-1)*(pos.y-grid->y_min)/(grid->y_max-grid->y_min);
     if (tmp<0 or tmp>grid->ny-1) { return 0.;}
-    decltype(grid->nx) yl {(unsigned int)floor(tmp)};
+    decltype(grid->nx) yl {(std::size_t)floor(tmp)};
     const double yd {tmp - yl};
     
     tmp = (grid->nz-1)*(pos.z-grid->z_min)/(grid->z_max-grid->z_min);
     if (tmp<0 or tmp>grid->nz-1) { return 0.;}
-    decltype(grid->nx) zl {(unsigned int)floor(tmp)};
+    decltype(grid->nx) zl {(std::size_t)floor(tmp)};
     const double zd {tmp - zl};
 #ifndef NDEBUG
     if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){

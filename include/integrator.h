@@ -37,7 +37,7 @@ private:
         double ff;
     };
     struct struct_shell{
-        unsigned int shell_num;
+        std::size_t shell_num;
         double d_start;
         double d_stop;
         double delta_d;
@@ -50,8 +50,8 @@ private:
     void radial_integration(struct_shell &,pointing &,struct_observables &,Breg *,Brnd *,FEreg *,FErnd *,CRE *,Grid_breg *,Grid_brnd *,Grid_fereg *,Grid_fernd *,Grid_cre *,Grid_int *,Pond *);
     
     // auxiliary functions
-    double get_max_shell_radius(const unsigned int &,const unsigned int &,const double &) const;
-    double get_min_shell_radius(const unsigned int &,const unsigned int &,const double &) const;
+    double get_max_shell_radius(const std::size_t &,const std::size_t &,const double &) const;
+    double get_min_shell_radius(const std::size_t &,const std::size_t &,const double &) const;
     
     inline bool check_simulation_upper_limit(const double &value, const double &limit) const {
         if(value>limit) return true;

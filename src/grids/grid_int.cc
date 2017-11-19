@@ -31,8 +31,8 @@ void Grid_int::build_grid(XMLDocument *doc){
     if(shell_type=="auto"){
         XMLElement *subptr {ptr->FirstChildElement("shell")->FirstChildElement("auto")};
         total_shell = FetchUnsigned(subptr,"shell_num");
-        unsigned int nside_min {FetchUnsigned(subptr,"nside_min")};
-        for(unsigned int i=0;i!=total_shell;++i){
+        std::size_t nside_min {FetchUnsigned(subptr,"nside_min")};
+        for(std::size_t i=0;i!=total_shell;++i){
             nside_shell.push_back(pow(2,i)*nside_min);
         }
     }
