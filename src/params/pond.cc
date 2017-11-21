@@ -58,6 +58,8 @@ void Pond::b_pond(XMLDocument *doc){
     breg_verify.b0 = FetchDouble(subptr,"b0"); //microGauss
     breg_verify.l0 = FetchDouble(subptr,"l0"); //deg
     breg_verify.r = FetchDouble(subptr,"r"); //deg
+    // random seed
+    brnd_seed = ptr->FirstChildElement("Random")->UnsignedAttribute("seed");
     // brnd_iso
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Iso");
     brnd_iso.rms = FetchDouble(subptr,"rms"); //in microGauss^2;
@@ -165,6 +167,8 @@ void Pond::fe_pond(XMLDocument *doc){
     fereg_verify.n0 = FetchDouble(subptr,"n0");
     fereg_verify.r0 = FetchDouble(subptr,"r0"); //kpc
     
+    // random seed
+    fernd_seed = ptr->FirstChildElement("Random")->UnsignedAttribute("seed");
     // isotropic turbulent
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Iso");
     // nomalization

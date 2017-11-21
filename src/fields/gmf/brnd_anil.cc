@@ -26,7 +26,7 @@ vec3_t<double> Brnd_anil::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
 void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
     // initialize random seed
     gsl_rng *r {gsl_rng_alloc(gsl_rng_taus)};
-    gsl_rng_set(r, toolkit::random_seed());
+    gsl_rng_set(r, toolkit::random_seed(par->brnd_seed));
     // start Fourier space filling
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};

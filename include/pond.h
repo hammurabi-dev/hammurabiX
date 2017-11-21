@@ -17,9 +17,9 @@ public:
     virtual ~Pond(void) = default;
     // observer
     vec3_t<double> SunPosition;
+    
     // magnetic field
     // wmap3yr
-    //std::vector<double> bwmap;
     struct param_breg_wmap{
         double b0;
         double psi0;
@@ -32,20 +32,19 @@ public:
         double l0;
         double r;
     }breg_verify;
+    // random seed
+    std::size_t brnd_seed;
     // isotropic
-    //std::vector<double> brnd_iso;
     struct param_brnd_iso{
         double rms;
         double k0;
         double a0;
     }brnd_iso;
     // global aniso
-    //std::vector<double> brnd_anig;
     struct param_brnd_anig{
         double rho;
     }brnd_anig;
     // local aniso
-    //std::vector<double> brnd_anil;
     struct param_brnd_anil{
         double rms;
         double rf;
@@ -60,11 +59,11 @@ public:
         double beta;
     }brnd_anil;
     // rescaling parameters for random b
-    //std::vector<double> brnd_scal;
     struct param_brnd_scal{
         double r0;
         double z0;
     }brnd_scal;
+    
     // FE
     // ymw16
     struct param_fereg_ymw16{
@@ -78,23 +77,25 @@ public:
         double t6_J_LB, t6_nlb1, t6_detlb1, t6_wlb1, t6_hlb1, t6_thetalb1, t6_nlb2, t6_detlb2, t6_wlb2, t6_hlb2, t6_thetalb2;
         double t7_nLI, t7_RLI, t7_WLI, t7_detthetaLI, t7_thetaLI;
     }fereg_ymw16;
+    // verify
     struct param_fereg_verify{
         double n0;
         double r0;
     }fereg_verify;
-    // gaussian random
-    //std::vector<double> fernd_iso;
+    // random seed
+    std::size_t fernd_seed;
+    // isotropic
     struct param_fernd_iso{
         double rms;
         double k0;
         double a0;
     }fernd_iso;
     // rescaling parameters for turbulent FE
-    //std::vector<double> fernd_scal;
     struct param_fernd_scal{
         double r0;
         double z0;
     }fernd_scal;
+    
     // CRE
     // analytical
     double sim_freq;

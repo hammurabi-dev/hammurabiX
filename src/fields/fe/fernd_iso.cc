@@ -60,7 +60,7 @@ void FErnd_iso::write_grid_iso(Pond *par, Grid_fernd *grid){
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
     // initialize random seed
     gsl_rng *r {gsl_rng_alloc(gsl_rng_taus)};
-    gsl_rng_set(r, toolkit::random_seed());
+    gsl_rng_set(r, toolkit::random_seed(par->fernd_seed));
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};
     double lz {grid->z_max-grid->z_min};

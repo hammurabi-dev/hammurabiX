@@ -42,15 +42,15 @@ namespace toolkit {
         
         double result {atan2(y_component, x_component)};
         /*
-        if(result<0.) {result+=2.*CGS_U_pi;}
-#ifndef NDEBUG
-        if (result<0 or result>2.*CGS_U_pi){
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl;
-            exit(1);
-        }
-#endif
+         if(result<0.) {result+=2.*CGS_U_pi;}
+         #ifndef NDEBUG
+         if (result<0 or result>2.*CGS_U_pi){
+         cerr<<"ERR:"<<__FILE__
+         <<" : in function "<<__func__<<endl
+         <<" at line "<<__LINE__<<endl;
+         exit(1);
+         }
+         #endif
          */
         return result;
     }
@@ -212,14 +212,17 @@ namespace toolkit {
     }
     
     // offer random seed
-    std::size_t random_seed(void){
-        struct timeval tv;
-        gettimeofday(&tv,nullptr);
-        // casting thread id into unsinged long
-        stringstream ss;
-        ss << this_thread::get_id();
-        auto th_id = stoul(ss.str());
-        return (th_id + tv.tv_sec + tv.tv_usec);
+    std::size_t random_seed(const int &s){
+        if(s<0){
+            struct timeval tv;
+            gettimeofday(&tv,nullptr);
+            // casting thread id into unsinged long
+            stringstream ss;
+            ss << this_thread::get_id();
+            auto th_id = stoul(ss.str());
+            return (th_id + tv.tv_sec + tv.tv_usec);
+        }
+        return s;
     }
     
     double timestamp(void){

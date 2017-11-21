@@ -100,7 +100,10 @@ namespace toolkit {
     ///
     vec3_t<double> warp(const vec3_t<double> &);
     
-    std::size_t random_seed(void);
+    ///
+    /// use given seed number or generate random seed according to thread and clock
+    ///
+    std::size_t random_seed(const int &);
     
     double timestamp(void);
 }
