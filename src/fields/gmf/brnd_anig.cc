@@ -14,10 +14,6 @@
 #include "breg.h"
 #include "cgs_units_file.h"
 #include "namespace_toolkit.h"
-// TIMER
-//#include <sys/time.h>
-//#include <sys/resource.h>
-//#define RCPU_TIME (getrusage(RUSAGE_SELF,&ruse), ruse.ru_utime.tv_sec + 1e-6 * ruse.ru_utime.tv_usec)
 
 using namespace std;
 
@@ -35,6 +31,11 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
     // initialize random seed
     gsl_rng *r{gsl_rng_alloc(gsl_rng_taus)};
     gsl_rng_set(r, toolkit::random_seed(par->brnd_seed));
+    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[6*grid->full_size]());
+    for(decltype(grid->full_size)i=0;i<6*grid->full_size;++i)
+        gaussian_num[i] = gsl_ran_gaussian(r,1);
+    // free random memory
+    gsl_rng_free(r);
     // start Fourier space filling
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};
@@ -43,7 +44,7 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
     const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
-#pragma omp parallel for ordered schedule(static,1)
+#pragma omp parallel for
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         double kx {CGS_U_kpc*i/lx};
         if(i>=grid->nx/2) kx -= CGS_U_kpc*grid->nx/lx;
@@ -57,20 +58,17 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 if(l>=grid->nz/2) kz -= CGS_U_kpc*grid->nz/lz;
                 const double k {sqrt(kx*kx + ky*ky + kz*kz)};
                 // simpson's rule
-                double element {2.*b_spec(k,par)/3.};
-                element += b_spec(k+halfdk,par)/6.;
-                element += b_spec(k-halfdk,par)/6.;
+                double element {b_spec(k,par)*0.66666667};
+                element += b_spec(k+halfdk,par)*0.16666667;
+                element += b_spec(k-halfdk,par)*0.16666667;
                 // amplitude, dividing by two because equal allocation to Re and Im parts
                 const double sigma {sqrt(0.5*element*dk3)};
-#pragma omp ordered
-                {
-                    grid->fftw_b_kx[idx][0] = gsl_ran_gaussian(r,sigma);
-                    grid->fftw_b_ky[idx][0] = gsl_ran_gaussian(r,sigma);
-                    grid->fftw_b_kz[idx][0] = gsl_ran_gaussian(r,sigma);
-                    grid->fftw_b_kx[idx][1] = gsl_ran_gaussian(r,sigma);
-                    grid->fftw_b_ky[idx][1] = gsl_ran_gaussian(r,sigma);
-                    grid->fftw_b_kz[idx][1] = gsl_ran_gaussian(r,sigma);
-                }
+                grid->fftw_b_kx[idx][0] = sigma*gaussian_num[6*idx];
+                grid->fftw_b_ky[idx][0] = sigma*gaussian_num[6*idx+1];
+                grid->fftw_b_kz[idx][0] = sigma*gaussian_num[6*idx+2];
+                grid->fftw_b_kx[idx][1] = sigma*gaussian_num[6*idx+3];
+                grid->fftw_b_ky[idx][1] = sigma*gaussian_num[6*idx+4];
+                grid->fftw_b_kz[idx][1] = sigma*gaussian_num[6*idx+5];
             }// l
         }// j
     }// i
@@ -81,8 +79,6 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
     grid->fftw_b_kx[0][1] = 0.;
     grid->fftw_b_ky[0][1] = 0.;
     grid->fftw_b_kz[0][1] = 0.;
-    // free random memory
-    gsl_rng_free(r);
     // no Hermiticity fixing, complex 2 complex
     // execute DFT backward plan
     fftw_execute(grid->fftw_px_bw);
@@ -128,7 +124,6 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 vec3_t<double> b_im_par {H_versor*dotprod(H_versor,b_im)};
                 vec3_t<double> b_im_perp {b_im - b_im_par};
                 b_im = toolkit::versor(b_im_par*rho + b_im_perp*(1-rho))*b_im.Length();
-                
                 // add anisotropic field to random one
                 grid->fftw_b_kx[idx][0] = b_re.x;
                 grid->fftw_b_ky[idx][0] = b_re.y;

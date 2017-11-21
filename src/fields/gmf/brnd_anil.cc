@@ -27,6 +27,15 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
     // initialize random seed
     gsl_rng *r {gsl_rng_alloc(gsl_rng_taus)};
     gsl_rng_set(r, toolkit::random_seed(par->brnd_seed));
+    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[3*grid->full_size]());
+    for(decltype(grid->full_size)i=0;i<3*grid->full_size;++i)
+        gaussian_num[i] = gsl_ran_gaussian(r,1);
+    unique_ptr<double[]> uniform_num = unique_ptr<double[]>(new double[2*grid->full_size]());
+    for(decltype(grid->full_size)i=0;i<2*grid->full_size;++i)
+        uniform_num[i] = gsl_rng_uniform(r);
+    // free random memory
+    gsl_rng_free(r);
+
     // start Fourier space filling
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};
@@ -67,10 +76,10 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                     double Ps {specs(ks,par)*0.66666667 + (specs(ks+halfdk,par) + specs(ks-halfdk,par))*0.16666667};
                     Ps *= fs(par->brnd_anil.ma,ang)*hs(par->brnd_anil.beta,ang)*dk3;
                     // complex angle
-                    const double angp = 2*CGS_U_pi*gsl_rng_uniform(r);
-                    const double angm = 2*CGS_U_pi*gsl_rng_uniform(r);
-                    vec3_t<double> bkp {ep*gsl_ran_gaussian(r,sqrt(2.*Pa))};
-                    vec3_t<double> bkm {em*(gsl_ran_gaussian(r,sqrt(2.*Pf)) + gsl_ran_gaussian(r,sqrt(2.*Ps)))};
+                    const double angp = 2*CGS_U_pi*uniform_num[2*idx];
+                    const double angm = 2*CGS_U_pi*uniform_num[2*idx+1];
+                    vec3_t<double> bkp {ep*gaussian_num[3*idx]*sqrt(2*Pa)};
+                    vec3_t<double> bkm {em*(gaussian_num[3*idx+1]*sqrt(2.*Pf) + gaussian_num[3*idx+2]*sqrt(2.*Ps))};
                     grid->fftw_b_kx[idx][0] = bkp.x*cos(angp) + bkm.x*cos(angm);
                     grid->fftw_b_ky[idx][0] = bkp.y*cos(angp) + bkm.y*cos(angm);
                     grid->fftw_b_kz[idx][0] = bkp.z*cos(angp) + bkm.z*cos(angm);
@@ -94,10 +103,10 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                         em.z = 0.;
                     }
                     // complex angle
-                    const double angp = 2*CGS_U_pi*gsl_rng_uniform(r);
-                    const double angm = 2*CGS_U_pi*gsl_rng_uniform(r);
-                    vec3_t<double> bkp {ep*gsl_ran_gaussian(r,sqrt(Pf))};
-                    vec3_t<double> bkm {em*gsl_ran_gaussian(r,sqrt(Pf))};
+                    const double angp = 2*CGS_U_pi*uniform_num[2*idx];
+                    const double angm = 2*CGS_U_pi*uniform_num[2*idx+1];
+                    vec3_t<double> bkp {ep*gaussian_num[3*idx]*sqrt(Pf)};
+                    vec3_t<double> bkm {ep*gaussian_num[3*idx+1]*sqrt(Pf)};
                     grid->fftw_b_kx[idx][0] = bkp.x*cos(angp) + bkm.x*cos(angm);
                     grid->fftw_b_ky[idx][0] = bkp.y*cos(angp) + bkm.y*cos(angm);
                     grid->fftw_b_kz[idx][0] = bkp.z*cos(angp) + bkm.z*cos(angm);
@@ -115,8 +124,6 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
     grid->fftw_b_kx[0][1] = 0.;
     grid->fftw_b_ky[0][1] = 0.;
     grid->fftw_b_kz[0][1] = 0.;
-    // free random memory
-    gsl_rng_free(r);
     // execute DFT backward plan
     fftw_execute(grid->fftw_px_bw);
     fftw_execute(grid->fftw_py_bw);

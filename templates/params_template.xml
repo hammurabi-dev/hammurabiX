@@ -103,10 +103,10 @@
             </Regular>
             <!-- turbulent fields -->
             <!-- seed works for IMAGINE -->
-            <Random cue="0" type="Anisolocal" seed="0">
+            <Random cue="1" type="Anisolocal" seed="0">
                 <!-- isotropic -->
                 <Iso>
-                    <rms value="0.1"/> <!-- norm at k0 -->
+                    <rms value="1"/> <!-- norm at k0 -->
                     <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
                     <a0 value="1.7"/> <!-- 5/3, Kolmogorov -->
                 </Iso>
