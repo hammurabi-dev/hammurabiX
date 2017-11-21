@@ -75,7 +75,7 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
     const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
-#pragma omp parallel for
+#pragma omp parallel for ordered schedule(static,1)
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         double kx {CGS_U_kpc*i/lx};
         if(i>=grid->nx/2) kx -= CGS_U_kpc*grid->nx/lx;
@@ -95,12 +95,15 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
                 element += b_spec(k-halfdk,par)/6.;
                 // amplitude, dividing by two because equal allocation to Re and Im parts
                 const double sigma {sqrt(0.5*element*dk3)};
-                grid->fftw_b_kx[idx][0] = gsl_ran_gaussian(r,sigma);
-                grid->fftw_b_ky[idx][0] = gsl_ran_gaussian(r,sigma);
-                grid->fftw_b_kz[idx][0] = gsl_ran_gaussian(r,sigma);
-                grid->fftw_b_kx[idx][1] = gsl_ran_gaussian(r,sigma);
-                grid->fftw_b_ky[idx][1] = gsl_ran_gaussian(r,sigma);
-                grid->fftw_b_kz[idx][1] = gsl_ran_gaussian(r,sigma);
+#pragma omp ordered
+                {
+                    grid->fftw_b_kx[idx][0] = gsl_ran_gaussian(r,sigma);
+                    grid->fftw_b_ky[idx][0] = gsl_ran_gaussian(r,sigma);
+                    grid->fftw_b_kz[idx][0] = gsl_ran_gaussian(r,sigma);
+                    grid->fftw_b_kx[idx][1] = gsl_ran_gaussian(r,sigma);
+                    grid->fftw_b_ky[idx][1] = gsl_ran_gaussian(r,sigma);
+                    grid->fftw_b_kz[idx][1] = gsl_ran_gaussian(r,sigma);
+                }
             }// l
         }// j
     }// i
@@ -111,7 +114,6 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
     grid->fftw_b_kx[0][1] = 0.;
     grid->fftw_b_ky[0][1] = 0.;
     grid->fftw_b_kz[0][1] = 0.;
-    
     // free random memory
     gsl_rng_free(r);
     // no Hermiticity fixing, complex 2 complex

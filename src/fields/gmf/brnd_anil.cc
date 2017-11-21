@@ -39,13 +39,14 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
     const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
-    for (decltype(grid->nx) i=0;i!=grid->nx;++i) {
+    // how to safely parallel this part?
+    for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         k.x = CGS_U_kpc*i/lx;
         if(i>=grid->nx/2) k.x -= grid->nx*CGS_U_kpc/lx;
-        for (decltype(grid->ny) j=0;j!=grid->ny;++j) {
+        for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             k.y = CGS_U_kpc*j/ly;
             if(j>=grid->ny/2) k.y -= CGS_U_kpc*grid->ny/ly;
-            for (decltype(grid->nz) l=0;l!=grid->nz;++l) {
+            for (decltype(grid->nz) l=0;l<grid->nz;++l) {
                 std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 // FFT expects up to n/2 positive while n/2 to n negative
                 k.z = CGS_U_kpc*l/lz;
@@ -73,16 +74,9 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                     grid->fftw_b_kx[idx][0] = bkp.x*cos(angp) + bkm.x*cos(angm);
                     grid->fftw_b_ky[idx][0] = bkp.y*cos(angp) + bkm.y*cos(angm);
                     grid->fftw_b_kz[idx][0] = bkp.z*cos(angp) + bkm.z*cos(angm);
-                    if((i==0 or i==grid->nx/2) and (j==0 or j==grid->ny/2) and (l==0 or l==grid->nz/2)) {
-                        grid->fftw_b_kx[idx][1] = 0.;
-                        grid->fftw_b_ky[idx][1] = 0.;
-                        grid->fftw_b_kz[idx][1] = 0.;
-                    }
-                    else{
-                        grid->fftw_b_kx[idx][1] = bkp.x*sin(angp) + bkm.x*sin(angm);
-                        grid->fftw_b_ky[idx][1] = bkp.y*sin(angp) + bkm.y*sin(angm);
-                        grid->fftw_b_kz[idx][1] = bkp.z*sin(angp) + bkm.z*sin(angm);
-                    }
+                    grid->fftw_b_kx[idx][1] = bkp.x*sin(angp) + bkm.x*sin(angm);
+                    grid->fftw_b_ky[idx][1] = bkp.y*sin(angp) + bkm.y*sin(angm);
+                    grid->fftw_b_kz[idx][1] = bkp.z*sin(angp) + bkm.z*sin(angm);
                 }
                 else{
                     double Pf {specf(ks,par)*0.66666667 + (specf(ks+halfdk,par) + specf(ks-halfdk,par))*0.16666667};
@@ -107,23 +101,22 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                     grid->fftw_b_kx[idx][0] = bkp.x*cos(angp) + bkm.x*cos(angm);
                     grid->fftw_b_ky[idx][0] = bkp.y*cos(angp) + bkm.y*cos(angm);
                     grid->fftw_b_kz[idx][0] = bkp.z*cos(angp) + bkm.z*cos(angm);
-                    if((i==0 or i==grid->nx/2) and (j==0 or j==grid->ny/2) and (l==0 or l==grid->nz/2)) {
-                        grid->fftw_b_kx[idx][1] = 0.;
-                        grid->fftw_b_ky[idx][1] = 0.;
-                        grid->fftw_b_kz[idx][1] = 0.;
-                    }
-                    else{
-                        grid->fftw_b_kx[idx][1] = bkp.x*sin(angp) + bkm.x*sin(angm);
-                        grid->fftw_b_ky[idx][1] = bkp.y*sin(angp) + bkm.y*sin(angm);
-                        grid->fftw_b_kz[idx][1] = bkp.z*sin(angp) + bkm.z*sin(angm);
-                    }
+                    grid->fftw_b_kx[idx][1] = bkp.x*sin(angp) + bkm.x*sin(angm);
+                    grid->fftw_b_ky[idx][1] = bkp.y*sin(angp) + bkm.y*sin(angm);
+                    grid->fftw_b_kz[idx][1] = bkp.z*sin(angp) + bkm.z*sin(angm);
                 }
             }// l
         }// j
     }// i
+    // fix the very 0th
+    grid->fftw_b_kx[0][0] = 0.;
+    grid->fftw_b_ky[0][0] = 0.;
+    grid->fftw_b_kz[0][0] = 0.;
+    grid->fftw_b_kx[0][1] = 0.;
+    grid->fftw_b_ky[0][1] = 0.;
+    grid->fftw_b_kz[0][1] = 0.;
     // free random memory
     gsl_rng_free(r);
-    
     // execute DFT backward plan
     fftw_execute(grid->fftw_px_bw);
     fftw_execute(grid->fftw_py_bw);

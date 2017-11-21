@@ -38,11 +38,14 @@ double FEreg::density_blur(const vec3_t<double> &pos, Pond *par, Grid_fereg *gri
     vec3_t<double> pos_s;
     gsl_rng *r {gsl_rng_alloc(gsl_rng_taus)};
     gsl_rng_set(r, toolkit::random_seed(par->fernd_seed));
-#pragma omp parallel for reduction(+:ne_blur)
+#pragma omp parallel for ordered schedule(static,1) reduction(+:ne_blur)
     for(decltype(step)i=0;i<step;++i){
-        pos_s = pos + vec3_t<double> {gsl_ran_gaussian(r,(blur_scale_x/2.355))*CGS_U_kpc,
-            gsl_ran_gaussian(r,(blur_scale_y/2.355))*CGS_U_kpc,
-            gsl_ran_gaussian(r,(blur_scale_z/2.355))*CGS_U_kpc};
+#pragma omp ordered
+        {
+            pos_s = pos + vec3_t<double> {gsl_ran_gaussian(r,(blur_scale_x/2.355))*CGS_U_kpc,
+                gsl_ran_gaussian(r,(blur_scale_y/2.355))*CGS_U_kpc,
+                gsl_ran_gaussian(r,(blur_scale_z/2.355))*CGS_U_kpc};
+        }
         ne_blur += density(pos_s,par);
     }
     gsl_rng_free(r);
