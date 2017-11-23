@@ -11,6 +11,7 @@
 #define CGS_U_Watt  (CGS_U_Joule/CGS_U_sec)
 
 #define CGS_U_pi 3.14159265358979
+#define CGS_U_rad (CGS_U_pi/180.)
 #define CGS_U_arcmin (2.*CGS_U_pi/(360.*60.))
 #define CGS_U_arcsec (2.*CGS_U_pi/(360.*60.*60.))
 #define CGS_U_sterad (4.* CGS_U_pi)

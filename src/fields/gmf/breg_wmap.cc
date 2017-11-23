@@ -20,10 +20,10 @@ vec3_t<double> Breg_wmap::breg(const vec3_t<double> &pos,Pond *par){
         return b_vec3;
     }
     // units
-    const double b0 {par->breg_wmap.b0*CGS_U_muGauss};
-    const double psi0 {par->breg_wmap.psi0*CGS_U_pi/180.};
-    const double psi1 {par->breg_wmap.psi1*CGS_U_pi/180.};
-    const double chi0 {par->breg_wmap.chi0*CGS_U_pi/180.};
+    const double b0 {par->breg_wmap.b0};
+    const double psi0 {par->breg_wmap.psi0};
+    const double psi1 {par->breg_wmap.psi1};
+    const double chi0 {par->breg_wmap.chi0};
     const double phi {atan2(pos.y,pos.x)};
     const double psi {psi0 + psi1*log(r/(8.*CGS_U_kpc))};
     const double chi {chi0*tanh(pos.z/(1.*CGS_U_kpc))};

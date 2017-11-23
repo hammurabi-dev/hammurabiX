@@ -48,13 +48,46 @@ public:
 };
 
 ///
-/// WMAP-3yr field modeling
+/// WMAP LSA modeling
 ///
 class Breg_wmap final : public Breg {
 public:
     Breg_wmap(void) = default;
     virtual ~Breg_wmap(void) = default;
     vec3_t<double> breg(const vec3_t<double> &,Pond *) override;
+};
+
+///
+/// Jaffe modeling
+///
+class Breg_jaffe final : public Breg{
+public:
+    Breg_jaffe(void) = default;
+    virtual ~Breg_jaffe(void) = default;
+    vec3_t<double> breg(const vec3_t<double> &,Pond *) override;
+private:
+    // field direction
+    vec3_t<double> versor(const vec3_t<double> &,Pond *);
+    // field amplitude radial scaling
+    double radial_scaling(const vec3_t<double> &,Pond *);
+    // spiral arm height scaling
+    inline double arm_scaling(const vec3_t<double> &pos,Pond *par){
+        return 1./(cosh(pos.z/par->breg_jaffe.arm_z0)*cosh(pos.z/par->breg_jaffe.arm_z0));
+    }
+    // disk height scaling
+    inline double disk_scaling(const vec3_t<double> &pos,Pond *par){
+        return 1./(cosh(pos.z/par->breg_jaffe.disk_z0)*cosh(pos.z/par->breg_jaffe.disk_z0));
+    }
+    // halo height scaling
+    inline double halo_scaling(const vec3_t<double> &pos,Pond *par){
+        return 1./(cosh(pos.z/par->breg_jaffe.halo_z0)*cosh(pos.z/par->breg_jaffe.halo_z0));
+    }
+    // spiral arm compression factor, for each arm
+    std::vector<double> arm_compress(const vec3_t<double> &,Pond *);
+    // spiral arm compression factor for dust, for each arm
+    std::vector<double> arm_compress_dust(const vec3_t<double> &,Pond *);
+    // distance to each spiral arm
+    std::vector<double> dist2arm(const vec3_t<double> &,Pond *);
 };
 
 #endif

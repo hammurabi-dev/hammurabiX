@@ -45,8 +45,8 @@ double FErnd_iso::fe_spec(const double &k, Pond *par){
 // galactic scaling of random field energy density
 // set to 1 at observer's place
 double FErnd_iso::rescal_fact(const vec3_t<double> &pos, Pond *par){
-    const double r_cyl {(sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x))/CGS_U_kpc};
-    const double z {(fabs(pos.z) - fabs(par->SunPosition.z))/CGS_U_kpc};
+    const double r_cyl {sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x)};
+    const double z {fabs(pos.z) - fabs(par->SunPosition.z)};
     const double r0 {par->fernd_scal.r0};
     const double z0 {par->fernd_scal.z0};
     if(r_cyl==0 or z==0) {return 1.;}

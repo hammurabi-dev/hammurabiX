@@ -9,7 +9,7 @@ using namespace std;
 
 // FEverify
 double FEreg_verify::density(const vec3_t<double> &pos, Pond *par){
-    if((pos-par->SunPosition).Length() > par->fereg_verify.r0*CGS_U_kpc){
+    if((pos-par->SunPosition).Length() > par->fereg_verify.r0){
         return 0.;
     }
     return par->fereg_verify.n0;

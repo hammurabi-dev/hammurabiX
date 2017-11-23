@@ -54,7 +54,7 @@ unsigned int Grid::FetchUnsigned(XMLElement* el, string obj){
 }
 
 bool Grid::FetchBool(XMLElement* el, string obj){
-    return el->FirstChildElement(obj.c_str())->BoolAttribute("value");
+    return el->FirstChildElement(obj.c_str())->BoolAttribute("cue");
 }
 
 double Grid::FetchDouble(XMLElement* el, string obj){

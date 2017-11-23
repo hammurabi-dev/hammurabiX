@@ -37,7 +37,7 @@ unsigned int Pond::FetchUnsigned(XMLElement* el, string obj){
 }
 
 bool Pond::FetchBool(XMLElement* el, string obj){
-    return el->FirstChildElement(obj.c_str())->BoolAttribute("value");
+    return el->FirstChildElement(obj.c_str())->BoolAttribute("cue");
 }
 
 double Pond::FetchDouble(XMLElement* el, string obj){
@@ -49,20 +49,55 @@ void Pond::b_pond(XMLDocument *doc){
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")};
     // bwmap
     XMLElement *subptr {ptr->FirstChildElement("Regular")->FirstChildElement("WMAP")};
-    breg_wmap.b0 = FetchDouble(subptr,"b0"); //microGauss
-    breg_wmap.psi0 = FetchDouble(subptr,"psi0"); //deg
-    breg_wmap.psi1 = FetchDouble(subptr,"psi1"); //deg
-    breg_wmap.chi0 = FetchDouble(subptr,"chi0"); //deg
+    breg_wmap.b0 = FetchDouble(subptr,"b0")*CGS_U_muGauss; //microGauss
+    breg_wmap.psi0 = FetchDouble(subptr,"psi0")*CGS_U_rad; //rad
+    breg_wmap.psi1 = FetchDouble(subptr,"psi1")*CGS_U_rad; //rad
+    breg_wmap.chi0 = FetchDouble(subptr,"chi0")*CGS_U_rad; //rad
     // bverify
     subptr = ptr->FirstChildElement("Regular")->FirstChildElement("Verify");
-    breg_verify.b0 = FetchDouble(subptr,"b0"); //microGauss
-    breg_verify.l0 = FetchDouble(subptr,"l0"); //deg
-    breg_verify.r = FetchDouble(subptr,"r"); //deg
+    breg_verify.b0 = FetchDouble(subptr,"b0")*CGS_U_muGauss; //microGauss
+    breg_verify.l0 = FetchDouble(subptr,"l0")*CGS_U_rad; //rad
+    breg_verify.r = FetchDouble(subptr,"r");
+    // bjaffe
+    subptr = ptr->FirstChildElement("Regular")->FirstChildElement("Jaffe");
+    breg_jaffe.quadruple = FetchBool(subptr,"quadruple");
+    breg_jaffe.bss = FetchBool(subptr,"bss");
+    breg_jaffe.disk_amp = FetchDouble(subptr,"disk_amp")*CGS_U_muGauss; //microG
+    breg_jaffe.disk_z0 = FetchDouble(subptr,"disk_z0")*CGS_U_kpc; //kpc
+    breg_jaffe.halo_amp = FetchDouble(subptr,"halo_amp")*CGS_U_muGauss; //microG
+    breg_jaffe.halo_z0 = FetchDouble(subptr,"halo_z0")*CGS_U_kpc; //kpc
+    breg_jaffe.r_inner = FetchDouble(subptr,"r_inner")*CGS_U_kpc; //kpc
+    breg_jaffe.r_scale = FetchDouble(subptr,"r_scale")*CGS_U_kpc; //kpc
+    breg_jaffe.r_peak = FetchDouble(subptr,"r_peak")*CGS_U_kpc; //kpc
+    breg_jaffe.ring = FetchBool(subptr,"ring");
+    breg_jaffe.ring_amp = FetchDouble(subptr,"ring_amp")*CGS_U_muGauss; //microG
+    breg_jaffe.ring_r = FetchDouble(subptr,"ring_r")*CGS_U_kpc; //kpc
+    breg_jaffe.bar = FetchBool(subptr,"bar");
+    breg_jaffe.bar_amp = FetchDouble(subptr,"bar_amp")*CGS_U_muGauss; //microG
+    breg_jaffe.bar_a = FetchDouble(subptr,"bar_a")*CGS_U_kpc; //kpc
+    breg_jaffe.bar_b = FetchDouble(subptr,"bar_b")*CGS_U_kpc; //kpc
+    breg_jaffe.bar_phi0 = FetchDouble(subptr,"bar_phi0")*CGS_U_rad; //rad
+    breg_jaffe.arm_num = FetchUnsigned(subptr,"arm_num");
+    breg_jaffe.arm_r0 = FetchDouble(subptr,"arm_r0")*CGS_U_kpc; //kpc
+    breg_jaffe.arm_z0 = FetchDouble(subptr,"arm_z0")*CGS_U_kpc; //kpc
+    breg_jaffe.arm_phi0.push_back(FetchDouble(subptr,"arm_phi1")*CGS_U_rad); //rad
+    breg_jaffe.arm_phi0.push_back(FetchDouble(subptr,"arm_phi2")*CGS_U_rad); //rad
+    breg_jaffe.arm_phi0.push_back(FetchDouble(subptr,"arm_phi3")*CGS_U_rad); //rad
+    breg_jaffe.arm_phi0.push_back(FetchDouble(subptr,"arm_phi4")*CGS_U_rad); //rad
+    breg_jaffe.arm_amp.push_back(FetchDouble(subptr,"arm_amp1")*CGS_U_muGauss); //microG
+    breg_jaffe.arm_amp.push_back(FetchDouble(subptr,"arm_amp2")*CGS_U_muGauss); //microG
+    breg_jaffe.arm_amp.push_back(FetchDouble(subptr,"arm_amp3")*CGS_U_muGauss); //microG
+    breg_jaffe.arm_amp.push_back(FetchDouble(subptr,"arm_amp4")*CGS_U_muGauss); //microG
+    breg_jaffe.arm_pitch = FetchDouble(subptr,"arm_pitch")*CGS_U_rad; //rad
+    breg_jaffe.comp_c = FetchDouble(subptr,"comp_c");
+    breg_jaffe.comp_d = FetchDouble(subptr,"comp_d")*CGS_U_kpc; //kpc
+    breg_jaffe.comp_r = FetchDouble(subptr,"comp_r")*CGS_U_kpc; //kpc
+    breg_jaffe.comp_p = FetchDouble(subptr,"comp_p");
     // random seed
     brnd_seed = ptr->FirstChildElement("Random")->UnsignedAttribute("seed");
     // brnd_iso
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Iso");
-    brnd_iso.rms = FetchDouble(subptr,"rms"); //in microGauss^2;
+    brnd_iso.rms = FetchDouble(subptr,"rms")*CGS_U_muGauss; //microG^2;
     // turning point
     brnd_iso.k0 = FetchDouble(subptr,"k0");
     // index before turning (large scales)
@@ -72,7 +107,7 @@ void Pond::b_pond(XMLDocument *doc){
     brnd_anig.rho = FetchDouble(subptr,"rho");
     // brnd_aniso_local
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Anisolocal");
-    brnd_anil.rms = FetchDouble(subptr,"rms");
+    brnd_anil.p0 = FetchDouble(subptr,"p0")*CGS_U_muGauss*CGS_U_muGauss;
     brnd_anil.rf = FetchDouble(subptr,"rf");
     brnd_anil.rs = FetchDouble(subptr,"rs");
     
@@ -85,8 +120,8 @@ void Pond::b_pond(XMLDocument *doc){
     brnd_anil.ma = FetchDouble(subptr,"ma");
     // rescaling parameters
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Rescal");
-    brnd_scal.r0 = FetchDouble(subptr,"r0");
-    brnd_scal.z0 = FetchDouble(subptr,"z0");
+    brnd_scal.r0 = FetchDouble(subptr,"r0")*CGS_U_kpc;
+    brnd_scal.z0 = FetchDouble(subptr,"z0")*CGS_U_kpc;
 }
 
 void Pond::fe_pond(XMLDocument *doc){
@@ -165,7 +200,7 @@ void Pond::fe_pond(XMLDocument *doc){
     // verify
     subptr = ptr->FirstChildElement("Regular")->FirstChildElement("Verify");
     fereg_verify.n0 = FetchDouble(subptr,"n0");
-    fereg_verify.r0 = FetchDouble(subptr,"r0"); //kpc
+    fereg_verify.r0 = FetchDouble(subptr,"r0")*CGS_U_kpc; //kpc
     
     // random seed
     fernd_seed = ptr->FirstChildElement("Random")->UnsignedAttribute("seed");
@@ -180,8 +215,8 @@ void Pond::fe_pond(XMLDocument *doc){
     
     // rescaling parameters for random fe
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Rescal");
-    fernd_scal.r0 = FetchDouble(subptr,"r0"); //kpc
-    fernd_scal.z0 = FetchDouble(subptr,"z0"); //kpc
+    fernd_scal.r0 = FetchDouble(subptr,"r0")*CGS_U_kpc; //kpc
+    fernd_scal.z0 = FetchDouble(subptr,"z0")*CGS_U_kpc; //kpc
 }
 
 void Pond::cre_pond(XMLDocument *doc){
@@ -198,14 +233,14 @@ void Pond::cre_pond(XMLDocument *doc){
     cre_ana.alpha = FetchDouble(subptr,"alpha");
     cre_ana.beta = FetchDouble(subptr,"beta");
     cre_ana.theta = FetchDouble(subptr,"theta");
-    cre_ana.hr = FetchDouble(subptr,"hr"); //kpc
-    cre_ana.hz = FetchDouble(subptr,"hz"); //kpc
+    cre_ana.hr = FetchDouble(subptr,"hr")*CGS_U_kpc; //kpc
+    cre_ana.hz = FetchDouble(subptr,"hz")*CGS_U_kpc; //kpc
     // differential flux normalization factor at gamma 10
     cre_ana.je = FetchDouble(subptr,"je");
     // verification
     subptr = ptr->FirstChildElement("Verify");
     cre_verify.alpha = FetchDouble(subptr,"alpha");
-    cre_verify.r0 = FetchDouble(subptr,"r0"); //kpc
+    cre_verify.r0 = FetchDouble(subptr,"r0")*CGS_U_kpc; //kpc
     cre_verify.je = FetchDouble(subptr,"je");
 }
 

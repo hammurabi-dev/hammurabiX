@@ -59,7 +59,7 @@
                 <!-- default setting of shells -->
                 <auto>
                     <shell_num value="1"/> <!-- total shell number -->
-                    <nside_min value="64"/> <!-- inner most shell resolution -->
+                    <nside_min value="16"/> <!-- inner most shell resolution -->
                 </auto>
                 <!-- set shell resolution from inside out -->
                 <!-- total shell number calculated automatically -->
@@ -68,14 +68,14 @@
                     <nside value="16"/>
                 </manual>
             </shell>
-            <nside_sim value="64"/> <!-- output map resolution -->
+            <nside_sim value="16"/> <!-- output map resolution -->
             <!-- maximum radius in earth/Galactic centric frame -->
             <ec_r_max value="30.0"/> <!-- kpc -->
             <gc_r_max value="20.0"/> <!-- kpc -->
             <!-- maximum height in galactic centric frame -->
             <gc_z_max value="10.0"/> <!-- kpc -->
             <!-- radial resolution -->
-            <ec_r_res value="0.1"/> <!-- kpc -->
+            <ec_r_res value="0.01"/> <!-- kpc -->
             <!-- galactic latitude lower limit -->
             <lat_lim value="0."/> <!-- [0,90] -->
         </Integration>
@@ -86,14 +86,54 @@
         <!-- magnetic fields -->
         <MagneticField>
             <!-- regular fields -->
-            <Regular type="WMAP">
-                <!-- WMAP3yr -->
+            <Regular type="Jaffe">
+                <!-- WMAP LSA -->
                 <WMAP>
                     <b0 value="2.0"/>
                     <psi0 value="27.0"/>
                     <psi1 value="0.9"/>
                     <chi0 value="25.0"/>
                 </WMAP>
+                <!-- Jaffe -->
+                <Jaffe>
+                    <quadruple cue="0"/> <!-- quadruple pattern in halo -->
+                    <bss cue="0"/> <!-- bi-symmetric -->
+                    
+                    <disk_amp value="0.167"/> <!-- disk amplitude, microG -->
+                    <disk_z0 value="0.1"/> <!-- disk height scale, kpc -->
+                    <halo_amp value="1.38"/> <!-- halo amplitude, microG -->
+                    <halo_z0 value="3.0"/> <!-- halo height scale, kpc -->
+                    <r_inner value="0.5"/> <!-- inner R scale, kpc -->
+                    <r_scale value="20"/> <!-- R scale, kpc -->
+                    <r_peak value="0"/> <!-- R peak, kpc -->
+                    
+                    <ring cue="0"/> <!-- molecular ring -->
+                    <ring_amp value="0.023"/> <!-- ring amplitude, microG -->
+                    <ring_r value="5.0"/> <!-- ring radius, kpc -->
+                    <bar cue="1"/> <!-- elliptical bar -->
+                    <bar_amp value="0.023"/> <!-- bar amplitude, microG -->
+                    <bar_a value="5.0"/> <!-- major scale, kpc -->
+                    <bar_b value="3.0"/> <!-- minor scale, kpc -->
+                    <bar_phi0 value="45.0"/> <!-- bar major direction -->
+                    
+                    <arm_num value="4"/> <!-- spiral arms -->
+                    <arm_r0 value="7.1"/> <!-- arm ref radius -->
+                    <arm_z0 value="0.1"/> <!-- arm heigth scale, kpc -->
+                    <arm_phi1 value="70"/> <!-- arm ref angles, deg -->
+                    <arm_phi2 value="160"/>
+                    <arm_phi3 value="250"/>
+                    <arm_phi4 value="340"/>
+                    <arm_amp1 value="2"/> <!-- arm amplitudes, microG -->
+                    <arm_amp2 value="0.133"/>
+                    <arm_amp3 value="-3.78"/>
+                    <arm_amp4 value="0.32"/>
+                    <arm_pitch value="11.5"/> <!-- pitch angle, deg -->
+                    
+                    <comp_c value="0.5"/> <!-- compress factor -->
+                    <comp_d value="0.3"/> <!-- arm cross-sec scale, kpc -->
+                    <comp_r value="12"/> <!-- radial cutoff scale, kpc -->
+                    <comp_p value="3"/> <!-- cutoff power -->
+                </Jaffe>
                 <!-- verification -->
                 <Verify>
                     <b0 value="2.0"/>
@@ -103,10 +143,10 @@
             </Regular>
             <!-- turbulent fields -->
             <!-- seed works for IMAGINE -->
-            <Random cue="1" type="Anisolocal" seed="0">
+            <Random cue="0" type="Anisolocal" seed="0">
                 <!-- isotropic -->
                 <Iso>
-                    <rms value="1"/> <!-- norm at k0 -->
+                    <rms value="1"/> <!-- RMS at k0 -->
                     <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
                     <a0 value="1.7"/> <!-- 5/3, Kolmogorov -->
                 </Iso>
@@ -116,7 +156,7 @@
                 </Anisoglob>
                 <!-- local turbulent -->
                 <Anisolocal>
-                    <rms  value="1"/> <!-- Alfven RMS -->
+                    <p0  value="1"/> <!-- Alfven power norm at k0 -->
                     <rf value="1.0"/> <!-- fast to Alfven ratio -->
                     <rs value="1.0"/> <!-- slow to Alfven ratio -->
                     <aa0 value="1.7"/> <!-- Kolmogorov -->
@@ -236,17 +276,17 @@
             <!-- Hou & Han, A&A 569 A125 (2014), used in YMW16, R0=8.3 -->
             <HH14>
                 <NumArms value="5"/>
-                <R_1 value="3.35"/> <!-- Noma-Outer Arm -->
+                <R_1 value="3.35"/> <!-- Noma-Outer Arm, initial radius -->
                 <R_2 value="3.71"/> <!-- Peseus Arm -->
                 <R_3 value="3.56"/> <!-- Carina-Segittarius Arm -->
                 <R_4 value="3.67"/> <!-- Crux-Scutum Arm -->
                 <R_5 value="8.21"/> <!-- Local Arm -->
-                <phi_1 value="44.4"/>
+                <phi_1 value="44.4"/> <!-- initial angles -->
                 <phi_2 value="120.0"/>
                 <phi_3 value="218.6"/>
                 <phi_4 value="330.3"/>
                 <phi_5 value="55.1"/>
-                <psi_1 value="11.43"/>
+                <psi_1 value="11.43"/> <!-- pitch angles -->
                 <psi_2 value="9.84"/>
                 <psi_3 value="10.38"/>
                 <psi_4 value="10.64"/>

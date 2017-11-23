@@ -66,7 +66,7 @@ void Grid_int::build_grid(XMLDocument *doc){
     gc_r_max = FetchDouble(ptr,"gc_r_max")*CGS_U_kpc;
     gc_z_max = FetchDouble(ptr,"gc_z_max")*CGS_U_kpc;
     radial_res = FetchDouble(ptr,"ec_r_res")*CGS_U_kpc;
-    lat_lim = FetchDouble(ptr,"lat_lim")*CGS_U_pi/180.;
+    lat_lim = FetchDouble(ptr,"lat_lim")*CGS_U_rad;
     // output file name
     
     ptr = doc->FirstChildElement("root")->FirstChildElement("Output");

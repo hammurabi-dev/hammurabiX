@@ -29,7 +29,7 @@ vec3_t<double> Brnd_iso::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
 // p0 is hidden and not affecting anything
 double Brnd_iso::b_spec(const double &k, Pond *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_iso.rms*pow(CGS_U_muGauss,2)};
+    const double p0 {par->brnd_iso.rms*CGS_U_muGauss};
     const double k0 {par->brnd_iso.k0};
     const double a0 {par->brnd_iso.a0};
     const double unit = 1./(4*CGS_U_pi*k*k);
@@ -48,8 +48,8 @@ double Brnd_iso::b_spec(const double &k, Pond *par){
 // galactic scaling of random field energy density
 // set to 1 at observer's place
 double Brnd_iso::rescal_fact(const vec3_t<double> &pos, Pond *par){
-    const double r_cyl {(sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x))/CGS_U_kpc};
-    const double z {(fabs(pos.z) - fabs(par->SunPosition.z))/CGS_U_kpc};
+    const double r_cyl {sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x)};
+    const double z {fabs(pos.z) - fabs(par->SunPosition.z)};
     const double r0 {par->brnd_scal.r0};
     const double z0 {par->brnd_scal.z0};
     if(r_cyl==0. or z==0){return 1.;}
@@ -131,7 +131,7 @@ void Brnd_iso::write_grid_iso(Pond *par, Grid_brnd *grid){
                 // get physical position
                 pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
-                double ratio {sqrt(rescal_fact(pos,par))*par->brnd_iso.rms*CGS_U_muGauss/sqrt(3.*b_var)};
+                double ratio {sqrt(rescal_fact(pos,par))*par->brnd_iso.rms/sqrt(3.*b_var)};
                 // add anisotropic field to random one
                 std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 grid->fftw_b_kx[idx][0] *= ratio;

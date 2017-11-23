@@ -50,7 +50,7 @@ double FEreg_ymw16::density(const vec3_t<double> &pos, Pond *par){
         //adding up rules
         NE[0] = NE[1]+max(NE[2],NE[3]);
         // distance to local bubble
-        const double rlb {sqrt( pow(((gc_pos.y-8.34*CGS_U_kpc)*0.94-0.34*gc_pos.z),2.) + pow(gc_pos.x,2.) )};
+        const double rlb {sqrt( pow(((gc_pos.y-8.34*CGS_U_kpc)*0.94-0.34*gc_pos.z),2) + pow(gc_pos.x,2) )};
         if(rlb<RLB){ //inside local bubble
             NE[0]=par->fereg_ymw16.t6_J_LB*NE[1]+max(NE[2],NE[3]);
             if(NE[6]>NE[0]) {WLB=1;}
@@ -71,19 +71,19 @@ double FEreg_ymw16::density(const vec3_t<double> &pos, Pond *par){
 double FEreg_ymw16::thick(const double &zz, const double &rr, Pond *par){
     double gd {1.};
     if(rr>par->fereg_ymw16.t1_Bd){
-        gd = pow(1/cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2.);
+        gd = pow(1/cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2);
     }
-    return par->fereg_ymw16.t1_n1*gd*pow(1/cosh(zz/par->fereg_ymw16.t1_H1),2.);
+    return par->fereg_ymw16.t1_n1*gd*pow(1/cosh(zz/par->fereg_ymw16.t1_H1),2);
 }
 // thin disk
 double FEreg_ymw16::thin(const double &zz,const double &rr, Pond *par){
     double gd {1.};
     if(rr>par->fereg_ymw16.t1_Bd){
-        gd = pow(1/cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2.);
+        gd = pow(1/cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2);
     }
     // z scaling, K_2*H in ref
-    double H {par->fereg_ymw16.t2_K2*(32*CGS_U_pc+1.6e-3*rr+(4.e-7/CGS_U_pc)*pow(rr,2.))};
-    return par->fereg_ymw16.t2_n2*gd*pow(1/cosh((rr-par->fereg_ymw16.t2_B2)/par->fereg_ymw16.t2_A2),2)*pow(1/cosh(zz/H),2.);
+    double H {par->fereg_ymw16.t2_K2*(32*CGS_U_pc+1.6e-3*rr+(4.e-7/CGS_U_pc)*pow(rr,2))};
+    return par->fereg_ymw16.t2_n2*gd*pow(1/cosh((rr-par->fereg_ymw16.t2_B2)/par->fereg_ymw16.t2_A2),2)*pow(1/cosh(zz/H),2);
 }
 // spiral arms
 double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,const double &rr,Pond *par){
@@ -95,14 +95,14 @@ double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,co
     double RAD {180./CGS_U_pi};
     double gd {1.};
     if(rr>par->fereg_ymw16.t1_Bd){
-        gd = pow(1/cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2.);
+        gd = pow(1/cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2);
     }
     // z scaling, K_a*H in ref
-    const double H {par->fereg_ymw16.t3_Ka*(32*CGS_U_pc+1.6e-3*rr+(4.e-7/CGS_U_pc)*pow(rr,2.))};
+    const double H {par->fereg_ymw16.t3_Ka*(32*CGS_U_pc+1.6e-3*rr+(4.e-7/CGS_U_pc)*pow(rr,2))};
     // R_ai
     const double rmin[5] = {3.35*CGS_U_kpc,3.707*CGS_U_kpc,3.56*CGS_U_kpc,3.670*CGS_U_kpc,8.21*CGS_U_kpc};
     // phi_ai
-    const double thmin[5] = {44.4*CGS_U_pi/180,120*CGS_U_pi/180,218.6*CGS_U_pi/180,330.3*CGS_U_pi/180,55.1*CGS_U_pi/180};
+    const double thmin[5] = {44.4*CGS_U_rad,120*CGS_U_rad,218.6*CGS_U_rad,330.3*CGS_U_rad,55.1*CGS_U_rad};
     // tan(psi_ai)
     const double tpitch[5] = {0.20200,0.17300,0.18300,0.18600,0.048300};
     // cos(psi_ai)
@@ -112,7 +112,7 @@ double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,co
     // 普通角度的计算 (general angle calculation)
     double ne3s {0.};
     // looping through arms
-    for(int i=0;i!=4;++i){
+    for(unsigned int i=0;i<4;++i){
         ga=0;
         //Norma-Outer
         if(i==0){
@@ -180,18 +180,17 @@ double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,co
         smin=detrr*cspitch[i];//s_ai
         // correction for Carina-Sagittarius
         if(i==2){
-            ga=(1-(par->fereg_ymw16.t3_nsg)*(exp(-pow((theta*RAD-par->fereg_ymw16.t3_thetasg)/par->fereg_ymw16.t3_wsg,2.))))*(1+par->fereg_ymw16.t3_ncn*exp(-pow((theta*RAD-par->fereg_ymw16.t3_thetacn)/par->fereg_ymw16.t3_wcn,2.)))*pow(1/cosh(smin/par->fereg_ymw16.t3_warm[i]),2.);
+            ga=(1-(par->fereg_ymw16.t3_nsg)*(exp(-pow((theta*RAD-par->fereg_ymw16.t3_thetasg)/par->fereg_ymw16.t3_wsg,2))))*(1+par->fereg_ymw16.t3_ncn*exp(-pow((theta*RAD-par->fereg_ymw16.t3_thetacn)/par->fereg_ymw16.t3_wcn,2)))*pow(1/cosh(smin/par->fereg_ymw16.t3_warm[i]),2);
             
             if(rr>6*CGS_U_kpc and theta*RAD>par->fereg_ymw16.t3_thetacn) {
-                ga=(1-(par->fereg_ymw16.t3_nsg)*(exp(-pow((theta*RAD-par->fereg_ymw16.t3_thetasg)/par->fereg_ymw16.t3_wsg,2.))))*(1+par->fereg_ymw16.t3_ncn)*pow(1/cosh(smin/par->fereg_ymw16.t3_warm[i]),2.);
+                ga=(1-(par->fereg_ymw16.t3_nsg)*(exp(-pow((theta*RAD-par->fereg_ymw16.t3_thetasg)/par->fereg_ymw16.t3_wsg,2))))*(1+par->fereg_ymw16.t3_ncn)*pow(1/cosh(smin/par->fereg_ymw16.t3_warm[i]),2);
             }
         }
         // for other three arms
         else {
-            ga=pow(1/cosh(smin/par->fereg_ymw16.t3_warm[i]),2.);
+            ga=pow(1/cosh(smin/par->fereg_ymw16.t3_warm[i]),2);
         }
-        
-        ne3s += par->fereg_ymw16.t3_narm[i]*ga*pow(1/cosh((rr-par->fereg_ymw16.t3_B2s)/par->fereg_ymw16.t3_Aa),2.)*gd*pow(1/cosh(zz/H),2.);
+        ne3s += par->fereg_ymw16.t3_narm[i]*ga*pow(1/cosh((rr-par->fereg_ymw16.t3_B2s)/par->fereg_ymw16.t3_Aa),2)*gd*pow(1/cosh(zz/H),2);
     }// end of looping through arms
     return ne3s;
 }
@@ -202,8 +201,8 @@ double FEreg_ymw16::galcen(const double &xx,const double &yy,const double &zz,Po
     const double Ygc {0.};
     const double Zgc {-7.*CGS_U_pc};
     const double Rgc {sqrt((xx-Xgc)*(xx-Xgc)+(yy-Ygc)*(yy-Ygc))};
-    const double Ar {exp(-pow(Rgc/par->fereg_ymw16.t4_Agc,2.))};
-    const double Az {pow(1/cosh((zz-Zgc)/par->fereg_ymw16.t4_Hgc),2.)};
+    const double Ar {exp(-pow(Rgc/par->fereg_ymw16.t4_Agc,2))};
+    const double Az {pow(1/cosh((zz-Zgc)/par->fereg_ymw16.t4_Hgc),2)};
     
     return par->fereg_ymw16.t4_ngc*Ar*Az;
 }
@@ -211,8 +210,8 @@ double FEreg_ymw16::galcen(const double &xx,const double &yy,const double &zz,Po
 double FEreg_ymw16::gum(const double &xx,const double &yy,const double &zz,Pond *par){
     double Dmin {1e5*CGS_U_pc};
     //center of Gum Nebula
-    const double lc {264.*CGS_U_pi/180.};
-    const double bc {-4.*CGS_U_pi/180.};
+    const double lc {264.*CGS_U_rad};
+    const double bc {-4.*CGS_U_rad};
     const double dc {450.*CGS_U_pc};
     
     const double xc {dc*cos(bc)*sin(lc)};
@@ -244,7 +243,7 @@ double FEreg_ymw16::localbubble(const double &xx,const double &yy,const double &
 }
 // north spur
 double FEreg_ymw16::nps(const double &xx,const double &yy,const double &zz,Pond *par){
-    const double theta_LI {(par->fereg_ymw16.t7_thetaLI)*CGS_U_pi/180.};
+    const double theta_LI {(par->fereg_ymw16.t7_thetaLI)*CGS_U_rad};
     const double x_c {-10.156*CGS_U_pc};
     const double y_c {8106.207*CGS_U_pc};
     const double z_c {10.467*CGS_U_pc};
@@ -252,5 +251,5 @@ double FEreg_ymw16::nps(const double &xx,const double &yy,const double &zz,Pond 
     const double rLI {sqrt((xx-x_c)*(xx-x_c)+(yy-y_c)*(yy-y_c)+(zz-z_c)*(zz-z_c))};
     const double theta {acos(((xx-x_c)*(cos(theta_LI))+(zz-z_c)*(sin(theta_LI)))/rLI)*180./CGS_U_pi};
     
-    return (par->fereg_ymw16.t7_nLI)*exp(-pow((rLI-par->fereg_ymw16.t7_RLI)/par->fereg_ymw16.t7_WLI,2.))*exp(-pow(theta/par->fereg_ymw16.t7_detthetaLI,2.));
+    return (par->fereg_ymw16.t7_nLI)*exp(-pow((rLI-par->fereg_ymw16.t7_RLI)/par->fereg_ymw16.t7_WLI,2))*exp(-pow(theta/par->fereg_ymw16.t7_detthetaLI,2));
 }

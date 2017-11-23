@@ -34,7 +34,7 @@ void CRE_verify::flux_param(const vec3_t<double> &/*pos*/,Pond *par,double &inde
 // analytical modeling use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
 double CRE_verify::flux(const vec3_t<double> &pos,Pond *par,const double &En){
-    if((pos-par->SunPosition).Length() > par->cre_verify.r0*CGS_U_kpc){
+    if((pos-par->SunPosition).Length() > par->cre_verify.r0){
         return 0.;
     }
     // units
@@ -60,7 +60,7 @@ double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Pond *par,Grid_cre
         exit(1);
     }
 #endif
-    if((pos-par->SunPosition).Length() > par->cre_verify.r0*CGS_U_kpc){
+    if((pos-par->SunPosition).Length() > par->cre_verify.r0){
         return 0.;
     }
     // allocating values to index, norm according to user defined model
@@ -90,7 +90,7 @@ double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,Pond *par,Grid_cre
         exit(1);
     }
 #endif
-    if((pos-par->SunPosition).Length() > par->cre_verify.r0*CGS_U_kpc){
+    if((pos-par->SunPosition).Length() > par->cre_verify.r0){
         return 0.;
     }
     // allocating values to index, norm according to user defined model

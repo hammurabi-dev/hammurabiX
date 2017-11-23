@@ -196,7 +196,7 @@ double Brnd_anil::fs(const double &ma,const double &cosa){
 
 double Brnd_anil::speca(const double &k,Pond *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_anil.rms*pow(CGS_U_muGauss,2)};
+    const double p0 {par->brnd_anil.p0};
     const double k0 {par->brnd_anil.k0};
     const double a0 {par->brnd_anil.aa0};
     const double unit = 1./(4*CGS_U_pi*k*k);
@@ -214,7 +214,7 @@ double Brnd_anil::speca(const double &k,Pond *par){
 
 double Brnd_anil::specf(const double &k,Pond *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_anil.rms*pow(CGS_U_muGauss,2)*par->brnd_anil.rf};
+    const double p0 {par->brnd_anil.p0*par->brnd_anil.rf};
     const double k0 {par->brnd_anil.k0};
     const double a0 {par->brnd_anil.af0};
     const double unit = 1./(4*CGS_U_pi*k*k);
@@ -232,7 +232,7 @@ double Brnd_anil::specf(const double &k,Pond *par){
 
 double Brnd_anil::specs(const double &k,Pond *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_anil.rms*pow(CGS_U_muGauss,2)*par->brnd_anil.rs};
+    const double p0 {par->brnd_anil.p0*par->brnd_anil.rs};
     const double k0 {par->brnd_anil.k0};
     const double a0 {par->brnd_anil.as0};
     const double unit = 1./(4*CGS_U_pi*k*k);

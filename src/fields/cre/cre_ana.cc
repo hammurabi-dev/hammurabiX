@@ -22,8 +22,8 @@ void CRE_ana::flux_param(const vec3_t<double> &pos,Pond *par,double &index,doubl
     const double alpha {par->cre_ana.alpha};
     const double beta {par->cre_ana.beta};
     const double theta {par->cre_ana.theta};
-    const double hr {par->cre_ana.hr*CGS_U_kpc};
-    const double hz {par->cre_ana.hz*CGS_U_kpc};
+    const double hr {par->cre_ana.hr};
+    const double hz {par->cre_ana.hz};
     // je is in [GeV m^2 s sr]^-1 units
     const double je {par->cre_ana.je};
     const double R0 {sqrt(par->SunPosition.x*par->SunPosition.x+par->SunPosition.y*par->SunPosition.y)};
@@ -35,7 +35,7 @@ void CRE_ana::flux_param(const vec3_t<double> &pos,Pond *par,double &index,doubl
     const double unit_factor {(4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*cre_beta_10)};
     // MODEL DEPENDENT PARAMETERS
     const double norm_factor {je*pow(cre_gamma_10,alpha-beta*R0)*exp(R0/hr)};
-    const double scal_factor {exp(-r/hr)*(1./pow(cosh(z/hz),2.))};
+    const double scal_factor {exp(-r/hr)*(1./(cosh(z/hz)*cosh(z/hz)))};
     // this is changeable by users
     index = -alpha+beta*r+theta*z;
     
@@ -49,8 +49,8 @@ double CRE_ana::flux(const vec3_t<double> &pos,Pond *par,const double &En){
     const double alpha {par->cre_ana.alpha};
     const double beta {par->cre_ana.beta};
     const double theta {par->cre_ana.theta};
-    const double hr {par->cre_ana.hr*CGS_U_kpc};
-    const double hz {par->cre_ana.hz*CGS_U_kpc};
+    const double hr {par->cre_ana.hr};
+    const double hz {par->cre_ana.hz};
     // je is in [GeV m^2 s sr]^-1 units
     const double je {par->cre_ana.je};
     const double R0 {sqrt(par->SunPosition.x*par->SunPosition.x+par->SunPosition.y*par->SunPosition.y)};
@@ -63,7 +63,7 @@ double CRE_ana::flux(const vec3_t<double> &pos,Pond *par,const double &En){
     // MODEL DEPENDENT PARAMETERS
     // CRE flux normalizaton factor at earth, model dependent
     const double norm_factor {je*pow(cre_gamma_10,alpha-beta*R0)*exp(R0/hr)};
-    const double scal_factor {exp(-r/hr)*(1./pow(cosh(z/hz),2.))};
+    const double scal_factor {exp(-r/hr)*(1./(cosh(z/hz)*cosh(z/hz)))};
     
     return norm_factor*scal_factor*unit_factor*pow(gamma,-alpha+beta*r+theta*z);
 }

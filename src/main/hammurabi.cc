@@ -26,7 +26,6 @@ int main(int , char **argv) {
 #endif
     
     string file_name {argv[1]};
-    
     // BUILD SPECIFIED MODULES
     unique_ptr<Pond> par = unique_ptr<Pond> (new Pond(file_name));
     unique_ptr<Grid_fereg> grid_fereg = unique_ptr<Grid_fereg> (new Grid_fereg(file_name));
@@ -82,9 +81,15 @@ int main(int , char **argv) {
     }
     else if(bregtype=="WMAP"){
 #ifndef NDEBUG
-        cout<<"INFO: USING WMAP3YR REGUALR B MODEL"<<endl;
+        cout<<"INFO: USING WMAP LSA REGUALR B MODEL"<<endl;
 #endif
         breg = unique_ptr<Breg> (new Breg_wmap());
+    }
+    else if(bregtype=="Jaffe"){
+#ifndef NDEBUG
+        cout<<"INFO: USING JAFFE REGUALR B MODEL"<<endl;
+#endif
+        breg = unique_ptr<Breg> (new Breg_jaffe());
     }
     else if(bregtype=="Verify"){
 #ifndef NDEBUG

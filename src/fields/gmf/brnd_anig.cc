@@ -96,7 +96,7 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 // get physical position
                 pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
-                double ratio {sqrt(rescal_fact(pos,par))*par->brnd_iso.rms*CGS_U_muGauss/sqrt(3.*b_var)};
+                double ratio {sqrt(rescal_fact(pos,par))*par->brnd_iso.rms/sqrt(3.*b_var)};
                 // assemble b_Re and b_Im
                 std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 vec3_t<double> b_re {grid->fftw_b_kx[idx][0]*ratio,grid->fftw_b_ky[idx][0]*ratio,grid->fftw_b_kz[idx][0]*ratio};
