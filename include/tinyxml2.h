@@ -53,7 +53,7 @@
  AStyle.exe --style=1tbs --indent-switches --break-closing-brackets --indent-preprocessor tinyxml2.cpp tinyxml2.h
  */
 
-#if defined( _DEBUG ) || defined( DEBUG ) || defined (__DEBUG__)
+#if defined( _DEBUG ) || defined (__DEBUG__)
 #   ifndef DEBUG
 #       define DEBUG
 #   endif
@@ -98,7 +98,7 @@
 /* Versioning, past 1.0.14:
 	http://semver.org/
  */
-static const int TIXML2_MAJOR_VERSION = 4;
+static const int TIXML2_MAJOR_VERSION = 5;
 static const int TIXML2_MINOR_VERSION = 0;
 static const int TIXML2_PATCH_VERSION = 1;
 
@@ -121,7 +121,7 @@ namespace tinyxml2
      */
     class StrPair
     {
-        public:
+    public:
         enum {
             NEEDS_ENTITY_PROCESSING			= 0x01,
             NEEDS_NEWLINE_NORMALIZATION		= 0x02,
@@ -166,7 +166,7 @@ namespace tinyxml2
         void TransferTo( StrPair* other );
         void Reset();
         
-        private:
+    private:
         void CollapseWhitespace();
         
         enum {
@@ -191,7 +191,7 @@ namespace tinyxml2
     template <class T, int INITIAL_SIZE>
     class DynArray
     {
-        public:
+    public:
         DynArray() {
             _mem = _pool;
             _allocated = INITIAL_SIZE;
@@ -264,6 +264,13 @@ namespace tinyxml2
             return _allocated;
         }
         
+        void SwapRemove(int i) {
+            TIXMLASSERT(i >= 0 && i < _size);
+            TIXMLASSERT(_size > 0);
+            _mem[i] = _mem[_size - 1];
+            --_size;
+        }
+        
         const T* Mem() const				{
             TIXMLASSERT( _mem );
             return _mem;
@@ -274,7 +281,7 @@ namespace tinyxml2
             return _mem;
         }
         
-        private:
+    private:
         DynArray( const DynArray& ); // not supported
         void operator=( const DynArray& ); // not supported
         
@@ -284,6 +291,7 @@ namespace tinyxml2
                 TIXMLASSERT( cap <= INT_MAX / 2 );
                 int newAllocated = cap * 2;
                 T* newMem = new T[newAllocated];
+                TIXMLASSERT( newAllocated >= _size );
                 memcpy( newMem, _mem, sizeof(T)*_size );	// warning: not using constructors, only works for PODs
                 if ( _mem != _pool ) {
                     delete [] _mem;
@@ -306,7 +314,7 @@ namespace tinyxml2
      */
     class MemPool
     {
-        public:
+    public:
         MemPool() {}
         virtual ~MemPool() {}
         
@@ -324,7 +332,7 @@ namespace tinyxml2
     template< int ITEM_SIZE >
     class MemPoolT : public MemPool
     {
-        public:
+    public:
         MemPoolT() : _root(0), _currentAllocs(0), _nAllocs(0), _maxAllocs(0), _nUntracked(0)	{}
         ~MemPoolT() {
             Clear();
@@ -333,8 +341,8 @@ namespace tinyxml2
         void Clear() {
             // Delete the blocks.
             while( !_blockPtrs.Empty()) {
-                Block* b  = _blockPtrs.Pop();
-                delete b;
+                Block* lastBlock = _blockPtrs.Pop();
+                delete lastBlock;
             }
             _root = 0;
             _currentAllocs = 0;
@@ -415,7 +423,7 @@ namespace tinyxml2
         // in private part if ITEMS_PER_BLOCK is private
         enum { ITEMS_PER_BLOCK = (4 * 1024) / ITEM_SIZE };
         
-        private:
+    private:
         MemPoolT( const MemPoolT& ); // not supported
         void operator=( const MemPoolT& ); // not supported
         
@@ -458,7 +466,7 @@ namespace tinyxml2
      */
     class TINYXML2_LIB XMLVisitor
     {
-        public:
+    public:
         virtual ~XMLVisitor() {}
         
         /// Visit a document.
@@ -505,10 +513,10 @@ namespace tinyxml2
         XML_ERROR_FILE_NOT_FOUND,
         XML_ERROR_FILE_COULD_NOT_BE_OPENED,
         XML_ERROR_FILE_READ_ERROR,
-        XML_ERROR_ELEMENT_MISMATCH,
+        UNUSED_XML_ERROR_ELEMENT_MISMATCH,	// remove at next major version
         XML_ERROR_PARSING_ELEMENT,
         XML_ERROR_PARSING_ATTRIBUTE,
-        XML_ERROR_IDENTIFYING_TAG,
+        UNUSED_XML_ERROR_IDENTIFYING_TAG,	// remove at next major version
         XML_ERROR_PARSING_TEXT,
         XML_ERROR_PARSING_CDATA,
         XML_ERROR_PARSING_COMMENT,
@@ -529,7 +537,7 @@ namespace tinyxml2
      */
     class TINYXML2_LIB XMLUtil
     {
-        public:
+    public:
         static const char* SkipWhiteSpace( const char* p, int* curLineNumPtr )	{
             TIXMLASSERT( p );
             
@@ -613,7 +621,7 @@ namespace tinyxml2
         // Be sure to set static const memory as parameters.
         static void SetBoolSerialization(const char* writeTrue, const char* writeFalse);
         
-        private:
+    private:
         static const char* writeBoolTrue;
         static const char* writeBoolFalse;
     };
@@ -648,7 +656,7 @@ namespace tinyxml2
     {
         friend class XMLDocument;
         friend class XMLElement;
-        public:
+    public:
         
         /// Get the XMLDocument that owns this XMLNode.
         const XMLDocument* GetDocument() const	{
@@ -858,6 +866,21 @@ namespace tinyxml2
         virtual XMLNode* ShallowClone( XMLDocument* document ) const = 0;
         
         /**
+         Make a copy of this node and all its children.
+         
+         If the 'target' is null, then the nodes will
+         be allocated in the current document. If 'target'
+         is specified, the memory will be allocated is the
+         specified XMLDocument.
+         
+         NOTE: This is probably not the correct tool to
+         copy a document, since XMLDocuments can have multiple
+         top level XMLNodes. You probably want to use
+         XMLDocument::DeepCopy()
+         */
+        XMLNode* DeepClone( XMLDocument* target ) const;
+        
+        /**
          Test if 2 nodes are the same, but don't test children.
          The 2 nodes do not need to be in the same Document.
          
@@ -903,7 +926,7 @@ namespace tinyxml2
          */
         void* GetUserData() const			{ return _userData; }
         
-        protected:
+    protected:
         XMLNode( XMLDocument* );
         virtual ~XMLNode();
         
@@ -922,7 +945,7 @@ namespace tinyxml2
         
         void*			_userData;
         
-        private:
+    private:
         MemPool*		_memPool;
         void Unlink( XMLNode* child );
         static void DeleteNode( XMLNode* node );
@@ -949,7 +972,7 @@ namespace tinyxml2
     class TINYXML2_LIB XMLText : public XMLNode
     {
         friend class XMLDocument;
-        public:
+    public:
         virtual bool Accept( XMLVisitor* visitor ) const;
         
         virtual XMLText* ToText()			{
@@ -971,13 +994,13 @@ namespace tinyxml2
         virtual XMLNode* ShallowClone( XMLDocument* document ) const;
         virtual bool ShallowEqual( const XMLNode* compare ) const;
         
-        protected:
+    protected:
         XMLText( XMLDocument* doc )	: XMLNode( doc ), _isCData( false )	{}
         virtual ~XMLText()												{}
         
         char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
         
-        private:
+    private:
         bool _isCData;
         
         XMLText( const XMLText& );	// not supported
@@ -989,7 +1012,7 @@ namespace tinyxml2
     class TINYXML2_LIB XMLComment : public XMLNode
     {
         friend class XMLDocument;
-        public:
+    public:
         virtual XMLComment*	ToComment()					{
             return this;
         }
@@ -1002,13 +1025,13 @@ namespace tinyxml2
         virtual XMLNode* ShallowClone( XMLDocument* document ) const;
         virtual bool ShallowEqual( const XMLNode* compare ) const;
         
-        protected:
+    protected:
         XMLComment( XMLDocument* doc );
         virtual ~XMLComment();
         
         char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr);
         
-        private:
+    private:
         XMLComment( const XMLComment& );	// not supported
         XMLComment& operator=( const XMLComment& );	// not supported
     };
@@ -1028,7 +1051,7 @@ namespace tinyxml2
     class TINYXML2_LIB XMLDeclaration : public XMLNode
     {
         friend class XMLDocument;
-        public:
+    public:
         virtual XMLDeclaration*	ToDeclaration()					{
             return this;
         }
@@ -1041,13 +1064,13 @@ namespace tinyxml2
         virtual XMLNode* ShallowClone( XMLDocument* document ) const;
         virtual bool ShallowEqual( const XMLNode* compare ) const;
         
-        protected:
+    protected:
         XMLDeclaration( XMLDocument* doc );
         virtual ~XMLDeclaration();
         
         char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
         
-        private:
+    private:
         XMLDeclaration( const XMLDeclaration& );	// not supported
         XMLDeclaration& operator=( const XMLDeclaration& );	// not supported
     };
@@ -1063,7 +1086,7 @@ namespace tinyxml2
     class TINYXML2_LIB XMLUnknown : public XMLNode
     {
         friend class XMLDocument;
-        public:
+    public:
         virtual XMLUnknown*	ToUnknown()					{
             return this;
         }
@@ -1076,13 +1099,13 @@ namespace tinyxml2
         virtual XMLNode* ShallowClone( XMLDocument* document ) const;
         virtual bool ShallowEqual( const XMLNode* compare ) const;
         
-        protected:
+    protected:
         XMLUnknown( XMLDocument* doc );
         virtual ~XMLUnknown();
         
         char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
         
-        private:
+    private:
         XMLUnknown( const XMLUnknown& );	// not supported
         XMLUnknown& operator=( const XMLUnknown& );	// not supported
     };
@@ -1098,7 +1121,7 @@ namespace tinyxml2
     class TINYXML2_LIB XMLAttribute
     {
         friend class XMLElement;
-        public:
+    public:
         /// The name of the attribute.
         const char* Name() const;
         
@@ -1185,7 +1208,7 @@ namespace tinyxml2
         /// Set the attribute to value.
         void SetAttribute( float value );
         
-        private:
+    private:
         enum { BUF_SIZE = 200 };
         
         XMLAttribute() : _parseLineNum( 0 ), _next( 0 ), _memPool( 0 ) {}
@@ -1212,7 +1235,7 @@ namespace tinyxml2
     class TINYXML2_LIB XMLElement : public XMLNode
     {
         friend class XMLDocument;
-        public:
+    public:
         /// Get the name of an element (which is the Value() of the node.)
         const char* Name() const		{
             return Value();
@@ -1570,10 +1593,10 @@ namespace tinyxml2
         virtual XMLNode* ShallowClone( XMLDocument* document ) const;
         virtual bool ShallowEqual( const XMLNode* compare ) const;
         
-        protected:
+    protected:
         char* ParseDeep( char* p, StrPair* parentEndTag, int* curLineNumPtr );
         
-        private:
+    private:
         XMLElement( XMLDocument* doc );
         virtual ~XMLElement();
         XMLElement( const XMLElement& );	// not supported
@@ -1611,7 +1634,7 @@ namespace tinyxml2
     class TINYXML2_LIB XMLDocument : public XMLNode
     {
         friend class XMLElement;
-        public:
+    public:
         /// constructor
         XMLDocument( bool processEntities = true, Whitespace whitespaceMode = PRESERVE_WHITESPACE );
         ~XMLDocument();
@@ -1780,13 +1803,11 @@ namespace tinyxml2
         static const char* ErrorIDToName(XMLError errorID);
         
         /// Return a possibly helpful diagnostic location or string.
-        const char* GetErrorStr1() const {
-            return _errorStr1.GetStr();
-        }
+        const char* GetErrorStr1() const;
+        
         /// Return a possibly helpful secondary diagnostic location or string.
-        const char* GetErrorStr2() const {
-            return _errorStr2.GetStr();
-        }
+        const char* GetErrorStr2() const;
+        
         /// Return the line where the error occured, or zero if unknown.
         int GetErrorLineNum() const
         {
@@ -1798,8 +1819,20 @@ namespace tinyxml2
         /// Clear the document, resetting it to the initial state.
         void Clear();
         
+        /**
+         Copies this document to a target document.
+         The target will be completely cleared before the copy.
+         If you want to copy a sub-tree, see XMLNode::DeepClone().
+         
+         NOTE: that the 'target' must be non-null.
+         */
+        void DeepCopy(XMLDocument* target) const;
+        
         // internal
         char* Identify( char* p, XMLNode** node );
+        
+        // internal
+        void MarkInUse(XMLNode*);
         
         virtual XMLNode* ShallowClone( XMLDocument* /*document*/ ) const	{
             return 0;
@@ -1808,7 +1841,7 @@ namespace tinyxml2
             return false;
         }
         
-        private:
+    private:
         XMLDocument( const XMLDocument& );	// not supported
         void operator=( const XMLDocument& );	// not supported
         
@@ -1821,6 +1854,13 @@ namespace tinyxml2
         int             _errorLineNum;
         char*			_charBuffer;
         int				_parseCurLineNum;
+        // Memory tracking does add some overhead.
+        // However, the code assumes that you don't
+        // have a bunch of unlinked nodes around.
+        // Therefore it takes less memory to track
+        // in the document vs. a linked list in the XMLNode,
+        // and the performance is the same.
+        DynArray<XMLNode*, 10> _unlinked;
         
         MemPoolT< sizeof(XMLElement) >	 _elementPool;
         MemPoolT< sizeof(XMLAttribute) > _attributePool;
@@ -1843,6 +1883,8 @@ namespace tinyxml2
         NodeType* returnNode = new (pool.Alloc()) NodeType( this );
         TIXMLASSERT( returnNode );
         returnNode->_memPool = &pool;
+        
+        _unlinked.Push(returnNode);
         return returnNode;
     }
     
@@ -1903,7 +1945,7 @@ namespace tinyxml2
      */
     class TINYXML2_LIB XMLHandle
     {
-        public:
+    public:
         /// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
         XMLHandle( XMLNode* node )												{
             _node = node;
@@ -1976,7 +2018,7 @@ namespace tinyxml2
             return ( _node ? _node->ToDeclaration() : 0 );
         }
         
-        private:
+    private:
         XMLNode* _node;
     };
     
@@ -1987,7 +2029,7 @@ namespace tinyxml2
      */
     class TINYXML2_LIB XMLConstHandle
     {
-        public:
+    public:
         XMLConstHandle( const XMLNode* node )											{
             _node = node;
         }
@@ -2045,7 +2087,7 @@ namespace tinyxml2
             return ( _node ? _node->ToDeclaration() : 0 );
         }
         
-        private:
+    private:
         const XMLNode* _node;
     };
     
@@ -2094,7 +2136,7 @@ namespace tinyxml2
      */
     class TINYXML2_LIB XMLPrinter : public XMLVisitor
     {
-        public:
+    public:
         /** Construct the printer. If the FILE* is specified,
          this will print to the FILE. Else it will print
          to memory, and the result is available in CStr().
@@ -2176,9 +2218,10 @@ namespace tinyxml2
         void ClearBuffer() {
             _buffer.Clear();
             _buffer.Push(0);
+            _firstElement = true;
         }
         
-        protected:
+    protected:
         virtual bool CompactMode( const XMLElement& )	{ return _compactMode; }
         
         /** Prints out the space before an element. You may override to change
@@ -2191,7 +2234,7 @@ namespace tinyxml2
         bool _elementJustOpened;
         DynArray< const char*, 10 > _stack;
         
-        private:
+    private:
         void PrintString( const char*, bool restrictedEntitySet );	// prints out, after detecting entities.
         
         bool _firstElement;

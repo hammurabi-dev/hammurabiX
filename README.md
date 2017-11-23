@@ -1,51 +1,74 @@
-# README
+# hammurabi README
+##### (current version X.alpha)
 
-Hammurabi X (reforged Hammurabi in C++11 std)
+hammurabi is a HEALPix-based tool for simulating observables, 
+such as **polarized synchrotron** and **thermal dust emission**, 
+from models of physical inputs such as **magnetic fields**, **dust** and **electron distributions**, etc.
 
-Re-developed by:
+It is a modular C++ framework into which you can add your own models easily, 
+and then use it to perform the line-of-sight integration to compute the observables. 
+Please cite the original [Waelkens et al. (2009)](https://www.aanda.org/articles/aa/abs/2009/08/aa10564-08/aa10564-08.html) paper if you use hammurabi.
 
-* Jiaxin Wang (SISSA)
-* Tess R. Jaffe (NASA)
-* Theo Steininger (MPA)
-* Torsten A. Ensslin (MPA)
+#### about X.alpha release
+*Currently we are in alpha testing release,
+with only minimal amount of features available.
+A full release of version X is scheduled in 2018.*
 
-It simulates 
 
-* synchrotron emission
+X.alpha provides simulation of: 
+
+* polarized synchrotron emission
 * Faraday depth
 
-with following physical quantities modeled:
+with following physical modelings:
 
 * galactic structures
 * galactic magnetic fields
-* free(thermal) electron fields
+* free electron fields
 * cosmic ray electron fields
 
-Our code contains (or is benefit from) following packages:
+with support from following packages:
 
-* Hammurabi
-* YMW16
-* GARFIELDS
-* TinyXML2
-* PyMultiNest
+* [YMW16](https://bitbucket.org/psrsoft/ymw16)
+* [GARFIELDS](https://academic.oup.com/mnras/article-lookup/doi/10.1111/j.1365-2966.2008.13341.x)
+* [TinyXML2](https://github.com/leethomason/tinyxml2)
 
-Major improvements:
+with major improvements:
 
 * in c++11 std
-* XML as parameter file style
-* parameters handled collectively
-* memory and in/outputs handled collectively
-* apply Simpson's rule in line-of-sight integration
-* YMW16 regular free electron density field
-* divergence-free anisotropic random magnetic field generator
-* random free electron density field generator (need further development)
-* python wrapper/interface to DRAGON code (under development)
-* fully parallelized with MPI (under development)
+* XML style parameter file 
+* parameters, memory, and I/O handled collectively
+* apply Simpson's rule in integration
+* YMW16 regular free-electron field
+* divergence-free anisotropic turbulent magnetic field generator
+* turbulent free-electron field generator
 
-Dependencies:
+with package dependencies:
 
-* Healpix
-* FFTW3
-* CFITSIO
-* GSL
-* PyMultiNest
+* [Healpix](https://healpix.jpl.nasa.gov/)
+* [FFTW3](http://www.fftw.org/)
+* [CFITSIO](https://heasarc.gsfc.nasa.gov/fitsio/fitsio.html)
+* [GSL](https://www.gnu.org/software/gsl/)
+
+#### compiling:
+```
+$ cd [package root]
+$ make -f install/[makefile]
+```
+
+#### documentation:
+```
+$ cd [package root]
+$ make documentation -f install/[makefile]
+```
+
+#### running:
+```
+$ cd bin/
+$ ./hamx [paramfile]
+```
+remarks: we suggest users to compile without -DNDEBUG to verify pipeline, while run the code with -NDEBUG to save computing time.
+
+#### contact:
+*bug reports and code contributions are warmly welcomed,
+feel free to contact Jiaxin Wang, Tess Jaffe, and Torsten Ensslin*

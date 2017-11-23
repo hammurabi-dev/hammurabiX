@@ -1,0 +1,72 @@
+# EXTERNAL LIB
+GSL = /usr
+FFTW = /vol/optcoma/fftw-3.3.6
+CFITSIO = /usr
+HEALPIX = /vol/optcoma/Healpix_3.31/src/cxx/optimized_gcc
+
+# EXECUTABLE NAME
+EXE = hammurabi
+
+# COMPILER
+CXX = g++ -std=c++11
+
+# DEBUG FLAGS
+DEBUG = -g #-DNDEBUG
+
+# COMPILE OPTIONS
+CXXFLAGS = -m64 -O3 -fopenmp -Wall -fPIC -Wno-deprecated -pthread $(DEBUG)
+
+EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
+	-I$(HEALPIX)/include \
+	-I include -I.
+CXXFLAGS += $(EXT_INC)
+ 
+ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
+	-L$(HEALPIX)/lib \
+	-L lib -L. 
+LFLAGS = $(ALL_L) \
+	-lhammurabi \
+	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
+	-lgsl -lgslcblas -lm -lfftw3 -fopenmp
+
+# DEPENDENCIES
+OBJ += $(addprefix src/params/, pond.o)
+OBJ += $(addprefix src/grids/, grid.o grid_breg.o grid_brnd.o grid_cre.o grid_fereg.o grid_fernd.o grid_int.o)
+OBJ += $(addprefix src/fields/cre/, cre.o cre_ana.o cre_num.o cre_verify.o)
+OBJ += $(addprefix src/fields/fe/, fereg.o fereg_ymw16.o fereg_verify.o fernd.o fernd_iso.o)
+OBJ += $(addprefix src/fields/gmf/, breg.o breg_verify.o brnd.o brnd_anig.o brnd_anil.o brnd_iso.o breg_wmap.o breg_jaffe.o)
+OBJ += $(addprefix src/tools/, namespace_toolkit.o tinyxml2.o)
+OBJ += $(addprefix src/integrators/, integrator.o)
+
+HEADS = $(addprefix include/, *.h) 
+
+
+
+# RULES
+
+default: $(EXE)
+
+src/main/hammurabi.o: src/main/hammurabi.cc $(OBJ)
+
+$(EXE): $(OBJ) src/main/hammurabi.o lib/libhammurabi.a
+	rm -rf bin; mkdir bin
+	$(CXX) $^ -o bin/$(EXE) $(LFLAGS)
+	cp templates/* bin
+
+%.o: %.cc $(HEADS)
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
+
+
+lib/libhammurabi.a: $(OBJ) src/main/hammurabi.o
+	ar cr $@ $^
+
+help:
+	echo $(OBJ)
+
+.PHONY: clean
+clean:
+	rm lib/*.a src/main/*.o src/params/*.o src/grids/*.o src/fields/cre/*.o src/fields/fe/*.o src/fields/gmf/*.o src/integrators/*.o src/tools/*.o; rm -rf bin
+.PHONY: tar 
+tar:
+	tar cfv HamX.tar.gz AUTHROS COPYING include install lib readme.md src templates
+# END
