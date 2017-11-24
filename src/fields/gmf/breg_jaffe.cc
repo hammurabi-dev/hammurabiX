@@ -39,9 +39,8 @@ vec3_t<double> Breg_jaffe::breg(const vec3_t<double> &pos,Pond *par){
 
 vec3_t<double> Breg_jaffe::versor(const vec3_t<double> &pos,Pond *par){
     const double r {sqrt(pos.x*pos.x+pos.y*pos.y)}; // cylindrical frame
-    const double r_lim {par->breg_jaffe.ring_r + par->breg_jaffe.comp_d};
-    const double a_lim {par->breg_jaffe.bar_a + par->breg_jaffe.comp_d};
-    const double b_lim {par->breg_jaffe.bar_b + par->breg_jaffe.comp_d};
+    const double r_lim {par->breg_jaffe.ring_r};
+    const double bar_lim {par->breg_jaffe.bar_a + 0.5*par->breg_jaffe.comp_d};
     const double cos_p {cos(par->breg_jaffe.arm_pitch)}; const double sin_p {sin(par->breg_jaffe.arm_pitch)}; // pitch angle
     vec3_t<double> tmp {0,0,0}; double quadruple {1};
     if(r<0.5*CGS_U_kpc) // forbiden region
@@ -68,7 +67,7 @@ vec3_t<double> Breg_jaffe::versor(const vec3_t<double> &pos,Pond *par){
         const double x {cos_phi*pos.x-sin_phi*pos.y};
         const double y {sin_phi*pos.x+cos_phi*pos.y};
         // inside spiral arm
-        if(x*x/(a_lim*a_lim)+y*y/(b_lim*b_lim)>1){
+        if(r>bar_lim){
             tmp.x = (cos_p*(pos.y/r)-sin_p*(pos.x/r))*quadruple; //sin(t-p)
             tmp.y = (-cos_p*(pos.x/r)-sin_p*(pos.y/r))*quadruple; //-cos(t-p)
         }
@@ -148,11 +147,10 @@ vector<double> Breg_jaffe::arm_compress_dust(const vec3_t<double> &pos,Pond *par
 vector<double> Breg_jaffe::dist2arm(const vec3_t<double> &pos,Pond *par){
     vector<double> d;
     const double r {sqrt(pos.x*pos.x+pos.y*pos.y)};
-    const double r_lim {par->breg_jaffe.ring_r + par->breg_jaffe.comp_d};
-    const double a_lim {par->breg_jaffe.bar_a + par->breg_jaffe.comp_d};
-    const double b_lim {par->breg_jaffe.bar_b + par->breg_jaffe.comp_d};
+    const double r_lim {par->breg_jaffe.ring_r};
+    const double bar_lim {par->breg_jaffe.bar_a + 0.5*par->breg_jaffe.comp_d};
     const double cos_p {cos(par->breg_jaffe.arm_pitch)}; const double sin_p {sin(par->breg_jaffe.arm_pitch)}; // pitch angle
-    const double beta_inv {sin_p/cos_p};
+    const double beta_inv {-sin_p/cos_p};
     double theta {atan2(pos.y,pos.x)};
     if(theta<0) theta += 2*CGS_U_pi;
     // if molecular ring
@@ -177,12 +175,9 @@ vector<double> Breg_jaffe::dist2arm(const vec3_t<double> &pos,Pond *par){
     else if(par->breg_jaffe.bar){
         const double cos_tmp {cos(par->breg_jaffe.bar_phi0)*pos.x/r - sin(par->breg_jaffe.bar_phi0)*pos.y/r}; // cos(phi)cos(phi0) - sin(phi)sin(phi0)
         const double sin_tmp {cos(par->breg_jaffe.bar_phi0)*pos.y/r + sin(par->breg_jaffe.bar_phi0)*pos.x/r}; // sin(phi)cos(phi0) + cos(phi)sin(phi0)
-        const double inbar {a_lim*b_lim/sqrt(a_lim*a_lim*sin_tmp*sin_tmp+b_lim*b_lim*cos_tmp*cos_tmp)-r};
         // in bar, return single element vector
-        if(inbar>0){
-            // project radial distance to vertical distance
-            const double proj_factor {par->breg_jaffe.bar_a*par->breg_jaffe.bar_a*fabs(pos.y)/(par->breg_jaffe.bar_b*par->breg_jaffe.bar_b*fabs(pos.x)+par->breg_jaffe.bar_a*par->breg_jaffe.bar_a*fabs(pos.y))};
-            d.push_back(proj_factor*fabs(par->breg_jaffe.bar_a*par->breg_jaffe.bar_b/sqrt(par->breg_jaffe.bar_a*par->breg_jaffe.bar_a*sin_tmp*sin_tmp+par->breg_jaffe.bar_b*par->breg_jaffe.bar_b*cos_tmp*cos_tmp)-r));
+        if(r<bar_lim){
+            d.push_back(fabs(par->breg_jaffe.bar_a*par->breg_jaffe.bar_b/sqrt(par->breg_jaffe.bar_a*par->breg_jaffe.bar_a*sin_tmp*sin_tmp+par->breg_jaffe.bar_b*par->breg_jaffe.bar_b*cos_tmp*cos_tmp)-r));
         }
         // in spiral arm, return vector with arm_num elements
         else{

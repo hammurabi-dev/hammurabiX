@@ -66,22 +66,6 @@ void Grid_breg::export_grid(void){
         <<"NONEXIST FILE"<<endl;
         exit(1);
     }
-    /*
-     // interesting output for paraview
-    ofstream output;
-    output.open("breg.csv");
-    for(decltype(nx) i=0;i<nx;++i){
-        for(decltype(ny) j=0;j<ny;++j){
-            for(decltype(nz) k=0;k<nz;++k){
-                auto idx {toolkit::Index3d(nx,ny,nz,i,j,k)};
-                if(reg_b_x[idx]==0 and reg_b_y[idx]==0 and reg_b_z[idx]==0)
-                    continue;
-                output<<i<<","<<j<<","<<k<<","<<reg_b_x[idx]/CGS_U_muGauss<<","<<reg_b_y[idx]/CGS_U_muGauss<<","<<reg_b_z[idx]/CGS_U_muGauss<<endl;
-            }
-        }
-    }
-    output.close();
-    */
     ofstream output(filename.c_str(), std::ios::out|std::ios::binary);
     if (!output.is_open()){
         cerr<<"ERR:"<<__FILE__

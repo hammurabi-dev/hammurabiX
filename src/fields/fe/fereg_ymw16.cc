@@ -35,7 +35,7 @@ double FEreg_ymw16::density(const vec3_t<double> &pos, Pond *par){
         double WGN {0.};
         double WLI {0.};
         // longitude, in deg
-        const double ec_l {atan2(gc_pos.x,par->fereg_ymw16.R0-gc_pos.y)*180./CGS_U_pi};
+        const double ec_l {atan2(gc_pos.x,par->fereg_ymw16.R0-gc_pos.y)/CGS_U_rad};
         //call structure functions
         //since in YMW16, Fermi Bubble is not actually contributing, we ignore FB for thick disk
         NE[1] = thick(gc_pos.z,r_cyl,par);

@@ -4,18 +4,17 @@
 <!-- email, jiwang@sissa.it -->
 <!-- "cue", switches for usage -->
 <root>
-    
+    <!-- observable output -->
     <Output>
         <!-- Dispersion Measure -->
         <DM cue="1" filename="dm.fits"/>
         <!-- synchrotron dmission -->
         <!-- frequency @ GHz -->
         <Sync cue="1" freq="23" filename="iqu_sync_23.fits"/>
-        <!--<Sync cue="1" freq="2.4" filename="iqu_sync_2.4.fits"/>-->
+        <Sync cue="1" freq="1.4" filename="iqu_sync_1.4.fits"/>
         <!-- Faraday depth -->
         <Faraday cue="1" filename="fd.fits"/>
     </Output>
-    
     <!-- physical field grid in/out -->
     <!-- resolution defined in './Grid/Box' -->
     <!-- CRE field resolution defined in './CRE/Numeric' -->
@@ -32,14 +31,14 @@
         <cre_grid read="0" write="0" filename="cre.bin"/>
     </Interface>
     
-    <!-- main field grid -->
+    <!-- field & observable grid -->
     <Grid type="3D">
         <SunPosition>
             <x value="-8.3"/> <!-- kpc -->
             <y value="0"/> <!-- kpc -->
             <z value="6"/> <!-- pc -->
         </SunPosition>
-        
+        <!-- field grid -->
         <Box>
             <!-- grid vertex number -->
             <nx value="400"/>
@@ -56,14 +55,12 @@
         <!-- LOS integration setting -->
         <Integration>
             <shell type="auto">
-                <!-- default setting of shells -->
                 <auto>
                     <shell_num value="1"/> <!-- total shell number -->
                     <nside_min value="16"/> <!-- inner most shell resolution -->
                 </auto>
                 <!-- set shell resolution from inside out -->
-                <!-- total shell number calculated automatically -->
-                <manual>
+                <manual> <!-- total shell number calculated automatically -->
                     <nside value="32"/> <!-- inner most shell Nside -->
                     <nside value="16"/>
                 </manual>
@@ -89,10 +86,10 @@
             <Regular type="Jaffe">
                 <!-- WMAP LSA -->
                 <WMAP>
-                    <b0 value="2.0"/>
-                    <psi0 value="27.0"/>
-                    <psi1 value="0.9"/>
-                    <chi0 value="25.0"/>
+                    <b0 value="2.0"/> <!-- microG -->
+                    <psi0 value="27.0"/> <!-- deg -->
+                    <psi1 value="0.9"/> <!-- deg -->
+                    <chi0 value="25.0"/> <!-- deg -->
                 </WMAP>
                 <!-- Jaffe -->
                 <Jaffe>
@@ -108,10 +105,10 @@
                     <r_peak value="0"/> <!-- R peak, kpc -->
                     
                     <ring cue="0"/> <!-- molecular ring -->
-                    <ring_amp value="0.023"/> <!-- ring amplitude, microG -->
+                    <ring_amp value="0.023"/> <!-- ring field amplitude, microG -->
                     <ring_r value="5.0"/> <!-- ring radius, kpc -->
                     <bar cue="1"/> <!-- elliptical bar -->
-                    <bar_amp value="0.023"/> <!-- bar amplitude, microG -->
+                    <bar_amp value="0.023"/> <!-- bar field amplitude, microG -->
                     <bar_a value="5.0"/> <!-- major scale, kpc -->
                     <bar_b value="3.0"/> <!-- minor scale, kpc -->
                     <bar_phi0 value="45.0"/> <!-- bar major direction -->
@@ -123,7 +120,7 @@
                     <arm_phi2 value="160"/>
                     <arm_phi3 value="250"/>
                     <arm_phi4 value="340"/>
-                    <arm_amp1 value="2"/> <!-- arm amplitudes, microG -->
+                    <arm_amp1 value="2"/> <!-- arm field amplitudes, microG -->
                     <arm_amp2 value="0.133"/>
                     <arm_amp3 value="-3.78"/>
                     <arm_amp4 value="0.32"/>
@@ -136,13 +133,12 @@
                 </Jaffe>
                 <!-- verification -->
                 <Verify>
-                    <b0 value="2.0"/>
-                    <l0 value="70"/>
+                    <b0 value="2.0"/> <!-- microG -->
+                    <l0 value="70"/> <!-- deg -->
                     <r value="0.3"/>
                 </Verify>
             </Regular>
             <!-- turbulent fields -->
-            <!-- seed works for IMAGINE -->
             <Random cue="0" type="Anisolocal" seed="0">
                 <!-- isotropic -->
                 <Iso>
@@ -152,7 +148,7 @@
                 </Iso>
                 <!-- global anisotropy -->
                 <Anisoglob>
-                    <rho value="0.5"/>
+                    <rho value="0.5"/> <!-- [0,1] -->
                 </Anisoglob>
                 <!-- local turbulent -->
                 <Anisolocal>
@@ -180,9 +176,9 @@
                 <!-- YMW16 -->
                 <YMW16>
                     <Warp>
-                        <R_warp value="8.4"/>
-                        <Gamma_w value="0.14"/>
-                        <R0 value="8.3"/>
+                        <R_warp value="8.4"/> <!-- Galactic warp, kpc -->
+                        <Gamma_w value="0.14"/> <!-- warp ratio -->
+                        <R0 value="8.3"/> <!-- Sun radial position, kpc -->
                     </Warp>
                     <ThickDisk>
                         <Ad value="2500"/>
@@ -275,22 +271,23 @@
         <SpiralArms type="HH14">
             <!-- Hou & Han, A&A 569 A125 (2014), used in YMW16, R0=8.3 -->
             <HH14>
-                <NumArms value="5"/>
-                <R_1 value="3.35"/> <!-- Noma-Outer Arm, initial radius -->
-                <R_2 value="3.71"/> <!-- Peseus Arm -->
-                <R_3 value="3.56"/> <!-- Carina-Segittarius Arm -->
-                <R_4 value="3.67"/> <!-- Crux-Scutum Arm -->
-                <R_5 value="8.21"/> <!-- Local Arm -->
-                <phi_1 value="44.4"/> <!-- initial angles -->
-                <phi_2 value="120.0"/>
-                <phi_3 value="218.6"/>
-                <phi_4 value="330.3"/>
-                <phi_5 value="55.1"/>
-                <psi_1 value="11.43"/> <!-- pitch angles -->
-                <psi_2 value="9.84"/>
-                <psi_3 value="10.38"/>
-                <psi_4 value="10.64"/>
-                <psi_5 value="2.77"/>
+                <arm_num value="5"/>
+                <!-- initial radius, kpc -->
+                <arm_r1 value="3.35"/> <!-- Noma-Outer Arm -->
+                <arm_r2 value="3.71"/> <!-- Peseus Arm -->
+                <arm_r3 value="3.56"/> <!-- Carina-Segittarius Arm -->
+                <arm_r4 value="3.67"/> <!-- Crux-Scutum Arm -->
+                <arm_r5 value="8.21"/> <!-- Local Arm -->
+                <arm_phi1 value="44.4"/> <!-- initial angles, deg -->
+                <arm_phi2 value="120.0"/>
+                <arm_phi3 value="218.6"/>
+                <arm_phi4 value="330.3"/>
+                <arm_phi5 value="55.1"/>
+                <arm_psi1 value="11.43"/> <!-- pitch angles, deg -->
+                <arm_psi2 value="9.84"/>
+                <arm_psi3 value="10.38"/>
+                <arm_psi4 value="10.64"/>
+                <arm_psi5 value="2.77"/>
             </HH14>
         </SpiralArms>
     </Galaxy>
@@ -300,7 +297,7 @@
         <!-- verification -->
         <Verify>
             <alpha value="3.0"/>
-            <r0 value="3.0"/> <!-- kpc -->
+            <r0 value="3.0"/> <!-- cutoff radius, kpc -->
             <je value="0.25"/> <!-- local CRE flux norm factor @ 10GeV -->
         </Verify>
         
@@ -321,7 +318,7 @@
             <nx value="80"/> <!-- silent if type="2D" -->
             <ny value="80"/> <!-- silent if type="2D" -->
             
-            <!-- box limit, in Galactic-centric frame -->
+            <!-- grid setting -->
             <r_max value="20.0"/> <!-- kpc -->
             <x_min value="0.0"/> <!-- kpc -->
             <x_max value="0.0"/> <!-- kpc -->
