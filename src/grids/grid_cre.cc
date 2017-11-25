@@ -20,7 +20,7 @@ using namespace std;
 Grid_cre::Grid_cre(string file_name){
     unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
     doc->LoadFile(file_name.c_str());
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("cre_grid")};
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Fieldout")->FirstChildElement("cre_grid")};
     read_permission = ptr->BoolAttribute("read");
     write_permission = ptr->BoolAttribute("write");
     // security check

@@ -4,7 +4,7 @@
 #include <array>
 #include <cmath>
 
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "breg.h"
 #include "cgs_units_file.h"
@@ -13,7 +13,7 @@
 using namespace std;
 
 /* wmap-3yr */
-vec3_t<double> Breg_wmap::breg(const vec3_t<double> &pos,Pond *par){
+vec3_t<double> Breg_wmap::breg(const vec3_t<double> &pos,Param *par){
     vec3_t<double> b_vec3 {0.,0.,0.};
     const double r {sqrt(pos.x*pos.x + pos.y*pos.y)};
     if (r>(20.*CGS_U_kpc) or r<(3.*CGS_U_kpc )) {

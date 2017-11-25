@@ -17,14 +17,14 @@
 #include "integrator.h"
 #include "fereg.h"
 #include "fernd.h"
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "cgs_units_file.h"
 #include "namespace_toolkit.h"
 
 using namespace std;
 
-void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fereg *gfereg,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Pond *par) {
+void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fereg *gfereg,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Param *par) {
     // unsigned int, pre-calculated in gint
     size_t npix_sim {gint->npix_sim};
     if (gint->do_dm) {
@@ -137,7 +137,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
     }//end shell iteration
 }
 
-void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, struct_observables &pixobs,Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fereg *gfereg,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Pond *par) {
+void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, struct_observables &pixobs,Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fereg *gfereg,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Param *par) {
     // pass in fd, zero others
     double inner_shells_fd {0.};
     if (gint->do_fd or gint->do_sync) {inner_shells_fd=pixobs.fd;}

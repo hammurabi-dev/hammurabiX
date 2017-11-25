@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <memory>
 
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "integrator.h"
 #include "breg.h"
@@ -27,7 +27,7 @@ int main(int , char **argv) {
     
     string file_name {argv[1]};
     // BUILD SPECIFIED MODULES
-    unique_ptr<Pond> par = unique_ptr<Pond> (new Pond(file_name));
+    unique_ptr<Param> par = unique_ptr<Param> (new Param(file_name));
     unique_ptr<Grid_fereg> grid_fereg = unique_ptr<Grid_fereg> (new Grid_fereg(file_name));
     unique_ptr<Grid_breg> grid_breg = unique_ptr<Grid_breg> (new Grid_breg(file_name));
     unique_ptr<Grid_brnd> grid_brnd = unique_ptr<Grid_brnd> (new Grid_brnd(file_name));
@@ -47,7 +47,7 @@ int main(int , char **argv) {
     doc->LoadFile(file_name.c_str());
     
     // regular FE field
-    string fetype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Regular")->Attribute("type")};
+    string fetype {doc->FirstChildElement("root")->FirstChildElement("FreeElectron")->FirstChildElement("Regular")->Attribute("type")};
     // if import from file, no need to build specific fe class
     if(grid_fereg->read_permission){
         grid_fereg->import_grid();
@@ -74,7 +74,7 @@ int main(int , char **argv) {
     }
     
     // regular B field, must before random B field
-    string bregtype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Regular")->Attribute("type")};
+    string bregtype {doc->FirstChildElement("root")->FirstChildElement("MagneticField")->FirstChildElement("Regular")->Attribute("type")};
     if(grid_breg->read_permission){
         grid_breg->import_grid();
         breg = unique_ptr<Breg> (new Breg());
@@ -110,16 +110,16 @@ int main(int , char **argv) {
         grid_fernd->import_grid();
         fernd = unique_ptr<FErnd> (new FErnd());
     }
-    else if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->BoolAttribute("cue")){
-        string ferndtype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->Attribute("type")};
-        if(ferndtype=="Iso"){
+    else if(doc->FirstChildElement("root")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->BoolAttribute("cue")){
+        string ferndtype {doc->FirstChildElement("root")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->Attribute("type")};
+        if(ferndtype=="Global"){
 #ifndef NDEBUG
-            cout<<"INFO: USING ISOTROPIC RANDOM FE MODEL"<<endl;
+            cout<<"INFO: USING GLOBAL RANDOM FE MODEL"<<endl;
 #endif
             // non default constructor
-            fernd = unique_ptr<FErnd> (new FErnd_iso());
+            fernd = unique_ptr<FErnd> (new FErnd_global());
             // fill grid with random fields
-            fernd->write_grid_iso(par.get(),grid_fernd.get());
+            fernd->write_grid_global(par.get(),grid_fernd.get());
         }
         else{return EXIT_FAILURE;}
     }
@@ -139,31 +139,23 @@ int main(int , char **argv) {
         grid_brnd->import_grid();
         brnd = unique_ptr<Brnd> (new Brnd());
     }
-    else if(doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->BoolAttribute("cue")){
-        string brndtype {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")->Attribute("type")};
-        if(brndtype=="Iso"){
+    else if(doc->FirstChildElement("root")->FirstChildElement("MagneticField")->FirstChildElement("Random")->BoolAttribute("cue")){
+        string brndtype {doc->FirstChildElement("root")->FirstChildElement("MagneticField")->FirstChildElement("Random")->Attribute("type")};
+        if(brndtype=="Global"){
 #ifndef NDEBUG
-            cout<<"INFO: USING ISOTROPIC RANDOM B MODEL"<<endl;
+            cout<<"INFO: USING GLOBAL RANDOM B MODEL"<<endl;
 #endif
-            brnd = unique_ptr<Brnd> (new Brnd_iso());
+            brnd = unique_ptr<Brnd> (new Brnd_global());
             // fill grid with random fields
-            brnd->write_grid_iso(par.get(),grid_brnd.get());
+            brnd->write_grid(par.get(),breg.get(),grid_breg.get(),grid_brnd.get());
         }
-        else if(brndtype=="Anisoglob"){
+        else if(brndtype=="Local"){
 #ifndef NDEBUG
-            cout<<"INFO: USING GLOBAL ANISOTROPIC RANDOM B MODEL"<<endl;
+            cout<<"INFO: USING LOCAL RANDOM B MODEL"<<endl;
 #endif
-            brnd = unique_ptr<Brnd> (new Brnd_anig());
+            brnd = unique_ptr<Brnd> (new Brnd_local());
             // fill grid with random fields
-            brnd->write_grid_ani(par.get(),breg.get(),grid_breg.get(),grid_brnd.get());
-        }
-        else if(brndtype=="Anisolocal"){
-#ifndef NDEBUG
-            cout<<"INFO: USING LOCAL ANISOTROPIC RANDOM B MODEL"<<endl;
-#endif
-            brnd = unique_ptr<Brnd> (new Brnd_anil());
-            // fill grid with random fields
-            brnd->write_grid_ani(par.get(),breg.get(),grid_breg.get(),grid_brnd.get());
+            brnd->write_grid(par.get(),breg.get(),grid_breg.get(),grid_brnd.get());
         }
         else{return EXIT_FAILURE;}
         
@@ -221,8 +213,8 @@ int main(int , char **argv) {
     grid_int->export_grid();
     
     // INSERT MULTI_OUTPUT TAKEOVER LOOP
-    if (doc->FirstChildElement("root")->FirstChildElement("Output")->FirstChildElement("Sync")!=nullptr){
-        for(auto e = doc->FirstChildElement("root")->FirstChildElement("Output")->FirstChildElement("Sync")->NextSiblingElement("Sync");e!=NULL;e=e->NextSiblingElement("Sync")){
+    if (doc->FirstChildElement("root")->FirstChildElement("Obsout")->FirstChildElement("Sync")!=nullptr){
+        for(auto e = doc->FirstChildElement("root")->FirstChildElement("Obsout")->FirstChildElement("Sync")->NextSiblingElement("Sync");e!=NULL;e=e->NextSiblingElement("Sync")){
             // stop producing dm and fd
             grid_int->do_dm = false;
             grid_int->do_fd = false;

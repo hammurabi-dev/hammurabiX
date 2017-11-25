@@ -4,7 +4,7 @@
 #include <array>
 #include <cmath>
 
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "breg.h"
 #include "cgs_units_file.h"
@@ -12,7 +12,7 @@
 
 using namespace std;
 
-vec3_t<double> Breg::get_breg(const vec3_t<double> &pos, Pond *par, Grid_breg *grid){
+vec3_t<double> Breg::get_breg(const vec3_t<double> &pos, Param *par, Grid_breg *grid){
     if(grid->read_permission){
         return read_grid(pos,grid);
     }
@@ -21,7 +21,7 @@ vec3_t<double> Breg::get_breg(const vec3_t<double> &pos, Pond *par, Grid_breg *g
     }
 }
 
-vec3_t<double> Breg::breg(const vec3_t<double> &, Pond *){
+vec3_t<double> Breg::breg(const vec3_t<double> &, Param *){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -100,7 +100,7 @@ vec3_t<double> Breg::read_grid(const vec3_t<double> &pos, Grid_breg *grid){
     return b_vec3;
 }
 
-void Breg::write_grid(Pond *par, Grid_breg *grid){
+void Breg::write_grid(Param *par, Grid_breg *grid){
     if(!grid->write_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl

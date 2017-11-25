@@ -9,7 +9,7 @@
 #include <vec3.h>
 #include <vector>
 #include <gsl/gsl_integration.h>
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "cgs_units_file.h"
 #include "breg.h"
@@ -34,36 +34,37 @@ public:
     ///
     /// write field to grid (model dependent),
     /// user can \p export_grid to binary file with \p Grid_xxx::export_grid
-    ///
-    virtual void write_grid_iso(Pond *,Grid_brnd *);
-    ///
     /// for dynamic binding only, implemented in derived class
     ///
-    virtual void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *);
+    virtual void write_grid(Param *,Breg *,Grid_breg *,Grid_brnd *);
 };
 
 ///
-/// global isotropic turbulent GMF with strength rescaling
+/// global (an)isotropic turbulent GMF,
 ///
-class Brnd_iso : public Brnd{
+class Brnd_global final : public Brnd{
 public:
-    Brnd_iso(void) = default;
-    virtual ~Brnd_iso(void) = default;
+    Brnd_global(void) = default;
+    virtual ~Brnd_global(void) = default;
     vec3_t<double> get_brnd(const vec3_t<double> &,Grid_brnd *) override;
     ///
-    /// global isotropic generator, using triple Fourier transform scheme
+    /// triple Fourier transform scheme
     ///
-    void write_grid_iso(Pond *,Grid_brnd *) override;
+    void write_grid(Param *,Breg *,Grid_breg *,Grid_brnd *) override;
+    
+private:
     ///
     /// isotropic power-spectrum
     ///
-    virtual double b_spec(const double &,Pond *);
+    virtual double spec(const double &,Param *);
     ///
     /// field energy density rescaling factor
     ///
-    virtual double rescal_fact(const vec3_t<double> &,Pond *);
-    
-protected:
+    virtual double rescal(const vec3_t<double> &,Param *);
+    ///
+    /// anisotropy factor at given point
+    ///
+    double anisotropy(const vec3_t<double> &,vec3_t<double> &,Param *,Breg *,Grid_breg *);
     ///
     /// get real part of each element from a complex array
     ///
@@ -75,38 +76,18 @@ protected:
 };
 
 ///
-/// global anisotropic turbulent GMF,
-/// inheret isotropic spectrum and density rescaling from \p Brnd_iso class
-///
-class Brnd_anig final : public Brnd_iso{
-public:
-    Brnd_anig(void) = default;
-    virtual ~Brnd_anig(void) = default;
-    ///
-    /// triple Fourier transform scheme
-    ///
-    void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *) override;
-    
-private:
-    ///
-    /// anisotropy factor at given point
-    ///
-    double anisotropy(const vec3_t<double> &,vec3_t<double> &,Pond *,Breg *,Grid_breg *);
-};
-
-///
 /// local anisotropic turbulent GMF, in compressive MHD plasma
 ///
-class Brnd_anil final : public Brnd{
+class Brnd_local final : public Brnd{
 public:
-    Brnd_anil(void) = default;
-    virtual ~Brnd_anil(void) = default;
+    Brnd_local(void) = default;
+    virtual ~Brnd_local(void) = default;
     vec3_t<double> get_brnd(const vec3_t<double> &,Grid_brnd *) override;
     ///
     /// vector field decomposition scheme,
     /// using regular GMF at Sun position
     ///
-    void write_grid_ani(Pond *,Breg *,Grid_breg *,Grid_brnd *) override;
+    void write_grid(Param *,Breg *,Grid_breg *,Grid_brnd *) override;
     
 private:
     ///
@@ -146,15 +127,15 @@ private:
     ///
     /// isotropic part of power spectrum of Alfvenic mode
     ///
-    double speca(const double &,Pond *);
+    double speca(const double &,Param *);
     ///
     /// isotropic part of power spectrum of fast mode
     ///
-    double specf(const double &,Pond *);
+    double specf(const double &,Param *);
     ///
     /// isotropic part of power spectrum of slow mode
     ///
-    double specs(const double &,Pond *);
+    double specs(const double &,Param *);
     
     void complex2real(const fftw_complex *,double *,const std::size_t &);
 };

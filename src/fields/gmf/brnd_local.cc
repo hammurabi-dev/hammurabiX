@@ -8,7 +8,7 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_integration.h>
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "brnd.h"
 #include "breg.h"
@@ -17,13 +17,13 @@
 
 using namespace std;
 
-vec3_t<double> Brnd_anil::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
+vec3_t<double> Brnd_local::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
     // interpolate written grid to given position
     // check if you have called ::write_grid
     return read_grid(pos,grid);
 }
 
-void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
+void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
     // initialize random seed
     gsl_rng *r {gsl_rng_alloc(gsl_rng_taus)};
     gsl_rng_set(r, toolkit::random_seed(par->brnd_seed));
@@ -70,11 +70,11 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 if(ep.SquaredLength()!=0){
                     double ang {cosa(b,k)};
                     double Pa {speca(ks,par)*0.66666667 + (speca(ks+halfdk,par) + speca(ks-halfdk,par))*0.16666667};
-                    Pa *= fa(par->brnd_anil.ma,ang)*dk3;
+                    Pa *= fa(par->brnd_local.ma,ang)*dk3;
                     double Pf {specf(ks,par)*0.66666667 + (specf(ks+halfdk,par) + specf(ks-halfdk,par))*0.16666667};
-                    Pf *= hf(par->brnd_anil.beta,ang)*dk3;
+                    Pf *= hf(par->brnd_local.beta,ang)*dk3;
                     double Ps {specs(ks,par)*0.66666667 + (specs(ks+halfdk,par) + specs(ks-halfdk,par))*0.16666667};
-                    Ps *= fs(par->brnd_anil.ma,ang)*hs(par->brnd_anil.beta,ang)*dk3;
+                    Ps *= fs(par->brnd_local.ma,ang)*hs(par->brnd_local.beta,ang)*dk3;
                     // complex angle
                     const double angp = 2*CGS_U_pi*uniform_num[2*idx];
                     const double angm = 2*CGS_U_pi*uniform_num[2*idx+1];
@@ -89,7 +89,7 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 }
                 else{
                     double Pf {specf(ks,par)*0.66666667 + (specf(ks+halfdk,par) + specf(ks-halfdk,par))*0.16666667};
-                    Pf *= hf(par->brnd_anil.beta,1)*dk3;
+                    Pf *= hf(par->brnd_local.beta,1)*dk3;
                     if(i==0 and j==0){
                         ep.x = k.x;
                         em.y = k.y;
@@ -136,11 +136,11 @@ void Brnd_anil::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
 }
 
 // PRIVATE FUNCTIONS FOR LOW-BETA SUB-ALFVENIC PLASMA
-double Brnd_anil::cosa(const vec3_t<double> &b,const vec3_t<double> &k){
+double Brnd_local::cosa(const vec3_t<double> &b,const vec3_t<double> &k){
     return dotprod(toolkit::versor(b),toolkit::versor(k));
 }
 
-vec3_t<double> Brnd_anil::eplus(const vec3_t<double> &b,const vec3_t<double> &k){
+vec3_t<double> Brnd_local::eplus(const vec3_t<double> &b,const vec3_t<double> &k){
     vec3_t<double> tmp {crossprod(toolkit::versor(k),toolkit::versor(b))};
     if(tmp.Length()==0){
         return tmp;
@@ -150,7 +150,7 @@ vec3_t<double> Brnd_anil::eplus(const vec3_t<double> &b,const vec3_t<double> &k)
     }
 }
 
-vec3_t<double> Brnd_anil::eminus(const vec3_t<double> &b,const vec3_t<double> &k){
+vec3_t<double> Brnd_local::eminus(const vec3_t<double> &b,const vec3_t<double> &k){
     vec3_t<double> tmp {crossprod(crossprod(toolkit::versor(k),toolkit::versor(b)),toolkit::versor(k))};
     if(tmp.Length()==0){
         return tmp;
@@ -160,11 +160,11 @@ vec3_t<double> Brnd_anil::eminus(const vec3_t<double> &b,const vec3_t<double> &k
     }
 }
 
-double Brnd_anil::dynamo(const double &beta,const double &cosa){
+double Brnd_local::dynamo(const double &beta,const double &cosa){
     return (1+0.5*beta)*(1+0.5*beta) - 2.*beta*cosa*cosa;
 }
 
-double Brnd_anil::hs(const double &beta,const double &cosa){
+double Brnd_local::hs(const double &beta,const double &cosa){
     if(cosa==0){
         return 0;
     }
@@ -175,7 +175,7 @@ double Brnd_anil::hs(const double &beta,const double &cosa){
     }
 }
 
-double Brnd_anil::hf(const double &beta,const double &cosa){
+double Brnd_local::hf(const double &beta,const double &cosa){
     if(cosa==0){
         return 0;
     }
@@ -186,19 +186,19 @@ double Brnd_anil::hf(const double &beta,const double &cosa){
     }
 }
 
-double Brnd_anil::fa(const double &ma,const double &cosa){
+double Brnd_local::fa(const double &ma,const double &cosa){
     return exp( -pow(ma,-1.33333333)*cosa*cosa/pow(1-cosa*cosa,0.66666667) );
 }
 
-double Brnd_anil::fs(const double &ma,const double &cosa){
+double Brnd_local::fs(const double &ma,const double &cosa){
     return exp( -pow(ma,-1.33333333)*cosa*cosa/pow(1-cosa*cosa,0.66666667) );
 }
 
-double Brnd_anil::speca(const double &k,Pond *par){
+double Brnd_local::speca(const double &k,Param *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_anil.p0};
-    const double k0 {par->brnd_anil.k0};
-    const double a0 {par->brnd_anil.aa0};
+    const double p0 {par->brnd_local.p0};
+    const double k0 {par->brnd_local.k0};
+    const double a0 {par->brnd_local.aa0};
     const double unit = 1./(4*CGS_U_pi*k*k);
     // avoid nan
     if(k<=0.){
@@ -212,11 +212,11 @@ double Brnd_anil::speca(const double &k,Pond *par){
     return P*unit;
 }
 
-double Brnd_anil::specf(const double &k,Pond *par){
+double Brnd_local::specf(const double &k,Param *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_anil.p0*par->brnd_anil.rf};
-    const double k0 {par->brnd_anil.k0};
-    const double a0 {par->brnd_anil.af0};
+    const double p0 {par->brnd_local.p0*par->brnd_local.rf};
+    const double k0 {par->brnd_local.k0};
+    const double a0 {par->brnd_local.af0};
     const double unit = 1./(4*CGS_U_pi*k*k);
     // avoid nan
     if(k<=0.){
@@ -230,11 +230,11 @@ double Brnd_anil::specf(const double &k,Pond *par){
     return P*unit;
 }
 
-double Brnd_anil::specs(const double &k,Pond *par){
+double Brnd_local::specs(const double &k,Param *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_anil.p0*par->brnd_anil.rs};
-    const double k0 {par->brnd_anil.k0};
-    const double a0 {par->brnd_anil.as0};
+    const double p0 {par->brnd_local.p0*par->brnd_local.rs};
+    const double k0 {par->brnd_local.k0};
+    const double a0 {par->brnd_local.as0};
     const double unit = 1./(4*CGS_U_pi*k*k);
     // avoid nan
     if(k<=0.){
@@ -249,7 +249,7 @@ double Brnd_anil::specs(const double &k,Pond *par){
 }
 
 // get real components from fftw_complex arrays
-void Brnd_anil::complex2real(const fftw_complex *input,double *output,const std::size_t &size) {
+void Brnd_local::complex2real(const fftw_complex *input,double *output,const std::size_t &size) {
     for(std::size_t i=0;i!=size;++i){
         output[i] = input[i][0];
     }

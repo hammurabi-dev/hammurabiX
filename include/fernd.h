@@ -8,7 +8,7 @@
 #include <vec3.h>
 #include <vector>
 #include <gsl/gsl_integration.h>
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "cgs_units_file.h"
 #include "fereg.h"
@@ -25,31 +25,31 @@ public:
     ///
     virtual double get_fernd(const vec3_t<double> &,Grid_fernd *);
     virtual double read_grid(const vec3_t<double> &,Grid_fernd *);
-    virtual void write_grid_iso(Pond *,Grid_fernd *);
+    virtual void write_grid_global(Param *,Grid_fernd *);
 };
 
 ///
-/// isotropic turbulent field
+/// global turbulent field
 ///
-class FErnd_iso : public FErnd{
+class FErnd_global : public FErnd{
 public:
-    FErnd_iso(void) = default;
-    virtual ~FErnd_iso(void) = default;
+    FErnd_global(void) = default;
+    virtual ~FErnd_global(void) = default;
     double get_fernd(const vec3_t<double> &,Grid_fernd *) override;
     ///
     /// trivial Fourier transform, with rescaling applied in spatial space
     ///
-    void write_grid_iso(Pond *,Grid_fernd *) override;
+    void write_grid_global(Param *,Grid_fernd *) override;
+    
+protected:
     ///
     /// isotropic turubulent power spectrum
     ///
-    virtual double fe_spec(const double &,Pond *);
+    virtual double spec(const double &,Param *);
     ///
     /// density variance rescaling factor
     ///
-    virtual double rescal_fact(const vec3_t<double> &,Pond *);
-    
-protected:
+    virtual double rescal(const vec3_t<double> &,Param *);
     void complex2real(const fftw_complex *,double *,const std::size_t &);
 };
 

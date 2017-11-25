@@ -8,7 +8,7 @@
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_integration.h>
 #include "cre.h"
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "cgs_units_file.h"
 #include "namespace_toolkit.h"
@@ -134,7 +134,7 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
 }
 
 // J_tot(\nu)
-double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Pond *par,Grid_cre *grid,const double &Bper){
+double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
     double J {0.};
 #ifndef NDEBUG
     if(!grid->read_permission){
@@ -185,7 +185,7 @@ double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Pond *par,Grid_cre *g
 }
 
 // J_pol(\nu)
-double CRE_num::get_emissivity_p(const vec3_t<double> &pos,Pond *par,Grid_cre *grid,const double &Bper){
+double CRE_num::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
     double J {0.};
 #ifndef NDEBUG
     if(!grid->read_permission){

@@ -21,11 +21,11 @@ using namespace std;
 Grid_fernd::Grid_fernd(string file_name){
     unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
     doc->LoadFile(file_name.c_str());
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")->FirstChildElement("Random")};
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("FreeElectron")->FirstChildElement("Random")};
     build_permission = ptr->BoolAttribute("cue");
     // sometimes users don't want to write out random field
     // but generation of random field needs grid
-    ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("fernd_grid");
+    ptr = doc->FirstChildElement("root")->FirstChildElement("Fieldout")->FirstChildElement("fernd_grid");
     read_permission = ptr->BoolAttribute("read");
     write_permission = ptr->BoolAttribute("write");
     if(build_permission or read_permission){

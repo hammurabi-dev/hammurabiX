@@ -7,7 +7,7 @@
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_integration.h>
 #include "cre.h"
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "cgs_units_file.h"
 #include "namespace_toolkit.h"
@@ -17,7 +17,7 @@ using namespace std;
 // analytical CRE flux
 // give values to spectral index and norm factor, in cgs units
 // analytical CRE integration use N(\gamma)
-void CRE_verify::flux_param(const vec3_t<double> &/*pos*/,Pond *par,double &index,double &norm){
+void CRE_verify::flux_param(const vec3_t<double> &/*pos*/,Param *par,double &index,double &norm){
     // units
     const double alpha {par->cre_verify.alpha};
     // je is in [GeV m^2 s sr]^-1 units
@@ -33,7 +33,7 @@ void CRE_verify::flux_param(const vec3_t<double> &/*pos*/,Pond *par,double &inde
 
 // analytical modeling use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
-double CRE_verify::flux(const vec3_t<double> &pos,Pond *par,const double &En){
+double CRE_verify::flux(const vec3_t<double> &pos,Param *par,const double &En){
     if((pos-par->SunPosition).Length() > par->cre_verify.r0){
         return 0.;
     }
@@ -50,7 +50,7 @@ double CRE_verify::flux(const vec3_t<double> &pos,Pond *par,const double &En){
 }
 
 // J_tot(\nu)
-double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Pond *par,Grid_cre *grid,const double &Bper){
+double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
 #ifndef NDEBUG
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
@@ -80,7 +80,7 @@ double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Pond *par,Grid_cre
 }
 
 // J_pol(\nu)
-double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,Pond *par,Grid_cre *grid,const double &Bper){
+double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
 #ifndef NDEBUG
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
@@ -110,7 +110,7 @@ double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,Pond *par,Grid_cre
 }
 
 // writing out CRE DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
-void CRE_verify::write_grid(Pond *par, Grid_cre *grid){
+void CRE_verify::write_grid(Param *par, Grid_cre *grid){
 #ifndef NDEBUG
     if(!grid->write_permission){
         cerr<<"ERR:"<<__FILE__

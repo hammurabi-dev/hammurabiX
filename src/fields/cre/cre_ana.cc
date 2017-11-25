@@ -7,7 +7,7 @@
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_integration.h>
 #include "cre.h"
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "cgs_units_file.h"
 #include "namespace_toolkit.h"
@@ -17,7 +17,7 @@ using namespace std;
 // analytical CRE flux
 // give values to spectral index and norm factor, in cgs units
 // analytical CRE integration use N(\gamma)
-void CRE_ana::flux_param(const vec3_t<double> &pos,Pond *par,double &index,double &norm){
+void CRE_ana::flux_param(const vec3_t<double> &pos,Param *par,double &index,double &norm){
     // units
     const double alpha {par->cre_ana.alpha};
     const double beta {par->cre_ana.beta};
@@ -44,7 +44,7 @@ void CRE_ana::flux_param(const vec3_t<double> &pos,Pond *par,double &index,doubl
 
 // analytical modeling use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
-double CRE_ana::flux(const vec3_t<double> &pos,Pond *par,const double &En){
+double CRE_ana::flux(const vec3_t<double> &pos,Param *par,const double &En){
     // units
     const double alpha {par->cre_ana.alpha};
     const double beta {par->cre_ana.beta};
@@ -69,7 +69,7 @@ double CRE_ana::flux(const vec3_t<double> &pos,Pond *par,const double &En){
 }
 
 // J_tot(\nu)
-double CRE_ana::get_emissivity_t(const vec3_t<double> &pos,Pond *par,Grid_cre *grid,const double &Bper){
+double CRE_ana::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
 #ifndef NDEBUG
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
@@ -96,7 +96,7 @@ double CRE_ana::get_emissivity_t(const vec3_t<double> &pos,Pond *par,Grid_cre *g
 }
 
 // J_pol(\nu)
-double CRE_ana::get_emissivity_p(const vec3_t<double> &pos,Pond *par,Grid_cre *grid,const double &Bper){
+double CRE_ana::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
 #ifndef NDEBUG
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
@@ -123,7 +123,7 @@ double CRE_ana::get_emissivity_p(const vec3_t<double> &pos,Pond *par,Grid_cre *g
 }
 
 // writing out CRE DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
-void CRE_ana::write_grid(Pond *par, Grid_cre *grid){
+void CRE_ana::write_grid(Param *par, Grid_cre *grid){
 #ifndef NDEBUG
     if(!grid->write_permission){
         cerr<<"ERR:"<<__FILE__

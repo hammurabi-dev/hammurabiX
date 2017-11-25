@@ -8,7 +8,7 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_integration.h>
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "brnd.h"
 #include "breg.h"
@@ -17,15 +17,73 @@
 
 using namespace std;
 
+vec3_t<double> Brnd_global::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
+    // interpolate written grid to given position
+    // check if you have called ::write_grid
+    return read_grid(pos,grid);
+}
+
 // global anisotropic turbulent field
-double Brnd_anig::anisotropy(const vec3_t<double> &pos,vec3_t<double> &H,Pond *par,Breg *breg,Grid_breg *gbreg){
+double Brnd_global::anisotropy(const vec3_t<double> &pos,vec3_t<double> &H,Param *par,Breg *breg,Grid_breg *gbreg){
     // H, direction of anisotropy
     H = toolkit::versor(breg->get_breg(pos,par,gbreg));
     // the simplest case, const.
-    return par->brnd_anig.rho;
+    return par->brnd_global.rho;
 }
 
-void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
+// since we are using rms normalization
+// p0 is hidden and not affecting anything
+double Brnd_global::spec(const double &k, Param *par){
+    //units fixing, wave vector in 1/kpc units
+    const double p0 {par->brnd_global.rms*CGS_U_muGauss};
+    const double k0 {par->brnd_global.k0};
+    const double a0 {par->brnd_global.a0};
+    const double unit = 1./(4*CGS_U_pi*k*k);
+    // avoid nan
+    if(k<=0.){
+        return 0.;
+    }
+    // power law
+    double P{0.};
+    if(k>k0){
+        P = p0/pow(k/k0,a0);
+    }
+    return P*unit;
+}
+
+// galactic scaling of random field energy density
+// set to 1 at observer's place
+double Brnd_global::rescal(const vec3_t<double> &pos, Param *par){
+    const double r_cyl {sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x)};
+    const double z {fabs(pos.z) - fabs(par->SunPosition.z)};
+    const double r0 {par->brnd_global.r0};
+    const double z0 {par->brnd_global.z0};
+    return exp(-r_cyl/r0)*exp(-z/z0);
+}
+
+// Gram-Schimdt, rewritten using Healpix vec3 library
+// tiny error caused by machine is inevitable
+vec3_t<double> Brnd_global::gramschmidt(const vec3_t<double> &k,const vec3_t<double> &b){
+    if(k.Length()==0 or b.Length()==0){
+        return vec3_t<double> {0,0,0};
+    }
+    const double inv_k_mod = 1./k.SquaredLength();
+    vec3_t<double> b_free {b.x - k.x*dotprod(k,b)*inv_k_mod,
+        b.y - k.y*dotprod(k,b)*inv_k_mod,
+        b.z - k.z*dotprod(k,b)*inv_k_mod};
+    
+    b_free = toolkit::versor(b_free)*b.Length();
+    return b_free;
+}
+
+// get real components from fftw_complex arrays
+void Brnd_global::complex2real(const fftw_complex *input,double *output,const std::size_t &size) {
+    for(std::size_t i=0;i!=size;++i){
+        output[i] = input[i][0];
+    }
+}
+
+void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
     // PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
     // initialize random seed
@@ -58,9 +116,9 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 if(l>=grid->nz/2) kz -= CGS_U_kpc*grid->nz/lz;
                 const double k {sqrt(kx*kx + ky*ky + kz*kz)};
                 // simpson's rule
-                double element {b_spec(k,par)*0.66666667};
-                element += b_spec(k+halfdk,par)*0.16666667;
-                element += b_spec(k-halfdk,par)*0.16666667;
+                double element {spec(k,par)*0.66666667};
+                element += spec(k+halfdk,par)*0.16666667;
+                element += spec(k-halfdk,par)*0.16666667;
                 // amplitude, dividing by two because equal allocation to Re and Im parts
                 const double sigma {sqrt(0.5*element*dk3)};
                 grid->fftw_b_kx[idx][0] = sigma*gaussian_num[6*idx];
@@ -96,7 +154,7 @@ void Brnd_anig::write_grid_ani(Pond *par, Breg *breg, Grid_breg *gbreg, Grid_brn
                 // get physical position
                 pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
-                double ratio {sqrt(rescal_fact(pos,par))*par->brnd_iso.rms/sqrt(3.*b_var)};
+                double ratio {sqrt(rescal(pos,par))*par->brnd_global.rms/sqrt(3.*b_var)};
                 // assemble b_Re and b_Im
                 std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 vec3_t<double> b_re {grid->fftw_b_kx[idx][0]*ratio,grid->fftw_b_ky[idx][0]*ratio,grid->fftw_b_kz[idx][0]*ratio};

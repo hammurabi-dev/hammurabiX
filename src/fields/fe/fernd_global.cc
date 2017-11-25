@@ -7,7 +7,7 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_integration.h>
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "fernd.h"
 #include "fereg.h"
@@ -17,7 +17,7 @@
 using namespace std;
 
 // isotropic turbulent field
-double FErnd_iso::get_fernd(const vec3_t<double> &pos, Grid_fernd *grid){
+double FErnd_global::get_fernd(const vec3_t<double> &pos, Grid_fernd *grid){
     // interpolate written grid to given position
     // check if you have called ::write_grid
     return read_grid(pos,grid);
@@ -25,11 +25,11 @@ double FErnd_iso::get_fernd(const vec3_t<double> &pos, Grid_fernd *grid){
 
 // since we are using rms normalization
 // p0 is hidden and not affecting anything
-double FErnd_iso::fe_spec(const double &k, Pond *par){
+double FErnd_global::spec(const double &k, Param *par){
     //units fixing
-    const double p0 {par->fernd_iso.rms}; //pccm
-    const double k0 {par->fernd_iso.k0};
-    const double a0 {par->fernd_iso.a0};
+    const double p0 {par->fernd_global.rms}; //pccm
+    const double k0 {par->fernd_global.k0};
+    const double a0 {par->fernd_global.a0};
     const double unit = 1./(4*CGS_U_pi*k*k);
     // avoid nan
     if(k<=0.){
@@ -44,18 +44,15 @@ double FErnd_iso::fe_spec(const double &k, Pond *par){
 
 // galactic scaling of random field energy density
 // set to 1 at observer's place
-double FErnd_iso::rescal_fact(const vec3_t<double> &pos, Pond *par){
+double FErnd_global::rescal(const vec3_t<double> &pos, Param *par){
     const double r_cyl {sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x)};
     const double z {fabs(pos.z) - fabs(par->SunPosition.z)};
-    const double r0 {par->fernd_scal.r0};
-    const double z0 {par->fernd_scal.z0};
-    if(r_cyl==0 or z==0) {return 1.;}
-    else{
-        return exp(-r_cyl/r0)*exp(-z/z0);
-    }
+    const double r0 {par->fernd_global.r0};
+    const double z0 {par->fernd_global.z0};
+    return exp(-r_cyl/r0)*exp(-z/z0);
 }
 
-void FErnd_iso::write_grid_iso(Pond *par, Grid_fernd *grid){
+void FErnd_global::write_grid_global(Param *par, Grid_fernd *grid){
     //PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
     // initialize random seed
@@ -83,9 +80,9 @@ void FErnd_iso::write_grid_iso(Pond *par, Grid_fernd *grid){
                 const double k {sqrt(kx*kx + ky*ky + kz*kz)};
                 
                 // simpson's rule
-                double element {2.*fe_spec(k,par)/3.};
-                element += fe_spec(k+halfdk,par)/6.;
-                element += fe_spec(k-halfdk,par)/6.;
+                double element {2.*spec(k,par)/3.};
+                element += spec(k+halfdk,par)/6.;
+                element += spec(k-halfdk,par)/6.;
                 // amplitude, dividing by two because equal allocation to Re and Im parts
                 const double sigma {sqrt(0.5*element*dk3)};
 #pragma omp ordered
@@ -114,7 +111,7 @@ void FErnd_iso::write_grid_iso(Pond *par, Grid_fernd *grid){
                 // get physical position
                 pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
-                double ratio {sqrt(rescal_fact(pos,par))*par->fernd_iso.rms/sqrt(fe_var)};
+                double ratio {sqrt(rescal(pos,par))*par->fernd_global.rms/sqrt(fe_var)};
                 std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 grid->fftw_fe_k[idx][0] *= ratio;
             }
@@ -126,7 +123,7 @@ void FErnd_iso::write_grid_iso(Pond *par, Grid_fernd *grid){
 
 
 // get real components from fftw_complex arrays
-void FErnd_iso::complex2real(const fftw_complex *input,double *output,const std::size_t &size) {
+void FErnd_global::complex2real(const fftw_complex *input,double *output,const std::size_t &size) {
     for(std::size_t i=0;i!=size;++i){
         output[i] = input[i][0];
     }

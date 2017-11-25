@@ -34,11 +34,11 @@ LFLAGS = $(ALL_L) \
 	-lgsl -lgslcblas -lm -lfftw3 -fopenmp
 
 # DEPENDENCIES
-OBJ += $(addprefix src/params/, pond.o)
+OBJ += $(addprefix src/params/, param.o)
 OBJ += $(addprefix src/grids/, grid.o grid_breg.o grid_brnd.o grid_cre.o grid_fereg.o grid_fernd.o grid_int.o)
 OBJ += $(addprefix src/fields/cre/, cre.o cre_ana.o cre_num.o cre_verify.o)
-OBJ += $(addprefix src/fields/fe/, fereg.o fereg_ymw16.o fereg_verify.o fernd.o fernd_iso.o)
-OBJ += $(addprefix src/fields/gmf/, breg.o breg_verify.o brnd.o brnd_anig.o brnd_anil.o brnd_iso.o breg_wmap.o breg_jaffe.o)
+OBJ += $(addprefix src/fields/fe/, fereg.o fereg_ymw16.o fereg_verify.o fernd.o fernd_global.o)
+OBJ += $(addprefix src/fields/gmf/, breg.o breg_verify.o brnd.o brnd_global.o brnd_local.o breg_wmap.o breg_jaffe.o)
 OBJ += $(addprefix src/tools/, namespace_toolkit.o tinyxml2.o)
 OBJ += $(addprefix src/integrators/, integrator.o)
 

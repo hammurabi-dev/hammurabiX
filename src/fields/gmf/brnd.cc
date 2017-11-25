@@ -8,7 +8,7 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_integration.h>
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "brnd.h"
 #include "breg.h"
@@ -102,16 +102,7 @@ vec3_t<double> Brnd::read_grid(const vec3_t<double> &pos, Grid_brnd *grid){
     return b_vec3;
 }
 
-// base class does not write out to grid
-void Brnd::write_grid_iso(Pond *,Grid_brnd *){
-    cerr<<"WAR:"<<__FILE__
-    <<" : in function "<<__func__<<endl
-    <<" at line "<<__LINE__<<endl
-    <<"DYNAMIC BINDING FAILURE"<<endl;
-    exit(1);
-}
-
-void Brnd::write_grid_ani(Pond *, Breg *, Grid_breg *, Grid_brnd *){
+void Brnd::write_grid(Param *, Breg *, Grid_breg *, Grid_brnd *){
     cerr<<"WAR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl

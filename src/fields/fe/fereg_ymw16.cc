@@ -7,7 +7,7 @@
 #include <string>
 #include <fstream>
 #include "fereg.h"
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "namespace_toolkit.h"
 #include "cgs_units_file.h"
@@ -15,7 +15,7 @@
 using namespace std;
 
 // YMW16
-double FEreg_ymw16::density(const vec3_t<double> &pos, Pond *par){
+double FEreg_ymw16::density(const vec3_t<double> &pos, Param *par){
     // YMW16 using a different Cartesian frame from our default one
     vec3_t<double> gc_pos {pos.y,-pos.x,pos.z};
     // sylindrical r
@@ -68,7 +68,7 @@ double FEreg_ymw16::density(const vec3_t<double> &pos, Pond *par){
     
 }
 // thick disk
-double FEreg_ymw16::thick(const double &zz, const double &rr, Pond *par){
+double FEreg_ymw16::thick(const double &zz, const double &rr, Param *par){
     double gd {1.};
     if(rr>par->fereg_ymw16.t1_Bd){
         gd = pow(1/cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2);
@@ -76,7 +76,7 @@ double FEreg_ymw16::thick(const double &zz, const double &rr, Pond *par){
     return par->fereg_ymw16.t1_n1*gd*pow(1/cosh(zz/par->fereg_ymw16.t1_H1),2);
 }
 // thin disk
-double FEreg_ymw16::thin(const double &zz,const double &rr, Pond *par){
+double FEreg_ymw16::thin(const double &zz,const double &rr, Param *par){
     double gd {1.};
     if(rr>par->fereg_ymw16.t1_Bd){
         gd = pow(1/cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2);
@@ -86,7 +86,7 @@ double FEreg_ymw16::thin(const double &zz,const double &rr, Pond *par){
     return par->fereg_ymw16.t2_n2*gd*pow(1/cosh((rr-par->fereg_ymw16.t2_B2)/par->fereg_ymw16.t2_A2),2)*pow(1/cosh(zz/H),2);
 }
 // spiral arms
-double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,const double &rr,Pond *par){
+double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,const double &rr,Param *par){
     double detrr {1e10*CGS_U_pc};
     double armr, armr1, armr2, smin;
     
@@ -195,7 +195,7 @@ double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,co
     return ne3s;
 }
 // galactic center
-double FEreg_ymw16::galcen(const double &xx,const double &yy,const double &zz,Pond *par){
+double FEreg_ymw16::galcen(const double &xx,const double &yy,const double &zz,Param *par){
     //pos of center
     const double Xgc {50.*CGS_U_pc};
     const double Ygc {0.};
@@ -207,7 +207,7 @@ double FEreg_ymw16::galcen(const double &xx,const double &yy,const double &zz,Po
     return par->fereg_ymw16.t4_ngc*Ar*Az;
 }
 // gum nebula
-double FEreg_ymw16::gum(const double &xx,const double &yy,const double &zz,Pond *par){
+double FEreg_ymw16::gum(const double &xx,const double &yy,const double &zz,Param *par){
     double Dmin {1e5*CGS_U_pc};
     //center of Gum Nebula
     const double lc {264.*CGS_U_rad};
@@ -229,7 +229,7 @@ double FEreg_ymw16::gum(const double &xx,const double &yy,const double &zz,Pond 
     return par->fereg_ymw16.t5_ngn*exp(-pow(Dmin/par->fereg_ymw16.t5_Wgn,2));
 }
 // local bubble
-double FEreg_ymw16::localbubble(const double &xx,const double &yy,const double &zz,const double &ll,const double &Rlb,Pond *par){
+double FEreg_ymw16::localbubble(const double &xx,const double &yy,const double &zz,const double &ll,const double &Rlb,Param *par){
     // r_LB in ref
     const double rLB {sqrt(pow(((yy-8.34*CGS_U_kpc)*0.94-0.34*zz),2)+pow(xx,2))};
     // l-l_LB1 in ref
@@ -242,7 +242,7 @@ double FEreg_ymw16::localbubble(const double &xx,const double &yy,const double &
     return nelb1+nelb2;
 }
 // north spur
-double FEreg_ymw16::nps(const double &xx,const double &yy,const double &zz,Pond *par){
+double FEreg_ymw16::nps(const double &xx,const double &yy,const double &zz,Param *par){
     const double theta_LI {(par->fereg_ymw16.t7_thetaLI)*CGS_U_rad};
     const double x_c {-10.156*CGS_U_pc};
     const double y_c {8106.207*CGS_U_pc};

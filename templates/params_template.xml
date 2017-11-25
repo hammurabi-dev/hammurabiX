@@ -5,7 +5,7 @@
 <!-- "cue", switches for usage -->
 <root>
     <!-- observable output -->
-    <Output>
+    <Obsout>
         <!-- Dispersion Measure -->
         <DM cue="1" filename="dm.fits"/>
         <!-- synchrotron dmission -->
@@ -14,11 +14,11 @@
         <Sync cue="1" freq="1.4" filename="iqu_sync_1.4.fits"/>
         <!-- Faraday depth -->
         <Faraday cue="1" filename="fd.fits"/>
-    </Output>
+    </Obsout>
     <!-- physical field grid in/out -->
     <!-- resolution defined in './Grid/Box' -->
     <!-- CRE field resolution defined in './CRE/Numeric' -->
-    <Interface>
+    <Fieldout>
         <!-- regular magnetic field -->
         <breg_grid read="0" write="0" filename="breg.bin"/>
         <!-- turbulent magnetic field -->
@@ -29,10 +29,10 @@
         <fernd_grid read="0" write="0" filename="fernd.bin"/>
         <!-- cosmic ray electron field -->
         <cre_grid read="0" write="0" filename="cre.bin"/>
-    </Interface>
+    </Fieldout>
     
     <!-- field & observable grid -->
-    <Grid type="3D">
+    <Grid>
         <SunPosition>
             <x value="-8.3"/> <!-- kpc -->
             <y value="0"/> <!-- kpc -->
@@ -72,235 +72,202 @@
             <!-- maximum height in galactic centric frame -->
             <gc_z_max value="10.0"/> <!-- kpc -->
             <!-- radial resolution -->
-            <ec_r_res value="0.01"/> <!-- kpc -->
+            <ec_r_res value="0.1"/> <!-- kpc -->
             <!-- galactic latitude lower limit -->
             <lat_lim value="0."/> <!-- [0,90] -->
         </Integration>
     </Grid>
     
-    <!-- galaxy settings -->
-    <Galaxy>
-        <!-- magnetic fields -->
-        <MagneticField>
-            <!-- regular fields -->
-            <Regular type="Jaffe">
-                <!-- WMAP LSA -->
-                <WMAP>
-                    <b0 value="2.0"/> <!-- microG -->
-                    <psi0 value="27.0"/> <!-- deg -->
-                    <psi1 value="0.9"/> <!-- deg -->
-                    <chi0 value="25.0"/> <!-- deg -->
-                </WMAP>
-                <!-- Jaffe -->
-                <Jaffe>
-                    <quadruple cue="0"/> <!-- quadruple pattern in halo -->
-                    <bss cue="0"/> <!-- bi-symmetric -->
-                    
-                    <disk_amp value="0.167"/> <!-- disk amplitude, microG -->
-                    <disk_z0 value="0.1"/> <!-- disk height scale, kpc -->
-                    <halo_amp value="1.38"/> <!-- halo amplitude, microG -->
-                    <halo_z0 value="3.0"/> <!-- halo height scale, kpc -->
-                    <r_inner value="0.5"/> <!-- inner R scale, kpc -->
-                    <r_scale value="20"/> <!-- R scale, kpc -->
-                    <r_peak value="0"/> <!-- R peak, kpc -->
-                    
-                    <ring cue="0"/> <!-- molecular ring -->
-                    <ring_amp value="0.023"/> <!-- ring field amplitude, microG -->
-                    <ring_r value="5.0"/> <!-- ring radius, kpc -->
-                    <bar cue="1"/> <!-- elliptical bar -->
-                    <bar_amp value="0.023"/> <!-- bar field amplitude, microG -->
-                    <bar_a value="5.0"/> <!-- major scale, kpc -->
-                    <bar_b value="3.0"/> <!-- minor scale, kpc -->
-                    <bar_phi0 value="45.0"/> <!-- bar major direction -->
-                    
-                    <arm_num value="4"/> <!-- spiral arms -->
-                    <arm_r0 value="7.1"/> <!-- arm ref radius -->
-                    <arm_z0 value="0.1"/> <!-- arm heigth scale, kpc -->
-                    <arm_phi1 value="70"/> <!-- arm ref angles, deg -->
-                    <arm_phi2 value="160"/>
-                    <arm_phi3 value="250"/>
-                    <arm_phi4 value="340"/>
-                    <arm_amp1 value="2"/> <!-- arm field amplitudes, microG -->
-                    <arm_amp2 value="0.133"/>
-                    <arm_amp3 value="-3.78"/>
-                    <arm_amp4 value="0.32"/>
-                    <arm_pitch value="11.5"/> <!-- pitch angle, deg -->
-                    
-                    <comp_c value="0.5"/> <!-- compress factor -->
-                    <comp_d value="0.3"/> <!-- arm cross-sec scale, kpc -->
-                    <comp_r value="12"/> <!-- radial cutoff scale, kpc -->
-                    <comp_p value="3"/> <!-- cutoff power -->
-                </Jaffe>
-                <!-- verification -->
-                <Verify>
-                    <b0 value="2.0"/> <!-- microG -->
-                    <l0 value="70"/> <!-- deg -->
-                    <r value="0.3"/>
-                </Verify>
-            </Regular>
-            <!-- turbulent fields -->
-            <Random cue="0" type="Anisolocal" seed="0">
-                <!-- isotropic -->
-                <Iso>
-                    <rms value="1"/> <!-- RMS at k0 -->
-                    <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
-                    <a0 value="1.7"/> <!-- 5/3, Kolmogorov -->
-                </Iso>
-                <!-- global anisotropy -->
-                <Anisoglob>
-                    <rho value="0.5"/> <!-- [0,1] -->
-                </Anisoglob>
-                <!-- local turbulent -->
-                <Anisolocal>
-                    <p0  value="1"/> <!-- Alfven power norm at k0 -->
-                    <rf value="1.0"/> <!-- fast to Alfven ratio -->
-                    <rs value="1.0"/> <!-- slow to Alfven ratio -->
-                    <aa0 value="1.7"/> <!-- Kolmogorov -->
-                    <af0 value="1.5"/>
-                    <as0 value="1.7"/>
-                    <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
-                    <beta value="0.1"/> <!-- plasma beta -->
-                    <ma value="0.5"/> <!-- Alfven Mach number -->
-                </Anisolocal>
+    <!-- magnetic fields -->
+    <MagneticField>
+        <!-- regular fields -->
+        <Regular type="WMAP">
+            <!-- WMAP LSA -->
+            <WMAP>
+                <b0 value="2.0"/> <!-- microG -->
+                <psi0 value="27.0"/> <!-- deg -->
+                <psi1 value="0.9"/> <!-- deg -->
+                <chi0 value="25.0"/> <!-- deg -->
+            </WMAP>
+            <!-- Jaffe -->
+            <Jaffe>
+                <quadruple cue="0"/> <!-- quadruple pattern in halo -->
+                <bss cue="0"/> <!-- bi-symmetric -->
+                
+                <disk_amp value="0.167"/> <!-- disk amplitude, microG -->
+                <disk_z0 value="0.1"/> <!-- disk height scale, kpc -->
+                <halo_amp value="1.38"/> <!-- halo amplitude, microG -->
+                <halo_z0 value="3.0"/> <!-- halo height scale, kpc -->
+                <r_inner value="0.5"/> <!-- inner R scale, kpc -->
+                <r_scale value="20"/> <!-- R scale, kpc -->
+                <r_peak value="0"/> <!-- R peak, kpc -->
+                
+                <ring cue="0"/> <!-- molecular ring -->
+                <bar cue="1"/> <!-- elliptical bar -->
+                <!-- either ring or bar -->
+                <ring_amp value="0.023"/> <!-- ring field amplitude, microG -->
+                <ring_r value="5.0"/> <!-- ring radius, kpc -->
+                <bar_amp value="0.023"/> <!-- bar field amplitude, microG -->
+                <bar_a value="5.0"/> <!-- major scale, kpc -->
+                <bar_b value="3.0"/> <!-- minor scale, kpc -->
+                <bar_phi0 value="45.0"/> <!-- bar major direction -->
+                
+                <arm_num value="4"/> <!-- spiral arms -->
+                <arm_r0 value="7.1"/> <!-- arm ref radius -->
+                <arm_z0 value="0.1"/> <!-- arm heigth scale, kpc -->
+                <arm_phi1 value="70"/> <!-- arm ref angles, deg -->
+                <arm_phi2 value="160"/>
+                <arm_phi3 value="250"/>
+                <arm_phi4 value="340"/>
+                <arm_amp1 value="2"/> <!-- arm field amplitudes, microG -->
+                <arm_amp2 value="0.133"/>
+                <arm_amp3 value="-3.78"/>
+                <arm_amp4 value="0.32"/>
+                <arm_pitch value="11.5"/> <!-- pitch angle, deg -->
+                
+                <comp_c value="0.5"/> <!-- compress factor -->
+                <comp_d value="0.3"/> <!-- arm cross-sec scale, kpc -->
+                <comp_r value="12"/> <!-- radial cutoff scale, kpc -->
+                <comp_p value="3"/> <!-- cutoff power -->
+            </Jaffe>
+            <!-- verification -->
+            <Verify>
+                <b0 value="2.0"/> <!-- microG -->
+                <l0 value="70"/> <!-- deg -->
+                <r value="0.3"/>
+            </Verify>
+        </Regular>
+        <!-- turbulent fields -->
+        <Random cue="1" type="Global" seed="0">
+            <!-- global anisotropy -->
+            <Global>
+                <rms value="1"/> <!-- RMS at k0 -->
+                <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
+                <a0 value="1.7"/> <!-- 5/3, Kolmogorov -->
+                <rho value="0.5"/> <!-- [0,1] -->
                 <!-- energy density rescaling -->
-                <Rescal>
-                    <r0 value="8.0"/> <!-- in kpc -->
-                    <z0 value="1.0"/> <!-- in kpc -->
-                </Rescal>
-            </Random>
-        </MagneticField>
-        
-        <!-- free electron field -->
-        <FreeElectron>
-            <Regular type="YMW16">
-                <!-- YMW16 -->
-                <YMW16>
-                    <Warp>
-                        <R_warp value="8.4"/> <!-- Galactic warp, kpc -->
-                        <Gamma_w value="0.14"/> <!-- warp ratio -->
-                        <R0 value="8.3"/> <!-- Sun radial position, kpc -->
-                    </Warp>
-                    <ThickDisk>
-                        <Ad value="2500"/>
-                        <Bd value="15000"/>
-                        <n1 value="0.01132"/>
-                        <H1 value="1673"/>
-                    </ThickDisk>
-                    <ThinDisk>
-                        <A2 value="1200"/>
-                        <B2 value="4000"/>
-                        <n2 value="0.404"/>
-                        <K2 value="1.54"/>
-                    </ThinDisk>
-                    <!-- using HH14 SpiralArms -->
-                    <SpiralArm>
-                        <B2s value="4000"/>
-                        <Ele_arm_0 value="0.135000"/>
-                        <Ele_arm_1 value="0.129000"/>
-                        <Ele_arm_2 value="0.103000"/>
-                        <Ele_arm_3 value="0.116000"/>
-                        <Ele_arm_4 value="0.005700"/>
-                        <Wid_arm_0 value="300"/>
-                        <Wid_arm_1 value="500"/>
-                        <Wid_arm_2 value="300"/>
-                        <Wid_arm_3 value="500"/>
-                        <Wid_arm_4 value="300"/>
-                        <Aa value="11680"/>
-                        <Ka value="5.015"/>
-                        <ncn value="2.4"/>
-                        <wcn value="8.2"/>
-                        <thetacn value="109"/>
-                        <nsg value="0.626"/>
-                        <wsg value="20"/>
-                        <thetasg value="75.8"/>
-                    </SpiralArm>
-                    <GalCenter>
-                        <ngc value="6.2"/>
-                        <Agc value="160"/>
-                        <Hgc value="35"/>
-                    </GalCenter>
-                    <GumNebula>
-                        <ngn value="1.84"/>
-                        <Wgn value="15.1"/>
-                        <Agn value="125.8"/>
-                        <Kgn value="1.4"/>
-                    </GumNebula>
-                    <LocalBubble>
-                        <J_LB value="0.480"/>
-                        <nlb1 value="1.094"/>
-                        <detlb1 value="28.4"/>
-                        <wlb1 value="14.2"/>
-                        <hlb1 value="112.9"/>
-                        <thetalb1 value="195.4"/>
-                        <nlb2 value="2.33"/>
-                        <detlb2 value="14.7"/>
-                        <wlb2 value="15.6"/>
-                        <hlb2 value="43.6"/>
-                        <thetalb2 value="278.2"/>
-                    </LocalBubble>
-                    <LoopI>
-                        <nLI value="1.907"/>
-                        <RLI value="80.0"/>
-                        <WLI value="15.0"/>
-                        <detthetaLI value="30.0"/>
-                        <thetaLI value="40.0"/>
-                    </LoopI>
-                </YMW16>
-                <!-- verification -->
-                <Verify>
-                    <n0 value="0.01"/> <!-- pccm -->
-                    <r0 value="3.0"/> <!-- kpc -->
-                </Verify>
-            </Regular>
-            <!-- turbulent free electron -->
-            <Random cue="0" type="Iso" seed="0">
-                <Iso>
-                    <rms value="1.0"/>
-                    <k0 value="2.0"/> <!-- cutoff 1/Lambda in kpc -->
-                    <a0 value="-1.7"/>
-                </Iso>
+                <r0 value="8.0"/> <!-- in kpc -->
+                <z0 value="1.0"/> <!-- in kpc -->
+            </Global>
+            <!-- local turbulent -->
+            <Local>
+                <p0  value="1"/> <!-- Alfven power norm at k0 -->
+                <rf value="1.0"/> <!-- fast to Alfven ratio -->
+                <rs value="1.0"/> <!-- slow to Alfven ratio -->
+                <aa0 value="1.7"/> <!-- Kolmogorov -->
+                <af0 value="1.5"/>
+                <as0 value="1.7"/>
+                <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
+                <beta value="0.1"/> <!-- plasma beta -->
+                <ma value="0.5"/> <!-- Alfven Mach number -->
+            </Local>
+            <!-- Jaffe turbulent -->
+            <Jaffe>
+                
+            </Jaffe>
+        </Random>
+    </MagneticField>
+    
+    <!-- free electron field -->
+    <FreeElectron>
+        <Regular type="YMW16">
+            <!-- YMW16 -->
+            <YMW16>
+                <Warp>
+                    <R_warp value="8.4"/> <!-- Galactic warp, kpc -->
+                    <Gamma_w value="0.14"/> <!-- warp ratio -->
+                    <R0 value="8.3"/> <!-- Sun radial position, kpc -->
+                </Warp>
+                <ThickDisk>
+                    <Ad value="2500"/>
+                    <Bd value="15000"/>
+                    <n1 value="0.01132"/>
+                    <H1 value="1673"/>
+                </ThickDisk>
+                <ThinDisk>
+                    <A2 value="1200"/>
+                    <B2 value="4000"/>
+                    <n2 value="0.404"/>
+                    <K2 value="1.54"/>
+                </ThinDisk>
+                <!-- using HH14 SpiralArms -->
+                <SpiralArm>
+                    <B2s value="4000"/>
+                    <Ele_arm_0 value="0.135000"/>
+                    <Ele_arm_1 value="0.129000"/>
+                    <Ele_arm_2 value="0.103000"/>
+                    <Ele_arm_3 value="0.116000"/>
+                    <Ele_arm_4 value="0.005700"/>
+                    <Wid_arm_0 value="300"/>
+                    <Wid_arm_1 value="500"/>
+                    <Wid_arm_2 value="300"/>
+                    <Wid_arm_3 value="500"/>
+                    <Wid_arm_4 value="300"/>
+                    <Aa value="11680"/>
+                    <Ka value="5.015"/>
+                    <ncn value="2.4"/>
+                    <wcn value="8.2"/>
+                    <thetacn value="109"/>
+                    <nsg value="0.626"/>
+                    <wsg value="20"/>
+                    <thetasg value="75.8"/>
+                </SpiralArm>
+                <GalCenter>
+                    <ngc value="6.2"/>
+                    <Agc value="160"/>
+                    <Hgc value="35"/>
+                </GalCenter>
+                <GumNebula>
+                    <ngn value="1.84"/>
+                    <Wgn value="15.1"/>
+                    <Agn value="125.8"/>
+                    <Kgn value="1.4"/>
+                </GumNebula>
+                <LocalBubble>
+                    <J_LB value="0.480"/>
+                    <nlb1 value="1.094"/>
+                    <detlb1 value="28.4"/>
+                    <wlb1 value="14.2"/>
+                    <hlb1 value="112.9"/>
+                    <thetalb1 value="195.4"/>
+                    <nlb2 value="2.33"/>
+                    <detlb2 value="14.7"/>
+                    <wlb2 value="15.6"/>
+                    <hlb2 value="43.6"/>
+                    <thetalb2 value="278.2"/>
+                </LocalBubble>
+                <LoopI>
+                    <nLI value="1.907"/>
+                    <RLI value="80.0"/>
+                    <WLI value="15.0"/>
+                    <detthetaLI value="30.0"/>
+                    <thetaLI value="40.0"/>
+                </LoopI>
+            </YMW16>
+            <!-- verification -->
+            <Verify>
+                <n0 value="0.01"/> <!-- pccm -->
+                <r0 value="3.0"/> <!-- kpc -->
+            </Verify>
+        </Regular>
+        <!-- turbulent free electron -->
+        <Random cue="0" type="Global" seed="0">
+            <Global>
+                <rms value="1.0"/>
+                <k0 value="2.0"/> <!-- cutoff 1/Lambda in kpc -->
+                <a0 value="-1.7"/>
                 <!-- field strength rescaling -->
-                <Rescal>
-                    <r0 value="8.0"/> <!-- in kpc -->
-                    <z0 value="1.0"/> <!-- in kpc -->
-                </Rescal>
-            </Random>
-        </FreeElectron>
-        
-        <!-- spiral arms setting -->
-        <SpiralArms type="HH14">
-            <!-- Hou & Han, A&A 569 A125 (2014), used in YMW16, R0=8.3 -->
-            <HH14>
-                <arm_num value="5"/>
-                <!-- initial radius, kpc -->
-                <arm_r1 value="3.35"/> <!-- Noma-Outer Arm -->
-                <arm_r2 value="3.71"/> <!-- Peseus Arm -->
-                <arm_r3 value="3.56"/> <!-- Carina-Segittarius Arm -->
-                <arm_r4 value="3.67"/> <!-- Crux-Scutum Arm -->
-                <arm_r5 value="8.21"/> <!-- Local Arm -->
-                <arm_phi1 value="44.4"/> <!-- initial angles, deg -->
-                <arm_phi2 value="120.0"/>
-                <arm_phi3 value="218.6"/>
-                <arm_phi4 value="330.3"/>
-                <arm_phi5 value="55.1"/>
-                <arm_psi1 value="11.43"/> <!-- pitch angles, deg -->
-                <arm_psi2 value="9.84"/>
-                <arm_psi3 value="10.38"/>
-                <arm_psi4 value="10.64"/>
-                <arm_psi5 value="2.77"/>
-            </HH14>
-        </SpiralArms>
-    </Galaxy>
+                <r0 value="8.0"/> <!-- in kpc -->
+                <z0 value="1.0"/> <!-- in kpc -->
+            </Global>
+            <Local>
+                
+            </Local>
+        </Random>
+    </FreeElectron>
     
     <!-- analytic/numeric CRE -->
     <CRE type="Analytic">
-        <!-- verification -->
-        <Verify>
-            <alpha value="3.0"/>
-            <r0 value="3.0"/> <!-- cutoff radius, kpc -->
-            <je value="0.25"/> <!-- local CRE flux norm factor @ 10GeV -->
-        </Verify>
-        
         <Analytic>
             <!-- CRE spectral index: -alpha+beta*r+theta*z, Galactic cylindric frame -->
             <alpha value="3.0"/>
@@ -332,6 +299,12 @@
             <E_max value="100.0"/> <!-- GeV -->
             <E_fact value="0.1"/> <!-- dimensionless -->
         </Numeric>
+        
+        <!-- verification -->
+        <Verify>
+            <alpha value="3.0"/>
+            <r0 value="3.0"/> <!-- cutoff radius, kpc -->
+            <je value="0.25"/> <!-- local CRE flux norm factor @ 10GeV -->
+        </Verify>
     </CRE>
-    
 </root>

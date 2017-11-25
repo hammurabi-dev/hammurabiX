@@ -7,14 +7,14 @@
 #include <string>
 #include <fstream>
 #include "fereg.h"
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "namespace_toolkit.h"
 #include "cgs_units_file.h"
 
 using namespace std;
 
-double FEreg::get_density(const vec3_t<double> &pos, Pond *par, Grid_fereg *grid){
+double FEreg::get_density(const vec3_t<double> &pos, Param *par, Grid_fereg *grid){
     if(grid->read_permission){
         return read_grid(pos,grid);
     }
@@ -26,7 +26,7 @@ double FEreg::get_density(const vec3_t<double> &pos, Pond *par, Grid_fereg *grid
 // not recommended to use without enough computing source
 // recommend to use this once (replace density in write_grid) if no
 // free parameters in FE
-double FEreg::density_blur(const vec3_t<double> &pos, Pond *par, Grid_fereg *grid){
+double FEreg::density_blur(const vec3_t<double> &pos, Param *par, Grid_fereg *grid){
     double ne_blur {0.};
     // sampling point number
     std::size_t step {1000};
@@ -52,7 +52,7 @@ double FEreg::density_blur(const vec3_t<double> &pos, Pond *par, Grid_fereg *gri
     return ne_blur/step;
 }
 
-double FEreg::density(const vec3_t<double> &, Pond *){
+double FEreg::density(const vec3_t<double> &, Param *){
     cerr<<"ERR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl
@@ -119,7 +119,7 @@ double FEreg::read_grid(const vec3_t<double> &pos, Grid_fereg *grid){
     return fe;
 }
 
-void FEreg::write_grid(Pond *par, Grid_fereg *grid){
+void FEreg::write_grid(Param *par, Grid_fereg *grid){
     if(!grid->write_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl

@@ -7,7 +7,7 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_integration.h>
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "fernd.h"
 #include "fereg.h"
@@ -84,7 +84,7 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     return density;
 }
 
-void FErnd::write_grid_iso(Pond *,Grid_fernd *){
+void FErnd::write_grid_global(Param *,Grid_fernd *){
     cerr<<"WAR:"<<__FILE__
     <<" : in function "<<__func__<<endl
     <<" at line "<<__LINE__<<endl

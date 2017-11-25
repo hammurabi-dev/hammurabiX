@@ -20,11 +20,11 @@ using namespace std;
 Grid_brnd::Grid_brnd(string file_name){
     unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
     doc->LoadFile(file_name.c_str());
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")->FirstChildElement("Random")};
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("MagneticField")->FirstChildElement("Random")};
     // sometimes users don't want to write out random field
     // but generation of random field needs grid
     build_permission = ptr->BoolAttribute("cue");
-    ptr = doc->FirstChildElement("root")->FirstChildElement("Interface")->FirstChildElement("brnd_grid");
+    ptr = doc->FirstChildElement("root")->FirstChildElement("Fieldout")->FirstChildElement("brnd_grid");
     read_permission = ptr->BoolAttribute("read");
     write_permission = ptr->BoolAttribute("write");
     if(build_permission or read_permission){

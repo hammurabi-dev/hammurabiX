@@ -1,8 +1,8 @@
 ///
 /// storing parameters (fixed or free) for physical models
 ///
-#ifndef GENERIC_POND_H
-#define GENERIC_POND_H
+#ifndef GENERIC_PARAM_H
+#define GENERIC_PARAM_H
 
 #include <string>
 #include <vector>
@@ -11,13 +11,12 @@
 
 using namespace tinyxml2;
 
-class Pond {
+class Param {
 public:
-    Pond(std::string);
-    virtual ~Pond(void) = default;
+    Param(std::string);
+    virtual ~Param(void) = default;
     // observer
     vec3_t<double> SunPosition;
-    
     // magnetic field
     // wmap lsa
     struct param_breg_wmap{
@@ -51,36 +50,27 @@ public:
     }breg_jaffe;
     // random seed
     std::size_t brnd_seed;
-    // isotropic
-    struct param_brnd_iso{
+    // global
+    struct param_brnd_global{
         double rms;
         double k0;
         double a0;
-    }brnd_iso;
-    // global aniso
-    struct param_brnd_anig{
         double rho;
-    }brnd_anig;
-    // local aniso
-    struct param_brnd_anil{
+        double r0;
+        double z0;
+    }brnd_global;
+    // local
+    struct param_brnd_local{
         double p0;
         double rf;
         double rs;
-        
         double aa0;
         double af0;
         double as0;
         double k0;
-        
         double ma;
         double beta;
-    }brnd_anil;
-    // rescaling parameters for random b
-    struct param_brnd_scal{
-        double r0;
-        double z0;
-    }brnd_scal;
-    
+    }brnd_local;
     // FE
     // ymw16
     struct param_fereg_ymw16{
@@ -102,17 +92,13 @@ public:
     // random seed
     std::size_t fernd_seed;
     // isotropic
-    struct param_fernd_iso{
+    struct param_fernd_global{
         double rms;
         double k0;
         double a0;
-    }fernd_iso;
-    // rescaling parameters for turbulent FE
-    struct param_fernd_scal{
         double r0;
         double z0;
-    }fernd_scal;
-    
+    }fernd_global;
     // CRE
     // analytical
     double sim_freq;
@@ -132,10 +118,9 @@ public:
     }cre_verify;
     
 private:
-    void b_pond(XMLDocument *);
-    void fe_pond(XMLDocument *);
-    void cre_pond(XMLDocument *);
-    
+    void b_param(XMLDocument *);
+    void fe_param(XMLDocument *);
+    void cre_param(XMLDocument *);
     // auxiliary functions
     std::string FetchString(XMLElement *,std::string);
     int FetchInt(XMLElement *,std::string);
@@ -144,3 +129,4 @@ private:
     double FetchDouble(XMLElement *,std::string);
 };
 #endif
+// END

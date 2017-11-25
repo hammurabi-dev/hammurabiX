@@ -51,10 +51,8 @@ public:
     void export_grid(void) override;
     void import_grid(void) override;
     std::unique_ptr<double[]> reg_b_x, reg_b_y, reg_b_z; ///< 3D regular GMF arrays
-    
     std::string filename;
     bool read_permission, write_permission;
-    
     double x_max, x_min, y_max, y_min, z_max, z_min;
     std::size_t nx, ny, nz, full_size;
 };
@@ -88,10 +86,8 @@ public:
     // for/backward plans
     fftw_plan fftw_px_bw, fftw_py_bw, fftw_pz_bw;
     fftw_plan fftw_px_fw, fftw_py_fw, fftw_pz_fw;
-    
     std::string filename;
     bool read_permission, write_permission, build_permission;
-    
     double x_max, x_min, y_max, y_min, z_max, z_min;
     std::size_t nx, ny, nz, full_size;
 };
@@ -106,12 +102,9 @@ public:
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
     void import_grid(void) override;
-    
     std::unique_ptr<double[]> fe;
-    
     std::string filename;
     bool read_permission, write_permission;
-    
     double x_max, x_min, y_max, y_min, z_max, z_min;
     std::size_t nx, ny, nz;
     std::size_t full_size;
@@ -132,15 +125,11 @@ public:
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
     void import_grid(void) override;
-    
     std::unique_ptr<double[]> fftw_fe;
-    
     fftw_complex *fftw_fe_k;
     fftw_plan fftw_p;
-    
     std::string filename;
     bool read_permission, write_permission, build_permission;
-    
     double x_max, x_min, y_max, y_min, z_max, z_min;
     std::size_t nx, ny, nz;
     std::size_t full_size;
@@ -156,12 +145,9 @@ public:
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
     void import_grid(void) override;
-    
     std::unique_ptr<double[]> cre_flux;
-    
     std::string filename;
     bool read_permission, write_permission;
-    
     // 2-D spatial 1-D spectral grid
     std::size_t nE, nr, nz;
     std::size_t cre_size;
@@ -180,13 +166,11 @@ public:
     virtual ~Grid_int(void) = default;
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
-    
     Healpix_Map<double> dm_map; ///< dispersion measure
     Healpix_Map<double> Is_map; ///< synchrotron total intensity
     Healpix_Map<double> Qs_map; ///< synchrotron Sotkes Q
     Healpix_Map<double> Us_map; ///< synchrotron Stokes U
     Healpix_Map<double> fd_map; ///< Faraday depth
-    
     // shell parameters
     std::size_t nside_sim, npix_sim, total_shell;
     std::vector<std::size_t> nside_shell;
@@ -194,7 +178,6 @@ public:
     double gc_r_max, ec_r_max, gc_z_max, radial_res, lat_lim;
     // switches
     bool do_dm, do_sync, do_fd;
-    
     std::string sim_sync_name;
     std::string sim_fd_name;
     std::string sim_dm_name;

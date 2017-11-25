@@ -69,7 +69,7 @@ void Grid_int::build_grid(XMLDocument *doc){
     lat_lim = FetchDouble(ptr,"lat_lim")*CGS_U_rad;
     // output file name
     
-    ptr = doc->FirstChildElement("root")->FirstChildElement("Output");
+    ptr = doc->FirstChildElement("root")->FirstChildElement("Obsout");
     if(ptr->FirstChildElement("DM")!=nullptr){
         do_dm = ptr->FirstChildElement("DM")->BoolAttribute("cue");
         sim_dm_name = ptr->FirstChildElement("DM")->Attribute("filename");

@@ -1,13 +1,13 @@
 #include <string>
 #include <vec3.h>
 #include <tinyxml2.h>
-#include "pond.h"
+#include "param.h"
 #include "cgs_units_file.h"
 
 using namespace tinyxml2;
 using namespace std;
 
-Pond::Pond(std::string file_name){
+Param::Param(std::string file_name){
     XMLDocument *doc = new XMLDocument();
     doc->LoadFile(file_name.c_str());
     // gc sun position
@@ -16,48 +16,21 @@ Pond::Pond(std::string file_name){
         CGS_U_kpc*FetchDouble(ptr,"y"),
         CGS_U_pc*FetchDouble(ptr,"z")};
     
-    b_pond(doc);
-    fe_pond(doc);
-    cre_pond(doc);
-    
+    b_param(doc);
+    fe_param(doc);
+    cre_param(doc);
     delete doc;
 }
 
-// auxiliary functions
-std::string Pond::FetchString(XMLElement* el, string obj){
-    return el->FirstChildElement(obj.c_str())->Attribute("value");
-}
-
-int Pond::FetchInt(XMLElement* el, string obj){
-    return el->FirstChildElement(obj.c_str())->IntAttribute("value");
-}
-
-unsigned int Pond::FetchUnsigned(XMLElement* el, string obj){
-    return el->FirstChildElement(obj.c_str())->UnsignedAttribute("value");
-}
-
-bool Pond::FetchBool(XMLElement* el, string obj){
-    return el->FirstChildElement(obj.c_str())->BoolAttribute("cue");
-}
-
-double Pond::FetchDouble(XMLElement* el, string obj){
-    return el->FirstChildElement(obj.c_str())->DoubleAttribute("value");
-}
-
 // magnetic field
-void Pond::b_pond(XMLDocument *doc){
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("MagneticField")};
+void Param::b_param(XMLDocument *doc){
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("MagneticField")};
     // bwmap
     XMLElement *subptr {ptr->FirstChildElement("Regular")->FirstChildElement("WMAP")};
     breg_wmap.b0 = FetchDouble(subptr,"b0")*CGS_U_muGauss; //microGauss
     breg_wmap.psi0 = FetchDouble(subptr,"psi0")*CGS_U_rad; //rad
     breg_wmap.psi1 = FetchDouble(subptr,"psi1")*CGS_U_rad; //rad
     breg_wmap.chi0 = FetchDouble(subptr,"chi0")*CGS_U_rad; //rad
-    // bverify
-    subptr = ptr->FirstChildElement("Regular")->FirstChildElement("Verify");
-    breg_verify.b0 = FetchDouble(subptr,"b0")*CGS_U_muGauss; //microGauss
-    breg_verify.l0 = FetchDouble(subptr,"l0")*CGS_U_rad; //rad
-    breg_verify.r = FetchDouble(subptr,"r");
     // bjaffe
     subptr = ptr->FirstChildElement("Regular")->FirstChildElement("Jaffe");
     breg_jaffe.quadruple = FetchBool(subptr,"quadruple");
@@ -93,39 +66,37 @@ void Pond::b_pond(XMLDocument *doc){
     breg_jaffe.comp_d = FetchDouble(subptr,"comp_d")*CGS_U_kpc; //kpc
     breg_jaffe.comp_r = FetchDouble(subptr,"comp_r")*CGS_U_kpc; //kpc
     breg_jaffe.comp_p = FetchDouble(subptr,"comp_p");
+    // bverify
+    subptr = ptr->FirstChildElement("Regular")->FirstChildElement("Verify");
+    breg_verify.b0 = FetchDouble(subptr,"b0")*CGS_U_muGauss; //microGauss
+    breg_verify.l0 = FetchDouble(subptr,"l0")*CGS_U_rad; //rad
+    breg_verify.r = FetchDouble(subptr,"r");
+    
     // random seed
     brnd_seed = ptr->FirstChildElement("Random")->UnsignedAttribute("seed");
-    // brnd_iso
-    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Iso");
-    brnd_iso.rms = FetchDouble(subptr,"rms")*CGS_U_muGauss; //microG^2;
-    // turning point
-    brnd_iso.k0 = FetchDouble(subptr,"k0");
-    // index before turning (large scales)
-    brnd_iso.a0 = FetchDouble(subptr,"a0");
-    // brnd_aniso_glob
-    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Anisoglob");
-    brnd_anig.rho = FetchDouble(subptr,"rho");
-    // brnd_aniso_local
-    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Anisolocal");
-    brnd_anil.p0 = FetchDouble(subptr,"p0")*CGS_U_muGauss*CGS_U_muGauss;
-    brnd_anil.rf = FetchDouble(subptr,"rf");
-    brnd_anil.rs = FetchDouble(subptr,"rs");
-    
-    brnd_anil.aa0 = FetchDouble(subptr,"aa0");
-    brnd_anil.af0 = FetchDouble(subptr,"af0");
-    brnd_anil.as0 = FetchDouble(subptr,"as0");
-    brnd_anil.k0 = FetchDouble(subptr,"k0");
-    
-    brnd_anil.beta = FetchDouble(subptr,"beta");
-    brnd_anil.ma = FetchDouble(subptr,"ma");
-    // rescaling parameters
-    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Rescal");
-    brnd_scal.r0 = FetchDouble(subptr,"r0")*CGS_U_kpc;
-    brnd_scal.z0 = FetchDouble(subptr,"z0")*CGS_U_kpc;
+    // brnd_global
+    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Global");
+    brnd_global.rms = FetchDouble(subptr,"rms")*CGS_U_muGauss;
+    brnd_global.k0 = FetchDouble(subptr,"k0");
+    brnd_global.a0 = FetchDouble(subptr,"a0");
+    brnd_global.rho = FetchDouble(subptr,"rho");
+    brnd_global.r0 = FetchDouble(subptr,"r0")*CGS_U_kpc;
+    brnd_global.z0 = FetchDouble(subptr,"z0")*CGS_U_kpc;
+    // brnd_local
+    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Local");
+    brnd_local.p0 = FetchDouble(subptr,"p0")*CGS_U_muGauss*CGS_U_muGauss;
+    brnd_local.rf = FetchDouble(subptr,"rf");
+    brnd_local.rs = FetchDouble(subptr,"rs");
+    brnd_local.aa0 = FetchDouble(subptr,"aa0");
+    brnd_local.af0 = FetchDouble(subptr,"af0");
+    brnd_local.as0 = FetchDouble(subptr,"as0");
+    brnd_local.k0 = FetchDouble(subptr,"k0");
+    brnd_local.beta = FetchDouble(subptr,"beta");
+    brnd_local.ma = FetchDouble(subptr,"ma");
 }
 
-void Pond::fe_pond(XMLDocument *doc){
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Galaxy")->FirstChildElement("FreeElectron")};
+void Param::fe_param(XMLDocument *doc){
+    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("FreeElectron")};
     // YMW16
     // Warp_Sun
     XMLElement *subptr {ptr->FirstChildElement("Regular")->FirstChildElement("YMW16")->FirstChildElement("Warp")};
@@ -204,44 +175,57 @@ void Pond::fe_pond(XMLDocument *doc){
     
     // random seed
     fernd_seed = ptr->FirstChildElement("Random")->UnsignedAttribute("seed");
-    // isotropic turbulent
-    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Iso");
-    // nomalization
-    fernd_iso.rms = FetchDouble(subptr,"rms");
-    // turning point
-    fernd_iso.k0 = FetchDouble(subptr,"k0");
-    // index before turning (large scales)
-    fernd_iso.a0 = FetchDouble(subptr,"a0");
-    
-    // rescaling parameters for random fe
-    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Rescal");
-    fernd_scal.r0 = FetchDouble(subptr,"r0")*CGS_U_kpc; //kpc
-    fernd_scal.z0 = FetchDouble(subptr,"z0")*CGS_U_kpc; //kpc
+    // global turbulent
+    subptr = ptr->FirstChildElement("Random")->FirstChildElement("Global");
+    fernd_global.rms = FetchDouble(subptr,"rms");
+    fernd_global.k0 = FetchDouble(subptr,"k0");
+    fernd_global.a0 = FetchDouble(subptr,"a0");
+    fernd_global.r0 = FetchDouble(subptr,"r0")*CGS_U_kpc;
+    fernd_global.z0 = FetchDouble(subptr,"z0")*CGS_U_kpc;
 }
 
-void Pond::cre_pond(XMLDocument *doc){
+void Param::cre_param(XMLDocument *doc){
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("CRE")};
-    if (doc->FirstChildElement("root")->FirstChildElement("Output")->FirstChildElement("Sync")!=nullptr){
-        sim_freq = doc->FirstChildElement("root")->FirstChildElement("Output")->FirstChildElement("Sync")->DoubleAttribute("freq")*CGS_U_GHz;
+    if (doc->FirstChildElement("root")->FirstChildElement("Obsout")->FirstChildElement("Sync")!=nullptr){
+        sim_freq = doc->FirstChildElement("root")->FirstChildElement("Obsout")->FirstChildElement("Sync")->DoubleAttribute("freq")*CGS_U_GHz;
     }
     else{
         sim_freq = 0.;
     }
     // analytical
     XMLElement *subptr {ptr->FirstChildElement("Analytic")};
-    // the default parameter setting follows wmap3yr model
     cre_ana.alpha = FetchDouble(subptr,"alpha");
     cre_ana.beta = FetchDouble(subptr,"beta");
     cre_ana.theta = FetchDouble(subptr,"theta");
     cre_ana.hr = FetchDouble(subptr,"hr")*CGS_U_kpc; //kpc
     cre_ana.hz = FetchDouble(subptr,"hz")*CGS_U_kpc; //kpc
-    // differential flux normalization factor at gamma 10
     cre_ana.je = FetchDouble(subptr,"je");
     // verification
     subptr = ptr->FirstChildElement("Verify");
     cre_verify.alpha = FetchDouble(subptr,"alpha");
     cre_verify.r0 = FetchDouble(subptr,"r0")*CGS_U_kpc; //kpc
     cre_verify.je = FetchDouble(subptr,"je");
+}
+
+// auxiliary functions
+std::string Param::FetchString(XMLElement* el, string obj){
+    return el->FirstChildElement(obj.c_str())->Attribute("value");
+}
+
+int Param::FetchInt(XMLElement* el, string obj){
+    return el->FirstChildElement(obj.c_str())->IntAttribute("value");
+}
+
+unsigned int Param::FetchUnsigned(XMLElement* el, string obj){
+    return el->FirstChildElement(obj.c_str())->UnsignedAttribute("value");
+}
+
+bool Param::FetchBool(XMLElement* el, string obj){
+    return el->FirstChildElement(obj.c_str())->BoolAttribute("cue");
+}
+
+double Param::FetchDouble(XMLElement* el, string obj){
+    return el->FirstChildElement(obj.c_str())->DoubleAttribute("value");
 }
 
 // END

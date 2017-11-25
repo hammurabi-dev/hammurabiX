@@ -14,7 +14,7 @@
 #include "cre.h"
 #include "fereg.h"
 #include "fernd.h"
-#include "pond.h"
+#include "param.h"
 #include "cgs_units_file.h"
 
 
@@ -26,7 +26,7 @@ public:
     ///
     /// assmebling pixels/shells into Healpix map
     ///
-    void write_grid(Breg *,Brnd *,FEreg *,FErnd *,CRE *,Grid_breg *,Grid_brnd *,Grid_fereg *,Grid_fernd *,Grid_cre *,Grid_int *,Pond *);
+    void write_grid(Breg *,Brnd *,FEreg *,FErnd *,CRE *,Grid_breg *,Grid_brnd *,Grid_fereg *,Grid_fernd *,Grid_cre *,Grid_int *,Param *);
     
 private:
     
@@ -47,7 +47,7 @@ private:
     ///
     /// conduct LOS integration in one pixel at given shell
     ///
-    void radial_integration(struct_shell &,pointing &,struct_observables &,Breg *,Brnd *,FEreg *,FErnd *,CRE *,Grid_breg *,Grid_brnd *,Grid_fereg *,Grid_fernd *,Grid_cre *,Grid_int *,Pond *);
+    void radial_integration(struct_shell &,pointing &,struct_observables &,Breg *,Brnd *,FEreg *,FErnd *,CRE *,Grid_breg *,Grid_brnd *,Grid_fereg *,Grid_fernd *,Grid_cre *,Grid_int *,Param *);
     
     // auxiliary functions
     double get_max_shell_radius(const std::size_t &,const std::size_t &,const double &) const;

@@ -4,7 +4,7 @@
 #include <array>
 #include <cmath>
 
-#include "pond.h"
+#include "param.h"
 #include "grid.h"
 #include "breg.h"
 #include "cgs_units_file.h"
@@ -12,7 +12,7 @@
 
 using namespace std;
 
-vec3_t<double> Breg_verify::breg(const vec3_t<double> &,Pond *par){
+vec3_t<double> Breg_verify::breg(const vec3_t<double> &,Param *par){
     // units
     const double b0 {par->breg_verify.b0};
     const double l0 {par->breg_verify.l0};
