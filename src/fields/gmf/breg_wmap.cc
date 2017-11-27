@@ -14,22 +14,21 @@ using namespace std;
 
 /* wmap-3yr */
 vec3_t<double> Breg_wmap::breg(const vec3_t<double> &pos,Param *par){
-    vec3_t<double> b_vec3 {0.,0.,0.};
     const double r {sqrt(pos.x*pos.x + pos.y*pos.y)};
     if (r>(20.*CGS_U_kpc) or r<(3.*CGS_U_kpc )) {
-        return b_vec3;
+        return vec3_t<double> {0.,0.,0.};
     }
     // units
     const double b0 {par->breg_wmap.b0};
     const double psi0 {par->breg_wmap.psi0};
     const double psi1 {par->breg_wmap.psi1};
     const double chi0 {par->breg_wmap.chi0};
-    const double phi {atan2(pos.y,pos.x)};
+    const double cos_p {pos.x/r};
+    const double sin_p {pos.y/r};
     const double psi {psi0 + psi1*log(r/(8.*CGS_U_kpc))};
     const double chi {chi0*tanh(pos.z/(1.*CGS_U_kpc))};
-    const vec3_t<double> b_cyl {b0*sin(psi)*cos(chi),
-        b0*cos(psi)*cos(chi),
+    return vec3_t<double> {
+        b0*(sin(psi)*cos(chi)*cos_p - cos(psi)*cos(chi)*sin_p),
+        b0*(sin(psi)*cos(chi)*sin_p + cos(psi)*cos(chi)*cos_p),
         b0*sin(chi)};
-    toolkit::Cyl2Cart(phi,b_cyl,b_vec3);
-    return b_vec3;
 }

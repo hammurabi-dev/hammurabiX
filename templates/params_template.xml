@@ -41,9 +41,9 @@
         <!-- field grid -->
         <Box>
             <!-- grid vertex number -->
-            <nx value="400"/>
-            <ny value="400"/>
-            <nz value="80"/>
+            <nx value="800"/>
+            <ny value="800"/>
+            <nz value="160"/>
             <!-- box limit, in Galactic-centric frame -->
             <x_min value="-20.0"/> <!-- kpc -->
             <x_max value="20.0"/> <!-- kpc -->
@@ -84,7 +84,7 @@
         <Regular type="WMAP">
             <!-- WMAP LSA -->
             <WMAP>
-                <b0 value="2.0"/> <!-- microG -->
+                <b0 value="1.2"/> <!-- microG -->
                 <psi0 value="27.0"/> <!-- deg -->
                 <psi1 value="0.9"/> <!-- deg -->
                 <chi0 value="25.0"/> <!-- deg -->
@@ -138,10 +138,10 @@
             </Verify>
         </Regular>
         <!-- turbulent fields -->
-        <Random cue="1" type="Global" seed="0">
+        <Random cue="1" type="Local" seed="0">
             <!-- global anisotropy -->
             <Global>
-                <rms value="1"/> <!-- RMS at k0 -->
+                <rms value="0.8"/> <!-- RMS at k0 -->
                 <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
                 <a0 value="1.7"/> <!-- 5/3, Kolmogorov -->
                 <rho value="0.5"/> <!-- [0,1] -->
@@ -151,9 +151,9 @@
             </Global>
             <!-- local turbulent -->
             <Local>
-                <p0  value="1"/> <!-- Alfven power norm at k0 -->
-                <rf value="1.0"/> <!-- fast to Alfven ratio -->
-                <rs value="1.0"/> <!-- slow to Alfven ratio -->
+                <pa0  value="1"/> <!-- Alfven power norm at k0 -->
+                <pf0 value="1"/> <!-- fast power norm at k0 -->
+                <ps0 value="1"/> <!-- slow power norm at k0 -->
                 <aa0 value="1.7"/> <!-- Kolmogorov -->
                 <af0 value="1.5"/>
                 <as0 value="1.7"/>

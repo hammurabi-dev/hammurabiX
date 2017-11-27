@@ -67,7 +67,7 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
                 ep = eplus(b,k);
                 em = eminus(b,k);
                 // without Hermiticity fixing, all power multiplied by 2
-                if(ep.SquaredLength()!=0){
+                if(ep.Length()>1e-6){
                     double ang {cosa(b,k)};
                     double Pa {speca(ks,par)*0.66666667 + (speca(ks+halfdk,par) + speca(ks-halfdk,par))*0.16666667};
                     Pa *= fa(par->brnd_local.ma,ang)*dk3;
@@ -128,7 +128,6 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
     fftw_execute(grid->fftw_px_bw);
     fftw_execute(grid->fftw_py_bw);
     fftw_execute(grid->fftw_pz_bw);
-    
     // get real elements, use auxiliary function
     complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
     complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
@@ -142,7 +141,7 @@ double Brnd_local::cosa(const vec3_t<double> &b,const vec3_t<double> &k){
 
 vec3_t<double> Brnd_local::eplus(const vec3_t<double> &b,const vec3_t<double> &k){
     vec3_t<double> tmp {crossprod(toolkit::versor(k),toolkit::versor(b))};
-    if(tmp.Length()==0){
+    if(tmp.Length()<1e-6){
         return tmp;
     }
     else{
@@ -152,7 +151,7 @@ vec3_t<double> Brnd_local::eplus(const vec3_t<double> &b,const vec3_t<double> &k
 
 vec3_t<double> Brnd_local::eminus(const vec3_t<double> &b,const vec3_t<double> &k){
     vec3_t<double> tmp {crossprod(crossprod(toolkit::versor(k),toolkit::versor(b)),toolkit::versor(k))};
-    if(tmp.Length()==0){
+    if(tmp.Length()<1e-6){
         return tmp;
     }
     else{
@@ -165,7 +164,7 @@ double Brnd_local::dynamo(const double &beta,const double &cosa){
 }
 
 double Brnd_local::hs(const double &beta,const double &cosa){
-    if(cosa==0){
+    if(cosa<1e-6){
         return 0;
     }
     else{
@@ -176,7 +175,7 @@ double Brnd_local::hs(const double &beta,const double &cosa){
 }
 
 double Brnd_local::hf(const double &beta,const double &cosa){
-    if(cosa==0){
+    if(cosa<1e-6){
         return 0;
     }
     else{
@@ -196,7 +195,7 @@ double Brnd_local::fs(const double &ma,const double &cosa){
 
 double Brnd_local::speca(const double &k,Param *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_local.p0};
+    const double p0 {par->brnd_local.pa0};
     const double k0 {par->brnd_local.k0};
     const double a0 {par->brnd_local.aa0};
     const double unit = 1./(4*CGS_U_pi*k*k);
@@ -214,7 +213,7 @@ double Brnd_local::speca(const double &k,Param *par){
 
 double Brnd_local::specf(const double &k,Param *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_local.p0*par->brnd_local.rf};
+    const double p0 {par->brnd_local.pf0};
     const double k0 {par->brnd_local.k0};
     const double a0 {par->brnd_local.af0};
     const double unit = 1./(4*CGS_U_pi*k*k);
@@ -232,7 +231,7 @@ double Brnd_local::specf(const double &k,Param *par){
 
 double Brnd_local::specs(const double &k,Param *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_local.p0*par->brnd_local.rs};
+    const double p0 {par->brnd_local.ps0};
     const double k0 {par->brnd_local.k0};
     const double a0 {par->brnd_local.as0};
     const double unit = 1./(4*CGS_U_pi*k*k);

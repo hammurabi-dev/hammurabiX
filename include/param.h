@@ -61,9 +61,9 @@ public:
     }brnd_global;
     // local
     struct param_brnd_local{
-        double p0;
-        double rf;
-        double rs;
+        double pa0;
+        double pf0;
+        double ps0;
         double aa0;
         double af0;
         double as0;

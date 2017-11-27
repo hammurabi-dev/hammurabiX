@@ -84,9 +84,9 @@ void Param::b_param(XMLDocument *doc){
     brnd_global.z0 = FetchDouble(subptr,"z0")*CGS_U_kpc;
     // brnd_local
     subptr = ptr->FirstChildElement("Random")->FirstChildElement("Local");
-    brnd_local.p0 = FetchDouble(subptr,"p0")*CGS_U_muGauss*CGS_U_muGauss;
-    brnd_local.rf = FetchDouble(subptr,"rf");
-    brnd_local.rs = FetchDouble(subptr,"rs");
+    brnd_local.pa0 = FetchDouble(subptr,"pa0")*CGS_U_muGauss*CGS_U_muGauss;
+    brnd_local.pf0 = FetchDouble(subptr,"pf0")*CGS_U_muGauss*CGS_U_muGauss;
+    brnd_local.ps0 = FetchDouble(subptr,"ps0")*CGS_U_muGauss*CGS_U_muGauss;
     brnd_local.aa0 = FetchDouble(subptr,"aa0");
     brnd_local.af0 = FetchDouble(subptr,"af0");
     brnd_local.as0 = FetchDouble(subptr,"as0");
