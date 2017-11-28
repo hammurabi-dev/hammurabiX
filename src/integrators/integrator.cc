@@ -208,7 +208,7 @@ void Integrator::radial_integration(struct_shell &shell_ref,pointing &ptg_in, st
         // Sync
         if(gint->do_sync){
             // pol. angle after Faraday rotation
-            double qui {(inner_shells_fd+pixobs.fd)*lambda_square+(intr_pol_ang[i-1]+4.*intr_pol_ang[i]+intr_pol_ang[i+1])*0.16666667};
+            double qui {(inner_shells_fd+pixobs.fd)*lambda_square+intr_pol_ang[i]};
 #ifndef NDEBUG
             if (abs(qui)>1e30) {
                 cerr<<"ERR: ODD VALUE"<<endl;
