@@ -63,7 +63,7 @@ $ make documentation -f install/[makefile]
 $ cd bin/
 $ ./hamx [paramfile]
 ```
-remarks: we suggest users to compile without -DNDEBUG to verify pipeline, while run the code with -NDEBUG to save computing time.
+remarks: we suggest users to compile without -DNDEBUG to verify pipeline, while run the code with -DNDEBUG to save computing time.
 
 #### contact:
 *bug reports and code contributions are warmly welcomed,
