@@ -57,7 +57,7 @@
             <shell type="auto">
                 <auto>
                     <shell_num value="1"/> <!-- total shell number -->
-                    <nside_min value="16"/> <!-- inner most shell resolution -->
+                    <nside_min value="32"/> <!-- inner most shell resolution -->
                 </auto>
                 <!-- set shell resolution from inside out -->
                 <manual> <!-- total shell number calculated automatically -->
@@ -65,14 +65,14 @@
                     <nside value="16"/>
                 </manual>
             </shell>
-            <nside_sim value="16"/> <!-- output map resolution -->
+            <nside_sim value="32"/> <!-- output map resolution -->
             <!-- maximum radius in earth/Galactic centric frame -->
             <ec_r_max value="30.0"/> <!-- kpc -->
             <gc_r_max value="20.0"/> <!-- kpc -->
             <!-- maximum height in galactic centric frame -->
             <gc_z_max value="10.0"/> <!-- kpc -->
             <!-- radial resolution -->
-            <ec_r_res value="0.1"/> <!-- kpc -->
+            <ec_r_res value="0.5"/> <!-- kpc -->
             <!-- galactic latitude lower limit -->
             <lat_lim value="0."/> <!-- [0,90] -->
         </Integration>
@@ -138,7 +138,7 @@
             </Verify>
         </Regular>
         <!-- turbulent fields -->
-        <Random cue="1" type="Local" seed="0">
+        <Random cue="0" type="Local" seed="0">
             <!-- global anisotropy -->
             <Global>
                 <rms value="0.8"/> <!-- RMS at k0 -->
