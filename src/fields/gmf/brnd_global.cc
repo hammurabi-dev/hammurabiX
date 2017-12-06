@@ -177,8 +177,6 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
                 vec3_t<double> b_re_par {H_versor*dotprod(H_versor,b_re)};
                 vec3_t<double> b_re_perp {b_re - b_re_par};
                 b_re = toolkit::versor(b_re_par*rho + b_re_perp*(1-rho))*b_re.Length();
-                vec3_t<double> test1 {toolkit::versor(b_re_par + b_re_perp)};
-                vec3_t<double> test2 {toolkit::versor(b_re_par*rho + b_re_perp*(1-rho))};
                 vec3_t<double> b_im_par {H_versor*dotprod(H_versor,b_im)};
                 vec3_t<double> b_im_perp {b_im - b_im_par};
                 b_im = toolkit::versor(b_im_par*rho + b_im_perp*(1-rho))*b_im.Length();
