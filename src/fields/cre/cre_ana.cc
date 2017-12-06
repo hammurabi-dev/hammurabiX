@@ -35,7 +35,7 @@ void CRE_ana::flux_param(const vec3_t<double> &pos,Param *par,double &index,doub
     const double unit_factor {(4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*cre_beta_10)};
     // MODEL DEPENDENT PARAMETERS
     const double norm_factor {je*pow(cre_gamma_10,alpha-beta*R0)};
-    const double scal_factor {exp(R0-r/hr)*(1./(cosh(z/hz)*cosh(z/hz)))};
+    const double scal_factor {exp((R0-r)/hr)*(1./(cosh(z/hz)*cosh(z/hz)))};
     // this is changeable by users
     index = -alpha+beta*r+theta*z;
     
@@ -63,7 +63,7 @@ double CRE_ana::flux(const vec3_t<double> &pos,Param *par,const double &En){
     // MODEL DEPENDENT PARAMETERS
     // CRE flux normalizaton factor at earth, model dependent
     const double norm_factor {je*pow(cre_gamma_10,alpha-beta*R0)};
-    const double scal_factor {exp(R0-r/hr)*(1./(cosh(z/hz)*cosh(z/hz)))};
+    const double scal_factor {exp((R0-r)/hr)*(1./(cosh(z/hz)*cosh(z/hz)))};
     
     return norm_factor*scal_factor*unit_factor*pow(gamma,-alpha+beta*r+theta*z);
 }
