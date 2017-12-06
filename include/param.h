@@ -56,20 +56,14 @@ public:
         double k0;
         double a0;
         double rho;
-        double r0;
-        double z0;
+        double r0,z0;
     }brnd_global;
     // local
     struct param_brnd_local{
-        double pa0;
-        double pf0;
-        double ps0;
-        double aa0;
-        double af0;
-        double as0;
+        double pa0,pf0,ps0;
+        double aa0,af0,as0;
         double k0;
-        double ma;
-        double beta;
+        double ma,beta;
     }brnd_local;
     // FE
     // ymw16
@@ -104,11 +98,8 @@ public:
     double sim_freq;
     //std::vector<double> creana;
     struct param_cre_ana{
-        double alpha;
-        double beta;
-        double theta;
-        double hr;
-        double hz;
+        double alpha,beta,theta;
+        double r0,z0;
         double je;
     }cre_ana;
     struct param_cre_verify{

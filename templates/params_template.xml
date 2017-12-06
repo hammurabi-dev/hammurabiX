@@ -72,7 +72,7 @@
             <!-- maximum height in galactic centric frame -->
             <gc_z_max value="10.0"/> <!-- kpc -->
             <!-- radial resolution -->
-            <ec_r_res value="0.5"/> <!-- kpc -->
+            <ec_r_res value="0.05"/> <!-- kpc -->
             <!-- galactic latitude lower limit -->
             <lat_lim value="0."/> <!-- [0,90] -->
         </Integration>
@@ -81,7 +81,7 @@
     <!-- magnetic fields -->
     <MagneticField>
         <!-- regular fields -->
-        <Regular type="WMAP">
+        <Regular type="Verify">
             <!-- WMAP LSA -->
             <WMAP>
                 <b0 value="1.2"/> <!-- microG -->
@@ -267,14 +267,14 @@
     </FreeElectron>
     
     <!-- analytic/numeric CRE -->
-    <CRE type="Analytic">
+    <CRE type="Verify">
         <Analytic>
             <!-- CRE spectral index: -alpha+beta*r+theta*z, Galactic cylindric frame -->
             <alpha value="3.0"/>
             <beta value="0.0"/>
             <theta value="0.0"/>
-            <hr value="5.0"/> <!-- kpc -->
-            <hz value="1.0"/> <!-- kpc -->
+            <r0 value="5.0"/> <!-- kpc -->
+            <z0 value="1.0"/> <!-- kpc -->
             <je value="0.25"/> <!-- local CRE flux norm factor @ 10GeV -->
         </Analytic>
         

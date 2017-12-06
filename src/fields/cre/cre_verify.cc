@@ -14,39 +14,47 @@
 
 using namespace std;
 
+// CRE flux spatial rescaling
+double CRE_verify::rescal(const vec3_t<double> &pos,Param *par){
+    if((pos-par->SunPosition).Length() > par->cre_verify.r0){
+        return 0;
+    }
+    else
+        return 1;
+}
+
+// CRE spectral index
+double CRE_verify::flux_idx(const vec3_t<double> &/*pos*/,Param *par){
+    return -(par->cre_verify.alpha);
+}
+
 // analytical CRE flux
 // give values to spectral index and norm factor, in cgs units
 // analytical CRE integration use N(\gamma)
-void CRE_verify::flux_param(const vec3_t<double> &/*pos*/,Param *par,double &index,double &norm){
-    // units
-    const double alpha {par->cre_verify.alpha};
+double CRE_verify::flux_norm(const vec3_t<double> &pos,Param *par){
     // je is in [GeV m^2 s sr]^-1 units
     const double je {par->cre_verify.je};
-    const double cre_gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
-    const double cre_beta_10 {sqrt(1.-1./cre_gamma_10)};
+    const double gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
+    const double beta_10 {sqrt(1.-1./gamma_10)};
     // from PHI(E) to N(\gamma) convertion
-    const double unit_factor {(4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*cre_beta_10)};
-    const double norm_factor {je*pow(cre_gamma_10,alpha)};
-    index = -alpha;
-    norm = norm_factor*unit_factor;
+    const double unit {(4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*beta_10)};
+    const double norm {je*pow(gamma_10,-flux_idx(par->SunPosition,par))};
+    
+    return norm*unit*rescal(pos,par);
 }
 
 // analytical modeling use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
 double CRE_verify::flux(const vec3_t<double> &pos,Param *par,const double &En){
-    if((pos-par->SunPosition).Length() > par->cre_verify.r0){
-        return 0.;
-    }
-    // units
-    const double alpha {par->cre_verify.alpha};
     // je is in [GeV m^2 s sr]^-1 units
     const double je {par->cre_verify.je};
     const double gamma {En/CGS_U_MEC2};
-    const double cre_gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
+    const double gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
     // converting from N to PHI
-    const double unit_factor {sqrt((gamma-1.)*cre_gamma_10/((cre_gamma_10-1.)*gamma))};
-    const double norm_factor {je*pow(cre_gamma_10,alpha)};
-    return norm_factor*unit_factor*pow(gamma,-alpha);
+    const double unit {sqrt((1.-1./gamma)/(1.-1./gamma_10))};
+    const double norm {je*pow(gamma_10,-flux_idx(par->SunPosition,par))};
+    
+    return norm*unit*pow(gamma,flux_idx(pos,par))*rescal(pos,par);
 }
 
 // J_tot(\nu)
@@ -60,15 +68,11 @@ double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cr
         exit(1);
     }
 #endif
-    if((pos-par->SunPosition).Length() > par->cre_verify.r0){
-        return 0.;
-    }
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
-    double index, norm;
-    flux_param(pos,par,index,norm);
+    const double index {flux_idx(pos,par)};
     // coefficients which do not attend integration
-    norm *= sqrt(3)*(CGS_U_qe*CGS_U_qe*CGS_U_qe)*fabs(Bper)/(2.*CGS_U_MEC2);
+    const double norm {flux_norm(pos,par)*sqrt(3)*(CGS_U_qe*CGS_U_qe*CGS_U_qe)*fabs(Bper)/(2.*CGS_U_MEC2)};
     // synchrotron integration
     const double A {4.*CGS_U_MEC*CGS_U_pi*par->sim_freq/(3.*CGS_U_qe*fabs(Bper))};
     const double mu {-0.5*(3.+index)};
@@ -90,15 +94,11 @@ double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cr
         exit(1);
     }
 #endif
-    if((pos-par->SunPosition).Length() > par->cre_verify.r0){
-        return 0.;
-    }
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
-    double index, norm;
-    flux_param(pos,par,index,norm);
+    const double index {flux_idx(pos,par)};
     // coefficients which do not attend integration
-    norm *= sqrt(3)*(CGS_U_qe*CGS_U_qe*CGS_U_qe)*fabs(Bper)/(2.*CGS_U_MEC2);
+    const double norm {flux_norm(pos,par)*sqrt(3)*(CGS_U_qe*CGS_U_qe*CGS_U_qe)*fabs(Bper)/(2.*CGS_U_MEC2)};
     // synchrotron integration
     const double A {4.*CGS_U_MEC*CGS_U_pi*par->sim_freq/(3.*CGS_U_qe*fabs(Bper))};
     const double mu {-0.5*(3.+index)};

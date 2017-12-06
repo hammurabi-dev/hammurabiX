@@ -38,9 +38,17 @@ private:
     ///
     double flux(const vec3_t<double> &,Param *,const double &);
     ///
-    /// flux index and normalization wrt Lorentz factor at given position
+    /// flux normalization at given position
     ///
-    void flux_param(const vec3_t<double> &,Param *,double &,double &);
+    double flux_norm(const vec3_t<double> &,Param *);
+    ///
+    /// flux index at given position
+    ///
+    double flux_idx(const vec3_t<double> &,Param *);
+    ///
+    /// spatial CRE flux rescaling
+    ///
+    double rescal(const vec3_t<double> &,Param *);
     ///
     /// write CRE flux into field grid
     ///
@@ -64,9 +72,17 @@ private:
     ///
     double flux(const vec3_t<double> &,Param *,const double &);
     ///
-    /// calculate flux index and normalization wrt Lorentz factor at given position
+    /// flux normalization at given position
     ///
-    void flux_param(const vec3_t<double> &,Param *,double &,double &);
+    double flux_norm(const vec3_t<double> &,Param *);
+    ///
+    /// flux index at given position
+    ///
+    double flux_idx(const vec3_t<double> &,Param *);
+    ///
+    /// spatial CRE flux rescaling
+    ///
+    double rescal(const vec3_t<double> &,Param *);
     ///
     /// write analytical CRE flux to field grid
     ///

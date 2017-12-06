@@ -14,58 +14,52 @@
 
 using namespace std;
 
-// analytical CRE flux
-// give values to spectral index and norm factor, in cgs units
-// analytical CRE integration use N(\gamma)
-void CRE_ana::flux_param(const vec3_t<double> &pos,Param *par,double &index,double &norm){
-    // units
+// CRE flux spatial rescaling
+double CRE_ana::rescal(const vec3_t<double> &pos,Param *par){
+    const double r0 {par->cre_ana.r0};
+    const double z0 {par->cre_ana.z0};
+    const double R0 {sqrt(par->SunPosition.x*par->SunPosition.x+par->SunPosition.y*par->SunPosition.y)};
+    const double r {sqrt(pos.x*pos.x+pos.y*pos.y)};
+    return exp((R0-r)/r0)*(1./(cosh(pos.z/z0)*cosh(pos.z/z0)));
+}
+
+// CRE spectral index
+double CRE_ana::flux_idx(const vec3_t<double> &pos,Param *par){
     const double alpha {par->cre_ana.alpha};
     const double beta {par->cre_ana.beta};
     const double theta {par->cre_ana.theta};
-    const double hr {par->cre_ana.hr};
-    const double hz {par->cre_ana.hz};
-    // je is in [GeV m^2 s sr]^-1 units
-    const double je {par->cre_ana.je};
-    const double R0 {sqrt(par->SunPosition.x*par->SunPosition.x+par->SunPosition.y*par->SunPosition.y)};
     const double r {sqrt(pos.x*pos.x+pos.y*pos.y)};
     const double z {fabs(pos.z)};
-    const double cre_gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
-    const double cre_beta_10 {sqrt(1.-1./cre_gamma_10)};
-    // from PHI(E) to N(\gamma) convertion
-    const double unit_factor {(4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*cre_beta_10)};
-    // MODEL DEPENDENT PARAMETERS
-    const double norm_factor {je*pow(cre_gamma_10,alpha-beta*R0)};
-    const double scal_factor {exp((R0-r)/hr)*(1./(cosh(z/hz)*cosh(z/hz)))};
-    // this is changeable by users
-    index = -alpha+beta*r+theta*z;
-    
-    norm = norm_factor*scal_factor*unit_factor;
+    return -alpha+beta*r+theta*z;
 }
 
-// analytical modeling use N(\gamma) while flux is PHI(E)
+// analytical CRE flux normalization factor at 10 GeV
+// analytical CRE spectral integrations use N(\gamma)
+double CRE_ana::flux_norm(const vec3_t<double> &pos,Param *par){
+    // je is in [GeV m^2 s sr]^-1 units
+    const double je {par->cre_ana.je};
+    const double gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
+    const double beta_10 {sqrt(1.-1./gamma_10)};
+    // from PHI(E) to N(\gamma) convertion
+    const double unit {(4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*beta_10)};
+    const double norm {je*pow(gamma_10,-flux_idx(par->SunPosition,par))};
+    
+    return norm*unit*rescal(pos,par);
+}
+
+// analytical modelings use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
 double CRE_ana::flux(const vec3_t<double> &pos,Param *par,const double &En){
     // units
-    const double alpha {par->cre_ana.alpha};
-    const double beta {par->cre_ana.beta};
-    const double theta {par->cre_ana.theta};
-    const double hr {par->cre_ana.hr};
-    const double hz {par->cre_ana.hz};
     // je is in [GeV m^2 s sr]^-1 units
     const double je {par->cre_ana.je};
-    const double R0 {sqrt(par->SunPosition.x*par->SunPosition.x+par->SunPosition.y*par->SunPosition.y)};
-    const double r {sqrt(pos.x*pos.x+pos.y*pos.y)};
-    const double z {fabs(pos.z)};
     const double gamma {En/CGS_U_MEC2};
-    const double cre_gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
+    const double gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
     // converting from N to PHI
-    const double unit_factor {sqrt((1.-1./gamma)/(1.-1./cre_gamma_10))};
-    // MODEL DEPENDENT PARAMETERS
-    // CRE flux normalizaton factor at earth, model dependent
-    const double norm_factor {je*pow(cre_gamma_10,alpha-beta*R0)};
-    const double scal_factor {exp((R0-r)/hr)*(1./(cosh(z/hz)*cosh(z/hz)))};
+    const double unit {sqrt((1.-1./gamma)/(1.-1./gamma_10))};
+    const double norm {je*pow(gamma_10,-flux_idx(par->SunPosition,par))};
     
-    return norm_factor*scal_factor*unit_factor*pow(gamma,-alpha+beta*r+theta*z);
+    return norm*unit*pow(gamma,flux_idx(pos,par))*rescal(pos,par);
 }
 
 // J_tot(\nu)
@@ -81,10 +75,9 @@ double CRE_ana::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *
 #endif
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
-    double index, norm;
-    flux_param(pos,par,index,norm);
+    const double index {flux_idx(pos,par)};
     // coefficients which do not attend integration
-    norm *= sqrt(3)*(CGS_U_qe*CGS_U_qe*CGS_U_qe)*fabs(Bper)/(2.*CGS_U_MEC2);
+    const double norm {flux_norm(pos,par)*sqrt(3)*(CGS_U_qe*CGS_U_qe*CGS_U_qe)*fabs(Bper)/(2.*CGS_U_MEC2)};
     // synchrotron integration
     const double A {4.*CGS_U_MEC*CGS_U_pi*par->sim_freq/(3.*CGS_U_qe*fabs(Bper))};
     const double mu {-0.5*(3.+index)};
@@ -108,10 +101,9 @@ double CRE_ana::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *
 #endif
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
-    double index, norm;
-    flux_param(pos,par,index,norm);
+    const double index {flux_idx(pos,par)};
     // coefficients which do not attend integration
-    norm *= sqrt(3)*(CGS_U_qe*CGS_U_qe*CGS_U_qe)*fabs(Bper)/(2.*CGS_U_MEC2);
+    const double norm {flux_norm(pos,par)*sqrt(3)*(CGS_U_qe*CGS_U_qe*CGS_U_qe)*fabs(Bper)/(2.*CGS_U_MEC2)};
     // synchrotron integration
     const double A {4.*CGS_U_MEC*CGS_U_pi*par->sim_freq/(3.*CGS_U_qe*fabs(Bper))};
     const double mu {-0.5*(3.+index)};
