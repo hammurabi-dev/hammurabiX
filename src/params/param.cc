@@ -199,12 +199,14 @@ void Param::cre_param(XMLDocument *doc){
     cre_ana.theta = FetchDouble(subptr,"theta");
     cre_ana.r0 = FetchDouble(subptr,"r0")*CGS_U_kpc; //kpc
     cre_ana.z0 = FetchDouble(subptr,"z0")*CGS_U_kpc; //kpc
-    cre_ana.je = FetchDouble(subptr,"je");
+    cre_ana.E0 = FetchDouble(subptr,"E0")*CGS_U_GeV; //GeV
+    cre_ana.j0 = FetchDouble(subptr,"j0");
     // verification
     subptr = ptr->FirstChildElement("Verify");
     cre_verify.alpha = FetchDouble(subptr,"alpha");
     cre_verify.r0 = FetchDouble(subptr,"r0")*CGS_U_kpc; //kpc
-    cre_verify.je = FetchDouble(subptr,"je");
+    cre_verify.E0 = FetchDouble(subptr,"E0")*CGS_U_GeV; //GeV
+    cre_verify.j0 = FetchDouble(subptr,"j0");
 }
 
 // auxiliary functions

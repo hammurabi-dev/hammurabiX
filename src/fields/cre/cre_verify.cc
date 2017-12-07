@@ -33,12 +33,12 @@ double CRE_verify::flux_idx(const vec3_t<double> &/*pos*/,Param *par){
 // analytical CRE integration use N(\gamma)
 double CRE_verify::flux_norm(const vec3_t<double> &pos,Param *par){
     // je is in [GeV m^2 s sr]^-1 units
-    const double je {par->cre_verify.je};
-    const double gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
-    const double beta_10 {sqrt(1.-1./gamma_10)};
+    const double je {par->cre_verify.j0};
+    const double gamma0 {par->cre_verify.E0/CGS_U_MEC2+1};
+    const double beta0 {sqrt(1.-1./gamma0)};
     // from PHI(E) to N(\gamma) convertion
-    const double unit {(4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*beta_10)};
-    const double norm {je*pow(gamma_10,-flux_idx(par->SunPosition,par))};
+    const double unit {(4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*beta0)};
+    const double norm {je*pow(gamma0,-flux_idx(par->SunPosition,par))};
     
     return norm*unit*rescal(pos,par);
 }
@@ -47,12 +47,12 @@ double CRE_verify::flux_norm(const vec3_t<double> &pos,Param *par){
 // En in CGS units, return in [GeV m^2 s Sr]^-1
 double CRE_verify::flux(const vec3_t<double> &pos,Param *par,const double &En){
     // je is in [GeV m^2 s sr]^-1 units
-    const double je {par->cre_verify.je};
+    const double je {par->cre_verify.j0};
     const double gamma {En/CGS_U_MEC2};
-    const double gamma_10 {10.*CGS_U_GeV/CGS_U_MEC2};
+    const double gamma0 {par->cre_verify.E0/CGS_U_MEC2+1};
     // converting from N to PHI
-    const double unit {sqrt((1.-1./gamma)/(1.-1./gamma_10))};
-    const double norm {je*pow(gamma_10,-flux_idx(par->SunPosition,par))};
+    const double unit {sqrt((1.-1./gamma)/(1.-1./gamma0))};
+    const double norm {je*pow(gamma0,-flux_idx(par->SunPosition,par))};
     
     return norm*unit*pow(gamma,flux_idx(pos,par))*rescal(pos,par);
 }

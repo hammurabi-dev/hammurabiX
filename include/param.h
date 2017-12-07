@@ -100,12 +100,12 @@ public:
     struct param_cre_ana{
         double alpha,beta,theta;
         double r0,z0;
-        double je;
+        double E0,j0;
     }cre_ana;
     struct param_cre_verify{
         double alpha;
         double r0;
-        double je;
+        double E0,j0;
     }cre_verify;
     
 private:
