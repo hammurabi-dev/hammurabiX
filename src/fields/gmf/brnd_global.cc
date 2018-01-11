@@ -102,7 +102,7 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
     const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         double kx {CGS_U_kpc*i/lx};
         if(i>=grid->nx/2) kx -= CGS_U_kpc*grid->nx/lx;
@@ -145,7 +145,7 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
     // PHASE II
     // RESCALING FIELD PROFILE IN REAL SPACE
     double b_var {toolkit::Variance(grid->fftw_b_kx[0], grid->full_size)};
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
     for (decltype(grid->nx) i=0;i<grid->nx;++i){
         vec3_t<double> pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
         for (decltype(grid->ny) j=0;j<grid->ny;++j){
@@ -197,7 +197,7 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
     // PHASE III
     // RE-ORTHOGONALIZING IN FOURIER SPACE
     // Gram-Schmidt process
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         vec3_t<double> tmp_k {CGS_U_kpc*i/lx,0,0};
         if(i>=grid->nx/2) tmp_k.x -= CGS_U_kpc*grid->nx/lx;
@@ -245,7 +245,7 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
     // according to FFTW3 manual
     // transform forward followed by backword scale up array by nx*ny*nz
     double inv_grid_size = 1.0/grid->full_size;
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
     for(std::size_t i=0;i<grid->full_size;++i){
         grid->fftw_b_x[i] *= inv_grid_size;
         grid->fftw_b_y[i] *= inv_grid_size;

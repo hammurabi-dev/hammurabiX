@@ -35,23 +35,22 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
         uniform_num[i] = gsl_rng_uniform(r);
     // free random memory
     gsl_rng_free(r);
-
     // start Fourier space filling
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};
     double lz {grid->z_max-grid->z_min};
-    // physical k in 1/kpc dimension
-    vec3_t<double> k {0,0,0};
-    vec3_t<double> ep {0,0,0};
-    vec3_t<double> em {0,0,0};
     const vec3_t<double> b {breg->get_breg(par->SunPosition,par,gbreg)};
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
     const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
-    // how to safely parallel this part?
+    
+#pragma omp parallel for schedule(dynamic)
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
-        k.x = CGS_U_kpc*i/lx;
-        if(i>=grid->nx/2) k.x -= grid->nx*CGS_U_kpc/lx;
+        // physical k in 1/kpc dimension
+        vec3_t<double> k {CGS_U_kpc*i/lx,0,0};
+        vec3_t<double> ep {0,0,0};
+        vec3_t<double> em {0,0,0};
+        if(i>=grid->nx/2) k.x -= CGS_U_kpc*grid->nx/lx;
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             k.y = CGS_U_kpc*j/ly;
             if(j>=grid->ny/2) k.y -= CGS_U_kpc*grid->ny/ly;
@@ -60,7 +59,6 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
                 // FFT expects up to n/2 positive while n/2 to n negative
                 k.z = CGS_U_kpc*l/lz;
                 if(l>=grid->nz/2) k.z -= CGS_U_kpc*grid->nz/lz;
-                
                 const double ks {k.Length()};
                 if(ks==0) continue;
                 
@@ -132,6 +130,10 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
     complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
     complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
     complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
+#ifndef NDEBUG
+    const double b_var {toolkit::Variance(grid->fftw_b_x.get(),grid->full_size)+toolkit::Variance(grid->fftw_b_y.get(),grid->full_size)+toolkit::Variance(grid->fftw_b_z.get(),grid->full_size)};
+    cout<< "BRND: Numerical RMS: "<<sqrt(b_var)/CGS_U_muGauss<<" microG"<<endl;
+#endif
 }
 
 // PRIVATE FUNCTIONS FOR LOW-BETA SUB-ALFVENIC PLASMA
