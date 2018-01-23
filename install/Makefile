@@ -41,10 +41,10 @@ CXXFLAGS += $(EXT_INC)
 ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
 	-L$(HEALPIX_FULL)/lib \
 	-L lib -L. 
-LFLAGS = $(ALL_L) \
-	-lhammurabi \
+LD_FLAGS = $(ALL_L) \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
-	-lgsl -lgslcblas -lm -lfftw3 -fopenmp
+	-lgsl -lgslcblas -lm -lfftw3 -fopenmp 
+LFLAGS = $(LD_FLAGS) -lhammurabi
 
 # DEPENDENCIES
 OBJ += $(addprefix src/params/, param.o)
@@ -77,12 +77,16 @@ $(EXE): $(OBJ) src/main/hammurabi.o lib/libhammurabi.a
 lib/libhammurabi.a: $(OBJ) src/main/hammurabi.o
 	ar cr $@ $^
 
+lib/libhammurabi.so: $(OBJ) src/main/hammurabi.o
+	$(CXX) $^ -o $@ $(LD_FLAGS)
+
 help:
 	echo $(OBJ)
 
 .PHONY: clean
 clean:
-	rm lib/*.a src/main/*.o src/params/*.o src/grids/*.o src/fields/cre/*.o src/fields/fe/*.o src/fields/gmf/*.o src/integrators/*.o src/tools/*.o; rm -rf bin
+	rm lib/*.a src/main/*.o src/params/*.o src/grids/*.o src/fields/cre/*.o src/fields/fe/*.o src/fields/gmf/*.o src/integrators/*.o src/tools/*.o; rm -rf bin; rm -rf html latex; rm lib/*.so
+
 .PHONY: tar 
 tar:
 	tar cfv HamX.tar.gz AUTHROS COPYING include install lib readme.md src templates
