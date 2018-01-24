@@ -47,7 +47,7 @@ with package dependencies:
 * [GSL](https://www.gnu.org/software/gsl/)
 
 #### compiling:
-<span style="color:red">some **modify makefile.ini first** text</span>
+**modify makefile.ini first**
 ```
 cd [package root]
 make -f install/makefile
