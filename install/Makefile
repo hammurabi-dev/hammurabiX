@@ -1,46 +1,25 @@
-# EXTERNAL LIBRARIES
-ifeq ($(GSL),)
-GSL := /usr/local
-endif
-
-ifeq ($(FFTW),)
-FFTW := /usr/local
-endif
-
-ifeq ($(CFITSIO),)
-CFITSIO := /usr/local
-endif
-
-ifeq ($(HEALPIX),)
-$(error "HEALPIX variable must be set")
-endif
-
-ifeq ($(HEALPIX_TARGET),)
-$(error "HEALPIX_TARGET variable must be set")
-endif
-
-HEALPIX_FULL = $(HEALPIX)/src/cxx/$(HEALPIX_TARGET)
+include ./install/makefile.ini
 
 # EXECUTABLE NAME
 EXE = hamx
 
 # COMPILER
-CXX = g++ -std=c++11
+CXX = g++-7 -std=c++11
 
 # DEBUG FLAGS
 DEBUG = -g #-DNDEBUG
 
 # COMPILE OPTIONS
-CXXFLAGS = -m64 -O3 -fopenmp -Wall -fPIC -Wno-deprecated -pthread $(DEBUG)
+CXXFLAGS = -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread $(DEBUG)
 
 EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
-	-I$(HEALPIX_FULL)/include \
+	-I$(HEALPIX)/include \
 	-I include -I.
 CXXFLAGS += $(EXT_INC)
  
 ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
-	-L$(HEALPIX_FULL)/lib \
-	-L lib -L. 
+	-L$(HEALPIX)/lib \
+	-L lib -L.
 LD_FLAGS = $(ALL_L) \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
 	-lgsl -lgslcblas -lm -lfftw3 -fopenmp 
@@ -55,9 +34,7 @@ OBJ += $(addprefix src/fields/gmf/, breg.o breg_verify.o brnd.o brnd_global.o br
 OBJ += $(addprefix src/tools/, namespace_toolkit.o tinyxml2.o)
 OBJ += $(addprefix src/integrators/, integrator.o)
 
-HEADS = $(addprefix include/, *.h) 
-
-
+HEADS = $(addprefix include/, *.h)
 
 # RULES
 
@@ -73,7 +50,6 @@ $(EXE): $(OBJ) src/main/hammurabi.o lib/libhammurabi.a
 %.o: %.cc $(HEADS)
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
-
 lib/libhammurabi.a: $(OBJ) src/main/hammurabi.o
 	ar cr $@ $^
 
@@ -82,6 +58,11 @@ lib/libhammurabi.so: $(OBJ) src/main/hammurabi.o
 
 help:
 	echo $(OBJ)
+
+documentation: install/doxy.in
+	doxygen $^
+
+dynamiclib: lib/libhammurabi.so
 
 .PHONY: clean
 clean:
