@@ -1,60 +1,50 @@
-include ./install/makefile.ini
+include ./makefile.ini
 
-# EXECUTABLE NAME
-EXE = hamx
-
-# COMPILER
-CXX = g++-7 -std=c++11
-
-# DEBUG FLAGS
-DEBUG = -g #-DNDEBUG
+SRCDIR=../src
+OBJDIR=../build
+SOURCES=$(shell find $(SRCDIR) -type f -name *.cc)
+OBJ=$(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(SOURCES:.cc=.o))
+INCDIR=../include
+HEADS=$(wildcard $(INCDIR)*.h)
+LIBDIR=../lib
+EXEDIR=../bin
 
 # COMPILE OPTIONS
 CXXFLAGS = -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread $(DEBUG)
 
 EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
 	-I$(HEALPIX)/include \
-	-I include -I.
+	-I $(INCDIR) -I.
 CXXFLAGS += $(EXT_INC)
  
 ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
-	-L$(HEALPIX)/lib \
-	-L lib -L.
+	-L$(HEALPIX)/lib\
+	-L$(LIBDIR) -L.
 LD_FLAGS = $(ALL_L) \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
-	-lgsl -lgslcblas -lm -lfftw3 -fopenmp 
-LFLAGS = $(LD_FLAGS) -lhammurabi
-
-# DEPENDENCIES
-OBJ += $(addprefix src/params/, param.o)
-OBJ += $(addprefix src/grids/, grid.o grid_breg.o grid_brnd.o grid_cre.o grid_fereg.o grid_fernd.o grid_int.o)
-OBJ += $(addprefix src/fields/cre/, cre.o cre_ana.o cre_num.o cre_verify.o)
-OBJ += $(addprefix src/fields/fe/, fereg.o fereg_ymw16.o fereg_verify.o fernd.o fernd_global.o)
-OBJ += $(addprefix src/fields/gmf/, breg.o breg_verify.o brnd.o brnd_global.o brnd_local.o breg_wmap.o breg_jaffe.o)
-OBJ += $(addprefix src/tools/, namespace_toolkit.o tinyxml2.o)
-OBJ += $(addprefix src/integrators/, integrator.o)
-
-HEADS = $(addprefix include/, *.h)
+	-lgsl -lgslcblas -lm -lfftw3 -fopenmp
+LFLAGS = $(LD_FLAGS)
 
 # RULES
 
 default: $(EXE)
 
-src/main/hammurabi.o: src/main/hammurabi.cc $(OBJ)
+$(EXE): | $(EXEDIR)
 
-$(EXE): $(OBJ) src/main/hammurabi.o lib/libhammurabi.a
-	rm -rf bin; mkdir bin
-	$(CXX) $^ -o bin/$(EXE) $(LFLAGS)
-	cp templates/* bin
+$(EXEDIR):
+	mkdir -p $(EXEDIR)
 
-%.o: %.cc $(HEADS)
+$(EXE): $(OBJ)
+	$(CXX) $^ -o $(EXEDIR)/$(EXE) $(LFLAGS)
+	cp ../templates/* $(EXEDIR)
+
+$(OBJDIR)%.o: $(SRCDIR)%.cc $(HEADS)
+	mkdir -p $(dir $@)
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
-lib/libhammurabi.a: $(OBJ) src/main/hammurabi.o
-	ar cr $@ $^
-
-lib/libhammurabi.so: $(OBJ) src/main/hammurabi.o
-	$(CXX) $^ -o $@ $(LD_FLAGS)
+$(LIBDIR)/libhammurabi.so: $(OBJ)
+	mkdir -p $(LIBDIR)
+	$(CXX) -o $@ -shared $(LD_FLAGS) $^
 
 help:
 	echo $(OBJ)
@@ -62,13 +52,13 @@ help:
 documentation: install/doxy.in
 	doxygen $^
 
-dynamiclib: lib/libhammurabi.so
+dynamiclib: $(LIBDIR)/libhammurabi.so
 
 .PHONY: clean
 clean:
-	rm lib/*.a src/main/*.o src/params/*.o src/grids/*.o src/fields/cre/*.o src/fields/fe/*.o src/fields/gmf/*.o src/integrators/*.o src/tools/*.o; rm -rf bin; rm -rf html latex; rm lib/*.so
+	rm -rf $(LIBDIR); rm -rf $(OBJDIR); rm -rf $(EXEDIR); rm -rf html latex;
 
 .PHONY: tar 
 tar:
-	tar cfv HamX.tar.gz AUTHROS COPYING include install lib readme.md src templates
+	tar cfv HamX.tar.gz AUTHROS COPYING readme.md ../templates $(INCDIR) $(OBJDIR) $(LIBDIR)
 # END

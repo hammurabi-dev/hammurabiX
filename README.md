@@ -49,26 +49,26 @@ with package dependencies:
 #### compiling:
 **modify makefile.ini first**
 ```
-cd [package root]
-make -f install/makefile
+cd [package root]/install
+make
 ```
 
 #### running:
 ```
-cd bin/
+cd [package root]/bin
 ./hamx [paramfile name]
 ```
 
 ### shared lib:
 ```
-cd [package root]
-make dynamiclib -f install/makefile
+cd [package root]/install
+make dynamiclib
 ```
 
 #### documentation:
 ```
-cd [package root]
-make documentation -f install/makefile
+cd [package root]/install
+make documentation
 ```
 
 remarks: we suggest users to compile without -DNDEBUG to verify pipeline, while run the code with -DNDEBUG to save computing time.
