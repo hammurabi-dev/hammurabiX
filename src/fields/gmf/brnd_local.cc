@@ -43,8 +43,9 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
     const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
-    
+#ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
+#endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         // physical k in 1/kpc dimension
         vec3_t<double> k {CGS_U_kpc*i/lx,0,0};

@@ -18,11 +18,10 @@ EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
 CXXFLAGS += $(EXT_INC)
  
 ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
-	-L$(HEALPIX)/lib\
-	-L$(LIBDIR) -L.
+	-L$(HEALPIX)/lib
 LD_FLAGS = $(ALL_L) \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
-	-lgsl -lgslcblas -lm -lfftw3 -fopenmp
+	-lgsl -lgslcblas -lm -lfftw3 -fopenmp $(DEBUG)
 LFLAGS = $(LD_FLAGS)
 
 # RULES
@@ -49,16 +48,17 @@ $(LIBDIR)/libhammurabi.so: $(OBJ)
 help:
 	echo $(OBJ)
 
-documentation: install/doxy.in
+doc: install/doxy.in
 	doxygen $^
 
-dynamiclib: $(LIBDIR)/libhammurabi.so
+lib: $(LIBDIR)/libhammurabi.so
 
 .PHONY: clean
 clean:
-	rm -rf $(LIBDIR); rm -rf $(OBJDIR); rm -rf $(EXEDIR); rm -rf html latex;
+	rm -rf $(OBJDIR)
 
-.PHONY: tar 
-tar:
-	tar cfv HamX.tar.gz AUTHROS COPYING readme.md ../templates $(INCDIR) $(OBJDIR) $(LIBDIR)
+.PHONY: wipe
+wipe:
+	rm -rf $(LIBDIR) $(EXEDIR) thml latex;
+
 # END

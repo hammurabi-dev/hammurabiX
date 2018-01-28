@@ -48,8 +48,9 @@ with package dependencies:
 
 #### compiling:
 **modify makefile.ini first**
+
 ```
-cd [package root]/install
+cd [package root]
 make
 ```
 
@@ -61,18 +62,18 @@ cd [package root]/bin
 
 ### shared lib:
 ```
-cd [package root]/install
-make dynamiclib
+cd [package root]
+make lib
 ```
 
 #### documentation:
 ```
-cd [package root]/install
-make documentation
+cd [package root]
+make doc
 ```
 
-remarks: we suggest users to compile without -DNDEBUG to verify pipeline, while run the code with -DNDEBUG to save computing time.
+remarks: we suggest users to compile without -DNDEBUG to verify pipeline first.
 
 #### contact:
 *bug reports and code contributions are warmly welcomed,
-feel free to contact Jiaxin Wang, Tess Jaffe, and Torsten Ensslin*
+feel free to contact [Jiaxin Wang](http://www.sissa.it/app/members.php?ID=222), [Tess Jaffe](https://science.gsfc.nasa.gov/sed/bio/tess.jaffe), and [Torsten Ensslin](https://wwwmpa.mpa-garching.mpg.de/~ensslin/)*
