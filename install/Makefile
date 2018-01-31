@@ -1,23 +1,27 @@
 include ./makefile.ini
 
-ifndef CXX
-CXX=g++ -std=c++11
+ifeq ($(CXX),)
+CXX=g++
 endif
 
-ifndef GSL
+ifeq ($(GSL),)
 GSL=/usr/local
 endif
 
-ifndef FFTW
+ifeq ($(FFTW),)
 FFTW=/usr/local
 endif
 
-ifndef CFITSIO
+ifeq ($(CFITSIO),)
 CFITSIO=/usr/local
 endif
 
-ifndef HEALPIX
+ifeq ($(HEALPIX),)
 $(error "missing HEALPIX")
+endif
+
+ifeq ($(HEALPIX_TARGET),)
+$(error "missing HEALPIX_TARGET")
 endif
 
 HEALPIX_FULL = $(HEALPIX)/src/cxx/$(HEALPIX_TARGET)
@@ -32,7 +36,7 @@ LIBDIR=../lib
 EXEDIR=../bin
 
 # COMPILE OPTIONS
-CXXFLAGS = -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread $(DEBUG)
+CXXFLAGS = -std=c++11 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread $(DEBUG)
 
 EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
 	-I$(HEALPIX_FULL)/include \
