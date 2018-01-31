@@ -1,6 +1,6 @@
 # -*- Makefile -*-
 
-default: hammurabi clean
+default: hammurabi lib clean
 
 hammurabi:
 	$(MAKE) $(MFLAGS) -C install default
