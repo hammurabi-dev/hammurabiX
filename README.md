@@ -72,7 +72,10 @@ cd [package root]
 make doc
 ```
 
-remarks: we suggest users to compile without -DNDEBUG to verify pipeline first.
+remarks: 
+
+* we suggest users to compile without -DNDEBUG to verify pipeline first.
+* Dockerfile is also provided, check [docker document](https://docs.docker.com/).
 
 #### contact:
 *bug reports and code contributions are warmly welcomed,
