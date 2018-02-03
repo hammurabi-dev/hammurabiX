@@ -5,7 +5,7 @@ CXX=g++
 endif
 
 ifeq ($(GSL),)
-GSL=/usr/local
+GSL=/usr
 endif
 
 ifeq ($(FFTW),)
