@@ -43,7 +43,7 @@ RUN rm -f *.tar.gz
 RUN git clone https://bitbucket.org/hammurabicode/hamx
 WORKDIR hamx
 # on fix branch (if necessary)
-#RUN git fetch origin fix
-#RUN git checkout fix
-RUN make
+#RUN git fetch origin unitest
+#RUN git checkout unitest
+RUN make test
 WORKDIR ..

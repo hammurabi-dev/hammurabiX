@@ -1,4 +1,4 @@
-include ./makefile.ini
+include ../install/makefile.ini
 
 ifeq ($(CXX),)
 CXX=g++
@@ -26,14 +26,13 @@ endif
 
 HEALPIX_FULL = $(HEALPIX)/src/cxx/$(HEALPIX_TARGET)
 
-SRCDIR=../src
-OBJDIR=../build
-SOURCES=$(shell find $(SRCDIR) -type f -name *.cc)
-OBJ=$(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(SOURCES:.cc=.o))
-INCDIR=../include
-HEADS=$(wildcard $(INCDIR)*.h)
+SOURCES=$(wildcard *.cc)
+OBJDIR=.
+OBJ=$(SOURCES:.cc=.o)
 LIBDIR=../lib
-EXEDIR=../bin
+INCDIR=../include
+EXEDIR=./bin
+TESTEXE=$(addprefix $(EXEDIR)/,$(SOURCES:.cc=.x))
 
 # COMPILE OPTIONS
 CXXFLAGS = -std=c++11 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread $(DEBUG)
@@ -44,47 +43,39 @@ EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
 CXXFLAGS += $(EXT_INC)
  
 ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
-	-L$(HEALPIX_FULL)/lib
+	-L$(HEALPIX_FULL)/lib -L$(LIBDIR) -L.
 LD_FLAGS = $(ALL_L) \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
-	-lgsl -lgslcblas -lm -lfftw3 -fopenmp $(DEBUG)
+	-lgsl -lgslcblas -lm -lfftw3 -fopenmp -lhammurabi $(DEBUG)
 LFLAGS = $(LD_FLAGS)
 
 # RULES
 
-default: $(EXE)
+default: $(TESTEXE)
 
-$(EXE): | $(EXEDIR)
+$(TESTEXE): | $(EXEDIR)
 
 $(EXEDIR):
 	mkdir -p $(EXEDIR)
 
-$(EXE): $(OBJ)
-	$(CXX) $^ -o $(EXEDIR)/$(EXE) $(LFLAGS)
-	cp ../templates/* $(EXEDIR)
+$(EXEDIR)/%.x: $(OBJDIR)/%.o
+	$(CXX) $^ -o $@ $(LFLAGS)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cc $(HEADS)
-	mkdir -p $(dir $@)
+$(OBJDIR)/%.o: $(SRCDIR)/%.cc
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
-
-$(LIBDIR)/libhammurabi.so: $(OBJ)
-	mkdir -p $(LIBDIR)
-	$(CXX) -o $@ -shared -fPIC -Wl,-z,defs $(LD_FLAGS) $^
 
 help:
 	echo $(OBJ)
 
-doc: install/doxy.in
-	doxygen $^
-
-lib: $(LIBDIR)/libhammurabi.so
-
 .PHONY: clean
 clean:
-	rm -rf $(OBJDIR)
+	rm -rf $(OBJDIR)/*.o
 
 .PHONY: wipe
 wipe:
-	rm -rf $(LIBDIR) $(EXEDIR) thml latex
+	rm -rf $(EXEDIR)
 
-# END
+run: ./bin/hello.x
+	./bin/hello.x
+
+#END

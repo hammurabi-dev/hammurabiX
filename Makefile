@@ -16,3 +16,11 @@ clean:
 
 wipe:
 	$(MAKE) $(MFLAGS) -C install wipe
+
+test: lib
+	$(MAKE) $(MFLAGS) -C install clean
+	$(MAKE) $(MFLAGS) -C unitest default
+	$(MAKE) $(MFLAGS) -C unitest clean
+	$(MAKE) $(MFLAGS) -C unitest run
+	$(MAKE) $(MFLAGS) -C unitest wipe
+	$(MAKE) $(MFLAGS) -C install wipe
