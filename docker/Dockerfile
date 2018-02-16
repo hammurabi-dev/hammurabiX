@@ -34,7 +34,7 @@ RUN echo '4\n\
 RUN ./configure < hlpx_config && make 
 WORKDIR ..
 ENV HEALPIX_TARGET optimized_gcc 
-ENV HEALPIX /home/Downloads/Healpix_3.31
+ENV HEALPIX /home/lab/Healpix_3.31
 
 # CLEAN PACKAGES
 RUN rm -f *.tar.gz
@@ -43,7 +43,7 @@ RUN rm -f *.tar.gz
 RUN git clone https://bitbucket.org/hammurabicode/hamx
 WORKDIR hamx
 # on fix branch (if necessary)
-#RUN git fetch origin unitest
-#RUN git checkout unitest
-RUN make test
+RUN git fetch origin unitest
+RUN git checkout unitest
+RUN make
 WORKDIR ..
