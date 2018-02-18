@@ -75,7 +75,7 @@ clean:
 wipe:
 	rm -rf $(EXEDIR)
 
-run: ./bin/hello.x
-	./bin/hello.x
+run: ./bin/param_unitest.x
+	./bin/param_unitest.x
 
 #END
