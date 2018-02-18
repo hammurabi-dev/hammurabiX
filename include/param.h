@@ -14,7 +14,9 @@ using namespace tinyxml2;
 class Param {
 public:
     Param(std::string);
+	Param(void) = default;
     virtual ~Param(void) = default;
+	
     // observer
     vec3_t<double> SunPosition;
     // magnetic field

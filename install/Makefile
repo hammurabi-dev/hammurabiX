@@ -69,7 +69,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cc $(HEADS)
 
 $(LIBDIR)/libhammurabi.so: $(OBJ)
 	mkdir -p $(LIBDIR)
-	$(CXX) -o $@ -shared -fPIC -Wl,-z,defs $(LD_FLAGS) $^
+	$(CXX) -o $@ -shared -fPIC $(LD_FLAGS) $^
 
 help:
 	echo $(OBJ)
