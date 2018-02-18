@@ -45,5 +45,5 @@ WORKDIR hamx
 # on fix branch (if necessary)
 RUN git fetch origin unitest
 RUN git checkout unitest
-RUN make
+RUN make test
 WORKDIR ..
