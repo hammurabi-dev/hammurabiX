@@ -55,7 +55,7 @@ ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
 LD_FLAGS = $(ALL_L) \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
 	-lgsl -lgslcblas -lm -lfftw3 -fopenmp $(DEBUG)
-LFLAGS = $(ALL_L) -lhammurabi \
+LFLAGS = $(ALL_L) -lhammurabi -Wl,-rpath=$(abspath $(LIBDIR)) \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
 	-lgsl -lgslcblas -lm -lfftw3 -fopenmp $(DEBUG)
 
@@ -94,9 +94,8 @@ clean:
 wipe:
 	rm -rf $(EXEDIR) $(LIBDIR)
 
-run: ./bin/param_unitest.x ./bin/int_unitest.x
-	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(LIBDIR)
-	./bin/param_unitest.x
-	./bin/int_unitest.x
+run: $(EXEDIR)/param_unitest.x $(EXEDIR)/int_unitest.x
+	$(EXEDIR)/param_unitest.x
+	$(EXEDIR)/int_unitest.x
 
 #END
