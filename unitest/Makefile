@@ -31,11 +31,18 @@ OBJDIR=.
 OBJ=$(SOURCES:.cc=.o)
 LIBDIR=../lib
 INCDIR=../include
+HEADS=$(wildcard $(INCDIR)*.h)
 EXEDIR=./bin
 TESTEXE=$(addprefix $(EXEDIR)/,$(SOURCES:.cc=.x))
 
+MRCDIR=../src
+MBJDIR=../build
+MOURCES=$(shell find $(MRCDIR) -type f -name "*.cc")
+MBJ=$(patsubst $(MRCDIR)/%,$(MBJDIR)/%,$(MOURCES:.cc=.o))
+
+
 # COMPILE OPTIONS
-CXXFLAGS = -std=c++11 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread -g -pg -DDEBUG
+CXXFLAGS = -std=c++11 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread -DDEBUG $(DEBUG)
 
 EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
 	-I$(HEALPIX_FULL)/include \
@@ -46,12 +53,20 @@ ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
 	-L$(HEALPIX_FULL)/lib -L$(LIBDIR) -L.
 LD_FLAGS = $(ALL_L) \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
-	-lgsl -lgslcblas -lm -lfftw3 -fopenmp -lhammurabi $(DEBUG)
-LFLAGS = $(LD_FLAGS)
+	-lgsl -lgslcblas -lm -lfftw3 -fopenmp $(DEBUG)
+LFLAGS = $(LD_FLAGS) -lhammurabi
 
 # RULES
 
-default: $(TESTEXE)
+default: $(LIBDIR)/libhammurabi.so $(TESTEXE)
+
+$(LIBDIR)/libhammurabi.so: $(MBJ)
+	mkdir -p $(LIBDIR)
+	$(CXX) -o $@ -shared -fPIC $(LD_FLAGS) $^
+
+$(MBJDIR)/%.o: $(MRCDIR)/%.cc $(HEADS)
+	mkdir -p $(dir $@)
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
 $(TESTEXE): | $(EXEDIR)
 
@@ -65,17 +80,18 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cc
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
 help:
-	echo $(OBJ)
+	echo $(MBJ)
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJDIR)/*.o
+	rm -rf $(OBJDIR) $(MOBJDIR)
 
 .PHONY: wipe
 wipe:
-	rm -rf $(EXEDIR)
+	rm -rf $(EXEDIR) $(LIBDIR)
 
-run: ./bin/param_unitest.x
+run: ./bin/param_unitest.x ./bin/int_unitest.x
 	./bin/param_unitest.x
+	./bin/int_unitest.x
 
 #END

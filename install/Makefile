@@ -28,7 +28,7 @@ HEALPIX_FULL = $(HEALPIX)/src/cxx/$(HEALPIX_TARGET)
 
 SRCDIR=../src
 OBJDIR=../build
-SOURCES=$(shell find $(SRCDIR) -type f -name *.cc)
+SOURCES=$(shell find $(SRCDIR) -type f -name "*.cc")
 OBJ=$(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(SOURCES:.cc=.o))
 INCDIR=../include
 HEADS=$(wildcard $(INCDIR)*.h)

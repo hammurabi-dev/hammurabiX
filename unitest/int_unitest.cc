@@ -23,34 +23,34 @@ int main(void){
         if(test.get_max_shell_radius(i,total_shell,R0)!=radius_max){
             cerr<<"get_max_shell_radius ...... fail"<<endl;
         }
-        if(test.get_min_shell_radius(i,total_shell,R0)!=raidus_min){
+        if(test.get_min_shell_radius(i,total_shell,R0)!=radius_min){
             cerr<<"get_min_shell_radius ...... fail"<<endl;
         }
     }
     
     // testing boundary check
     double R_lim = 1.0001*R0;
-    if(test.check_simulation_upper_limit!=true){
+    if(test.check_simulation_upper_limit(R0,R_lim)){
         cerr<<"check_simulation_upper_limit ...... fail"<<endl;
     }
-    if(test.check_simulation_lower_limit!=false){
+    if(not test.check_simulation_lower_limit(R0,R_lim)){
         cerr<<"check_simulation_lower_limit ...... fail"<<endl;
     }
     
     // testing shell_ref assembling
     // need Grid_int class
     unique_ptr<Grid_int> gint;
-    gint->total_shell = 1
-    gint->ec_r_max = 10.
-    gint->raidal_res = 0.03
-    unique_ptr<Integrator::struct_shell> tmp = unique_prt<Integrator::struct_shell>(new Integrator::struct_shell);
+    gint->total_shell = 1;
+    gint->ec_r_max = 10.;
+    gint->radial_res = 0.03;
+    unique_ptr<Integrator::struct_shell> tmp = unique_ptr<Integrator::struct_shell>(new Integrator::struct_shell);
     test.assemble_shell_ref(tmp.get(),gint.get(),1);
-    if(tmp.step!=667){
+    if(tmp->step!=667){
         cerr<<"assemble_shell_ref ...... fail"<<endl;
     }
-    gint->ec_r_max = 10.02
+    gint->ec_r_max = 10.02;
     test.assemble_shell_ref(tmp.get(),gint.get(),1);
-    if(tmp.step!=669){
+    if(tmp->step!=669){
         cerr<<"assemble_shell_ref ...... fail"<<endl;
     }
     
