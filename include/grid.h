@@ -163,6 +163,7 @@ public:
 class Grid_int final : public Grid{
 public:
     Grid_int(std::string);
+    Grid_int(void) = default;
     virtual ~Grid_int(void) = default;
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;

@@ -12,10 +12,13 @@ int main(void){
 	cout<<"param unitest"<<endl;
 	
 	Param par;
-	cerr<<"default constr ...... pass"<<endl;
+	
 	par.brnd_seed = 23;
 	if(par.brnd_seed != 23){
-		cerr<<"assign value ...... fail"<<endl;
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"assign value ...... fail"<<endl;
 		exit(1);
 	}
     

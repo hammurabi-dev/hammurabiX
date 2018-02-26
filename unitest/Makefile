@@ -26,9 +26,10 @@ endif
 
 HEALPIX_FULL = $(HEALPIX)/src/cxx/$(HEALPIX_TARGET)
 
+SRCDIR=.
 SOURCES=$(wildcard *.cc)
-OBJDIR=.
-OBJ=$(SOURCES:.cc=.o)
+OBJDIR=./build
+OBJ=$(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(SOURCES:.cc=.o))
 LIBDIR=../lib
 INCDIR=../include
 HEADS=$(wildcard $(INCDIR)*.h)
@@ -54,7 +55,9 @@ ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
 LD_FLAGS = $(ALL_L) \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
 	-lgsl -lgslcblas -lm -lfftw3 -fopenmp $(DEBUG)
-LFLAGS = $(LD_FLAGS) -lhammurabi
+LFLAGS = $(ALL_L) -lhammurabi \
+	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
+	-lgsl -lgslcblas -lm -lfftw3 -fopenmp $(DEBUG)
 
 # RULES
 
@@ -77,6 +80,7 @@ $(EXEDIR)/%.x: $(OBJDIR)/%.o
 	$(CXX) $^ -o $@ $(LFLAGS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cc
+	mkdir -p $(dir $@)
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
 help:
@@ -84,13 +88,14 @@ help:
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJDIR) $(MOBJDIR)
+	rm -rf $(OBJDIR) $(MBJDIR)
 
 .PHONY: wipe
 wipe:
 	rm -rf $(EXEDIR) $(LIBDIR)
 
 run: ./bin/param_unitest.x ./bin/int_unitest.x
+	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):$(LIBDIR)
 	./bin/param_unitest.x
 	./bin/int_unitest.x
 

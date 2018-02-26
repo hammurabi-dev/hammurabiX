@@ -18,40 +18,65 @@ int main(void){
     size_t total_shell = 200;
     double R0 = 10.;
     for(size_t i=1;i<=total_shell;++i){
-        double radius_max = pow(2,-(total_shell-i));
-        double radius_min = pow(2,-(total_shell-i+1));
+        double radius_max = R0*pow(2.,-int(total_shell-i));
+        double radius_min = R0*pow(2.,-int(total_shell-i+1));
+        if(i==1) radius_min = 0.;
         if(test.get_max_shell_radius(i,total_shell,R0)!=radius_max){
-            cerr<<"get_max_shell_radius ...... fail"<<endl;
+            cerr<<"ERR:"<<__FILE__
+            <<" : in function "<<__func__<<endl
+            <<" at line "<<__LINE__<<endl
+            <<"get_max_shell_radius ...... fail"<<endl;
+            exit(1);
         }
         if(test.get_min_shell_radius(i,total_shell,R0)!=radius_min){
-            cerr<<"get_min_shell_radius ...... fail"<<endl;
+            cerr<<"ERR:"<<__FILE__
+            <<" : in function "<<__func__<<endl
+            <<" at line "<<__LINE__<<endl
+            <<"get_min_shell_radius ...... fail"<<endl;
+            exit(1);
         }
     }
     
     // testing boundary check
     double R_lim = 1.0001*R0;
     if(test.check_simulation_upper_limit(R0,R_lim)){
-        cerr<<"check_simulation_upper_limit ...... fail"<<endl;
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"check_simulation_upper_limit ...... fail"<<endl;
+        exit(1);
     }
     if(not test.check_simulation_lower_limit(R0,R_lim)){
-        cerr<<"check_simulation_lower_limit ...... fail"<<endl;
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"check_simulation_lower_limit ...... fail"<<endl;
+        exit(1);
     }
     
     // testing shell_ref assembling
     // need Grid_int class
-    unique_ptr<Grid_int> gint;
+    unique_ptr<Grid_int> gint = unique_ptr<Grid_int>(new Grid_int());
     gint->total_shell = 1;
     gint->ec_r_max = 10.;
     gint->radial_res = 0.03;
     unique_ptr<Integrator::struct_shell> tmp = unique_ptr<Integrator::struct_shell>(new Integrator::struct_shell);
     test.assemble_shell_ref(tmp.get(),gint.get(),1);
     if(tmp->step!=667){
-        cerr<<"assemble_shell_ref ...... fail"<<endl;
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"assemble_shell_ref ...... fail"<<endl;
+        exit(1);
     }
     gint->ec_r_max = 10.02;
     test.assemble_shell_ref(tmp.get(),gint.get(),1);
     if(tmp->step!=669){
-        cerr<<"assemble_shell_ref ...... fail"<<endl;
+        cerr<<"ERR:"<<__FILE__
+        <<" : in function "<<__func__<<endl
+        <<" at line "<<__LINE__<<endl
+        <<"assemble_shell_ref ...... fail"<<endl;
+        exit(1);
     }
     
     // LOS integration will be tested through integrated tests
