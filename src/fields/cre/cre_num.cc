@@ -32,7 +32,7 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
         if(tmp<0 or tmp>grid->nz-1) {return 0.;}
         decltype(grid->nr) zl {(std::size_t)floor(tmp)};
         const double zd {tmp - zl};
-#ifndef NDEBUG
+#ifdef DEBUG
         if(rd<0 or zd<0 or rd>1 or zd>1){
             cerr<<"ERR:"<<__FILE__
             <<" : in function "<<__func__<<endl
@@ -55,7 +55,7 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
             std::size_t idx1 {toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl,zl)};
             cre = grid->cre_flux[idx1];
         }
-#ifndef NDEBUG
+#ifdef DEBUG
         if(cre<0){
             cerr<<"ERR:"<<__FILE__
             <<" : in function "<<__func__<<endl
@@ -81,7 +81,7 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
         if (tmp<0 or tmp>grid->nz-1) { return 0.;}
         decltype(grid->nx) zl {(std::size_t)floor(tmp)};
         const double zd {tmp - zl};
-#ifndef NDEBUG
+#ifdef DEBUG
         if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
             cerr<<"ERR:"<<__FILE__
             <<" : in function "<<__func__<<endl
@@ -113,7 +113,7 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
             std::size_t idx1 {toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,Eidx,xl,yl,zl)};
             cre = grid->cre_flux[idx1];
         }
-#ifndef NDEBUG
+#ifdef DEBUG
         if(cre<0){
             cerr<<"ERR:"<<__FILE__
             <<" : in function "<<__func__<<endl
@@ -136,7 +136,7 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
 // J_tot(\nu)
 double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
     double J {0.};
-#ifndef NDEBUG
+#ifdef DEBUG
     if(!grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -170,7 +170,7 @@ double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *
         const double dE {fabs(KE[i+1]-KE[i])};
         // we put beta here
         const double de {(read_grid(i+1,pos,grid)/beta[i+1]+read_grid(i,pos,grid)/beta[i])/2.};
-#ifndef NDEBUG
+#ifdef DEBUG
         if(de<0){
             cerr<<"ERR:"<<__FILE__
             <<" : in function "<<__func__<<endl
@@ -187,7 +187,7 @@ double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *
 // J_pol(\nu)
 double CRE_num::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
     double J {0.};
-#ifndef NDEBUG
+#ifdef DEBUG
     if(!grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -221,7 +221,7 @@ double CRE_num::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *
         const double dE {fabs(KE[i+1]-KE[i])};
         // we put beta here
         const double de {(read_grid(i+1,pos,grid)/beta[i+1]+read_grid(i,pos,grid)/beta[i])/2.};
-#ifndef NDEBUG
+#ifdef DEBUG
         if(de<0){
             cerr<<"ERR:"<<__FILE__
             <<" : in function "<<__func__<<endl

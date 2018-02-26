@@ -76,7 +76,7 @@ double FEreg::read_grid(const vec3_t<double> &pos, Grid_fereg *grid){
     if (tmp<1 or tmp>grid->nz-1) { return 0.;}
     decltype(grid->nx) zl {(std::size_t)floor(tmp)};
     const double zd = tmp - zl;
-#ifndef NDEBUG
+#ifdef DEBUG
     if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -107,7 +107,7 @@ double FEreg::read_grid(const vec3_t<double> &pos, Grid_fereg *grid){
         std::size_t idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         fe = grid->fe[idx1];
     }
-#ifndef NDEBUG
+#ifdef DEBUG
     if(fe<0){
         cerr<<"WAR:"<<__FILE__
         <<" : in function "<<__func__<<endl

@@ -32,7 +32,7 @@ Grid_fernd::Grid_fernd(string file_name){
         build_grid(doc.get());
     }
     if(read_permission or write_permission){
-#ifndef NDEBUG
+#ifdef DEBUG
         cout<<"IFNO: FE_RND I/O ACTIVE"<<endl;
 #endif
         filename = ptr->Attribute("filename");
@@ -53,7 +53,7 @@ void Grid_fernd::build_grid(XMLDocument *doc){
     y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
     z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
     z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
-#ifndef NDEBUG
+#ifdef DEBUG
     // memory check (double complex + double + double)
     const double bytes {full_size*(16.+ 8.)};
     cout<<"INFO: FERND REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
@@ -96,7 +96,7 @@ void Grid_fernd::export_grid(void){
     }
     output.close();
     // exit program
-#ifndef NDEBUG
+#ifdef DEBUG
     cout<<"...RANDOM FREE ELECTRON FIELD EXPORTED AND CLEANED..."<<endl;
 #endif
     exit(0);

@@ -42,7 +42,7 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     if (tmp<0 or tmp>grid->nz-1) { return 0.;}
     decltype(grid->nx) zl {(std::size_t)floor(tmp)};
     const double zd {tmp - zl};
-#ifndef NDEBUG
+#ifdef DEBUG
     if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl

@@ -43,7 +43,7 @@ vec3_t<double> Brnd::read_grid(const vec3_t<double> &pos, Grid_brnd *grid){
     if (tmp<0 or tmp>grid->nz-1) { return vec3_t<double> {0.,0.,0.};}
     decltype(grid->nx) zl {(std::size_t)floor(tmp)};
     const double zd {tmp - zl};
-#ifndef NDEBUG
+#ifdef DEBUG
     if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -89,7 +89,7 @@ vec3_t<double> Brnd::read_grid(const vec3_t<double> &pos, Grid_brnd *grid){
         std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         b_vec3 = vec3_t<double> {grid->fftw_b_x[idx],grid->fftw_b_y[idx],grid->fftw_b_z[idx]};
     }
-#ifndef NDEBUG
+#ifdef DEBUG
     if (b_vec3.Length()>50.*CGS_U_muGauss) {
         cerr<<"WAR:"<<__FILE__
         <<" : in function "<<__func__<<endl

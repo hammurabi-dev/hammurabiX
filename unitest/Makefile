@@ -35,7 +35,7 @@ EXEDIR=./bin
 TESTEXE=$(addprefix $(EXEDIR)/,$(SOURCES:.cc=.x))
 
 # COMPILE OPTIONS
-CXXFLAGS = -std=c++11 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread $(DEBUG)
+CXXFLAGS = -std=c++11 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread -g -pg -DDEBUG
 
 EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
 	-I$(HEALPIX_FULL)/include \

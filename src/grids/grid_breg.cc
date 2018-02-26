@@ -25,7 +25,7 @@ Grid_breg::Grid_breg(string file_name){
     write_permission = ptr->BoolAttribute("write");
     // build up grid when have read or write permission
     if(read_permission or write_permission){
-#ifndef NDEBUG
+#ifdef DEBUG
         cout<<"IFNO: GRID_BREG I/O ACTIVE"<<endl;
 #endif
         filename = ptr->Attribute("filename");
@@ -47,7 +47,7 @@ void Grid_breg::build_grid(XMLDocument *doc){
     y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
     z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
     z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
-#ifndef NDEBUG
+#ifdef DEBUG
     // memory check (double complex + double + double)
     const double bytes {full_size*(3.*8.)};
     cout<<"INFO: BREG REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
@@ -92,7 +92,7 @@ void Grid_breg::export_grid(void){
     }
     output.close();
     // exit program
-#ifndef NDEBUG
+#ifdef DEBUG
     cout<<"...REGULAR MAGNETIC FIELD EXPORTED AND CLEANED..."<<endl;
 #endif
     exit(0);

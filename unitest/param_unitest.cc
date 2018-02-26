@@ -1,5 +1,9 @@
+///
+/// unit-test for class Param
+/// feel free to add more rational testing blocks
+///
 #include<iostream>
-#include<stdlib.h>
+#include<cstdlib>
 #include<param.h>
 
 using namespace std;
@@ -8,13 +12,15 @@ int main(void){
 	cout<<"param unitest"<<endl;
 	
 	Param par;
-	cout<<"default constr ...... pass"<<endl;
+	cerr<<"default constr ...... pass"<<endl;
 	par.brnd_seed = 23;
 	if(par.brnd_seed != 23){
-		cout<<"assign value ...... fail"<<endl;
+		cerr<<"assign value ...... fail"<<endl;
 		exit(1);
 	}
-	cout<<"assign value ...... pass"<<endl;
-		
+    
+    
+    // if all testing blocks pass
+	cout<<"class Param ...... pass"<<endl;
 	return EXIT_SUCCESS;
 }

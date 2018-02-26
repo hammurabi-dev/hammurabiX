@@ -24,7 +24,7 @@ Grid_fereg::Grid_fereg(string file_name){
     read_permission = ptr->BoolAttribute("read");
     write_permission = ptr->BoolAttribute("write");
     if(read_permission or write_permission){
-#ifndef NDEBUG
+#ifdef DEBUG
         cout<<"IFNO: FE I/O ACTIVE"<<endl;
 #endif
         filename = ptr->Attribute("filename");
@@ -46,7 +46,7 @@ void Grid_fereg::build_grid(XMLDocument *doc){
     y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
     z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
     z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
-#ifndef NDEBUG
+#ifdef DEBUG
     // memory check
     const double bytes {full_size*8.};
     cout<<"INFO: FE REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
@@ -91,7 +91,7 @@ void Grid_fereg::export_grid(void){
     }
     output.close();
     // exit program
-#ifndef NDEBUG
+#ifdef DEBUG
     cout<<"...FREE ELECTRON FIELD EXPORTED AND CLEANED..."<<endl;
 #endif
     exit(0);

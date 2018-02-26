@@ -166,7 +166,7 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
                 // impose anisotropy
                 vec3_t<double> H_versor {0.,0.,0.,};
                 double rho {anisotropy(pos,H_versor,par,breg,gbreg)};
-#ifndef NDEBUG
+#ifdef DEBUG
                 if(rho<0. or rho>1.){
                     cerr<<"ERR:"<<__FILE__
                     <<" : in function "<<__func__<<endl

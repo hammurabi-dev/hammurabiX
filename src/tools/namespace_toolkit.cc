@@ -43,7 +43,7 @@ namespace toolkit {
         double result {atan2(y_component, x_component)};
         /*
          if(result<0.) {result+=2.*CGS_U_pi;}
-         #ifndef NDEBUG
+         #ifdef DEBUG
          if (result<0 or result>2.*CGS_U_pi){
          cerr<<"ERR:"<<__FILE__
          <<" : in function "<<__func__<<endl

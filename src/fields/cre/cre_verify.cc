@@ -59,7 +59,7 @@ double CRE_verify::flux(const vec3_t<double> &pos,Param *par,const double &En){
 
 // J_tot(\nu)
 double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
-#ifndef NDEBUG
+#ifdef DEBUG
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -85,7 +85,7 @@ double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cr
 
 // J_pol(\nu)
 double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
-#ifndef NDEBUG
+#ifdef DEBUG
     if(grid->read_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl
@@ -111,7 +111,7 @@ double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cr
 
 // writing out CRE DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
 void CRE_verify::write_grid(Param *par, Grid_cre *grid){
-#ifndef NDEBUG
+#ifdef DEBUG
     if(!grid->write_permission){
         cerr<<"ERR:"<<__FILE__
         <<" : in function "<<__func__<<endl

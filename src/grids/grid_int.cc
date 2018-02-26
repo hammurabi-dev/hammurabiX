@@ -43,7 +43,7 @@ void Grid_int::build_grid(XMLDocument *doc){
             total_shell++;
             nside_shell.push_back(e->UnsignedAttribute("value"));
         }
-#ifndef NDEBUG
+#ifdef DEBUG
         if(nside_shell.size()!=total_shell){
             cerr<<"ERR:"<<__FILE__
             <<" : in function "<<__func__<<endl

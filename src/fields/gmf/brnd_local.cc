@@ -131,7 +131,7 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
     complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
     complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
     complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
-#ifndef NDEBUG
+#ifdef DEBUG
     const double b_var {toolkit::Variance(grid->fftw_b_x.get(),grid->full_size)+toolkit::Variance(grid->fftw_b_y.get(),grid->full_size)+toolkit::Variance(grid->fftw_b_z.get(),grid->full_size)};
     cout<< "BRND: Numerical RMS: "<<sqrt(b_var)/CGS_U_muGauss<<" microG"<<endl;
 #endif

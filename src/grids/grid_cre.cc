@@ -33,7 +33,7 @@ Grid_cre::Grid_cre(string file_name){
         exit(1);
     }
     if(read_permission or write_permission){
-#ifndef NDEBUG
+#ifdef DEBUG
         cout<<"IFNO: CRE I/O ACTIVE"<<endl;
 #endif
         filename = ptr->Attribute("filename");
@@ -81,7 +81,7 @@ void Grid_cre::build_grid(XMLDocument *doc){
         exit(1);
     }
     // memory check
-#ifndef NDEBUG
+#ifdef DEBUG
     const double bytes {cre_size*8.};
     cout<<"INFO: CRE REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
 #endif
@@ -118,7 +118,7 @@ void Grid_cre::export_grid(void){
     }
     output.close();
     // exit program
-#ifndef NDEBUG
+#ifdef DEBUG
     if(nx!=0){
         cout<<"...COSMIC-RAY ELECTRON IN 4D GRID..."<<endl;
     }
