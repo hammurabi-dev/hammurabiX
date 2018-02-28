@@ -11,7 +11,7 @@ Please cite the original [Waelkens et al. (2009)](https://www.aanda.org/articles
 
 Original hammurabi can be found [here](https://sourceforge.net/projects/hammurabicode/).
 
-#### about X.01.00 release
+#### about X.01 release:
 *Currently we are in [TESTING](./unitest) release,
 with only minimal amount of features available.
 Not all modelings have been thoroughly cross-checked with original hammurabi!
@@ -46,7 +46,7 @@ with package dependencies:
 * [CFITSIO](https://heasarc.gsfc.nasa.gov/fitsio/fitsio.html)
 * [GSL](https://www.gnu.org/software/gsl/)
 
-#### compiling:
+#### compile:
 **modify makefile.ini first**
 ```
 cd [package root]
@@ -59,7 +59,7 @@ cd [package root]/bin
 ./hamx [paramfile name]
 ```
 
-### shared lib:
+#### shared lib:
 ```
 cd [package root]
 make lib
@@ -83,7 +83,7 @@ cd [package root]
 make wipe
 ```
 
-remarks: 
+#### remarks:
 
 * Dockerfile is provided, check [docker document](https://docs.docker.com/).
 
