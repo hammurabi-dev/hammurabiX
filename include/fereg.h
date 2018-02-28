@@ -6,8 +6,8 @@
 
 #include <iostream>
 #include <vec3.h>
-#include "param.h"
-#include "grid.h"
+#include <param.h>
+#include <grid.h>
 
 class FEreg{
 public:

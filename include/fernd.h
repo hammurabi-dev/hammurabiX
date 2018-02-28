@@ -8,10 +8,10 @@
 #include <vec3.h>
 #include <vector>
 #include <gsl/gsl_integration.h>
-#include "param.h"
-#include "grid.h"
-#include "cgs_units_file.h"
-#include "fereg.h"
+#include <param.h>
+#include <grid.h>
+#include <cgs_units_file.h>
+#include <fereg.h>
 
 ///
 /// base class with read_grid implemented

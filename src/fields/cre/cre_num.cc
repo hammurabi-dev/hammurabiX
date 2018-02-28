@@ -7,11 +7,11 @@
 #include <gsl/gsl_sf_synchrotron.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_integration.h>
-#include "cre.h"
-#include "param.h"
-#include "grid.h"
-#include "cgs_units_file.h"
-#include "namespace_toolkit.h"
+#include <cre.h>
+#include <param.h>
+#include <grid.h>
+#include <cgs_units_file.h>
+#include <namespace_toolkit.h>
 
 using namespace std;
 

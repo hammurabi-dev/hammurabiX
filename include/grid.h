@@ -1,8 +1,8 @@
 ///
 /// allocating physical/observable fields
 ///
-#ifndef GENERIC_GRID_H
-#define GENERIC_GRID_H
+#ifndef HAMMURABI_GRID_H
+#define HAMMURABI_GRID_H
 
 #include <fftw3.h>
 #include <string>

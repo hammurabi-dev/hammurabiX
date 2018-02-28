@@ -1,8 +1,8 @@
 #include <string>
 #include <vec3.h>
 #include <tinyxml2.h>
-#include "param.h"
-#include "cgs_units_file.h"
+#include <param.h>
+#include <cgs_units_file.h>
 
 using namespace tinyxml2;
 using namespace std;

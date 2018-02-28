@@ -5,8 +5,8 @@
 #define HAMMURABI_CRE_H
 
 #include <gsl/gsl_sf_synchrotron.h>
-#include "param.h"
-#include "grid.h"
+#include <param.h>
+#include <grid.h>
 
 ///
 /// base class, all functions are implemented in derived class

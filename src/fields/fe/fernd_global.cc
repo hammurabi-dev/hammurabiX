@@ -8,12 +8,12 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_integration.h>
 #include <omp.h>
-#include "param.h"
-#include "grid.h"
-#include "fernd.h"
-#include "fereg.h"
-#include "cgs_units_file.h"
-#include "namespace_toolkit.h"
+#include <param.h>
+#include <grid.h>
+#include <fernd.h>
+#include <fereg.h>
+#include <cgs_units_file.h>
+#include <namespace_toolkit.h>
 
 
 using namespace std;

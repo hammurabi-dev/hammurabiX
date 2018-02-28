@@ -1,5 +1,5 @@
 # hammurabi README
-##### (current version X.01)
+##### (current version X.01.00)
 
 hammurabi is a HEALPix-based tool for simulating observables, 
 such as **polarized synchrotron** and **thermal dust emission**, 
@@ -11,8 +11,8 @@ Please cite the original [Waelkens et al. (2009)](https://www.aanda.org/articles
 
 Original hammurabi can be found [here](https://sourceforge.net/projects/hammurabicode/).
 
-#### about X.01 release
-*Currently we are in TESTING release,
+#### about X.01.00 release
+*Currently we are in [TESTING](./unitest) release,
 with only minimal amount of features available.
 Not all modelings have been thoroughly cross-checked with original hammurabi!
 A full release of version X is scheduled in 2018.*
@@ -48,13 +48,12 @@ with package dependencies:
 
 #### compiling:
 **modify makefile.ini first**
-
 ```
 cd [package root]
 make
 ```
 
-#### running:
+#### run:
 ```
 cd [package root]/bin
 ./hamx [paramfile name]
@@ -72,11 +71,25 @@ cd [package root]
 make doc
 ```
 
+#### unit-test:
+```
+cd [package root]
+make test
+```
+
+#### clean up:
+```
+cd [package root]
+make wipe
+```
+
 remarks: 
 
-* we suggest users to compile without -DNDEBUG to verify pipeline first.
-* Dockerfile is also provided, check [docker document](https://docs.docker.com/).
+* Dockerfile is provided, check [docker document](https://docs.docker.com/).
 
 #### contact:
 *bug reports and code contributions are warmly welcomed,
-feel free to contact [Jiaxin Wang](http://www.sissa.it/app/members.php?ID=222), [Tess Jaffe](https://science.gsfc.nasa.gov/sed/bio/tess.jaffe), and [Torsten Ensslin](https://wwwmpa.mpa-garching.mpg.de/~ensslin/)*
+feel free to contact
+[Tess Jaffe](https://science.gsfc.nasa.gov/sed/bio/tess.jaffe),
+[Torsten Ensslin](https://wwwmpa.mpa-garching.mpg.de/~ensslin/),
+and [Jiaxin Wang](http://www.sissa.it/app/members.php?ID=222)*

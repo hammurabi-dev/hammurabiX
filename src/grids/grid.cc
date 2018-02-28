@@ -9,9 +9,9 @@
 #include <fstream>
 #include <healpix_map_fitsio.h>
 #include <fitsio.h>
-#include "grid.h"
-#include "cgs_units_file.h"
-#include "namespace_toolkit.h"
+#include <grid.h>
+#include <cgs_units_file.h>
+#include <namespace_toolkit.h>
 
 using namespace tinyxml2;
 using namespace std;

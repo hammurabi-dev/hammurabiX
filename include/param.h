@@ -1,8 +1,8 @@
 ///
 /// storing parameters (fixed or free) for physical models
 ///
-#ifndef GENERIC_PARAM_H
-#define GENERIC_PARAM_H
+#ifndef HAMMURABI_PARAM_H
+#define HAMMURABI_PARAM_H
 
 #include <string>
 #include <vector>

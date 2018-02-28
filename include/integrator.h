@@ -9,13 +9,13 @@
 #include <healpix_map.h>
 #include <memory>
 
-#include "breg.h"
-#include "brnd.h"
-#include "cre.h"
-#include "fereg.h"
-#include "fernd.h"
-#include "param.h"
-#include "cgs_units_file.h"
+#include <breg.h>
+#include <brnd.h>
+#include <cre.h>
+#include <fereg.h>
+#include <fernd.h>
+#include <param.h>
+#include <cgs_units_file.h>
 
 class Integrator {
 public:

@@ -7,8 +7,8 @@
 #include <fftw3.h>
 #include <vec3.h>
 #include <vector>
-#include "param.h"
-#include "grid.h"
+#include <param.h>
+#include <grid.h>
 
 ///
 /// base class of GMF generator,

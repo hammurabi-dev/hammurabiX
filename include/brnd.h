@@ -9,10 +9,10 @@
 #include <vec3.h>
 #include <vector>
 #include <gsl/gsl_integration.h>
-#include "param.h"
-#include "grid.h"
-#include "cgs_units_file.h"
-#include "breg.h"
+#include <param.h>
+#include <grid.h>
+#include <cgs_units_file.h>
+#include <breg.h>
 
 ///
 /// base class with \p read_grid implemented,

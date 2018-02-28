@@ -2,22 +2,20 @@
 #include <vec3.h>
 #include <cmath>
 #include <sys/time.h>
-#include "namespace_toolkit.h"
-#include "cgs_units_file.h"
-#include <thread>
+#include <namespace_toolkit.h>
+#include <cgs_units_file.h>
+#include <thread> // for random seed generator
 #include <sstream>
 
 using namespace std;
 
 namespace toolkit {
-    
     // calculate the perpendicular to LOS component of a vector
     double get_perp2LOS (const vec3_t<double> &input,const double &the_los,const double &phi_los){
         const vec3_t<double> unit_vec {get_LOS_unit_vec(the_los, phi_los)};
         const vec3_t<double> perp_vec {crossprod(unit_vec,input)};
         return perp_vec.Length();
     }
-    
     // calculate the parallel to LOS component of a vector
     double get_par2LOS (const vec3_t<double> &input,const double &the_los,const double &phi_los){
         const vec3_t<double> unit_vec {get_LOS_unit_vec(the_los, phi_los)};
@@ -27,34 +25,18 @@ namespace toolkit {
     double get_intr_pol_ang(const vec3_t<double> &input,const double &the_ec,const double &phi_ec){
         vec3_t<double> sph_unit_v_the;
         vec3_t<double> sph_unit_v_phi;
-        
         sph_unit_v_the = vec3_t<double> {cos(the_ec)*cos(phi_ec),
             cos(the_ec)*sin(phi_ec),
             -sin(the_ec)};
-        
         sph_unit_v_phi = vec3_t<double> {-sin(phi_ec),
             cos(phi_ec),
             0.};
-        
         // IAU convention
         const double y_component {-dotprod(sph_unit_v_the, input)};
         const double x_component {-dotprod(sph_unit_v_phi, input)};
-        
         double result {atan2(y_component, x_component)};
-        /*
-         if(result<0.) {result+=2.*CGS_U_pi;}
-         #ifdef DEBUG
-         if (result<0 or result>2.*CGS_U_pi){
-         cerr<<"ERR:"<<__FILE__
-         <<" : in function "<<__func__<<endl
-         <<" at line "<<__LINE__<<endl;
-         exit(1);
-         }
-         #endif
-         */
         return result;
     }
-    
     // from cartesian coordiante to cylindrical coordinate
     void cart_coord2cyl_coord(const vec3_t<double> &input, double &r, double &phi, double &z){
         r = sqrt(input.x*input.x+input.y*input.y);
@@ -76,7 +58,6 @@ namespace toolkit {
         V.Normalize();
         return V;
     }
-    
     // Mean for array
     double Mean(const double *arr,const std::size_t &size){
         double avg {0};
@@ -99,7 +80,6 @@ namespace toolkit {
         avg/=vect.size();
         return avg;
     }
-    
     // Variance for array
     double Variance(const double *arr,const std::size_t &size){
         const double avg {Mean(arr,size)};

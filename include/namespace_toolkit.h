@@ -8,23 +8,35 @@
 #include <vector>
 #include <string>
 #include <cmath>
-#include "cgs_units_file.h"
+#include <cgs_units_file.h>
 
 namespace toolkit {
     ///
     /// perpendicular component of a vector wrt LOS direction
+    /// 1st argument: vector in Cartesian frame
+    /// 2nd argument: polar angle (in rad)
+    /// 3rd argument: azimuthal angle (in rad)
     ///
     double get_perp2LOS (const vec3_t<double> &,const double &,const double &);
     ///
-    /// parallel component of a vector wrt LOS direction
+    /// (signed) parallel component of a vector wrt LOS direction
+    /// 1st argument: vector in Cartesian frame
+    /// 2nd argument: polar angle (in rad)
+    /// 3rd argument: azimuthal angle (in rad)
     ///
     double get_par2LOS (const vec3_t<double> &,const double &,const double &);
     ///
-    /// intrinsic polarization angle
+    /// intrinsic polarization angle (in rad)
+    /// 1st argument: magnetic field in Cartesian frame
+    /// 2nd argument: polar angle (in rad) of LOS direction
+    /// 3rd argument: azimuthal angle (in rad) of LOS direction
+    /// use with caution, since vector can be parallel to LOS direction
     ///
     double get_intr_pol_ang(const vec3_t<double> &,const double &,const double &);
     ///
     /// Carteisan unit vector of given LOS direction
+    /// first argument: polar angle (in rad)
+    /// second argument: azimuthal angle (in rad)
     ///
     inline vec3_t<double> get_LOS_unit_vec(const double &the_los,const double &phi_los){
         return vec3_t<double> {cos(phi_los)*sin(the_los),

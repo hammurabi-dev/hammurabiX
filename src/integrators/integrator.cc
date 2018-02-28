@@ -11,16 +11,16 @@
 #include <pointing.h>
 #include <vec3.h>
 
-#include "breg.h"
-#include "brnd.h"
-#include "cre.h"
-#include "integrator.h"
-#include "fereg.h"
-#include "fernd.h"
-#include "param.h"
-#include "grid.h"
-#include "cgs_units_file.h"
-#include "namespace_toolkit.h"
+#include <breg.h>
+#include <brnd.h>
+#include <cre.h>
+#include <integrator.h>
+#include <fereg.h>
+#include <fernd.h>
+#include <param.h>
+#include <grid.h>
+#include <cgs_units_file.h>
+#include <namespace_toolkit.h>
 
 using namespace std;
 
@@ -204,20 +204,23 @@ void Integrator::radial_integration(struct_shell *shell_ref,pointing &ptg_in, st
         // Sync
         if(gint->do_sync){
             // pol. angle after Faraday rotation
-            double qui {(inner_shells_fd+pixobs.fd)*lambda_square+intr_pol_ang[i]};
+            double qui_base {(inner_shells_fd+pixobs.fd)*lambda_square};
+            double qui_0 {qui_base+intr_pol_ang[i-1]};
+            double qui_1 {qui_base+intr_pol_ang[i]};
+            double qui_2 {qui_base+intr_pol_ang[i+1]};
 #ifdef DEBUG
-            if (abs(qui)>1e30) {
+            if (abs(qui_0)+abs(qui_1)+abs(qui_2)>1e30) {
                 cerr<<"ERR: ODD VALUE"<<endl;
                 exit(1);
             }
-            if (F_Jtot[i]<0) {
+            if (F_Jtot[i-1]<0 or F_Jtot[i]<0 or F_Jtot[i+1]<0) {
                 cerr<<"ERR: J_tot NEGATIVE"<<endl;
                 exit(1);
             }
 #endif
             pixobs.Is += (F_Jtot[i-1]+4.*F_Jtot[i]+F_Jtot[i+1])*0.16666667;
-            pixobs.Qs += cos(2.*qui)*(F_Jpol[i-1]+4.*F_Jpol[i]+F_Jpol[i+1])*0.16666667;
-            pixobs.Us += sin(2.*qui)*(F_Jpol[i-1]+4.*F_Jpol[i]+F_Jpol[i+1])*0.16666667;
+            pixobs.Qs += (cos(2.*qui_0)*F_Jpol[i-1]+4.*cos(2.*qui_1)*F_Jpol[i]+cos(2.*qui_2)*F_Jpol[i+1])*0.16666667;
+            pixobs.Us += (sin(2.*qui_0)*F_Jpol[i-1]+4.*sin(2.*qui_1)*F_Jpol[i]+sin(2.*qui_2)*F_Jpol[i+1])*0.16666667;
         }
     }
 }//end of radial_integrate
