@@ -14,7 +14,7 @@
 #include <breg.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-
+#include <ap_err.h>
 using namespace std;
 
 vec3_t<double> Brnd_global::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
@@ -168,10 +168,7 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
                 double rho {anisotropy(pos,H_versor,par,breg,gbreg)};
 #ifdef DEBUG
                 if(rho<0. or rho>1.){
-                    cerr<<"ERR:"<<__FILE__
-                    <<" : in function "<<__func__<<endl
-                    <<" at line "<<__LINE__<<endl
-                    <<"WRONG VALUE"<<endl;
+                    ap_err("wrong value");
                     exit(1);
                 }
 #endif

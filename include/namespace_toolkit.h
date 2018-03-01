@@ -9,6 +9,8 @@
 #include <string>
 #include <cmath>
 #include <cgs_units_file.h>
+#include <tinyxml2.h>
+using namespace tinyxml2;
 
 namespace toolkit {
     ///
@@ -35,8 +37,8 @@ namespace toolkit {
     double get_intr_pol_ang(const vec3_t<double> &,const double &,const double &);
     ///
     /// Carteisan unit vector of given LOS direction
-    /// first argument: polar angle (in rad)
-    /// second argument: azimuthal angle (in rad)
+    /// 1st argument: polar angle (in rad)
+    /// 2nd argument: azimuthal angle (in rad)
     ///
     inline vec3_t<double> get_LOS_unit_vec(const double &the_los,const double &phi_los){
         return vec3_t<double> {cos(phi_los)*sin(the_los),
@@ -44,31 +46,25 @@ namespace toolkit {
             cos(the_los)};
     }
     ///
-    /// convert coordinate from cartesian to cylindrical frame
+    /// convert coordinate from Cartesian to cylindrical frame
+    /// 1st argument: coordinate in Cartesian frame
+    /// 2nd argument: r in cylindrical frame
+    /// 3rd argument: phi in cylindrical frame
+    /// 4th argument: z in cylindrical frame
     ///
     void cart_coord2cyl_coord(const vec3_t<double> &, double &, double &, double &);
     ///
-    /// convert coordinate from cylindrical to cartesian frame
+    /// convert coordinate from Cartesian to cylindrical frame
+    /// 1st argument: coordinate in Cartesian frame
+    /// 2nd argument: vec3_t{r,phi,z} in cylindrical frame
     ///
     void cart_coord2cyl_coord(const vec3_t<double> &, vec3_t<double> &);
     ///
-    /// map a vector from Galactic centric cylindrical frame into Galactic centric cartesian frame
-    ///
-    inline void Cyl2Cart(const double &phi,const vec3_t<double> &input, vec3_t<double> &output){
-        output = vec3_t<double> {cos(phi)*input.x - sin(phi)*input.y,
-            sin(phi)*input.x + cos(phi)*input.y,
-            input.z};
-    }
-    inline void Cyl2Cart(const double &phi,const double input[3],double output[3]){
-        output[0] = cos(phi)*input[0] - sin(phi)*input[1];
-        output[1] = sin(phi)*input[0] + cos(phi)*input[1];
-        output[2] = input[2];
-    }
-    ///
     /// get versor of given vector
+    /// 1st argument: vector in an orthogonal frame
+    /// return: versor of given vector
     ///
     vec3_t<double> versor(const vec3_t<double> &);
-    
     ///
     /// find index of 3D grid
     ///
@@ -81,25 +77,22 @@ namespace toolkit {
     inline std::size_t Index4d(const std::size_t &/* n1 */,const std::size_t &n2,const std::size_t &n3,const std::size_t &n4,const std::size_t &e,const std::size_t &i,const std::size_t &j,const std::size_t &l){
         return (e*n2*n3*n4 + i*n3*n4 + j*n4 + l);
     }
-    
-    double Mean (const double *,const std::size_t &); //for array
+    double Mean (const double *,const std::size_t &);
     double Mean(const std::vector<double> &);
-    
     double Variance (const double *,const std::size_t &);
     double Variance(const std::vector<double> &);
-    
     double Covariance (const double *,const double *,const std::size_t &);
     double Covariance(const std::vector<double> &,const std::vector<double> &);
-    
     ///
-    /// convert an array/vector into rank array/vector
+    /// convert an array into rank array
+    /// 1st argument: array pointer
+    /// 2nd argument: array size
     ///
     void Rank(double *,const std::size_t &);
+    ///
+    /// convert a vector into rank vector
+    ///
     void Rank(std::vector<double> &);
-    
-    void Cart2LOS(const double &,const double &,const vec3_t<double> &,vec3_t<double> &);
-    void LOS2Cart(const double &,const double &,const vec3_t<double> &,vec3_t<double> &);
-    
     ///
     /// converting brightness temp into thermal temp with T_0 = 2.725K, Prog.Theor.Exp.Phys. (2014) 2014 (6): 06B109.
     ///
@@ -111,13 +104,21 @@ namespace toolkit {
     /// convert cartesian coordiante into frame with galacitc warp, while fields built in warpped frame as in ordinary frame
     ///
     vec3_t<double> warp(const vec3_t<double> &);
-    
     ///
     /// use given seed number or generate random seed according to thread and clock
     ///
     std::size_t random_seed(const int &);
-    
+    ///
+    /// simple time stamp
+    /// return time in ms
+    ///
     double timestamp(void);
+    //auxiliary functions for class Grid and Param
+    std::string FetchString(XMLElement *,std::string);
+    int FetchInt(XMLElement *,std::string);
+    unsigned int FetchUnsigned(XMLElement *,std::string);
+    bool FetchBool(XMLElement *,std::string);
+    double FetchDouble(XMLElement *,std::string);
 }
 
 #endif

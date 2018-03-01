@@ -6,8 +6,10 @@
 #include <cgs_units_file.h>
 #include <thread> // for random seed generator
 #include <sstream>
-
+#include <tinyxml2.h>
+#include <ap_err.h>
 using namespace std;
+using namespace tinyxml2;
 
 namespace toolkit {
     // calculate the perpendicular to LOS component of a vector
@@ -37,21 +39,21 @@ namespace toolkit {
         double result {atan2(y_component, x_component)};
         return result;
     }
-    // from cartesian coordiante to cylindrical coordinate
+    // from Cartesian coordiante to cylindrical coordinate
     void cart_coord2cyl_coord(const vec3_t<double> &input, double &r, double &phi, double &z){
         r = sqrt(input.x*input.x+input.y*input.y);
         phi = atan2(input.y,input.x);
-        if(phi<0.) {phi+=2.*CGS_U_pi;}
+        //if(phi<0.) {phi+=2.*CGS_U_pi;} // may not be necessary
         z = input.z;
     }
     // overload for vec3 to vec3
     void cart_coord2cyl_coord(const vec3_t<double> &input, vec3_t<double> &cyl_vec){
         cyl_vec.x = sqrt(input.x*input.x+input.y*input.y);
         cyl_vec.y = atan2(input.y,input.x);
-        if(cyl_vec.y<0.) {cyl_vec.y+=2.*CGS_U_pi;}
+        //if(cyl_vec.y<0.) {cyl_vec.y+=2.*CGS_U_pi;} // may not be necessary
         cyl_vec.z = input.z;
     }
-    
+    // get versor of a vector
     vec3_t<double> versor(const vec3_t<double> &b){
         if(b.Length()==0.) {return vec3_t<double> {0.,0.,0.};}
         vec3_t<double> V = b;
@@ -69,10 +71,12 @@ namespace toolkit {
     }
     // Mean for vector
     double Mean(const std::vector<double> &vect){
+#ifdef DEBUG
         if(vect.empty()){
-            cerr<<"ERR: EMPTY VECTOR"<<endl;
+            ap_err("empty vector");
             exit(1);
         }
+#endif
         double avg {0};
         for(auto &i : vect) {
             avg += i;
@@ -92,10 +96,12 @@ namespace toolkit {
     }
     // Variance for vector
     double Variance(const std::vector<double> &vect){
+#ifdef DEBUG
         if(vect.empty()){
-            cerr<<"ERR: EMPTY VECTOR"<<endl;
+            ap_err("empty vector");
             exit(1);
         }
+#endif
         const double avg {Mean(vect)};
         double var {0.};
         for(auto &i : vect){
@@ -117,10 +123,12 @@ namespace toolkit {
     }
     // cov for vector
     double Covariance (const vector<double> &vect1,const vector<double> &vect2){
+#ifdef DEBUG
         if(vect1.size()!=vect2.size()){
-            cerr<<"ERR: NON EQUAL VECTOR SIZE"<<endl;
+            ap_err("unequal vector size");
             exit(1);
         }
+#endif
         double avg1 {Mean(vect1)};
         double avg2 {Mean(vect2)};
         double covar {0.};
@@ -130,15 +138,20 @@ namespace toolkit {
         covar /= vect1.size();
         return covar;
     }
-    
     // get ranked array
-    void Rank(double *arr,const std::size_t &size){
+    void Rank(double *arr,const size_t &size){
         // get max and min
         double max {arr[0]}; double min {arr[0]};
         for(std::size_t i=0;i!=size;++i){
             if(arr[i]>max) max=arr[i];
             else if(arr[i]<min) min=arr[i];
         }
+#ifdef DEBUG
+        if(max==min){
+            ap_err("invalid array");
+            exit(1);
+        }
+#endif
         // get elements ranked
         for(std::size_t i=0;i!=size;++i){
             arr[i] = (arr[i]-min)/(max-min);
@@ -146,10 +159,12 @@ namespace toolkit {
     }
     // get ranked vector
     void Rank(vector<double> &vect){
+#ifdef DEBUG
         if(vect.empty()){
-            cerr<<"ERR: EMPTY VECTOR"<<endl;
+            ap_err("empty vector");
             exit(1);
         }
+#endif
         // get max and min
         double max=vect[0];double min=vect[0];
         for(auto &i : vect){
@@ -161,21 +176,6 @@ namespace toolkit {
             i = (i-min)/(max-min);
         }
     }
-    
-    void Cart2LOS(const double &lat,const double &lon,const vec3_t<double> &infield,vec3_t<double> &outfield){
-        // Jennifer's final modified transform
-        outfield.x=	infield.x*cos(lat)*cos(lon)		+ infield.y*cos(lat)*sin(lon) + infield.z*sin(lat);
-        outfield.y=	-1.*infield.x*sin(lon)			+ infield.y*cos(lon);
-        outfield.z=	-1.*infield.x*sin(lat)*cos(lon)	- infield.y*sin(lat)*sin(lon) + infield.z*cos(lat);
-    }
-    // Inverse tranformation, whichis just the transpose (or swap the sign of the angles):
-    void LOS2Cart(const double &lat,const double &lon,const vec3_t<double> &infield,vec3_t<double> &outfield){
-        // Jennifer's final modified transform
-        outfield.x=	infield.x*cos(lat)*cos(lon)		- infield.y*sin(lon)	- infield.z*sin(lat)*cos(lon);
-        outfield.y=	infield.x*cos(lat)*sin(lon)		+ infield.y*cos(lon)	- infield.z*sin(lat)*sin(lon);
-        outfield.z=	infield.x*sin(lat)										+ infield.z*cos(lat);
-    }
-    
     // galactic warp of cartesian coordinate
     // with this module, we still do modelling in ordinary flat frame.
     // input, Cartesian gc_pos in cgs units, output, warp z in cgs units
@@ -190,7 +190,6 @@ namespace toolkit {
         }
         return wpos;
     }
-    
     // offer random seed
     std::size_t random_seed(const int &s){
         if(s<0){
@@ -204,11 +203,76 @@ namespace toolkit {
         }
         return s;
     }
-    
+    // record time in ms
     double timestamp(void){
         struct timeval tv;
         gettimeofday(&tv,nullptr);
-        return tv.tv_sec + tv.tv_usec*1e-6;
+        return tv.tv_sec*1.e+3 + tv.tv_usec*1e-3;
+    }
+    // auxiliary functions for class Grid and Param
+    std::string FetchString(XMLElement* el, string obj){
+#ifdef DEBUG
+        try{
+#endif
+            return el->FirstChildElement(obj.c_str())->Attribute("value");
+#ifdef DEBUG
+        }catch(...){
+            ap_err("fail");
+            exit(1);
+        }
+#endif
+    }
+    
+    int FetchInt(XMLElement* el, string obj){
+#ifdef DEBUG
+        try{
+#endif
+        return el->FirstChildElement(obj.c_str())->IntAttribute("value");
+#ifdef DEBUG
+        }catch(...){
+            ap_err("fail");
+            exit(1);
+        }
+#endif
+    }
+    
+    unsigned int FetchUnsigned(XMLElement* el, string obj){
+#ifdef DEBUG
+        try{
+#endif
+        return el->FirstChildElement(obj.c_str())->UnsignedAttribute("value");
+#ifdef DEBUG
+        }catch(...){
+            ap_err("fail");
+            exit(1);
+        }
+#endif
+    }
+    
+    bool FetchBool(XMLElement* el, string obj){
+#ifdef DEBUG
+        try{
+#endif
+        return el->FirstChildElement(obj.c_str())->BoolAttribute("cue");
+#ifdef DEBUG
+        }catch(...){
+            ap_err("fail");
+            exit(1);
+        }
+#endif
+    }
+    
+    double FetchDouble(XMLElement* el, string obj){
+#ifdef DEBUG
+        try{
+#endif
+        return el->FirstChildElement(obj.c_str())->DoubleAttribute("value");
+#ifdef DEBUG
+        }catch(...){
+            ap_err("fail");
+            exit(1);
+        }
+#endif
     }
 }
 // END

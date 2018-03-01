@@ -10,7 +10,7 @@
 #include <healpix_map.h>
 #include <pointing.h>
 #include <vec3.h>
-
+#include <ap_err.h>
 #include <breg.h>
 #include <brnd.h>
 #include <cre.h>
@@ -210,11 +210,11 @@ void Integrator::radial_integration(struct_shell *shell_ref,pointing &ptg_in, st
             double qui_2 {qui_base+intr_pol_ang[i+1]};
 #ifdef DEBUG
             if (abs(qui_0)+abs(qui_1)+abs(qui_2)>1e30) {
-                cerr<<"ERR: ODD VALUE"<<endl;
+                ap_err("incorrect value");
                 exit(1);
             }
             if (F_Jtot[i-1]<0 or F_Jtot[i]<0 or F_Jtot[i+1]<0) {
-                cerr<<"ERR: J_tot NEGATIVE"<<endl;
+                ap_err("negative J_tot");
                 exit(1);
             }
 #endif
@@ -232,7 +232,7 @@ void Integrator::radial_integration(struct_shell *shell_ref,pointing &ptg_in, st
 double Integrator::get_max_shell_radius(const size_t &shell_numb,const size_t &total_shell,const double &radius) const {
 #ifdef DEBUG
     if (shell_numb<1 or shell_numb>(total_shell)) {
-        cerr<<"INVALID shell_numb"<<endl;
+        ap_err("invalid shell_numb");
         exit(1);
     }
 #endif
@@ -247,7 +247,7 @@ double Integrator::get_max_shell_radius(const size_t &shell_numb,const size_t &t
 double Integrator::get_min_shell_radius(const size_t &shell_numb,const size_t &total_shell,const double &radius) const {
 #ifdef DEBUG
     if (shell_numb<1 or shell_numb>total_shell) {
-        cerr<<"INVALID shell_numb"<<endl;
+        ap_err("invalid shell_numb");
         exit(1);
     }
 #endif

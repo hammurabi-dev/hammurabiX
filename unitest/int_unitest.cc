@@ -2,11 +2,12 @@
 /// unit-test for class Integration
 /// feel free to add more rational testing blocks
 ///
-#include<iostream>
-#include<cstdlib>
-#include<cmath>
-#include<integrator.h>
-#include<grid.h>
+#include <iostream>
+#include <cstdlib>
+#include <cmath>
+#include <integrator.h>
+#include <grid.h>
+#include <ap_err.h>
 using namespace std;
 
 int main(void){
@@ -22,17 +23,11 @@ int main(void){
         double radius_min = R0*pow(2.,-int(total_shell-i+1));
         if(i==1) radius_min = 0.;
         if(test.get_max_shell_radius(i,total_shell,R0)!=radius_max){
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"get_max_shell_radius ...... fail"<<endl;
+            ap_err("get_max_shell_radius ...... fail");
             exit(1);
         }
         if(test.get_min_shell_radius(i,total_shell,R0)!=radius_min){
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"get_min_shell_radius ...... fail"<<endl;
+            ap_err("get_min_shell_radius ...... fail");
             exit(1);
         }
     }
@@ -40,17 +35,11 @@ int main(void){
     // testing boundary check
     double R_lim = 1.0001*R0;
     if(test.check_simulation_upper_limit(R0,R_lim)){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"check_simulation_upper_limit ...... fail"<<endl;
+        ap_err("check_simulation_upper_limit ...... fail");
         exit(1);
     }
     if(not test.check_simulation_lower_limit(R0,R_lim)){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"check_simulation_lower_limit ...... fail"<<endl;
+        ap_err("check_simulation_lower_limit ...... fail");
         exit(1);
     }
     
@@ -63,19 +52,13 @@ int main(void){
     unique_ptr<Integrator::struct_shell> tmp = unique_ptr<Integrator::struct_shell>(new Integrator::struct_shell);
     test.assemble_shell_ref(tmp.get(),gint.get(),1);
     if(tmp->step!=667){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"assemble_shell_ref ...... fail"<<endl;
+        ap_err("assemble_shell_ref ...... fail");
         exit(1);
     }
     gint->ec_r_max = 10.02;
     test.assemble_shell_ref(tmp.get(),gint.get(),1);
     if(tmp->step!=669){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"assemble_shell_ref ...... fail"<<endl;
+        ap_err("assemble_shell_ref ...... fail");
         exit(1);
     }
     

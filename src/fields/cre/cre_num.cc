@@ -12,7 +12,7 @@
 #include <grid.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-
+#include <ap_err.h>
 using namespace std;
 
 // numerical CRE flux
@@ -34,10 +34,7 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
         const double zd {tmp - zl};
 #ifdef DEBUG
         if(rd<0 or zd<0 or rd>1 or zd>1){
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"WRONG VALUE: "<<endl;
+            ap_err("wrong value");
             exit(1);
         }
 #endif
@@ -57,10 +54,7 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
         }
 #ifdef DEBUG
         if(cre<0){
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"NEGATIVE CRE FLUX"<<endl;
+            ap_err("negative CRE flux");
             exit(1);
         }
 #endif
@@ -83,10 +77,7 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
         const double zd {tmp - zl};
 #ifdef DEBUG
         if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"WRONG VALUE: "<<endl;
+            ap_err("wrong value");
             exit(1);
         }
 #endif
@@ -115,20 +106,14 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
         }
 #ifdef DEBUG
         if(cre<0){
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"NEGATIVE CRE FLUX"<<endl;
+            ap_err("negative CRE flux");
             exit(1);
         }
 #endif
         return cre;
     }
     else{
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"WRONG CRE GRID DIMENSION"<<endl;
+        ap_err("wrong CRE grid dimension");
         exit(1);
     }
 }
@@ -138,10 +123,7 @@ double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *
     double J {0.};
 #ifdef DEBUG
     if(!grid->read_permission){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"NO INPUT"<<endl;
+        ap_err("no input");
         exit(1);
     }
 #endif
@@ -172,10 +154,7 @@ double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *
         const double de {(read_grid(i+1,pos,grid)/beta[i+1]+read_grid(i,pos,grid)/beta[i])/2.};
 #ifdef DEBUG
         if(de<0){
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"NEGATIVE CRE DENSITY"<<endl;
+            ap_err("negative CRE density");
             exit(1);
         }
 #endif
@@ -189,10 +168,7 @@ double CRE_num::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *
     double J {0.};
 #ifdef DEBUG
     if(!grid->read_permission){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"NO INPUT"<<endl;
+        ap_err("no input");
         exit(1);
     }
 #endif
@@ -223,10 +199,7 @@ double CRE_num::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *
         const double de {(read_grid(i+1,pos,grid)/beta[i+1]+read_grid(i,pos,grid)/beta[i])/2.};
 #ifdef DEBUG
         if(de<0){
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"NEGATIVE CRE DENSITY"<<endl;
+            ap_err("negative CRE density");
             exit(1);
         }
 #endif

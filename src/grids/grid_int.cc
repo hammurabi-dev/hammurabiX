@@ -13,9 +13,10 @@
 #include <grid.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-
+#include <ap_err.h>
 using namespace tinyxml2;
 using namespace std;
+using namespace toolkit;
 
 /* line of sight integrator */
 Grid_int::Grid_int(string file_name){
@@ -45,19 +46,13 @@ void Grid_int::build_grid(XMLDocument *doc){
         }
 #ifdef DEBUG
         if(nside_shell.size()!=total_shell){
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"WRONG SHELL NUM"<<endl;
+            ap_err("incorrect shell number");
             exit(1);
         }
 #endif
     }
     else{
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"INVALID SHELL TYPE"<<endl;
+        ap_err("invalid shell type");
         exit(1);
     }
     nside_sim = FetchUnsigned(ptr,"nside_sim");
@@ -92,7 +87,7 @@ void Grid_int::build_grid(XMLDocument *doc){
         do_sync = false;
     }
     if(not (do_dm or do_fd or do_sync)){
-        cerr<<"PEACE: NO OUTPUT REQUIRED"<<endl;
+        ap_err("no output required");
         exit(1);
     }
     

@@ -14,7 +14,7 @@
 #include <breg.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-
+#include <ap_err.h>
 using namespace std;
 
 vec3_t<double> Brnd::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
@@ -45,10 +45,7 @@ vec3_t<double> Brnd::read_grid(const vec3_t<double> &pos, Grid_brnd *grid){
     const double zd {tmp - zl};
 #ifdef DEBUG
     if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"WRONG VALUE"<<endl;
+        ap_err("wrong value");
         exit(1);
     }
 #endif
@@ -91,11 +88,7 @@ vec3_t<double> Brnd::read_grid(const vec3_t<double> &pos, Grid_brnd *grid){
     }
 #ifdef DEBUG
     if (b_vec3.Length()>50.*CGS_U_muGauss) {
-        cerr<<"WAR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<" too strong field at xl="<<xl<<", yl="<<yl<<", zl="<<zl<<endl
-        <<" b_strength = "<< b_vec3.Length()/CGS_U_muGauss <<" microGauss"<<endl;
+        ap_err("sceptical field strength");
         exit(1);
     }
 #endif
@@ -103,10 +96,7 @@ vec3_t<double> Brnd::read_grid(const vec3_t<double> &pos, Grid_brnd *grid){
 }
 
 void Brnd::write_grid(Param *, Breg *, Grid_breg *, Grid_brnd *){
-    cerr<<"WAR:"<<__FILE__
-    <<" : in function "<<__func__<<endl
-    <<" at line "<<__LINE__<<endl
-    <<"DYNAMIC BINDING FAILURE"<<endl;
+    ap_err("dynamic binding fail");
     exit(1);
 }
 

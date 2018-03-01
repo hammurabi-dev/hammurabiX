@@ -11,7 +11,7 @@
 #include <grid.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-
+#include <ap_err.h>
 using namespace std;
 
 // CRE flux spatial rescaling
@@ -61,10 +61,7 @@ double CRE_verify::flux(const vec3_t<double> &pos,Param *par,const double &En){
 double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
 #ifdef DEBUG
     if(grid->read_permission){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"WRONG MODULE"<<endl;
+        ap_err("wrong module");
         exit(1);
     }
 #endif
@@ -87,10 +84,7 @@ double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cr
 double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
 #ifdef DEBUG
     if(grid->read_permission){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"WRONG MODULE"<<endl;
+        ap_err("wrong module");
         exit(1);
     }
 #endif
@@ -113,10 +107,7 @@ double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cr
 void CRE_verify::write_grid(Param *par, Grid_cre *grid){
 #ifdef DEBUG
     if(!grid->write_permission){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"NO PERMISSION"<<endl;
+        ap_err("no permission");
         exit(1);
     }
 #endif

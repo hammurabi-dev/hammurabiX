@@ -30,14 +30,6 @@ public:
     /// import file to grid
     ///
     virtual void import_grid(void);
-    
-protected:
-    //auxiliary functions
-    std::string FetchString(XMLElement *,std::string);
-    int FetchInt(XMLElement *,std::string);
-    unsigned int FetchUnsigned(XMLElement *,std::string);
-    bool FetchBool(XMLElement *,std::string);
-    double FetchDouble(XMLElement *,std::string);
 };
 
 ///

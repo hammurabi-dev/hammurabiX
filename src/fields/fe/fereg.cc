@@ -11,7 +11,7 @@
 #include <grid.h>
 #include <namespace_toolkit.h>
 #include <cgs_units_file.h>
-
+#include <ap_err.h>
 using namespace std;
 
 double FEreg::get_density(const vec3_t<double> &pos, Param *par, Grid_fereg *grid){
@@ -53,10 +53,7 @@ double FEreg::density_blur(const vec3_t<double> &pos, Param *par, Grid_fereg *gr
 }
 
 double FEreg::density(const vec3_t<double> &, Param *){
-    cerr<<"ERR:"<<__FILE__
-    <<" : in function "<<__func__<<endl
-    <<" at line "<<__LINE__<<endl
-    <<"DYNAMIC BINDING FAILURE"<<endl;
+    ap_err("dynamic binding fail");
     exit(1);
     return 0.;
 }
@@ -78,10 +75,7 @@ double FEreg::read_grid(const vec3_t<double> &pos, Grid_fereg *grid){
     const double zd = tmp - zl;
 #ifdef DEBUG
     if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"WRONG VALUE: "<<endl;
+        ap_err("wrong value");
         exit(1);
     }
 #endif
@@ -109,10 +103,7 @@ double FEreg::read_grid(const vec3_t<double> &pos, Grid_fereg *grid){
     }
 #ifdef DEBUG
     if(fe<0){
-        cerr<<"WAR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"WRONG VALUE"<<endl;
+        ap_err("wrong value");
         exit(1);
     }
 #endif
@@ -121,10 +112,7 @@ double FEreg::read_grid(const vec3_t<double> &pos, Grid_fereg *grid){
 
 void FEreg::write_grid(Param *par, Grid_fereg *grid){
     if(!grid->write_permission){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"NO PERMISSION"<<endl;
+        ap_err("no permission");
         exit(1);
     }
     cout<<"...FE: WRITING OUTPUT..."<<endl;

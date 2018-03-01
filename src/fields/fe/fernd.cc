@@ -13,7 +13,7 @@
 #include <fereg.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-
+#include <ap_err.h>
 using namespace std;
 
 double FErnd::get_fernd(const vec3_t<double> &pos,Grid_fernd *grid){
@@ -44,10 +44,7 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     const double zd {tmp - zl};
 #ifdef DEBUG
     if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"WRONG VALUE"<<endl;
+        ap_err("wrong value");
         exit(1);
     }
 #endif
@@ -85,10 +82,7 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
 }
 
 void FErnd::write_grid_global(Param *,Grid_fernd *){
-    cerr<<"WAR:"<<__FILE__
-    <<" : in function "<<__func__<<endl
-    <<" at line "<<__LINE__<<endl
-    <<"DYNAMIC BINDING FAILURE"<<endl;
+    ap_err("dynamic binding fail");
     exit(1);
 }
 

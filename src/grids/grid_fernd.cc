@@ -13,9 +13,10 @@
 #include <grid.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-
+#include <ap_err.h>
 using namespace tinyxml2;
 using namespace std;
+using namespace toolkit;
 
 // turbulent free electron density field
 Grid_fernd::Grid_fernd(string file_name){
@@ -68,27 +69,18 @@ void Grid_fernd::build_grid(XMLDocument *doc){
 
 void Grid_fernd::export_grid(void){
     if(filename.empty()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"NONEXIST FILE"<<endl;
+        ap_err("invalid filename");
         exit(1);
     }
     ofstream output(filename.c_str(), std::ios::out|std::ios::binary);
     if (!output.is_open()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"COULD NOT OPEN: "<<filename<<endl;
+        ap_err("file open fail");
         exit(1);
     }
     double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
         if (output.eof()) {
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"UNEXPECTED END AT: "<<i<<endl;
+            ap_err("unexpected");
             exit(1);
         }
         tmp = fftw_fe[i];
@@ -104,27 +96,18 @@ void Grid_fernd::export_grid(void){
 
 void Grid_fernd::import_grid(void){
     if(filename.empty()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"NONEXIST FILE"<<endl;
+        ap_err("invalid filename");
         exit(1);
     }
     ifstream input(filename.c_str(), std::ios::in|std::ios::binary);
     if (!input.is_open()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"COULD NOT OPEN: "<<filename<<endl;
+        ap_err("file open fail");
         exit(1);
     }
     double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
         if (input.eof()) {
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"UNEXPECTED END AT: "<<i<<endl;
+            ap_err("unexpected");
             exit(1);
         }
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
@@ -133,10 +116,7 @@ void Grid_fernd::import_grid(void){
     auto eof = input.tellg();
     input.seekg (0, input.end);
     if (eof != input.tellg()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"INCORRECT LENGTH"<<endl;
+        ap_err("incorrect length");
         exit(1);
     }
     input.close();

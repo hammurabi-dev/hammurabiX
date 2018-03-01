@@ -3,9 +3,10 @@
 #include <tinyxml2.h>
 #include <param.h>
 #include <cgs_units_file.h>
-
+#include <namespace_toolkit.h>
 using namespace tinyxml2;
 using namespace std;
+using namespace toolkit;
 
 Param::Param(std::string file_name){
     XMLDocument *doc = new XMLDocument();

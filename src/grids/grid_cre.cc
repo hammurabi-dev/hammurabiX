@@ -13,9 +13,10 @@
 #include <grid.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-
+#include <ap_err.h>
 using namespace tinyxml2;
 using namespace std;
+using namespace toolkit;
 
 Grid_cre::Grid_cre(string file_name){
     unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
@@ -26,10 +27,7 @@ Grid_cre::Grid_cre(string file_name){
     // security check
     string type_check {doc->FirstChildElement("root")->FirstChildElement("CRE")->Attribute("type")};
     if(read_permission and type_check=="Analytic"){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"ANALYTIC CRE DO NOT READ"<<endl;
+        ap_err("analytic CRE does not read");
         exit(1);
     }
     if(read_permission or write_permission){
@@ -74,10 +72,7 @@ void Grid_cre::build_grid(XMLDocument *doc){
         cre_size = nE*nx*ny*nz;
     }
     else{
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"UNEXPECTED GRID DIMENSION"<<endl;
+        ap_err("unexpected grid dimension");
         exit(1);
     }
     // memory check
@@ -90,27 +85,18 @@ void Grid_cre::build_grid(XMLDocument *doc){
 
 void Grid_cre::export_grid(void){
     if(filename.empty()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"NONEXIST FILE"<<endl;
+        ap_err("invalid filename");
         exit(1);
     }
     ofstream output(filename.c_str(), std::ios::out|std::ios::binary);
     if (!output.is_open()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"COULD NOT OPEN: "<<filename<<endl;
+        ap_err("open file fail");
         exit(1);
     }
     double tmp;
     for(decltype(cre_size) i=0;i!=cre_size;++i){
         if (output.eof()) {
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"UNEXPECTED END AT: "<<i<<endl;
+            ap_err("unexpected");
             exit(1);
         }
         tmp = cre_flux[i];
@@ -132,27 +118,18 @@ void Grid_cre::export_grid(void){
 
 void Grid_cre::import_grid(void){
     if(filename.empty()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"NONEXIST FILE"<<endl;
+        ap_err("invalid filename");
         exit(1);
     }
     ifstream input(filename.c_str(), std::ios::in|std::ios::binary);
     if (!input.is_open()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"COULD NOT OPEN: "<<filename<<endl;
+        ap_err("open file fail");
         exit(1);
     }
     double tmp;
     for(decltype(cre_size) i=0;i!=cre_size;++i){
         if (input.eof()) {
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"UNEXPECTED END AT: "<<i<<endl;
+            ap_err("unexpected");
             exit(1);
         }
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
@@ -161,10 +138,7 @@ void Grid_cre::import_grid(void){
     auto eof = input.tellg();
     input.seekg (0, input.end);
     if (eof != input.tellg()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"INCORRECT LENGTH"<<endl;
+        ap_err("incorrect length");
         exit(1);
     }
     input.close();
