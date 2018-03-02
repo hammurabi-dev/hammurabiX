@@ -46,29 +46,12 @@ with package dependencies:
 * [CFITSIO](https://heasarc.gsfc.nasa.gov/fitsio/fitsio.html)
 * [GSL](https://www.gnu.org/software/gsl/)
 
-#### compile:
+#### install:
 **modify makefile.ini first**
 ```
 cd [package root]
 make
-```
-
-#### run:
-```
-cd [package root]/bin
-./hamx [paramfile name]
-```
-
-#### shared lib:
-```
-cd [package root]
-make lib
-```
-
-#### documentation:
-```
-cd [package root]
-make doc
+make install
 ```
 
 #### unit-test:
@@ -77,10 +60,16 @@ cd [package root]
 make test
 ```
 
-#### clean up:
+#### run:
+```
+cd [package root]/bin
+hamx [paramfile name]
+```
+
+* documentation:
 ```
 cd [package root]
-make wipe
+make doc
 ```
 
 #### remarks:
