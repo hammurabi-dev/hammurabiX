@@ -42,8 +42,10 @@ RUN rm -f *.tar.gz
 # HAMMURABI X
 RUN git clone https://bitbucket.org/hammurabicode/hamx
 WORKDIR hamx
-# on fix branch (if necessary)
-RUN git fetch origin unitest
-RUN git checkout unitest
+# move to slave branch (if necessary)
+#RUN git fetch origin unitest
+#RUN git checkout unitest
 RUN make test
+RUN make
+RUN make install
 WORKDIR ..
