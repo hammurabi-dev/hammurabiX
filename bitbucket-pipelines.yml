@@ -9,7 +9,8 @@ pipelines:
   default:
     - step:
         script:
-          - docker build -t hammurabi:pipeline -f docker/Dockerfile .
+          - cd docker
+          - docker build -t hammurabi:pipeline .
         services:
           - docker
 definitions:
