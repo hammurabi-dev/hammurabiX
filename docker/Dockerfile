@@ -21,7 +21,9 @@ RUN ./configure --enable-threads --enable-openmp --enable-shared --prefix=/usr/l
 WORKDIR ..
 
 # HEALPIX
-RUN wget http://downloads.sourceforge.net/project/healpix/Healpix_3.31/Healpix_3.31_2016Aug26.tar.gz && tar -xzf Healpix_3.31_2016Aug26.tar.gz 
+RUN wget http://downloads.sourceforge.net/project/healpix/Healpix_3.31/Healpix_3.31_2016Aug26.tar.gz
+#RUN gunzip Healpix_3.31_2016Aug26.tar.gz
+RUN tar xzf Healpix_3.31_2016Aug26.tar.gz
 WORKDIR Healpix_3.31
 # write config file on fly
 RUN echo '4\n\
