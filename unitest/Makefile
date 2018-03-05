@@ -1,4 +1,4 @@
-include ../install/makefile.ini
+include ../INSTALL/makefile.ini
 
 ifeq ($(CXX),)
 CXX=g++
