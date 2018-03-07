@@ -25,17 +25,6 @@ public:
     /// assmebling pixels/shells into Healpix map
     ///
     void write_grid(Breg *,Brnd *,FEreg *,FErnd *,CRE *,Grid_breg *,Grid_brnd *,Grid_fereg *,Grid_fernd *,Grid_cre *,Grid_int *,Param *);
-    ///
-    /// to hold temporary information of spherical shells
-    ///
-    struct struct_shell{
-        std::size_t shell_num;
-        double d_start;
-        double d_stop;
-        double delta_d;
-        std::size_t step;
-        std::vector<double> dist;
-    };
 #ifndef DEBUG
 private:
 #endif
@@ -47,6 +36,17 @@ private:
         double fd;
         double dm;
         double ff;
+    };
+    ///
+    /// to hold temporary information of spherical shells
+    ///
+    struct struct_shell{
+        std::size_t shell_num;
+        double d_start;
+        double d_stop;
+        double delta_d;
+        std::size_t step;
+        std::vector<double> dist;
     };
     ///
     /// conduct LOS integration in one pixel at given shell

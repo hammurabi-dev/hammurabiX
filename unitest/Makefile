@@ -94,9 +94,7 @@ clean:
 wipe:
 	rm -rf $(EXEDIR) $(LIBDIR)
 
-run: $(EXEDIR)/param_unitest.x $(EXEDIR)/int_unitest.x $(EXEDIR)/tool_unitest.x
-	$(EXEDIR)/param_unitest.x
-	$(EXEDIR)/int_unitest.x
-	$(EXEDIR)/tool_unitest.x
+run: $(TESTEXE)
+	$(foreach exec,$(TESTEXE),$(exec);)
 
 #END

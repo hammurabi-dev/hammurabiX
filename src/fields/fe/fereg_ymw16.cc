@@ -92,7 +92,6 @@ double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,co
     
     double ga {0};
     //for calculating Carina-Sagittarius correction
-    double RAD {180./CGS_U_pi};
     double gd {1.};
     if(rr>par->fereg_ymw16.t1_Bd){
         gd = pow(1/cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2);
@@ -180,10 +179,10 @@ double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,co
         smin=detrr*cspitch[i];//s_ai
         // correction for Carina-Sagittarius
         if(i==2){
-            ga=(1-(par->fereg_ymw16.t3_nsg)*(exp(-pow((theta*RAD-par->fereg_ymw16.t3_thetasg)/par->fereg_ymw16.t3_wsg,2))))*(1+par->fereg_ymw16.t3_ncn*exp(-pow((theta*RAD-par->fereg_ymw16.t3_thetacn)/par->fereg_ymw16.t3_wcn,2)))*pow(1/cosh(smin/par->fereg_ymw16.t3_warm[i]),2);
+            ga=(1-(par->fereg_ymw16.t3_nsg)*(exp(-pow((theta*CGS_U_rad-par->fereg_ymw16.t3_thetasg)/par->fereg_ymw16.t3_wsg,2))))*(1+par->fereg_ymw16.t3_ncn*exp(-pow((theta*CGS_U_rad-par->fereg_ymw16.t3_thetacn)/par->fereg_ymw16.t3_wcn,2)))*pow(1/cosh(smin/par->fereg_ymw16.t3_warm[i]),2);
             
-            if(rr>6*CGS_U_kpc and theta*RAD>par->fereg_ymw16.t3_thetacn) {
-                ga=(1-(par->fereg_ymw16.t3_nsg)*(exp(-pow((theta*RAD-par->fereg_ymw16.t3_thetasg)/par->fereg_ymw16.t3_wsg,2))))*(1+par->fereg_ymw16.t3_ncn)*pow(1/cosh(smin/par->fereg_ymw16.t3_warm[i]),2);
+            if(rr>6*CGS_U_kpc and theta*CGS_U_rad>par->fereg_ymw16.t3_thetacn) {
+                ga=(1-(par->fereg_ymw16.t3_nsg)*(exp(-pow((theta*CGS_U_rad-par->fereg_ymw16.t3_thetasg)/par->fereg_ymw16.t3_wsg,2))))*(1+par->fereg_ymw16.t3_ncn)*pow(1/cosh(smin/par->fereg_ymw16.t3_warm[i]),2);
             }
         }
         // for other three arms

@@ -21,7 +21,7 @@ bool compare(const T &a,const T &b,const double &precision){
 }
 
 int main(void){
-    cout<<"toolkit unitest"<<endl;
+    cout<<endl<<"toolkit unitest"<<endl;
     
     double theta[3] = {0.,90.*CGS_U_rad,90.*CGS_U_rad};
     double phi[3] = {0.,180.*CGS_U_rad,270.*CGS_U_rad};
@@ -96,6 +96,6 @@ int main(void){
     
     
     // if all testing blocks pass
-    cout<<"namespace toolkit ...... pass"<<endl;
+    cout<<"namespace toolkit ...... pass"<<endl<<endl;
     return EXIT_SUCCESS;
 }

@@ -36,8 +36,7 @@ namespace toolkit {
         // IAU convention
         const double y_component {-dotprod(sph_unit_v_the, input)};
         const double x_component {-dotprod(sph_unit_v_phi, input)};
-        double result {atan2(y_component, x_component)};
-        return result;
+        return atan2(y_component, x_component);
     }
     // from Cartesian coordiante to cylindrical coordinate
     void cart_coord2cyl_coord(const vec3_t<double> &input, double &r, double &phi, double &z){

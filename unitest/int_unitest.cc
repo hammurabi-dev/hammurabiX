@@ -11,7 +11,7 @@
 using namespace std;
 
 int main(void){
-    cout<<"integrator unitest"<<endl;
+    cout<<endl<<"integrator unitest"<<endl;
     
     Integrator test;
     
@@ -65,6 +65,6 @@ int main(void){
     // LOS integration will be tested through integrated tests
     
     // if all testing blocks pass
-    cout<<"class Integration ...... pass"<<endl;
+    cout<<"class Integration ...... pass"<<endl<<endl;
     return EXIT_SUCCESS;
 }

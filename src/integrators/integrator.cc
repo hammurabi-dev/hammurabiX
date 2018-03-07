@@ -28,19 +28,19 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
     // unsigned int, pre-calculated in gint
     size_t npix_sim {gint->npix_sim};
     if (gint->do_dm) {
-        gint->dm_map.SetNside(gint->nside_sim, NEST);
+        gint->dm_map.SetNside(gint->nside_sim, RING);
         gint->dm_map.fill(0.);
     }
     if (gint->do_sync) {
-        gint->Is_map.SetNside(gint->nside_sim, NEST);
-        gint->Qs_map.SetNside(gint->nside_sim, NEST);
-        gint->Us_map.SetNside(gint->nside_sim, NEST);
+        gint->Is_map.SetNside(gint->nside_sim, RING);
+        gint->Qs_map.SetNside(gint->nside_sim, RING);
+        gint->Us_map.SetNside(gint->nside_sim, RING);
         gint->Is_map.fill(0.);
         gint->Qs_map.fill(0.);
         gint->Us_map.fill(0.);
     }
     if (gint->do_fd or gint->do_sync) {
-        gint->fd_map.SetNside(gint->nside_sim, NEST);
+        gint->fd_map.SetNside(gint->nside_sim, RING);
         gint->fd_map.fill(0.);
     }
     unique_ptr<struct_shell> shell_ref = unique_ptr<struct_shell>(new struct_shell);
@@ -55,19 +55,19 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
         size_t current_nside {gint->nside_shell[current_shell-1]};
         size_t current_npix {12*current_nside*current_nside};
         if (gint->do_dm) {
-            current_dm_map.SetNside(current_nside, NEST);
+            current_dm_map.SetNside(current_nside, RING);
             current_dm_map.fill(0.);
         }
         if (gint->do_sync) {
-            current_Is_map.SetNside(current_nside, NEST);
-            current_Qs_map.SetNside(current_nside, NEST);
-            current_Us_map.SetNside(current_nside, NEST);
+            current_Is_map.SetNside(current_nside, RING);
+            current_Qs_map.SetNside(current_nside, RING);
+            current_Us_map.SetNside(current_nside, RING);
             current_Is_map.fill(0.);
             current_Qs_map.fill(0.);
             current_Us_map.fill(0.);
         }
         if (gint->do_fd or gint->do_sync) {
-            current_fd_map.SetNside(current_nside, NEST);
+            current_fd_map.SetNside(current_nside, RING);
             current_fd_map.fill(0.);
         }
         // setting for radial_integration

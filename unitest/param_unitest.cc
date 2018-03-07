@@ -9,7 +9,7 @@
 using namespace std;
 
 int main(void){
-	cout<<"param unitest"<<endl;
+	cout<<endl<<"param unitest"<<endl;
 	
 	Param par;
 	
@@ -21,6 +21,6 @@ int main(void){
     
     
     // if all testing blocks pass
-	cout<<"class Param ...... pass"<<endl;
+	cout<<"class Param ...... pass"<<endl<<endl;
 	return EXIT_SUCCESS;
 }
