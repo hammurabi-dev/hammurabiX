@@ -210,25 +210,4 @@ void Param::cre_param(XMLDocument *doc){
     cre_verify.j0 = FetchDouble(subptr,"j0");
 }
 
-// auxiliary functions
-std::string Param::FetchString(XMLElement* el, string obj){
-    return el->FirstChildElement(obj.c_str())->Attribute("value");
-}
-
-int Param::FetchInt(XMLElement* el, string obj){
-    return el->FirstChildElement(obj.c_str())->IntAttribute("value");
-}
-
-unsigned int Param::FetchUnsigned(XMLElement* el, string obj){
-    return el->FirstChildElement(obj.c_str())->UnsignedAttribute("value");
-}
-
-bool Param::FetchBool(XMLElement* el, string obj){
-    return el->FirstChildElement(obj.c_str())->BoolAttribute("cue");
-}
-
-double Param::FetchDouble(XMLElement* el, string obj){
-    return el->FirstChildElement(obj.c_str())->DoubleAttribute("value");
-}
-
 // END
