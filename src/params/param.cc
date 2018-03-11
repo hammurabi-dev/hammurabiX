@@ -4,6 +4,7 @@
 #include <param.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
+#include <cmath>
 using namespace tinyxml2;
 using namespace std;
 using namespace toolkit;
@@ -129,6 +130,26 @@ void Param::fe_param(XMLDocument *doc){
     fereg_ymw16.t3_warm[2] = FetchDouble(subptr,"Wid_arm_2")*CGS_U_pc;
     fereg_ymw16.t3_warm[3] = FetchDouble(subptr,"Wid_arm_3")*CGS_U_pc;
     fereg_ymw16.t3_warm[4] = FetchDouble(subptr,"Wid_arm_4")*CGS_U_pc;
+    fereg_ymw16.t3_rmin[0] = FetchDouble(subptr,"Rref_arm_0")*CGS_U_kpc;//kpc
+    fereg_ymw16.t3_rmin[1] = FetchDouble(subptr,"Rref_arm_1")*CGS_U_kpc;
+    fereg_ymw16.t3_rmin[2] = FetchDouble(subptr,"Rref_arm_2")*CGS_U_kpc;
+    fereg_ymw16.t3_rmin[3] = FetchDouble(subptr,"Rref_arm_3")*CGS_U_kpc;
+    fereg_ymw16.t3_rmin[4] = FetchDouble(subptr,"Rref_arm_4")*CGS_U_kpc;
+    fereg_ymw16.t3_phimin[0] = FetchDouble(subptr,"Phiref_arm_0")*CGS_U_rad;//rad
+    fereg_ymw16.t3_phimin[1] = FetchDouble(subptr,"Phiref_arm_1")*CGS_U_rad;//rad
+    fereg_ymw16.t3_phimin[2] = FetchDouble(subptr,"Phiref_arm_2")*CGS_U_rad;//rad
+    fereg_ymw16.t3_phimin[3] = FetchDouble(subptr,"Phiref_arm_3")*CGS_U_rad;//rad
+    fereg_ymw16.t3_phimin[4] = FetchDouble(subptr,"Phiref_arm_4")*CGS_U_rad;//rad
+    fereg_ymw16.t3_tpitch[0] = tan(FetchDouble(subptr,"pitch_arm_0")*CGS_U_rad);
+    fereg_ymw16.t3_tpitch[1] = tan(FetchDouble(subptr,"pitch_arm_1")*CGS_U_rad);
+    fereg_ymw16.t3_tpitch[2] = tan(FetchDouble(subptr,"pitch_arm_2")*CGS_U_rad);
+    fereg_ymw16.t3_tpitch[3] = tan(FetchDouble(subptr,"pitch_arm_3")*CGS_U_rad);
+    fereg_ymw16.t3_tpitch[4] = tan(FetchDouble(subptr,"pitch_arm_4")*CGS_U_rad);
+    fereg_ymw16.t3_cpitch[0] = cos(FetchDouble(subptr,"pitch_arm_0")*CGS_U_rad);
+    fereg_ymw16.t3_cpitch[1] = cos(FetchDouble(subptr,"pitch_arm_1")*CGS_U_rad);
+    fereg_ymw16.t3_cpitch[2] = cos(FetchDouble(subptr,"pitch_arm_2")*CGS_U_rad);
+    fereg_ymw16.t3_cpitch[3] = cos(FetchDouble(subptr,"pitch_arm_3")*CGS_U_rad);
+    fereg_ymw16.t3_cpitch[4] = cos(FetchDouble(subptr,"pitch_arm_4")*CGS_U_rad);
     fereg_ymw16.t3_Aa = FetchDouble(subptr,"Aa")*CGS_U_pc;//pc
     fereg_ymw16.t3_Ka = FetchDouble(subptr,"Ka");
     fereg_ymw16.t3_ncn = FetchDouble(subptr,"ncn");

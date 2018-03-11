@@ -87,25 +87,22 @@ double FEreg_ymw16::thin(const double &zz,const double &rr, Param *par){
 }
 // spiral arms
 double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,const double &rr,Param *par){
-    double detrr {1e10*CGS_U_pc};
-    double armr, armr1, armr2, smin;
-    
-    double ga {0};
-    //for calculating Carina-Sagittarius correction
-    double gd {1.};
+    // structure scaling
+    double scaling {1.};
     if(rr>par->fereg_ymw16.t1_Bd){
-        gd = pow(1/cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2);
+        scaling = pow(1/cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2);
     }
     // z scaling, K_a*H in ref
     const double H {par->fereg_ymw16.t3_Ka*(32*CGS_U_pc+1.6e-3*rr+(4.e-7/CGS_U_pc)*pow(rr,2))};
-    // R_ai
-    const double rmin[5] = {3.35*CGS_U_kpc,3.707*CGS_U_kpc,3.56*CGS_U_kpc,3.670*CGS_U_kpc,8.21*CGS_U_kpc};
-    // phi_ai
-    const double thmin[5] = {44.4*CGS_U_rad,120*CGS_U_rad,218.6*CGS_U_rad,330.3*CGS_U_rad,55.1*CGS_U_rad};
-    // tan(psi_ai)
-    const double tpitch[5] = {0.20200,0.17300,0.18300,0.18600,0.048300};
-    // cos(psi_ai)
-    const double cspitch[5] = {0.98000,0.98500,0.98360,0.98300,0.99880};
+    scaling *= pow(1/cosh(zz/H),2);
+    // 2nd raidus scaling
+    scaling *= pow(1/cosh((rr-par->fereg_ymw16.t3_B2s)/par->fereg_ymw16.t3_Aa),2);
+    // cutoff for performance
+    if(scaling<1e-5) {return 0.;}
+    
+    double detrr {1e10*CGS_U_pc};
+    double armr, armr1, armr2, smin;
+    double ga {0};
     double theta {atan2(yy,xx)};
     if(theta<0) theta += 2*CGS_U_pi;
     // 普通角度的计算 (general angle calculation)
@@ -113,70 +110,70 @@ double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,co
     // looping through arms
     for(unsigned int i=0;i<4;++i){
         ga=0;
-        //Norma-Outer
+        //Norma-Outer, Perseus, Carina-Sagittarius, Crux_Scutum
         if(i==0){
-            if(theta>=0 and theta<thmin[i]){
-                armr=rmin[i]*exp( (theta+2*CGS_U_pi-thmin[i])*tpitch[i] );//R_a
+            if(theta>=0 and theta<par->fereg_ymw16.t3_phimin[i]){
+                armr=par->fereg_ymw16.t3_rmin[i]*exp( (theta+2*CGS_U_pi-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );//R_a
                 detrr=fabs(rr-armr);//radial distance
             }
-            if(theta>=thmin[i] and theta<2*CGS_U_pi){
-                armr1=rmin[i]*exp( (theta-thmin[i])*tpitch[i] );
-                armr2=rmin[i]*exp( (theta+2*CGS_U_pi-thmin[i])*tpitch[i] );
+            if(theta>=par->fereg_ymw16.t3_phimin[i] and theta<2*CGS_U_pi){
+                armr1=par->fereg_ymw16.t3_rmin[i]*exp( (theta-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );
+                armr2=par->fereg_ymw16.t3_rmin[i]*exp( (theta+2*CGS_U_pi-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );
                 detrr=min(fabs(rr-armr1), fabs(rr-armr2));
             }
         }
         //Perseus
         if(i==1){
-            if(theta>=0 and theta<thmin[i]){
-                armr=rmin[i]*exp( (theta+2*CGS_U_pi-thmin[i])*tpitch[i] );
+            if(theta>=0 and theta<par->fereg_ymw16.t3_phimin[i]){
+                armr=par->fereg_ymw16.t3_rmin[i]*exp( (theta+2*CGS_U_pi-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );
                 detrr=fabs(rr-armr);
             }
-            if(theta>=thmin[i] and theta<2*CGS_U_pi){
-                armr1=rmin[i]*exp( (theta-thmin[i])*tpitch[i] );
-                armr2=rmin[i]*exp( (theta+2*CGS_U_pi-thmin[i])*tpitch[i] );
+            if(theta>=par->fereg_ymw16.t3_phimin[i] and theta<2*CGS_U_pi){
+                armr1=par->fereg_ymw16.t3_rmin[i]*exp( (theta-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );
+                armr2=par->fereg_ymw16.t3_rmin[i]*exp( (theta+2*CGS_U_pi-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );
                 detrr=min(fabs(rr-armr1), fabs(rr-armr2));
             }
         }
         //Carina-Sagittarius
         if(i==2){
-            if(theta>=0 and theta<thmin[i]){
-                armr1=rmin[i]*exp( (theta+2*CGS_U_pi-thmin[i])*tpitch[i] );
-                armr2=rmin[i]*exp( (theta+4*CGS_U_pi-thmin[i])*tpitch[i] );
+            if(theta>=0 and theta<par->fereg_ymw16.t3_phimin[i]){
+                armr1=par->fereg_ymw16.t3_rmin[i]*exp( (theta+2*CGS_U_pi-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );
+                armr2=par->fereg_ymw16.t3_rmin[i]*exp( (theta+4*CGS_U_pi-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );
                 detrr=min(fabs(rr-armr1), fabs(rr-armr2));
             }
-            if(theta>=thmin[i] and theta<2*CGS_U_pi){
-                armr1=rmin[i]*exp( (theta-thmin[i])*tpitch[i] );
-                armr2=rmin[i]*exp( (theta+2*CGS_U_pi-thmin[i])*tpitch[i] );
+            if(theta>=par->fereg_ymw16.t3_phimin[i] and theta<2*CGS_U_pi){
+                armr1=par->fereg_ymw16.t3_rmin[i]*exp( (theta-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );
+                armr2=par->fereg_ymw16.t3_rmin[i]*exp( (theta+2*CGS_U_pi-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );
                 detrr=min(fabs(rr-armr1), fabs(rr-armr2));
             }
         }
         //Crux_Scutum
         if(i==3){
-            if(theta>=0 and theta<thmin[i]){
-                armr1=rmin[i]*exp( (theta+2*CGS_U_pi-thmin[i])*tpitch[i] );
-                armr2=rmin[i]*exp( (theta+4*CGS_U_pi-thmin[i])*tpitch[i] );
+            if(theta>=0 and theta<par->fereg_ymw16.t3_phimin[i]){
+                armr1=par->fereg_ymw16.t3_rmin[i]*exp( (theta+2*CGS_U_pi-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );
+                armr2=par->fereg_ymw16.t3_rmin[i]*exp( (theta+4*CGS_U_pi-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );
                 detrr=min(fabs(rr-armr1), fabs(rr-armr2));
             }
-            if(theta>=thmin[i] and theta<2*CGS_U_pi){
-                armr1=rmin[i]*exp( (theta-thmin[i])*tpitch[i] );
-                armr2=rmin[i]*exp( (theta+2*CGS_U_pi-thmin[i])*tpitch[i] );
+            if(theta>=par->fereg_ymw16.t3_phimin[i] and theta<2*CGS_U_pi){
+                armr1=par->fereg_ymw16.t3_rmin[i]*exp( (theta-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );
+                armr2=par->fereg_ymw16.t3_rmin[i]*exp( (theta+2*CGS_U_pi-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i] );
                 detrr=min(fabs(rr-armr1), fabs(rr-armr2));
             }
         }
         //Local
         if(i==4){
-            if(theta>=0 and theta<thmin[i]){
+            if(theta>=0 and theta<par->fereg_ymw16.t3_phimin[i]){
                 detrr=1e10*CGS_U_pc;//a very big value
             }
-            if(theta>=thmin[i] and theta<2){
-                armr=rmin[i]*exp((theta-thmin[i])*tpitch[i]);
+            if(theta>=par->fereg_ymw16.t3_phimin[i] and theta<2){
+                armr=par->fereg_ymw16.t3_rmin[i]*exp((theta-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i]);
                 detrr=fabs(rr-armr);
             }
             if(theta>=2 and theta<2*CGS_U_pi){
                 detrr=1e10*CGS_U_pc;//a very big value
             }
         }
-        smin=detrr*cspitch[i];//s_ai
+        smin=detrr*par->fereg_ymw16.t3_cpitch[i];//s_ai
         // correction for Carina-Sagittarius
         if(i==2){
             ga=(1-(par->fereg_ymw16.t3_nsg)*(exp(-pow((theta*CGS_U_rad-par->fereg_ymw16.t3_thetasg)/par->fereg_ymw16.t3_wsg,2))))*(1+par->fereg_ymw16.t3_ncn*exp(-pow((theta*CGS_U_rad-par->fereg_ymw16.t3_thetacn)/par->fereg_ymw16.t3_wcn,2)))*pow(1/cosh(smin/par->fereg_ymw16.t3_warm[i]),2);
@@ -189,7 +186,7 @@ double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,co
         else {
             ga=pow(1/cosh(smin/par->fereg_ymw16.t3_warm[i]),2);
         }
-        ne3s += par->fereg_ymw16.t3_narm[i]*ga*pow(1/cosh((rr-par->fereg_ymw16.t3_B2s)/par->fereg_ymw16.t3_Aa),2)*gd*pow(1/cosh(zz/H),2);
+        ne3s += par->fereg_ymw16.t3_narm[i]*ga*scaling;
     }// end of looping through arms
     return ne3s;
 }

@@ -115,7 +115,6 @@ void FEreg::write_grid(Param *par, Grid_fereg *grid){
         ap_err("no permission");
         exit(1);
     }
-    cout<<"...FE: WRITING OUTPUT..."<<endl;
     vec3_t<double> gc_pos;
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};
