@@ -4,11 +4,20 @@
 ///
 #include <iostream>
 #include <cstdlib>
+#include <cmath>
 #include <cgs_units_file.h>
 #include <ap_err.h>
 #include <fereg.h>
 #include <param.h>
 using namespace std;
+
+template<typename T>
+bool compare(const T &,const T &,const double &);
+
+template<typename T>
+bool compare(const T &a,const T &b,const double &precision){
+    return (fabs(a-b)<precision);
+}
 
 int main(void){
     cout<<endl<<"YMW16 regular free-electron field unitest"<<endl;
@@ -31,7 +40,9 @@ int main(void){
         exit(1);
     }
     for(decltype(ref_grid->full_size) i=0;i!=ref_grid->full_size;++i){
-        if(ref_grid->fe[i]!=test_grid->fe[i]){
+        if(!compare(ref_grid->fe[i],test_grid->fe[i],1e-5)){
+            cout<<"ref "<<ref_grid->fe[i]<<endl
+            <<"test "<<test_grid->fe[i]<<endl;
             ap_err("YMW16 ...... fail");
             exit(1);
         }
