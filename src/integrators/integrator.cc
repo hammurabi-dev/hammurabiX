@@ -45,7 +45,9 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
     }
     unique_ptr<struct_shell> shell_ref = unique_ptr<struct_shell>(new struct_shell);
     for (decltype(gint->total_shell) current_shell=1;current_shell!=(gint->total_shell+1);++current_shell) {
+#ifdef DEBUG
         cout<<"INTEGRATOR: AT SHELL "<<current_shell<<endl;
+#endif
         Healpix_Map<double> current_Is_map;
         Healpix_Map<double> current_Qs_map;
         Healpix_Map<double> current_Us_map;
