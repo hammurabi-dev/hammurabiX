@@ -144,7 +144,7 @@ double Brnd_local::cosa(const vec3_t<double> &b,const vec3_t<double> &k){
 
 vec3_t<double> Brnd_local::eplus(const vec3_t<double> &b,const vec3_t<double> &k){
     vec3_t<double> tmp {crossprod(toolkit::versor(k),toolkit::versor(b))};
-    if(tmp.Length()<1e-6){
+    if(tmp.SquaredLength()<1e-12){
         return tmp;
     }
     else{
@@ -154,7 +154,7 @@ vec3_t<double> Brnd_local::eplus(const vec3_t<double> &b,const vec3_t<double> &k
 
 vec3_t<double> Brnd_local::eminus(const vec3_t<double> &b,const vec3_t<double> &k){
     vec3_t<double> tmp {crossprod(crossprod(toolkit::versor(k),toolkit::versor(b)),toolkit::versor(k))};
-    if(tmp.Length()<1e-6){
+    if(tmp.SquaredLength()<1e-12){
         return tmp;
     }
     else{
@@ -199,17 +199,13 @@ double Brnd_local::fs(const double &ma,const double &cosa){
 double Brnd_local::speca(const double &k,Param *par){
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_local.pa0};
-    const double k0 {par->brnd_local.k0};
+    const double kr {k/par->brnd_local.k0};
     const double a0 {par->brnd_local.aa0};
     const double unit = 1./(4*CGS_U_pi*k*k);
-    // avoid nan
-    if(k<=0.){
-        return 0.;
-    }
     // power law
-    double P{0.};
-    if(k>k0){
-        P = p0/pow(k/k0,a0);
+    double P {0.};
+    if(kr>=1.){
+        P = p0/pow(kr,a0);
     }
     return P*unit;
 }
@@ -217,17 +213,13 @@ double Brnd_local::speca(const double &k,Param *par){
 double Brnd_local::specf(const double &k,Param *par){
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_local.pf0};
-    const double k0 {par->brnd_local.k0};
+    const double kr {k/par->brnd_local.k0};
     const double a0 {par->brnd_local.af0};
     const double unit = 1./(4*CGS_U_pi*k*k);
-    // avoid nan
-    if(k<=0.){
-        return 0.;
-    }
     // power law
     double P{0.};
-    if(k>k0){
-        P = p0/pow(k/k0,a0);
+    if(kr>=1.){
+        P = p0/pow(kr,a0);
     }
     return P*unit;
 }
@@ -235,17 +227,13 @@ double Brnd_local::specf(const double &k,Param *par){
 double Brnd_local::specs(const double &k,Param *par){
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_local.ps0};
-    const double k0 {par->brnd_local.k0};
+    const double kr {k/par->brnd_local.k0};
     const double a0 {par->brnd_local.as0};
     const double unit = 1./(4*CGS_U_pi*k*k);
-    // avoid nan
-    if(k<=0.){
-        return 0.;
-    }
     // power law
-    double P{0.};
-    if(k>k0){
-        P = p0/pow(k/k0,a0);
+    double P {0.};
+    if(kr>=1.){
+        P = p0/pow(kr,a0);
     }
     return P*unit;
 }
