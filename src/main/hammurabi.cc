@@ -235,7 +235,7 @@ int main(int , char **argv) {
     // CLEANING
 #ifdef DEBUG
     cout<<"...ENDING HAMMURABI..."<<endl
-    <<"INFO:TIME ELAPSE "<<(toolkit::timestamp()-time)<<"sec"<<endl;
+    <<"INFO:TIME ELAPSE "<<(toolkit::timestamp()-time)<<" ms"<<endl;
 #endif 
     return EXIT_SUCCESS;
 }

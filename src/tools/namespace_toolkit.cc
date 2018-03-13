@@ -55,9 +55,8 @@ namespace toolkit {
     // get versor of a vector
     vec3_t<double> versor(const vec3_t<double> &b){
         if(b.Length()==0.) {return vec3_t<double> {0.,0.,0.};}
-        vec3_t<double> V = b;
-        V.Normalize();
-        return V;
+        const double L = 1./sqrt(b.x*b.x+b.y*b.y+b.z*b.z);
+        return vec3_t<double> {b.x*L,b.y*L,b.z*L};
     }
     // Mean for array
     double Mean(const double *arr,const std::size_t &size){
