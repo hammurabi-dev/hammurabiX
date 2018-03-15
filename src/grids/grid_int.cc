@@ -16,7 +16,6 @@
 #include <ap_err.h>
 using namespace tinyxml2;
 using namespace std;
-using namespace toolkit;
 
 /* line of sight integrator */
 Grid_int::Grid_int(string file_name){
@@ -31,8 +30,8 @@ void Grid_int::build_grid(XMLDocument *doc){
     string shell_type {ptr->FirstChildElement("shell")->Attribute("type")};
     if(shell_type=="auto"){
         XMLElement *subptr {ptr->FirstChildElement("shell")->FirstChildElement("auto")};
-        total_shell = FetchUnsigned(subptr,"shell_num");
-        std::size_t nside_min {FetchUnsigned(subptr,"nside_min")};
+        total_shell = toolkit::FetchUnsigned(subptr,"shell_num");
+        std::size_t nside_min {toolkit::FetchUnsigned(subptr,"nside_min")};
         for(std::size_t i=0;i!=total_shell;++i){
             nside_shell.push_back(pow(2,i)*nside_min);
         }
@@ -55,13 +54,13 @@ void Grid_int::build_grid(XMLDocument *doc){
         ap_err("invalid shell type");
         exit(1);
     }
-    nside_sim = FetchUnsigned(ptr,"nside_sim");
+    nside_sim = toolkit::FetchUnsigned(ptr,"nside_sim");
     npix_sim = 12*nside_sim*nside_sim;
-    ec_r_max = CGS_U_kpc*FetchDouble(ptr,"ec_r_max");
-    gc_r_max = FetchDouble(ptr,"gc_r_max")*CGS_U_kpc;
-    gc_z_max = FetchDouble(ptr,"gc_z_max")*CGS_U_kpc;
-    radial_res = FetchDouble(ptr,"ec_r_res")*CGS_U_kpc;
-    lat_lim = FetchDouble(ptr,"lat_lim")*CGS_U_rad;
+    ec_r_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"ec_r_max");
+    gc_r_max = toolkit::FetchDouble(ptr,"gc_r_max")*CGS_U_kpc;
+    gc_z_max = toolkit::FetchDouble(ptr,"gc_z_max")*CGS_U_kpc;
+    radial_res = toolkit::FetchDouble(ptr,"ec_r_res")*CGS_U_kpc;
+    lat_lim = toolkit::FetchDouble(ptr,"lat_lim")*CGS_U_rad;
     // output file name
     
     ptr = doc->FirstChildElement("root")->FirstChildElement("Obsout");

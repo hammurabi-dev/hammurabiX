@@ -51,7 +51,7 @@ vec3_t<double> Brnd::read_grid(const vec3_t<double> &pos, Grid_brnd *grid){
 #endif
     vec3_t<double> b_vec3;
     //trilinear interpolation
-    if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
+    if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz){
         std::size_t idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         std::size_t idx2 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
         vec3_t<double> i1 {grid->fftw_b_x[idx1]*(1.-zd) + grid->fftw_b_x[idx2]*zd,
@@ -82,12 +82,12 @@ vec3_t<double> Brnd::read_grid(const vec3_t<double> &pos, Grid_brnd *grid){
         b_vec3 = w1*(1.-xd) + w2*xd;
     }
     // on the boundary
-    else {
+    else{
         std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         b_vec3 = vec3_t<double> {grid->fftw_b_x[idx],grid->fftw_b_y[idx],grid->fftw_b_z[idx]};
     }
 #ifdef DEBUG
-    if (b_vec3.Length()>50.*CGS_U_muGauss) {
+    if (b_vec3.Length()>50.*CGS_U_muGauss){
         ap_err("sceptical field strength");
         exit(1);
     }

@@ -50,7 +50,6 @@ protected:
     /// density variance rescaling factor
     ///
     virtual double rescal(const vec3_t<double> &,Param *);
-    void complex2real(const fftw_complex *,double *,const std::size_t &);
 };
 
 #endif

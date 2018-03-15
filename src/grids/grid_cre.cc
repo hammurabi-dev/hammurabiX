@@ -16,7 +16,6 @@
 #include <ap_err.h>
 using namespace tinyxml2;
 using namespace std;
-using namespace toolkit;
 
 Grid_cre::Grid_cre(string file_name){
     unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
@@ -41,33 +40,33 @@ Grid_cre::Grid_cre(string file_name){
 
 void Grid_cre::build_grid(XMLDocument *doc){
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("CRE")->FirstChildElement("Numeric")};
-    E_min = CGS_U_GeV*FetchDouble(ptr,"E_min");
-    E_max = CGS_U_GeV*FetchDouble(ptr,"E_max");
-    E_fact = FetchDouble(ptr,"E_fact");
+    E_min = CGS_U_GeV*toolkit::FetchDouble(ptr,"E_min");
+    E_max = CGS_U_GeV*toolkit::FetchDouble(ptr,"E_max");
+    E_fact = toolkit::FetchDouble(ptr,"E_fact");
     nE = ceil(log(E_max/E_min)/E_fact);
     // spatial 2D
     if(strcmp(ptr->Attribute("type"),"2D")==0){
-        nr = FetchUnsigned(ptr,"nr");
-        nz = FetchUnsigned(ptr,"nz");
+        nr = toolkit::FetchUnsigned(ptr,"nr");
+        nz = toolkit::FetchUnsigned(ptr,"nz");
         nx = 0; ny = 0;
-        r_max = CGS_U_kpc*FetchDouble(ptr,"r_max");
-        z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
-        z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
+        r_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"r_max");
+        z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_max");
+        z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_min");
         x_max = 0.; x_min = 0.; y_max = 0.; y_min = 0.;
         cre_size = nE*nr*nz;
     }
     // spatial 3D
     else if(strcmp(ptr->Attribute("type"),"3D")==0){
         nr = 0;
-        nz = FetchUnsigned(ptr,"nz");
-        nx = FetchUnsigned(ptr,"nx");
-        ny = FetchUnsigned(ptr,"ny");
-        x_max = CGS_U_kpc*FetchDouble(ptr,"x_max");
-        x_min = CGS_U_kpc*FetchDouble(ptr,"x_min");
-        y_max = CGS_U_kpc*FetchDouble(ptr,"y_max");
-        y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
-        z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
-        z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
+        nz = toolkit::FetchUnsigned(ptr,"nz");
+        nx = toolkit::FetchUnsigned(ptr,"nx");
+        ny = toolkit::FetchUnsigned(ptr,"ny");
+        x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_max");
+        x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_min");
+        y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_max");
+        y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_min");
+        z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_max");
+        z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_min");
         r_max = 0.;
         cre_size = nE*nx*ny*nz;
     }

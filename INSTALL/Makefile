@@ -51,7 +51,7 @@ ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
 	-L$(HEALPIX_FULL)/lib
 LD_FLAGS = $(ALL_L) \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
-	-lgsl -lgslcblas -lm -lfftw3 -fopenmp $(DEBUG)
+	-lgsl -lgslcblas -lfftw3_omp -lfftw3 -lm -fopenmp $(DEBUG)
 LFLAGS = $(LD_FLAGS)
 
 # RULES

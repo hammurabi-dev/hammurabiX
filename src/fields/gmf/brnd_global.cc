@@ -15,6 +15,7 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 #include <ap_err.h>
+
 using namespace std;
 
 vec3_t<double> Brnd_global::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
@@ -76,13 +77,6 @@ vec3_t<double> Brnd_global::gramschmidt(const vec3_t<double> &k,const vec3_t<dou
     return b_free;
 }
 
-// get real components from fftw_complex arrays
-void Brnd_global::complex2real(const fftw_complex *input,double *output,const std::size_t &size) {
-    for(std::size_t i=0;i!=size;++i){
-        output[i] = input[i][0];
-    }
-}
-
 void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
     // PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
@@ -103,7 +97,7 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
     const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(static)
 #endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         double kx {CGS_U_kpc*i/lx};
@@ -148,7 +142,7 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
     // RESCALING FIELD PROFILE IN REAL SPACE
     double b_var {toolkit::Variance(grid->fftw_b_kx[0], grid->full_size)};
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(static)
 #endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i){
         vec3_t<double> pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
@@ -199,7 +193,7 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
     // RE-ORTHOGONALIZING IN FOURIER SPACE
     // Gram-Schmidt process
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(static)
 #endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         vec3_t<double> tmp_k {CGS_U_kpc*i/lx,0,0};
@@ -242,14 +236,14 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
     fftw_execute(grid->fftw_py_bw);
     fftw_execute(grid->fftw_pz_bw);
     // get real elements, use auxiliary function
-    complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
-    complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
-    complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
+    toolkit::complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
+    toolkit::complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
+    toolkit::complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
     // according to FFTW3 manual
     // transform forward followed by backword scale up array by nx*ny*nz
     double inv_grid_size = 1.0/grid->full_size;
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(static)
 #endif
     for(std::size_t i=0;i<grid->full_size;++i){
         grid->fftw_b_x[i] *= inv_grid_size;

@@ -15,7 +15,6 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 
-
 using namespace std;
 
 // isotropic turbulent field
@@ -30,16 +29,12 @@ double FErnd_global::get_fernd(const vec3_t<double> &pos, Grid_fernd *grid){
 double FErnd_global::spec(const double &k, Param *par){
     //units fixing
     const double p0 {par->fernd_global.rms}; //pccm
-    const double k0 {par->fernd_global.k0};
+    const double kr {k/par->fernd_global.k0};
     const double a0 {par->fernd_global.a0};
     const double unit = 1./(4*CGS_U_pi*k*k);
-    // avoid nan
-    if(k<=0.){
-        return 0.;
-    }
     double P {0.};
-    if(k>k0){
-        P = p0*pow(k/k0,a0);
+    if(kr>1){
+        P = p0*pow(kr,a0);
     }
     return P*unit;
 }
@@ -73,7 +68,7 @@ void FErnd_global::write_grid_global(Param *par, Grid_fernd *grid){
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
     const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
 #ifdef _OPENMP
-#pragma omp parallel for ordered schedule(dynamic)
+#pragma omp parallel for schedule(static)
 #endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         double kx {CGS_U_kpc*i/lx};
@@ -124,13 +119,5 @@ void FErnd_global::write_grid_global(Param *par, Grid_fernd *grid){
         }
     }
     // get real elements, use auxiliary function
-    complex2real(grid->fftw_fe_k, grid->fftw_fe.get(), grid->full_size);
-}
-
-
-// get real components from fftw_complex arrays
-void FErnd_global::complex2real(const fftw_complex *input,double *output,const std::size_t &size) {
-    for(std::size_t i=0;i!=size;++i){
-        output[i] = input[i][0];
-    }
+    toolkit::complex2real(grid->fftw_fe_k, grid->fftw_fe.get(), grid->full_size);
 }

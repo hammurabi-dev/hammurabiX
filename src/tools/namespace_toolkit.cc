@@ -1,9 +1,11 @@
 #include <vector>
 #include <vec3.h>
 #include <cmath>
+#include <fftw3.h>
 #include <sys/time.h>
 #include <namespace_toolkit.h>
 #include <cgs_units_file.h>
+#include <omp.h>
 #include <thread> // for random seed generator
 #include <sstream>
 #include <tinyxml2.h>
@@ -225,7 +227,7 @@ namespace toolkit {
 #ifdef DEBUG
         try{
 #endif
-        return el->FirstChildElement(obj.c_str())->IntAttribute("value");
+            return el->FirstChildElement(obj.c_str())->IntAttribute("value");
 #ifdef DEBUG
         }catch(...){
             ap_err("fail");
@@ -238,7 +240,7 @@ namespace toolkit {
 #ifdef DEBUG
         try{
 #endif
-        return el->FirstChildElement(obj.c_str())->UnsignedAttribute("value");
+            return el->FirstChildElement(obj.c_str())->UnsignedAttribute("value");
 #ifdef DEBUG
         }catch(...){
             ap_err("fail");
@@ -251,7 +253,7 @@ namespace toolkit {
 #ifdef DEBUG
         try{
 #endif
-        return el->FirstChildElement(obj.c_str())->BoolAttribute("cue");
+            return el->FirstChildElement(obj.c_str())->BoolAttribute("cue");
 #ifdef DEBUG
         }catch(...){
             ap_err("fail");
@@ -264,7 +266,7 @@ namespace toolkit {
 #ifdef DEBUG
         try{
 #endif
-        return el->FirstChildElement(obj.c_str())->DoubleAttribute("value");
+            return el->FirstChildElement(obj.c_str())->DoubleAttribute("value");
 #ifdef DEBUG
         }catch(...){
             ap_err("fail");
@@ -272,5 +274,17 @@ namespace toolkit {
         }
 #endif
     }
-}
+    
+    // get real components from fftw_complex arrays
+    void complex2real(const fftw_complex *input,double *output,const std::size_t &size){
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+        // DO NOT CHANGE SCHEDULE TYPE
+        for(std::size_t i=0;i<size;++i){
+            output[i] = input[i][0];
+        }
+    }
+    
+}// end of namespace
 // END

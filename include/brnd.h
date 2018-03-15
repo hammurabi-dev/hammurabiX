@@ -66,10 +66,6 @@ private:
     ///
     double anisotropy(const vec3_t<double> &,vec3_t<double> &,Param *,Breg *,Grid_breg *);
     ///
-    /// get real part of each element from a complex array
-    ///
-    void complex2real(const fftw_complex *,double *,const std::size_t &);
-    ///
     /// Gram-Schmidt orthogonalization process
     ///
     vec3_t<double> gramschmidt(const vec3_t<double> &,const vec3_t<double> &);
@@ -136,8 +132,6 @@ private:
     /// isotropic part of power spectrum of slow mode
     ///
     double specs(const double &,Param *);
-    
-    void complex2real(const fftw_complex *,double *,const std::size_t &);
 };
 
 #endif

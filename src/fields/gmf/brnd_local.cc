@@ -44,7 +44,7 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
     const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(static)
 #endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         // physical k in 1/kpc dimension
@@ -128,9 +128,9 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
     fftw_execute(grid->fftw_py_bw);
     fftw_execute(grid->fftw_pz_bw);
     // get real elements, use auxiliary function
-    complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
-    complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
-    complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
+    toolkit::complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
+    toolkit::complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
+    toolkit::complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
 #ifdef DEBUG
     const double b_var {toolkit::Variance(grid->fftw_b_x.get(),grid->full_size)+toolkit::Variance(grid->fftw_b_y.get(),grid->full_size)+toolkit::Variance(grid->fftw_b_z.get(),grid->full_size)};
     cout<< "BRND: Numerical RMS: "<<sqrt(b_var)/CGS_U_muGauss<<" microG"<<endl;
@@ -236,12 +236,5 @@ double Brnd_local::specs(const double &k,Param *par){
         P = p0/pow(kr,a0);
     }
     return P*unit;
-}
-
-// get real components from fftw_complex arrays
-void Brnd_local::complex2real(const fftw_complex *input,double *output,const std::size_t &size) {
-    for(std::size_t i=0;i!=size;++i){
-        output[i] = input[i][0];
-    }
 }
 // END

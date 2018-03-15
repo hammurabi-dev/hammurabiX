@@ -5,6 +5,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <omp.h>
 #include <tinyxml2.h>
 #include <fitshandle.h>
 #include <fstream>
@@ -43,17 +44,17 @@ Grid_fernd::Grid_fernd(string file_name){
 void Grid_fernd::build_grid(XMLDocument *doc){
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box")};
     // Cartesian grid
-    nx = FetchUnsigned(ptr,"nx");
-    ny = FetchUnsigned(ptr,"ny");
-    nz = FetchUnsigned(ptr,"nz");
+    nx = toolkit::FetchUnsigned(ptr,"nx");
+    ny = toolkit::FetchUnsigned(ptr,"ny");
+    nz = toolkit::FetchUnsigned(ptr,"nz");
     full_size = nx*ny*nz;
     // box limit for filling field
-    x_max = CGS_U_kpc*FetchDouble(ptr,"x_max");
-    x_min = CGS_U_kpc*FetchDouble(ptr,"x_min");
-    y_max = CGS_U_kpc*FetchDouble(ptr,"y_max");
-    y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
-    z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
-    z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
+    x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_max");
+    x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_min");
+    y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_max");
+    y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_min");
+    z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_max");
+    z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_min");
 #ifdef DEBUG
     // memory check (double complex + double + double)
     const double bytes {full_size*(16.+ 8.)};
@@ -64,6 +65,10 @@ void Grid_fernd::build_grid(XMLDocument *doc){
     // complex random b field in k-space
     fftw_fe_k = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*full_size));
     // DFT plan
+#ifdef _OPENMP
+    fftw_init_threads();
+    fftw_plan_with_nthreads(omp_get_max_threads());
+#endif
     fftw_p = fftw_plan_dft_3d(nx,ny,nz,fftw_fe_k,fftw_fe_k,FFTW_BACKWARD,FFTW_MEASURE);
 }
 

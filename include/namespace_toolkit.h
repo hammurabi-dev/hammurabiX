@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <fftw3.h>
 #include <cgs_units_file.h>
 #include <tinyxml2.h>
 using namespace tinyxml2;
@@ -113,7 +114,14 @@ namespace toolkit {
     /// return time in ms
     ///
     double timestamp(void);
-    //auxiliary functions for class Grid and Param
+    ///
+    /// substract real part of a fftw complex array
+    /// 1st argument: input fftw complex array
+    /// 2nd argument: output double array
+    /// 3rd argument: (output) array size
+    ///
+    void complex2real(const fftw_complex *,double *,const std::size_t &);
+    // auxiliary functions for class Grid and Param
     std::string FetchString(XMLElement *,std::string);
     int FetchInt(XMLElement *,std::string);
     unsigned int FetchUnsigned(XMLElement *,std::string);

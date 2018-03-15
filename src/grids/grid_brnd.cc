@@ -5,6 +5,7 @@
 #include <array>
 #include <string>
 #include <vector>
+#include <omp.h>
 #include <tinyxml2.h>
 #include <fitshandle.h>
 #include <fstream>
@@ -16,7 +17,6 @@
 #include <ap_err.h>
 using namespace tinyxml2;
 using namespace std;
-using namespace toolkit;
 
 Grid_brnd::Grid_brnd(string file_name){
     unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
@@ -42,17 +42,17 @@ Grid_brnd::Grid_brnd(string file_name){
 void Grid_brnd::build_grid(XMLDocument *doc){
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box")};
     // Cartesian grid
-    nx = FetchUnsigned(ptr,"nx");
-    ny = FetchUnsigned(ptr,"ny");
-    nz = FetchUnsigned(ptr,"nz");
+    nx = toolkit::FetchUnsigned(ptr,"nx");
+    ny = toolkit::FetchUnsigned(ptr,"ny");
+    nz = toolkit::FetchUnsigned(ptr,"nz");
     full_size = nx*ny*nz;
     // box limit for filling field
-    x_max = CGS_U_kpc*FetchDouble(ptr,"x_max");
-    x_min = CGS_U_kpc*FetchDouble(ptr,"x_min");
-    y_max = CGS_U_kpc*FetchDouble(ptr,"y_max");
-    y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
-    z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
-    z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
+    x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_max");
+    x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_min");
+    y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_max");
+    y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_min");
+    z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_max");
+    z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_min");
 #ifdef DEBUG
     // memory check (double complex + double + double)
     const double bytes {full_size*(3.*16.+3.*8.)};
@@ -67,6 +67,10 @@ void Grid_brnd::build_grid(XMLDocument *doc){
     fftw_b_ky = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*full_size));
     fftw_b_kz = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*full_size));
     // DFT plans
+#ifdef _OPENMP
+    fftw_init_threads();
+    fftw_plan_with_nthreads(omp_get_max_threads());
+#endif
     // backword plan
     fftw_px_bw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_kx,fftw_b_kx,FFTW_BACKWARD,FFTW_ESTIMATE);
     fftw_py_bw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_ky,fftw_b_ky,FFTW_BACKWARD,FFTW_ESTIMATE);

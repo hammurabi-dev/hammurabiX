@@ -78,7 +78,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
         assemble_shell_ref(shell_ref.get(),gint,current_shell);
         
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(static)
 #endif
         for (decltype(current_npix) ipix=0;ipix<current_npix;++ipix) {
             struct_observables observables;
@@ -113,7 +113,7 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
         }
         //adding up new shell map to sim map
 #ifdef _OPENMP
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(static)
 #endif
         for (decltype(npix_sim) ipix=0;ipix<npix_sim;++ipix) {
             pointing ptg;
