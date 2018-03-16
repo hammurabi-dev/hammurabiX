@@ -102,7 +102,7 @@ void FErnd_global::write_grid_global(Param *par, Grid_fernd *grid){
     // RESCALING FIELD PROFILE IN REAL SPACE
     double fe_var {toolkit::Variance(grid->fftw_fe_k[0],grid->full_size)};
 #ifdef _OPENMP
-#pragma omp parallel for
+#pragma omp parallel for schedule(static)
 #endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         vec3_t<double> pos {i*lx/(grid->nx-1) + grid->x_min,0,0};

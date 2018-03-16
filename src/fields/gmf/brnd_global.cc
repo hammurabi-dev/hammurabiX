@@ -37,17 +37,13 @@ double Brnd_global::anisotropy(const vec3_t<double> &pos,vec3_t<double> &H,Param
 double Brnd_global::spec(const double &k, Param *par){
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_global.rms*CGS_U_muGauss};
-    const double k0 {par->brnd_global.k0};
+    const double kr {k/par->brnd_global.k0};
     const double a0 {par->brnd_global.a0};
     const double unit = 1./(4*CGS_U_pi*k*k);
-    // avoid nan
-    if(k<=0.){
-        return 0.;
-    }
     // power law
-    double P{0.};
-    if(k>k0){
-        P = p0/pow(k/k0,a0);
+    double P {0.};
+    if(kr>1){
+        P = p0/pow(kr,a0);
     }
     return P*unit;
 }
