@@ -17,7 +17,6 @@
 #include <ap_err.h>
 using namespace tinyxml2;
 using namespace std;
-using namespace toolkit;
 
 // turbulent free electron density field
 Grid_fernd::Grid_fernd(string file_name){
@@ -69,7 +68,7 @@ void Grid_fernd::build_grid(XMLDocument *doc){
     fftw_init_threads();
     fftw_plan_with_nthreads(omp_get_max_threads());
 #endif
-    fftw_p = fftw_plan_dft_3d(nx,ny,nz,fftw_fe_k,fftw_fe_k,FFTW_BACKWARD,FFTW_MEASURE);
+    fftw_p_bw = fftw_plan_dft_3d(nx,ny,nz,fftw_fe_k,fftw_fe_k,FFTW_BACKWARD,FFTW_ESTIMATE);
 }
 
 void Grid_fernd::export_grid(void){

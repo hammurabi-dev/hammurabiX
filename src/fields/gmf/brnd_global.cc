@@ -76,14 +76,30 @@ vec3_t<double> Brnd_global::gramschmidt(const vec3_t<double> &k,const vec3_t<dou
 void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
     // PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
+    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[6*grid->full_size]());
+#ifdef _OPENMP
+    // initialize random seed
+    gsl_rng **threadvec = new gsl_rng *[omp_get_max_threads()];
+    for (int b=0;b<omp_get_max_threads();++b){
+        threadvec[b] = gsl_rng_alloc(gsl_rng_taus);
+        gsl_rng_set(threadvec[b],b+toolkit::random_seed(par->brnd_seed));
+    }
+#pragma omp parallel for schedule(static)
+    for(decltype(grid->full_size)i=0;i<6*grid->full_size;++i)
+        gaussian_num[i] = gsl_ran_gaussian(threadvec[omp_get_thread_num()],1);
+    // free random memory
+    for (int b=0;b<omp_get_max_threads();++b)
+        gsl_rng_free(threadvec[b]);
+    delete [] threadvec;
+#else
     // initialize random seed
     gsl_rng *r{gsl_rng_alloc(gsl_rng_taus)};
     gsl_rng_set(r, toolkit::random_seed(par->brnd_seed));
-    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[6*grid->full_size]());
     for(decltype(grid->full_size)i=0;i<6*grid->full_size;++i)
         gaussian_num[i] = gsl_ran_gaussian(r,1);
     // free random memory
     gsl_rng_free(r);
+#endif
     // start Fourier space filling
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};

@@ -7,7 +7,7 @@
 #include <fftw3.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
-#include <gsl/gsl_integration.h>
+//#include <gsl/gsl_integration.h>
 #include <param.h>
 #include <grid.h>
 #include <brnd.h>
@@ -24,17 +24,39 @@ vec3_t<double> Brnd_local::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
 }
 
 void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
+    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[3*grid->full_size]());
+    unique_ptr<double[]> uniform_num = unique_ptr<double[]>(new double[2*grid->full_size]());
+#ifdef _OPENMP
+    // initialize random seed
+    gsl_rng **threadvec = new gsl_rng *[omp_get_max_threads()];
+    for (int b=0;b<omp_get_max_threads();++b){
+        threadvec[b] = gsl_rng_alloc(gsl_rng_taus);
+        gsl_rng_set(threadvec[b],b+toolkit::random_seed(par->brnd_seed));
+    }
+#pragma omp parallel
+    {
+#pragma omp for schedule(static)
+    for(decltype(grid->full_size)i=0;i<3*grid->full_size;++i)
+        gaussian_num[i] = gsl_ran_gaussian(threadvec[omp_get_thread_num()],1);
+#pragma omp for schedule(static)
+    for(decltype(grid->full_size)i=0;i<2*grid->full_size;++i)
+        uniform_num[i] = gsl_rng_uniform(threadvec[omp_get_thread_num()]);
+    }
+    // free random memory
+    for (int b=0;b<omp_get_max_threads();++b)
+        gsl_rng_free(threadvec[b]);
+    delete [] threadvec;
+#else
     // initialize random seed
     gsl_rng *r {gsl_rng_alloc(gsl_rng_taus)};
     gsl_rng_set(r, toolkit::random_seed(par->brnd_seed));
-    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[3*grid->full_size]());
     for(decltype(grid->full_size)i=0;i<3*grid->full_size;++i)
         gaussian_num[i] = gsl_ran_gaussian(r,1);
-    unique_ptr<double[]> uniform_num = unique_ptr<double[]>(new double[2*grid->full_size]());
     for(decltype(grid->full_size)i=0;i<2*grid->full_size;++i)
         uniform_num[i] = gsl_rng_uniform(r);
     // free random memory
     gsl_rng_free(r);
+#endif
     // start Fourier space filling
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};
@@ -56,7 +78,7 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
             k.y = CGS_U_kpc*j/ly;
             if(j>=grid->ny/2) k.y -= CGS_U_kpc*grid->ny/ly;
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
-                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+                size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 // FFT expects up to n/2 positive while n/2 to n negative
                 k.z = CGS_U_kpc*l/lz;
                 if(l>=grid->nz/2) k.z -= CGS_U_kpc*grid->nz/lz;

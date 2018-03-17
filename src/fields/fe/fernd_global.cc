@@ -49,17 +49,33 @@ double FErnd_global::rescal(const vec3_t<double> &pos, Param *par){
     return exp(-r_cyl/r0)*exp(-z/z0);
 }
 
-void FErnd_global::write_grid_global(Param *par, Grid_fernd *grid){
+void FErnd_global::write_grid(Param *par, Grid_fernd *grid){
     //PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
+    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[2*grid->full_size]());
+    // initialize random seed
+#ifdef _OPENMP
+    gsl_rng **threadvec = new gsl_rng *[omp_get_max_threads()];
+    for (int b=0;b<omp_get_max_threads();++b){
+        threadvec[b] = gsl_rng_alloc(gsl_rng_taus);
+        gsl_rng_set(threadvec[b],b+toolkit::random_seed(par->brnd_seed));
+    }
+#pragma omp parallel for schedule(static)
+    for(decltype(grid->full_size)i=0;i<2*grid->full_size;++i)
+        gaussian_num[i] = gsl_ran_gaussian(threadvec[omp_get_thread_num()],1);
+    // free random memory
+    for (int b=0;b<omp_get_max_threads();++b)
+        gsl_rng_free(threadvec[b]);
+    delete [] threadvec;
+#else
     // initialize random seed
     gsl_rng *r {gsl_rng_alloc(gsl_rng_taus)};
     gsl_rng_set(r, toolkit::random_seed(par->fernd_seed));
-    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[2*grid->full_size]());
     for(decltype(grid->full_size)i=0;i<2*grid->full_size;++i)
         gaussian_num[i] = gsl_ran_gaussian(r,1);
     // free random memory
     gsl_rng_free(r);
+#endif
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};
     double lz {grid->z_max-grid->z_min};
@@ -77,7 +93,7 @@ void FErnd_global::write_grid_global(Param *par, Grid_fernd *grid){
             double ky {CGS_U_kpc*j/ly};
             if(j>=grid->ny/2) ky -= CGS_U_kpc*grid->ny/ly;
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
-                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+                size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 // FFT expects up to n/2 positive while n/2 to n negative
                 double kz {CGS_U_kpc*l/lz};
                 if(l>=grid->nz/2) kz -= CGS_U_kpc*grid->nz/lz;
@@ -97,7 +113,7 @@ void FErnd_global::write_grid_global(Param *par, Grid_fernd *grid){
     grid->fftw_fe_k[0][0] = 0.;
     grid->fftw_fe_k[0][1] = 0.;
     // execute DFT backward plan
-    fftw_execute(grid->fftw_p);
+    fftw_execute(grid->fftw_p_bw);
     // PHASE II
     // RESCALING FIELD PROFILE IN REAL SPACE
     double fe_var {toolkit::Variance(grid->fftw_fe_k[0],grid->full_size)};
@@ -113,7 +129,7 @@ void FErnd_global::write_grid_global(Param *par, Grid_fernd *grid){
                 pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
                 double ratio {sqrt(rescal(pos,par))*par->fernd_global.rms/sqrt(fe_var)};
-                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+                size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 grid->fftw_fe_k[idx][0] *= ratio;
             }
         }

@@ -119,7 +119,7 @@ int main(int , char **argv) {
             // non default constructor
             fernd = unique_ptr<FErnd> (new FErnd_global());
             // fill grid with random fields
-            fernd->write_grid_global(par.get(),grid_fernd.get());
+            fernd->write_grid(par.get(),grid_fernd.get());
         }
         else{return EXIT_FAILURE;}
     }

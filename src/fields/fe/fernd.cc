@@ -81,7 +81,7 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     return density;
 }
 
-void FErnd::write_grid_global(Param *,Grid_fernd *){
+void FErnd::write_grid(Param *,Grid_fernd *){
     ap_err("dynamic binding fail");
     exit(1);
 }

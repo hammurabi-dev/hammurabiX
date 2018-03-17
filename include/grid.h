@@ -110,7 +110,7 @@ public:
     Grid_fernd(std::string);
     virtual ~Grid_fernd(void) {
         if(build_permission or read_permission){
-            fftw_destroy_plan(fftw_p);
+            fftw_destroy_plan(fftw_p_bw);
             fftw_free(fftw_fe_k);
         }
     };
@@ -119,7 +119,7 @@ public:
     void import_grid(void) override;
     std::unique_ptr<double[]> fftw_fe;
     fftw_complex *fftw_fe_k;
-    fftw_plan fftw_p;
+    fftw_plan fftw_p_bw;
     std::string filename;
     bool read_permission, write_permission, build_permission;
     double x_max, x_min, y_max, y_min, z_max, z_min;
