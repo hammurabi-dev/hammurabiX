@@ -13,7 +13,7 @@
 #include <grid.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-#include <ap_err.h>
+#include <cassert>
 using namespace tinyxml2;
 using namespace std;
 
@@ -43,16 +43,10 @@ void Grid_int::build_grid(XMLDocument *doc){
             total_shell++;
             nside_shell.push_back(e->UnsignedAttribute("value"));
         }
-#ifdef DEBUG
-        if(nside_shell.size()!=total_shell){
-            ap_err("incorrect shell number");
-            exit(1);
-        }
-#endif
+        assert(nside_shell.size()==total_shell);
     }
     else{
-        ap_err("invalid shell type");
-        exit(1);
+        assert(false);
     }
     nside_sim = toolkit::FetchUnsigned(ptr,"nside_sim");
     npix_sim = 12*nside_sim*nside_sim;
@@ -85,11 +79,7 @@ void Grid_int::build_grid(XMLDocument *doc){
     else{
         do_sync = false;
     }
-    if(not (do_dm or do_fd or do_sync)){
-        ap_err("no output required");
-        exit(1);
-    }
-    
+    assert(do_dm or do_fd or do_sync);
 }
 
 void Grid_int::export_grid(void){

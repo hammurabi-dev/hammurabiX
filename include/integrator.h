@@ -25,7 +25,7 @@ public:
     /// assmebling pixels/shells into Healpix map
     ///
     void write_grid(Breg *,Brnd *,FEreg *,FErnd *,CRE *,Grid_breg *,Grid_brnd *,Grid_fereg *,Grid_fernd *,Grid_cre *,Grid_int *,Param *);
-#ifndef DEBUG
+#ifdef NDEBUG
 private:
 #endif
     ///

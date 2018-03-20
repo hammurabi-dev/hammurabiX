@@ -13,7 +13,7 @@
 #include <grid.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-#include <ap_err.h>
+#include <cassert>
 using namespace tinyxml2;
 using namespace std;
 
@@ -24,9 +24,6 @@ Grid_fereg::Grid_fereg(string file_name){
     read_permission = ptr->BoolAttribute("read");
     write_permission = ptr->BoolAttribute("write");
     if(read_permission or write_permission){
-#ifdef DEBUG
-        cout<<"IFNO: FE I/O ACTIVE"<<endl;
-#endif
         filename = ptr->Attribute("filename");
         build_grid(doc.get());
     }
@@ -46,69 +43,38 @@ void Grid_fereg::build_grid(XMLDocument *doc){
     y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_min");
     z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_max");
     z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_min");
-#ifdef DEBUG
-    // memory check
-    const double bytes {full_size*8.};
-    cout<<"INFO: FE REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
-#endif
     fe = unique_ptr<double[]> (new double[full_size]);
 }
 
 void Grid_fereg::export_grid(void){
-    if(filename.empty()){
-        ap_err("invalid filename");
-        exit(1);
-    }
+    assert(!filename.empty());
     ofstream output(filename.c_str(), std::ios::out|std::ios::binary);
-    if (!output.is_open()){
-        ap_err("open file fail");
-        exit(1);
-    }
+    assert(output.is_open());
     double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
-        if (output.eof()) {
-            ap_err("unexpected");
-            exit(1);
-        }
+        assert(!output.eof());
         tmp = fe[i];
-        if(tmp<0) {
-            ap_err("wrong value");
-            exit(1);
-        }
+        assert(tmp>=0);
         output.write(reinterpret_cast<char*>(&tmp),sizeof(double));
     }
     output.close();
-    // exit program
-#ifdef DEBUG
-    cout<<"...FREE ELECTRON FIELD EXPORTED AND CLEANED..."<<endl;
-#endif
     exit(0);
 }
 
 void Grid_fereg::import_grid(void){
-    if(filename.empty()){
-        ap_err("invalid filename");
-        exit(1);
-    }
+    assert(!filename.empty());
     ifstream input(filename.c_str(), std::ios::in|std::ios::binary);
-    if (!input.is_open()){
-        ap_err("open file fail");
-        exit(1);
-    }
+    assert(input.is_open());
     double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
-        if (input.eof()) {
-            ap_err("unexpected");
-            exit(1);
-        }
+        assert(!input.eof());
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
         fe[i] = tmp;
     }
+#ifndef NDEBUG
     auto eof = input.tellg();
     input.seekg (0, input.end);
-    if (eof != input.tellg()){
-        ap_err("incorrect length");
-        exit(1);
-    }
+#endif
+    assert(eof==input.tellg());
     input.close();
 }

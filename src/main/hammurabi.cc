@@ -20,7 +20,7 @@ using namespace std;
 using namespace tinyxml2;
 
 int main(int , char **argv) {
-#ifdef DEBUG
+#ifndef NDEBUG
     double time = toolkit::timestamp();
     cout<<"...STARTING HAMMURABI..."<<endl;
 #endif
@@ -34,9 +34,7 @@ int main(int , char **argv) {
     unique_ptr<Grid_fernd> grid_fernd = unique_ptr<Grid_fernd> (new Grid_fernd(file_name));
     unique_ptr<Grid_cre> grid_cre = unique_ptr<Grid_cre> (new Grid_cre(file_name));
     unique_ptr<Grid_int> grid_int = unique_ptr<Grid_int> (new Grid_int(file_name));
-#ifdef DEBUG
-    cout<<"INFO: ALL GRIDS BUILT"<<endl;
-#endif
+    
     unique_ptr<FEreg> fereg;
     unique_ptr<Breg> breg;
     unique_ptr<FErnd> fernd;
@@ -54,13 +52,13 @@ int main(int , char **argv) {
         fereg = unique_ptr<FEreg> (new FEreg());
     }
     else if(fetype=="YMW16"){
-#ifdef DEBUG
+#ifndef NDEBUG
         cout<<"INFO: USING YMW16 FE MODEL"<<endl;
 #endif
         fereg = unique_ptr<FEreg> (new FEreg_ymw16());
     }
     else if(fetype=="Verify"){
-#ifdef DEBUG
+#ifndef NDEBUG
         cout<<"INFO: USING VERIFICATION FE MODEL"<<endl;
 #endif
         fereg = unique_ptr<FEreg> (new FEreg_verify());
@@ -80,19 +78,19 @@ int main(int , char **argv) {
         breg = unique_ptr<Breg> (new Breg());
     }
     else if(bregtype=="WMAP"){
-#ifdef DEBUG
+#ifndef NDEBUG
         cout<<"INFO: USING WMAP LSA REGUALR B MODEL"<<endl;
 #endif
         breg = unique_ptr<Breg> (new Breg_wmap());
     }
     else if(bregtype=="Jaffe"){
-#ifdef DEBUG
+#ifndef NDEBUG
         cout<<"INFO: USING JAFFE REGUALR B MODEL"<<endl;
 #endif
         breg = unique_ptr<Breg> (new Breg_jaffe());
     }
     else if(bregtype=="Verify"){
-#ifdef DEBUG
+#ifndef NDEBUG
         cout<<"INFO: USING VERIFICATION REGUALR B MODEL"<<endl;
 #endif
         breg = unique_ptr<Breg> (new Breg_verify());
@@ -113,7 +111,7 @@ int main(int , char **argv) {
     else if(doc->FirstChildElement("root")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->BoolAttribute("cue")){
         string ferndtype {doc->FirstChildElement("root")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->Attribute("type")};
         if(ferndtype=="Global"){
-#ifdef DEBUG
+#ifndef NDEBUG
             cout<<"INFO: USING GLOBAL RANDOM FE MODEL"<<endl;
 #endif
             // non default constructor
@@ -124,7 +122,7 @@ int main(int , char **argv) {
         else{return EXIT_FAILURE;}
     }
     else{
-#ifdef DEBUG
+#ifndef NDEBUG
         cout<<"INFO: NO RANDOM FE FIELD"<<endl;
 #endif
         fernd = unique_ptr<FErnd> (new FErnd());
@@ -142,7 +140,7 @@ int main(int , char **argv) {
     else if(doc->FirstChildElement("root")->FirstChildElement("MagneticField")->FirstChildElement("Random")->BoolAttribute("cue")){
         string brndtype {doc->FirstChildElement("root")->FirstChildElement("MagneticField")->FirstChildElement("Random")->Attribute("type")};
         if(brndtype=="Global"){
-#ifdef DEBUG
+#ifndef NDEBUG
             cout<<"INFO: USING GLOBAL RANDOM B MODEL"<<endl;
 #endif
             brnd = unique_ptr<Brnd> (new Brnd_global());
@@ -150,7 +148,7 @@ int main(int , char **argv) {
             brnd->write_grid(par.get(),breg.get(),grid_breg.get(),grid_brnd.get());
         }
         else if(brndtype=="Local"){
-#ifdef DEBUG
+#ifndef NDEBUG
             cout<<"INFO: USING LOCAL RANDOM B MODEL"<<endl;
 #endif
             brnd = unique_ptr<Brnd> (new Brnd_local());
@@ -161,7 +159,7 @@ int main(int , char **argv) {
         
     }
     else{
-#ifdef DEBUG
+#ifndef NDEBUG
         cout<<"INFO: NO RANDOM B FIELD"<<endl;
 #endif
         //without read permission, return zeros
@@ -175,19 +173,19 @@ int main(int , char **argv) {
     // cre
     string cretype {doc->FirstChildElement("root")->FirstChildElement("CRE")->Attribute("type")};
     if(cretype=="Analytic"){
-#ifdef DEBUG
+#ifndef NDEBUG
         cout<<"INFO: USING ANALYTIC CRE"<<endl;
 #endif
         cre = unique_ptr<CRE> (new CRE_ana());
     }
     else if(cretype=="Verify"){
-#ifdef DEBUG
+#ifndef NDEBUG
         cout<<"INFO: USING VERIFICATION CRE"<<endl;
 #endif
         cre = unique_ptr<CRE> (new CRE_verify());
     }
     else if(cretype=="Numeric"){
-#ifdef DEBUG
+#ifndef NDEBUG
         cout<<"INFO: USING NUMERIC CRE"<<endl;
 #endif
         grid_cre->import_grid();
@@ -202,12 +200,12 @@ int main(int , char **argv) {
     
     // START INTEGRATION
     unique_ptr<Integrator> intobj = unique_ptr<Integrator> (new Integrator());
-#ifdef DEBUG
+#ifndef NDEBUG
     cout<<"...ALL MODULES BUILT..."<<endl;
 #endif
     
     intobj->write_grid(breg.get(),brnd.get(),fereg.get(),fernd.get(),cre.get(),grid_breg.get(),grid_brnd.get(),grid_fereg.get(),grid_fernd.get(),grid_cre.get(),grid_int.get(),par.get());
-#ifdef DEBUG
+#ifndef NDEBUG
     cout<<"...PRODUCING MAPS..."<<endl;
 #endif
     grid_int->export_grid();
@@ -221,11 +219,11 @@ int main(int , char **argv) {
             grid_int->do_sync = e->BoolAttribute("cue");
             par->sim_freq = e->DoubleAttribute("freq")*CGS_U_GHz;
             grid_int->sim_sync_name = e->Attribute("filename");
-#ifdef DEBUG
+#ifndef NDEBUG
             cout<<"...MULTI OUTPUT MODE..."<<endl;
 #endif
             intobj->write_grid(breg.get(),brnd.get(),fereg.get(),fernd.get(),cre.get(),grid_breg.get(),grid_brnd.get(),grid_fereg.get(),grid_fernd.get(),grid_cre.get(),grid_int.get(),par.get());
-#ifdef DEBUG
+#ifndef NDEBUG
             cout<<"...PRODUCING MAPS..."<<endl;
 #endif
             grid_int->export_grid();
@@ -233,7 +231,7 @@ int main(int , char **argv) {
     }
     
     // CLEANING
-#ifdef DEBUG
+#ifndef NDEBUG
     cout<<"...ENDING HAMMURABI..."<<endl
     <<"INFO:TIME ELAPSE "<<(toolkit::timestamp()-time)<<" ms"<<endl;
 #endif 

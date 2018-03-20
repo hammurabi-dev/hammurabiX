@@ -1,6 +1,6 @@
-///
-/// cgs units
-///
+/**
+ * constants in CGS units
+ */
 #define CGS_U_erg 1.
 #define CGS_U_cm 1.
 #define CGS_U_sec 1.

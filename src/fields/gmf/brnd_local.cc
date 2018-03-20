@@ -7,7 +7,6 @@
 #include <fftw3.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
-//#include <gsl/gsl_integration.h>
 #include <param.h>
 #include <grid.h>
 #include <brnd.h>
@@ -153,17 +152,9 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
     toolkit::complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
     toolkit::complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
     toolkit::complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
-#ifdef DEBUG
-    const double b_var {toolkit::Variance(grid->fftw_b_x.get(),grid->full_size)+toolkit::Variance(grid->fftw_b_y.get(),grid->full_size)+toolkit::Variance(grid->fftw_b_z.get(),grid->full_size)};
-    cout<< "BRND: Numerical RMS: "<<sqrt(b_var)/CGS_U_muGauss<<" microG"<<endl;
-#endif
 }
 
 // PRIVATE FUNCTIONS FOR LOW-BETA SUB-ALFVENIC PLASMA
-double Brnd_local::cosa(const vec3_t<double> &b,const vec3_t<double> &k){
-    return dotprod(toolkit::versor(b),toolkit::versor(k));
-}
-
 vec3_t<double> Brnd_local::eplus(const vec3_t<double> &b,const vec3_t<double> &k){
     vec3_t<double> tmp {crossprod(toolkit::versor(k),toolkit::versor(b))};
     if(tmp.SquaredLength()<1e-12){
@@ -182,10 +173,6 @@ vec3_t<double> Brnd_local::eminus(const vec3_t<double> &b,const vec3_t<double> &
     else{
         return tmp/tmp.Length();
     }
-}
-
-double Brnd_local::dynamo(const double &beta,const double &cosa){
-    return (1+0.5*beta)*(1+0.5*beta) - 2.*beta*cosa*cosa;
 }
 
 double Brnd_local::hs(const double &beta,const double &cosa){
@@ -208,14 +195,6 @@ double Brnd_local::hf(const double &beta,const double &cosa){
         double lambda {(1-sqrt(dynamo(beta,cosa))+0.5*beta)/(1+sqrt(dynamo(beta,cosa))-0.5*beta)};
         return 1./(dispersion*(1+lambda*lambda*(1./(cosa*cosa) -1)));
     }
-}
-
-double Brnd_local::fa(const double &ma,const double &cosa){
-    return exp( -pow(ma,-1.33333333)*cosa*cosa/pow(1-cosa*cosa,0.66666667) );
-}
-
-double Brnd_local::fs(const double &ma,const double &cosa){
-    return exp( -pow(ma,-1.33333333)*cosa*cosa/pow(1-cosa*cosa,0.66666667) );
 }
 
 double Brnd_local::speca(const double &k,Param *par){

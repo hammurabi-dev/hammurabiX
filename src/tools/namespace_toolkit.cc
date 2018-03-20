@@ -9,7 +9,8 @@
 #include <thread> // for random seed generator
 #include <sstream>
 #include <tinyxml2.h>
-#include <ap_err.h>
+#include <cassert>
+
 using namespace std;
 using namespace tinyxml2;
 
@@ -71,12 +72,7 @@ namespace toolkit {
     }
     // Mean for vector
     double Mean(const std::vector<double> &vect){
-#ifdef DEBUG
-        if(vect.empty()){
-            ap_err("empty vector");
-            exit(1);
-        }
-#endif
+        assert(!vect.empty());
         double avg {0};
         for(auto &i : vect) {
             avg += i;
@@ -96,12 +92,7 @@ namespace toolkit {
     }
     // Variance for vector
     double Variance(const std::vector<double> &vect){
-#ifdef DEBUG
-        if(vect.empty()){
-            ap_err("empty vector");
-            exit(1);
-        }
-#endif
+        assert(!vect.empty());
         const double avg {Mean(vect)};
         double var {0.};
         for(auto &i : vect){
@@ -123,12 +114,7 @@ namespace toolkit {
     }
     // cov for vector
     double Covariance (const vector<double> &vect1,const vector<double> &vect2){
-#ifdef DEBUG
-        if(vect1.size()!=vect2.size()){
-            ap_err("unequal vector size");
-            exit(1);
-        }
-#endif
+        assert(vect1.size()==vect2.size());
         double avg1 {Mean(vect1)};
         double avg2 {Mean(vect2)};
         double covar {0.};
@@ -146,12 +132,7 @@ namespace toolkit {
             if(arr[i]>max) max=arr[i];
             else if(arr[i]<min) min=arr[i];
         }
-#ifdef DEBUG
-        if(max==min){
-            ap_err("invalid array");
-            exit(1);
-        }
-#endif
+        assert(max!=min);
         // get elements ranked
         for(std::size_t i=0;i!=size;++i){
             arr[i] = (arr[i]-min)/(max-min);
@@ -159,12 +140,7 @@ namespace toolkit {
     }
     // get ranked vector
     void Rank(vector<double> &vect){
-#ifdef DEBUG
-        if(vect.empty()){
-            ap_err("empty vector");
-            exit(1);
-        }
-#endif
+        assert(!vect.empty());
         // get max and min
         double max=vect[0];double min=vect[0];
         for(auto &i : vect){
@@ -211,68 +187,23 @@ namespace toolkit {
     }
     // auxiliary functions for class Grid and Param
     std::string FetchString(XMLElement* el, string obj){
-#ifdef DEBUG
-        try{
-#endif
-            return el->FirstChildElement(obj.c_str())->Attribute("value");
-#ifdef DEBUG
-        }catch(...){
-            ap_err("fail");
-            exit(1);
-        }
-#endif
+        return el->FirstChildElement(obj.c_str())->Attribute("value");
     }
     
     int FetchInt(XMLElement* el, string obj){
-#ifdef DEBUG
-        try{
-#endif
-            return el->FirstChildElement(obj.c_str())->IntAttribute("value");
-#ifdef DEBUG
-        }catch(...){
-            ap_err("fail");
-            exit(1);
-        }
-#endif
+        return el->FirstChildElement(obj.c_str())->IntAttribute("value");
     }
     
     unsigned int FetchUnsigned(XMLElement* el, string obj){
-#ifdef DEBUG
-        try{
-#endif
-            return el->FirstChildElement(obj.c_str())->UnsignedAttribute("value");
-#ifdef DEBUG
-        }catch(...){
-            ap_err("fail");
-            exit(1);
-        }
-#endif
+        return el->FirstChildElement(obj.c_str())->UnsignedAttribute("value");
     }
     
     bool FetchBool(XMLElement* el, string obj){
-#ifdef DEBUG
-        try{
-#endif
-            return el->FirstChildElement(obj.c_str())->BoolAttribute("cue");
-#ifdef DEBUG
-        }catch(...){
-            ap_err("fail");
-            exit(1);
-        }
-#endif
+        return el->FirstChildElement(obj.c_str())->BoolAttribute("cue");
     }
     
     double FetchDouble(XMLElement* el, string obj){
-#ifdef DEBUG
-        try{
-#endif
-            return el->FirstChildElement(obj.c_str())->DoubleAttribute("value");
-#ifdef DEBUG
-        }catch(...){
-            ap_err("fail");
-            exit(1);
-        }
-#endif
+        return el->FirstChildElement(obj.c_str())->DoubleAttribute("value");
     }
     
     // get real components from fftw_complex arrays

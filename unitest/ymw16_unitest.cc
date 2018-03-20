@@ -1,14 +1,15 @@
-///
-/// unit-test for namespace toolkit
-/// feel free to add more rational testing blocks
-///
+/**
+ * unit-test for namespace toolkit
+ * feel free to add more rational testing blocks
+ */
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
 #include <cgs_units_file.h>
-#include <ap_err.h>
 #include <fereg.h>
 #include <param.h>
+#include <cassert>
+
 using namespace std;
 
 template<typename T>
@@ -35,17 +36,9 @@ int main(void){
     unique_ptr<FEreg> ref_field = unique_ptr<FEreg> (new FEreg_ymw16());
     ref_grid->import_grid();
     
-    if(ref_grid->full_size!=test_grid->full_size){
-        ap_err("YMW16 ...... fail");
-        exit(1);
-    }
+    assert(ref_grid->full_size==test_grid->full_size);
     for(decltype(ref_grid->full_size) i=0;i!=ref_grid->full_size;++i){
-        if(!compare(ref_grid->fe[i],test_grid->fe[i],1e-5)){
-            cout<<"ref "<<ref_grid->fe[i]<<endl
-            <<"test "<<test_grid->fe[i]<<endl;
-            ap_err("YMW16 ...... fail");
-            exit(1);
-        }
+        assert(compare(ref_grid->fe[i],test_grid->fe[i],1e-5));
     }
     
     // if all testing blocks pass

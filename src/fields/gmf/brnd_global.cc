@@ -14,7 +14,7 @@
 #include <breg.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-#include <ap_err.h>
+#include <cassert>
 
 using namespace std;
 
@@ -172,12 +172,7 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
                 // impose anisotropy
                 vec3_t<double> H_versor {0.,0.,0.,};
                 double rho {anisotropy(pos,H_versor,par,breg,gbreg)};
-#ifdef DEBUG
-                if(rho<0. or rho>1.){
-                    ap_err("wrong value");
-                    exit(1);
-                }
-#endif
+                assert(rho>=0. and rho<=1.);
                 if(H_versor.Length()==0){
                     break;
                 }

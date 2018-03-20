@@ -11,7 +11,7 @@
 #include <grid.h>
 #include <namespace_toolkit.h>
 #include <cgs_units_file.h>
-#include <ap_err.h>
+#include <cassert>
 using namespace std;
 
 double FEreg::get_density(const vec3_t<double> &pos, Param *par, Grid_fereg *grid){
@@ -53,8 +53,7 @@ double FEreg::density_blur(const vec3_t<double> &pos, Param *par, Grid_fereg *gr
 }
 
 double FEreg::density(const vec3_t<double> &, Param *){
-    ap_err("dynamic binding fail");
-    exit(1);
+    assert(false);
     return 0.;
 }
 
@@ -73,12 +72,7 @@ double FEreg::read_grid(const vec3_t<double> &pos, Grid_fereg *grid){
     if (tmp<1 or tmp>grid->nz-1) { return 0.;}
     decltype(grid->nx) zl {(std::size_t)floor(tmp)};
     const double zd = tmp - zl;
-#ifdef DEBUG
-    if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
-        ap_err("wrong value");
-        exit(1);
-    }
-#endif
+    assert(xd>=0 and yd>=0 and zd>=0 and xd<=1 and yd<=1 and zd<=1);
     double fe;
     if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
         std::size_t idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
@@ -101,20 +95,12 @@ double FEreg::read_grid(const vec3_t<double> &pos, Grid_fereg *grid){
         std::size_t idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         fe = grid->fe[idx1];
     }
-#ifdef DEBUG
-    if(fe<0){
-        ap_err("wrong value");
-        exit(1);
-    }
-#endif
+    assert(fe>=0);
     return fe;
 }
 
 void FEreg::write_grid(Param *par, Grid_fereg *grid){
-    if(!grid->write_permission){
-        ap_err("no permission");
-        exit(1);
-    }
+    assert(grid->write_permission);
     vec3_t<double> gc_pos;
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};

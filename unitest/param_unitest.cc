@@ -1,26 +1,23 @@
-///
-/// unit-test for class Param
-/// feel free to add more rational testing blocks
-///
+/**
+ * unit-test for class Param
+ * feel free to add more rational testing blocks
+ */
 #include <iostream>
 #include <cstdlib>
 #include <param.h>
-#include <ap_err.h>
+#include <cassert>
 using namespace std;
 
 int main(void){
-	cout<<endl<<"param unitest"<<endl;
-	
-	Param par;
-	
-	par.brnd_seed = 23;
-	if(par.brnd_seed != 23){
-        ap_err("assign value ...... fail");
-		exit(1);
-	}
+    cout<<endl<<"param unitest"<<endl;
+    
+    Param par;
+    
+    par.brnd_seed = 23;
+    assert(par.brnd_seed==23);
     
     
     // if all testing blocks pass
-	cout<<"class Param ...... pass"<<endl<<endl;
-	return EXIT_SUCCESS;
+    cout<<"class Param ...... pass"<<endl<<endl;
+    return EXIT_SUCCESS;
 }

@@ -13,7 +13,7 @@
 #include <grid.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-#include <ap_err.h>
+#include <cassert>
 using namespace tinyxml2;
 using namespace std;
 
@@ -25,14 +25,8 @@ Grid_cre::Grid_cre(string file_name){
     write_permission = ptr->BoolAttribute("write");
     // security check
     string type_check {doc->FirstChildElement("root")->FirstChildElement("CRE")->Attribute("type")};
-    if(read_permission and type_check=="Analytic"){
-        ap_err("analytic CRE does not read");
-        exit(1);
-    }
+    assert(!read_permission or type_check!="Analytic");
     if(read_permission or write_permission){
-#ifdef DEBUG
-        cout<<"IFNO: CRE I/O ACTIVE"<<endl;
-#endif
         filename = ptr->Attribute("filename");
         build_grid(doc.get());
     }
@@ -71,74 +65,39 @@ void Grid_cre::build_grid(XMLDocument *doc){
         cre_size = nE*nx*ny*nz;
     }
     else{
-        ap_err("unexpected grid dimension");
-        exit(1);
+        assert(false);
     }
-    // memory check
-#ifdef DEBUG
-    const double bytes {cre_size*8.};
-    cout<<"INFO: CRE REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
-#endif
     cre_flux = unique_ptr<double[]> (new double[cre_size]);
 }
 
 void Grid_cre::export_grid(void){
-    if(filename.empty()){
-        ap_err("invalid filename");
-        exit(1);
-    }
+    assert(!filename.empty());
     ofstream output(filename.c_str(), std::ios::out|std::ios::binary);
-    if (!output.is_open()){
-        ap_err("open file fail");
-        exit(1);
-    }
+    assert(output.is_open());
     double tmp;
     for(decltype(cre_size) i=0;i!=cre_size;++i){
-        if (output.eof()) {
-            ap_err("unexpected");
-            exit(1);
-        }
+        assert(!output.eof());
         tmp = cre_flux[i];
         output.write(reinterpret_cast<char*>(&tmp),sizeof(double));
     }
     output.close();
-    // exit program
-#ifdef DEBUG
-    if(nx!=0){
-        cout<<"...COSMIC-RAY ELECTRON IN 4D GRID..."<<endl;
-    }
-    else{
-        cout<<"...COSMIC-RAY ELECTRON IN 3D GRID..."<<endl;
-    }
-    cout<<"...FIELD EXPORTED AND CLEANED..."<<endl;
-#endif
     exit(0);
 }
 
 void Grid_cre::import_grid(void){
-    if(filename.empty()){
-        ap_err("invalid filename");
-        exit(1);
-    }
+    assert(!filename.empty());
     ifstream input(filename.c_str(), std::ios::in|std::ios::binary);
-    if (!input.is_open()){
-        ap_err("open file fail");
-        exit(1);
-    }
+    assert(input.is_open());
     double tmp;
     for(decltype(cre_size) i=0;i!=cre_size;++i){
-        if (input.eof()) {
-            ap_err("unexpected");
-            exit(1);
-        }
+        assert(!input.eof());
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
         cre_flux[i] = tmp;
     }
+#ifndef NDEBUG
     auto eof = input.tellg();
     input.seekg (0, input.end);
-    if (eof != input.tellg()){
-        ap_err("incorrect length");
-        exit(1);
-    }
+#endif
+    assert(eof==input.tellg());
     input.close();
 }

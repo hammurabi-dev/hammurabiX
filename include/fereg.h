@@ -57,7 +57,7 @@ public:
     FEreg_ymw16(void) = default;
     virtual ~FEreg_ymw16(void) = default;
     double density(const vec3_t<double> &, Param *) override;
-#ifndef DEBUG
+#ifdef NDEBUG
 private:
 #endif
     ///

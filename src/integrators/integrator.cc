@@ -4,13 +4,13 @@
 #include <gsl/gsl_errno.h>
 #include <omp.h>
 #include <cmath>
+#include <cassert>
 #include <fitshandle.h>
 #include <healpix_map_fitsio.h>
 #include <healpix_base.h>
 #include <healpix_map.h>
 #include <pointing.h>
 #include <vec3.h>
-#include <ap_err.h>
 #include <breg.h>
 #include <brnd.h>
 #include <cre.h>
@@ -45,9 +45,6 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
     }
     unique_ptr<struct_shell> shell_ref = unique_ptr<struct_shell>(new struct_shell);
     for (decltype(gint->total_shell) current_shell=1;current_shell!=(gint->total_shell+1);++current_shell) {
-#ifdef DEBUG
-        cout<<"INTEGRATOR: AT SHELL "<<current_shell<<endl;
-#endif
         Healpix_Map<double> current_Is_map;
         Healpix_Map<double> current_Qs_map;
         Healpix_Map<double> current_Us_map;
@@ -210,16 +207,10 @@ void Integrator::radial_integration(struct_shell *shell_ref,pointing &ptg_in, st
             double qui_0 {qui_base+intr_pol_ang[i-1]};
             double qui_1 {qui_base+intr_pol_ang[i]};
             double qui_2 {qui_base+intr_pol_ang[i+1]};
-#ifdef DEBUG
-            if (abs(qui_0)+abs(qui_1)+abs(qui_2)>1e30) {
-                ap_err("incorrect value");
-                exit(1);
-            }
-            if (F_Jtot[i-1]<0 or F_Jtot[i]<0 or F_Jtot[i+1]<0) {
-                ap_err("negative J_tot");
-                exit(1);
-            }
-#endif
+            
+            assert(abs(qui_0)+abs(qui_1)+abs(qui_2)<1e30);
+            assert(F_Jtot[i-1]>0 and F_Jtot[i]>0 and F_Jtot[i+1]>0);
+            
             pixobs.Is += (F_Jtot[i-1]+4.*F_Jtot[i]+F_Jtot[i+1])*0.16666667;
             pixobs.Qs += (cos(2.*qui_0)*F_Jpol[i-1]+4.*cos(2.*qui_1)*F_Jpol[i]+cos(2.*qui_2)*F_Jpol[i+1])*0.16666667;
             pixobs.Us += (sin(2.*qui_0)*F_Jpol[i-1]+4.*sin(2.*qui_1)*F_Jpol[i]+sin(2.*qui_2)*F_Jpol[i+1])*0.16666667;
@@ -232,12 +223,7 @@ void Integrator::radial_integration(struct_shell *shell_ref,pointing &ptg_in, st
 
 // compute upper radial boundary at given shell
 double Integrator::get_max_shell_radius(const size_t &shell_numb,const size_t &total_shell,const double &radius) const {
-#ifdef DEBUG
-    if (shell_numb<1 or shell_numb>(total_shell)) {
-        ap_err("invalid shell_numb");
-        exit(1);
-    }
-#endif
+    assert(shell_numb>=1 and shell_numb<=total_shell);
     double max_shell_radius {radius};
     for (size_t n=total_shell;n!=shell_numb;--n) {
         max_shell_radius *= 0.5;
@@ -247,12 +233,7 @@ double Integrator::get_max_shell_radius(const size_t &shell_numb,const size_t &t
 
 // compute lower radial boundary at given shell
 double Integrator::get_min_shell_radius(const size_t &shell_numb,const size_t &total_shell,const double &radius) const {
-#ifdef DEBUG
-    if (shell_numb<1 or shell_numb>total_shell) {
-        ap_err("invalid shell_numb");
-        exit(1);
-    }
-#endif
+    assert(shell_numb>=1 and shell_numb<=total_shell);
     // min_shell_radius for the first shell is always zero.
     if(shell_numb==1){
         return 0.;

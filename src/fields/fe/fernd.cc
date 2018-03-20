@@ -13,7 +13,7 @@
 #include <fereg.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-#include <ap_err.h>
+#include <cassert>
 using namespace std;
 
 double FErnd::get_fernd(const vec3_t<double> &pos,Grid_fernd *grid){
@@ -42,12 +42,7 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     if (tmp<0 or tmp>grid->nz-1) { return 0.;}
     decltype(grid->nx) zl {(std::size_t)floor(tmp)};
     const double zd {tmp - zl};
-#ifdef DEBUG
-    if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
-        ap_err("wrong value");
-        exit(1);
-    }
-#endif
+    assert(xd>=0 and yd>=0 and zd>=0 and xd<=1 and yd<=1 and zd<=1);
     double density;
     //trilinear interpolation
     if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
@@ -82,8 +77,7 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
 }
 
 void FErnd::write_grid(Param *,Grid_fernd *){
-    ap_err("dynamic binding fail");
-    exit(1);
+    assert(false);
 }
 
 // END

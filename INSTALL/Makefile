@@ -8,6 +8,10 @@ ifeq ($(CXX),)
 CXX=g++
 endif
 
+ifeq ($(DEBUG),)
+DEBUG= -DNDEBUG
+endif
+
 ifeq ($(GSL),)
 GSL=/usr
 endif

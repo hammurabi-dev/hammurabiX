@@ -14,7 +14,7 @@
 #include <breg.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-#include <ap_err.h>
+#include <cassert>
 using namespace std;
 
 vec3_t<double> Brnd::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
@@ -43,12 +43,7 @@ vec3_t<double> Brnd::read_grid(const vec3_t<double> &pos, Grid_brnd *grid){
     if (tmp<0 or tmp>grid->nz-1) { return vec3_t<double> {0.,0.,0.};}
     decltype(grid->nx) zl {(std::size_t)floor(tmp)};
     const double zd {tmp - zl};
-#ifdef DEBUG
-    if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
-        ap_err("wrong value");
-        exit(1);
-    }
-#endif
+    assert(xd>=0 and yd>=0 and zd>=0 and xd<=1 and yd<=1 and zd<=1);
     vec3_t<double> b_vec3;
     //trilinear interpolation
     if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz){
@@ -86,18 +81,12 @@ vec3_t<double> Brnd::read_grid(const vec3_t<double> &pos, Grid_brnd *grid){
         std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         b_vec3 = vec3_t<double> {grid->fftw_b_x[idx],grid->fftw_b_y[idx],grid->fftw_b_z[idx]};
     }
-#ifdef DEBUG
-    if (b_vec3.Length()>50.*CGS_U_muGauss){
-        ap_err("sceptical field strength");
-        exit(1);
-    }
-#endif
+    assert(b_vec3.Length()<1e+5*CGS_U_muGauss);
     return b_vec3;
 }
 
 void Brnd::write_grid(Param *, Breg *, Grid_breg *, Grid_brnd *){
-    ap_err("dynamic binding fail");
-    exit(1);
+    assert(false);
 }
 
 // END

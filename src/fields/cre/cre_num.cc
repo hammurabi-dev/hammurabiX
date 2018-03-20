@@ -12,7 +12,7 @@
 #include <grid.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-#include <ap_err.h>
+#include <cassert>
 using namespace std;
 
 // numerical CRE flux
@@ -32,12 +32,8 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
         if(tmp<0 or tmp>grid->nz-1) {return 0.;}
         decltype(grid->nr) zl {(std::size_t)floor(tmp)};
         const double zd {tmp - zl};
-#ifdef DEBUG
-        if(rd<0 or zd<0 or rd>1 or zd>1){
-            ap_err("wrong value");
-            exit(1);
-        }
-#endif
+        assert(rd>=0 and zd>=0 and rd<=1 and zd<=1);
+        
         double cre;
         if(rl+1<grid->nr and zl+1<grid->nz){
             std::size_t idx1 {toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl,zl)};
@@ -52,12 +48,7 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
             std::size_t idx1 {toolkit::Index3d(grid->nE,grid->nr,grid->nz,Eidx,rl,zl)};
             cre = grid->cre_flux[idx1];
         }
-#ifdef DEBUG
-        if(cre<0){
-            ap_err("negative CRE flux");
-            exit(1);
-        }
-#endif
+        assert(cre>=0);
         return cre;
     }
     // if grid in spatial 3D
@@ -75,12 +66,7 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
         if (tmp<0 or tmp>grid->nz-1) { return 0.;}
         decltype(grid->nx) zl {(std::size_t)floor(tmp)};
         const double zd {tmp - zl};
-#ifdef DEBUG
-        if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
-            ap_err("wrong value");
-            exit(1);
-        }
-#endif
+        assert(xd>=0 and yd>=0 and zd>=0 and xd<=1 and yd<=1 and zd<=1);
         double cre;
         if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
             std::size_t idx1 {toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,Eidx,xl,yl,zl)};
@@ -104,29 +90,19 @@ double CRE_num::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Gri
             std::size_t idx1 {toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,Eidx,xl,yl,zl)};
             cre = grid->cre_flux[idx1];
         }
-#ifdef DEBUG
-        if(cre<0){
-            ap_err("negative CRE flux");
-            exit(1);
-        }
-#endif
+        assert(cre>=0);
         return cre;
     }
     else{
-        ap_err("wrong CRE grid dimension");
-        exit(1);
+        assert(false);
+        return 0;
     }
 }
 
 // J_tot(\nu)
 double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
     double J {0.};
-#ifdef DEBUG
-    if(!grid->read_permission){
-        ap_err("no input");
-        exit(1);
-    }
-#endif
+    assert(grid->read_permission);
     // allocate energy grid
     unique_ptr<double[]> KE = unique_ptr<double[]> (new double[grid->nE] {0.});
     // we need F(x[E]) and G(x[E]) in spectral integration
@@ -152,12 +128,7 @@ double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *
         const double dE {fabs(KE[i+1]-KE[i])};
         // we put beta here
         const double de {(read_grid(i+1,pos,grid)/beta[i+1]+read_grid(i,pos,grid)/beta[i])/2.};
-#ifdef DEBUG
-        if(de<0){
-            ap_err("negative CRE density");
-            exit(1);
-        }
-#endif
+        assert(de>=0);
         J += gsl_sf_synchrotron_1(xv)*de*dE;
     }
     return fore_factor*J/(4.*CGS_U_pi);
@@ -166,12 +137,7 @@ double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *
 // J_pol(\nu)
 double CRE_num::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
     double J {0.};
-#ifdef DEBUG
-    if(!grid->read_permission){
-        ap_err("no input");
-        exit(1);
-    }
-#endif
+    assert(grid->read_permission);
     // allocate energy grid
     unique_ptr<double[]> KE = unique_ptr<double[]> (new double[grid->nE] {0.});
     // we need F(x[E]) and G(x[E]) in spectral integration
@@ -197,12 +163,7 @@ double CRE_num::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *
         const double dE {fabs(KE[i+1]-KE[i])};
         // we put beta here
         const double de {(read_grid(i+1,pos,grid)/beta[i+1]+read_grid(i,pos,grid)/beta[i])/2.};
-#ifdef DEBUG
-        if(de<0){
-            ap_err("negative CRE density");
-            exit(1);
-        }
-#endif
+        assert(de>=0);
         J += gsl_sf_synchrotron_2(xv)*de*dE;
     }
     return fore_factor*J/(4.*CGS_U_pi);

@@ -11,7 +11,7 @@
 #include <grid.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-#include <ap_err.h>
+#include <cassert>
 using namespace std;
 
 // CRE flux spatial rescaling
@@ -59,12 +59,7 @@ double CRE_verify::flux(const vec3_t<double> &pos,Param *par,const double &En){
 
 // J_tot(\nu)
 double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
-#ifdef DEBUG
-    if(grid->read_permission){
-        ap_err("wrong module");
-        exit(1);
-    }
-#endif
+    assert(!grid->read_permission);
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
     const double index {flux_idx(pos,par)};
@@ -82,12 +77,7 @@ double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cr
 
 // J_pol(\nu)
 double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
-#ifdef DEBUG
-    if(grid->read_permission){
-        ap_err("wrong module");
-        exit(1);
-    }
-#endif
+    assert(!grid->read_permission);
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
     const double index {flux_idx(pos,par)};
@@ -105,12 +95,7 @@ double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cr
 
 // writing out CRE DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
 void CRE_verify::write_grid(Param *par, Grid_cre *grid){
-#ifdef DEBUG
-    if(!grid->write_permission){
-        ap_err("no permission");
-        exit(1);
-    }
-#endif
+    assert(grid->write_permission);
     vec3_t<double> gc_pos {0.,0.,0.};
     // 2D grid
     if(grid->nr!=0){
