@@ -21,35 +21,35 @@ using namespace std;
 // turbulent free electron density field
 Grid_fernd::Grid_fernd(string file_name){
     unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("FreeElectron")->FirstChildElement("Random")};
-    build_permission = ptr->BoolAttribute("cue");
+    XMLElement *ptr {toolkit::tracexml(doc.get(),{"FreeElectron"})};
+    build_permission = toolkit::FetchBool(ptr,"cue","Random");
     // sometimes users don't want to write out random field
     // but generation of random field needs grid
-    ptr = doc->FirstChildElement("root")->FirstChildElement("Fieldout")->FirstChildElement("fernd_grid");
-    read_permission = ptr->BoolAttribute("read");
-    write_permission = ptr->BoolAttribute("write");
+    ptr = toolkit::tracexml(doc.get(),{"Fieldout"});
+    read_permission = toolkit::FetchBool(ptr,"read","fernd_grid");
+    write_permission = toolkit::FetchBool(ptr,"write","fernd_grid");
     if(build_permission or read_permission){
         build_grid(doc.get());
     }
     if(read_permission or write_permission){
-        filename = ptr->Attribute("filename");
+        filename = toolkit::FetchString(ptr,"filename","fernd_grid");
     }
 }
 
 void Grid_fernd::build_grid(XMLDocument *doc){
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box")};
+    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box"})};
     // Cartesian grid
-    nx = toolkit::FetchUnsigned(ptr,"nx");
-    ny = toolkit::FetchUnsigned(ptr,"ny");
-    nz = toolkit::FetchUnsigned(ptr,"nz");
+    nx = toolkit::FetchUnsigned(ptr,"value","nx");
+    ny = toolkit::FetchUnsigned(ptr,"value","ny");
+    nz = toolkit::FetchUnsigned(ptr,"value","nz");
     full_size = nx*ny*nz;
     // box limit for filling field
-    x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_max");
-    x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_min");
-    y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_max");
-    y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_min");
-    z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_max");
-    z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_min");
+    x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_max");
+    x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_min");
+    y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_max");
+    y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_min");
+    z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
+    z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
     // real random fe field
     fftw_fe = unique_ptr<double[]> (new double[full_size]);
     // complex random b field in k-space

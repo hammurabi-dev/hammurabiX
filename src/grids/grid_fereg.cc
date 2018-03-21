@@ -19,29 +19,29 @@ using namespace std;
 
 Grid_fereg::Grid_fereg(string file_name){
     unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Fieldout")->FirstChildElement("fereg_grid")};
-    read_permission = ptr->BoolAttribute("read");
-    write_permission = ptr->BoolAttribute("write");
+    XMLElement *ptr {toolkit::tracexml(doc.get(),{"Fieldout"})};
+    read_permission = toolkit::FetchBool(ptr,"read","fereg_grid");
+    write_permission = toolkit::FetchBool(ptr,"write","fereg_grid");
     if(read_permission or write_permission){
-        filename = ptr->Attribute("filename");
+        filename = toolkit::FetchString(ptr,"filename","fereg_grid");
         build_grid(doc.get());
     }
 }
 
 void Grid_fereg::build_grid(XMLDocument *doc){
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box")};
+    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box"})};
     // Cartesian grid
-    nx = toolkit::FetchUnsigned(ptr,"nx");
-    ny = toolkit::FetchUnsigned(ptr,"ny");
-    nz = toolkit::FetchUnsigned(ptr,"nz");
+    nx = toolkit::FetchUnsigned(ptr,"value","nx");
+    ny = toolkit::FetchUnsigned(ptr,"value","ny");
+    nz = toolkit::FetchUnsigned(ptr,"value","nz");
     full_size = nx*ny*nz;
     // box limit for filling field
-    x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_max");
-    x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_min");
-    y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_max");
-    y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_min");
-    z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_max");
-    z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_min");
+    x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_max");
+    x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_min");
+    y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_max");
+    y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_min");
+    z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
+    z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
     fe = unique_ptr<double[]> (new double[full_size]);
 }
 

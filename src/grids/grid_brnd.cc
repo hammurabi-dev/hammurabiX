@@ -20,35 +20,35 @@ using namespace std;
 
 Grid_brnd::Grid_brnd(string file_name){
     unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("MagneticField")->FirstChildElement("Random")};
+    XMLElement *ptr {toolkit::tracexml(doc.get(),{"MagneticField"})};
     // sometimes users don't want to write out random field
     // but generation of random field needs grid
-    build_permission = ptr->BoolAttribute("cue");
-    ptr = doc->FirstChildElement("root")->FirstChildElement("Fieldout")->FirstChildElement("brnd_grid");
-    read_permission = ptr->BoolAttribute("read");
-    write_permission = ptr->BoolAttribute("write");
+    build_permission = toolkit::FetchBool(ptr,"cue","Random");
+    ptr = toolkit::tracexml(doc.get(),{"Fieldout"});
+    read_permission = toolkit::FetchBool(ptr,"read","brnd_grid");
+    write_permission = toolkit::FetchBool(ptr,"write","brnd_grid");
     if(build_permission or read_permission){
         build_grid(doc.get());
     }
     if(read_permission or write_permission){
-        filename = ptr->Attribute("filename");
+        filename = toolkit::FetchString(ptr,"filename","brnd_grid");
     }
 }
 
 void Grid_brnd::build_grid(XMLDocument *doc){
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box")};
+    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box"})};
     // Cartesian grid
-    nx = toolkit::FetchUnsigned(ptr,"nx");
-    ny = toolkit::FetchUnsigned(ptr,"ny");
-    nz = toolkit::FetchUnsigned(ptr,"nz");
+    nx = toolkit::FetchUnsigned(ptr,"value","nx");
+    ny = toolkit::FetchUnsigned(ptr,"value","ny");
+    nz = toolkit::FetchUnsigned(ptr,"value","nz");
     full_size = nx*ny*nz;
     // box limit for filling field
-    x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_max");
-    x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_min");
-    y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_max");
-    y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_min");
-    z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_max");
-    z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_min");
+    x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_max");
+    x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_min");
+    y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_max");
+    y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_min");
+    z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
+    z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
     // real 3D random b field
     fftw_b_x = unique_ptr<double[]> (new double[full_size]);
     fftw_b_y = unique_ptr<double[]> (new double[full_size]);

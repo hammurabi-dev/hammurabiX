@@ -47,15 +47,15 @@ distribution.
 */
 /*
 	gcc:
-        g++ -Wall -DTINYXML2_DEBUG tinyxml2.cpp xmltest.cpp -o gccxmltest.exe
+        g++ -Wall -DDEBUG tinyxml2.cpp xmltest.cpp -o gccxmltest.exe
 
     Formatting, Artistic Style:
         AStyle.exe --style=1tbs --indent-switches --break-closing-brackets --indent-preprocessor tinyxml2.cpp tinyxml2.h
 */
 
 #if defined( _DEBUG ) || defined (__DEBUG__)
-#   ifndef TINYXML2_DEBUG
-#       define TINYXML2_DEBUG
+#   ifndef DEBUG
+#       define DEBUG
 #   endif
 #endif
 
@@ -79,7 +79,7 @@ distribution.
 #endif
 
 
-#if defined(TINYXML2_DEBUG)
+#if defined(DEBUG)
 #   if defined(_MSC_VER)
 #       // "(void)0," is for suppressing C4127 warning in "assert(false)", "assert(true)" and the like
 #       define TIXMLASSERT( x )           if ( !((void)0,(x))) { __debugbreak(); }
@@ -99,12 +99,8 @@ distribution.
 	http://semver.org/
 */
 static const int TIXML2_MAJOR_VERSION = 6;
-static const int TIXML2_MINOR_VERSION = 1;
+static const int TIXML2_MINOR_VERSION = 0;
 static const int TIXML2_PATCH_VERSION = 0;
-
-#define TINYXML2_MAJOR_VERSION 6
-#define TINYXML2_MINOR_VERSION 1
-#define TINYXML2_PATCH_VERSION 0
 
 namespace tinyxml2
 {
@@ -395,7 +391,7 @@ public:
         }
         --_currentAllocs;
         Item* item = static_cast<Item*>( mem );
-#ifdef TINYXML2_DEBUG
+#ifdef DEBUG
         memset( item, 0xfe, sizeof( *item ) );
 #endif
         item->next = _root;
@@ -1364,17 +1360,6 @@ public:
         }
         return a->QueryFloatValue( value );
     }
-
-	/// See QueryIntAttribute()
-	XMLError QueryStringAttribute(const char* name, const char** value) const {
-		const XMLAttribute* a = FindAttribute(name);
-		if (!a) {
-			return XML_NO_ATTRIBUTE;
-		}
-		*value = a->Value();
-		return XML_SUCCESS;
-	}
-
 
 	
     /** Given an attribute name, QueryAttribute() returns

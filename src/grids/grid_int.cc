@@ -1,7 +1,5 @@
-#include <sstream>
 #include <iostream>
 #include <memory>
-#include <fftw3.h>
 #include <array>
 #include <string>
 #include <vector>
@@ -24,56 +22,56 @@ Grid_int::Grid_int(string file_name){
 }
 
 void Grid_int::build_grid(XMLDocument *doc){
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Integration")};
+    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Integration"})};
     // get shell Nside
-    string shell_type {ptr->FirstChildElement("shell")->Attribute("type")};
+    string shell_type {toolkit::FetchString(ptr,"type","shell")};
     if(shell_type=="auto"){
-        XMLElement *subptr {ptr->FirstChildElement("shell")->FirstChildElement("auto")};
-        total_shell = toolkit::FetchUnsigned(subptr,"shell_num");
-        std::size_t nside_min {toolkit::FetchUnsigned(subptr,"nside_min")};
+        XMLElement *subptr {toolkit::tracexml(doc,{"Grid","Integration","shell","auto"})};
+        total_shell = toolkit::FetchUnsigned(subptr,"value","shell_num");
+        size_t nside_min {toolkit::FetchUnsigned(subptr,"value","nside_min")};
         for(std::size_t i=0;i!=total_shell;++i){
             nside_shell.push_back(pow(2,i)*nside_min);
         }
     }
     else if(shell_type=="manual"){
-        XMLElement *subptr {ptr->FirstChildElement("shell")->FirstChildElement("manual")};
+        XMLElement *subptr {toolkit::tracexml(doc,{"Grid","Integration","shell","manual"})};
         total_shell = 0;
-        for(auto e = subptr->FirstChildElement("nside");e!=NULL;e=e->NextSiblingElement("nside")){
+        for(auto e = subptr->FirstChildElement("nside");e!=nullptr;e=e->NextSiblingElement("nside")){
             total_shell++;
-            nside_shell.push_back(e->UnsignedAttribute("value"));
+            nside_shell.push_back(toolkit::FetchUnsigned(e,"value"));
         }
         assert(nside_shell.size()==total_shell);
     }
     else{
         assert(false);
     }
-    nside_sim = toolkit::FetchUnsigned(ptr,"nside_sim");
+    nside_sim = toolkit::FetchUnsigned(ptr,"value","nside_sim");
     npix_sim = 12*nside_sim*nside_sim;
-    ec_r_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"ec_r_max");
-    gc_r_max = toolkit::FetchDouble(ptr,"gc_r_max")*CGS_U_kpc;
-    gc_z_max = toolkit::FetchDouble(ptr,"gc_z_max")*CGS_U_kpc;
-    radial_res = toolkit::FetchDouble(ptr,"ec_r_res")*CGS_U_kpc;
-    lat_lim = toolkit::FetchDouble(ptr,"lat_lim")*CGS_U_rad;
+    ec_r_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","ec_r_max");
+    gc_r_max = toolkit::FetchDouble(ptr,"value","gc_r_max")*CGS_U_kpc;
+    gc_z_max = toolkit::FetchDouble(ptr,"value","gc_z_max")*CGS_U_kpc;
+    radial_res = toolkit::FetchDouble(ptr,"value","ec_r_res")*CGS_U_kpc;
+    lat_lim = toolkit::FetchDouble(ptr,"value","lat_lim")*CGS_U_rad;
     // output file name
     
-    ptr = doc->FirstChildElement("root")->FirstChildElement("Obsout");
+    ptr = toolkit::tracexml(doc,{"Obsout"});
     if(ptr->FirstChildElement("DM")!=nullptr){
-        do_dm = ptr->FirstChildElement("DM")->BoolAttribute("cue");
-        sim_dm_name = ptr->FirstChildElement("DM")->Attribute("filename");
+        do_dm = toolkit::FetchBool(ptr,"cue","DM");
+        sim_dm_name = toolkit::FetchString(ptr,"filename","DM");
     }
     else{
         do_dm = false;
     }
     if(ptr->FirstChildElement("Faraday")!=nullptr){
-        do_fd = ptr->FirstChildElement("Faraday")->BoolAttribute("cue");
-        sim_fd_name = ptr->FirstChildElement("Faraday")->Attribute("filename");
+        do_fd = toolkit::FetchBool(ptr,"cue","Faraday");
+        sim_fd_name = toolkit::FetchString(ptr,"filename","Faraday");
     }
     else{
         do_fd = false;
     }
     if(ptr->FirstChildElement("Sync")!=nullptr){
-        do_sync = ptr->FirstChildElement("Sync")->BoolAttribute("cue");
-        sim_sync_name = ptr->FirstChildElement("Sync")->Attribute("filename");
+        do_sync = toolkit::FetchBool(ptr,"cue","Sync");
+        sim_sync_name = toolkit::FetchString(ptr,"filename","Sync");
     }
     else{
         do_sync = false;

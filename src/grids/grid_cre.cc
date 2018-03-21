@@ -19,47 +19,45 @@ using namespace std;
 
 Grid_cre::Grid_cre(string file_name){
     unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Fieldout")->FirstChildElement("cre_grid")};
-    read_permission = ptr->BoolAttribute("read");
-    write_permission = ptr->BoolAttribute("write");
-    // security check
-    string type_check {doc->FirstChildElement("root")->FirstChildElement("CRE")->Attribute("type")};
-    assert(!read_permission or type_check!="Analytic");
+    XMLElement *ptr {toolkit::tracexml(doc.get(),{"Fieldout"})};
+    read_permission = toolkit::FetchBool(ptr,"read","cre_grid");
+    write_permission = toolkit::FetchBool(ptr,"write","cre_grid");
+    // build up grid when have read or write permission
     if(read_permission or write_permission){
-        filename = ptr->Attribute("filename");
+        filename = toolkit::FetchString(ptr,"filename","cre_grid");
         build_grid(doc.get());
     }
 }
 
 void Grid_cre::build_grid(XMLDocument *doc){
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("CRE")->FirstChildElement("Numeric")};
-    E_min = CGS_U_GeV*toolkit::FetchDouble(ptr,"E_min");
-    E_max = CGS_U_GeV*toolkit::FetchDouble(ptr,"E_max");
-    E_fact = toolkit::FetchDouble(ptr,"E_fact");
+    XMLElement *ptr {toolkit::tracexml(doc,{"CRE","Numeric"})};
+    E_min = CGS_U_GeV*toolkit::FetchDouble(ptr,"value","E_min");
+    E_max = CGS_U_GeV*toolkit::FetchDouble(ptr,"value","E_max");
+    E_fact = toolkit::FetchDouble(ptr,"value","E_fact");
     nE = ceil(log(E_max/E_min)/E_fact);
     // spatial 2D
-    if(strcmp(ptr->Attribute("type"),"2D")==0){
-        nr = toolkit::FetchUnsigned(ptr,"nr");
-        nz = toolkit::FetchUnsigned(ptr,"nz");
+    if(toolkit::FetchString(ptr,"type")=="2D"){
+        nr = toolkit::FetchUnsigned(ptr,"value","nr");
+        nz = toolkit::FetchUnsigned(ptr,"value","nz");
         nx = 0; ny = 0;
-        r_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"r_max");
-        z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_max");
-        z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_min");
+        r_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","r_max");
+        z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
+        z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
         x_max = 0.; x_min = 0.; y_max = 0.; y_min = 0.;
         cre_size = nE*nr*nz;
     }
     // spatial 3D
-    else if(strcmp(ptr->Attribute("type"),"3D")==0){
+    else if(toolkit::FetchString(ptr,"type")=="3D"){
         nr = 0;
-        nz = toolkit::FetchUnsigned(ptr,"nz");
-        nx = toolkit::FetchUnsigned(ptr,"nx");
-        ny = toolkit::FetchUnsigned(ptr,"ny");
-        x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_max");
-        x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"x_min");
-        y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_max");
-        y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"y_min");
-        z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_max");
-        z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"z_min");
+        nz = toolkit::FetchUnsigned(ptr,"value","nz");
+        nx = toolkit::FetchUnsigned(ptr,"value","nx");
+        ny = toolkit::FetchUnsigned(ptr,"value","ny");
+        x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_max");
+        x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_min");
+        y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_max");
+        y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_min");
+        z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
+        z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
         r_max = 0.;
         cre_size = nE*nx*ny*nz;
     }

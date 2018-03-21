@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<VAL>
+<root>
     <integer value="23"/>
     <double value="3.14"/>
     <string value="string"/>
-</VAL>
+</root>

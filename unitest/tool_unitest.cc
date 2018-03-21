@@ -77,7 +77,8 @@ int main(void){
     
     // test xml parser
     unique_ptr<XMLDocument> doc = loadxml("reference/example.xml");
-    assert(compare(FetchDouble(doc->FirstChildElement("VAL"),"double"),3.14,1e-10));
+    XMLElement* el = tracexml(doc.get(),{"double"});
+    assert(compare(FetchDouble(el,"value"),3.14,1e-10));
     
     // if all testing blocks pass
     cout<<"namespace toolkit ...... pass"<<endl<<endl;

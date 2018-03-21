@@ -192,24 +192,66 @@ namespace toolkit {
         assert(!doc->Error());
         return move(doc);
     }
-    std::string FetchString(XMLElement* el, string obj){
-        return el->FirstChildElement(obj.c_str())->Attribute("value");
+    XMLElement* tracexml(XMLDocument *doc,std::vector<std::string> keychain){
+        XMLElement* el {doc->FirstChildElement("root")};
+        if(!keychain.empty()){
+            for(auto key: keychain){
+#ifndef NDEBUG
+                cout<<"key: "<<key<<endl;
+#endif
+                el = el->FirstChildElement(key.c_str());
+            }
+        }
+        return el;
+    }
+    std::string FetchString(XMLElement* el,string att_type,string key){
+#ifndef NDEBUG
+        cout<<"key: "<<key<<endl;
+#endif
+        if(!key.empty())
+            return el->FirstChildElement(key.c_str())->Attribute(att_type.c_str());
+        else
+            return el->Attribute(att_type.c_str());
     }
     
-    int FetchInt(XMLElement* el, string obj){
-        return el->FirstChildElement(obj.c_str())->IntAttribute("value");
+    int FetchInt(XMLElement* el,string att_type,string key){
+#ifndef NDEBUG
+        cout<<"key: "<<key<<endl;
+#endif
+        if(!key.empty())
+            return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str());
+        else
+            return el->IntAttribute(att_type.c_str());
     }
     
-    unsigned int FetchUnsigned(XMLElement* el, string obj){
-        return el->FirstChildElement(obj.c_str())->UnsignedAttribute("value");
+    unsigned int FetchUnsigned(XMLElement* el,string att_type,string key){
+#ifndef NDEBUG
+        cout<<"key: "<<key<<endl;
+#endif
+        if(!key.empty())
+            return el->FirstChildElement(key.c_str())->UnsignedAttribute(att_type.c_str());
+        else
+            return el->UnsignedAttribute(att_type.c_str());
     }
     
-    bool FetchBool(XMLElement* el, string obj){
-        return el->FirstChildElement(obj.c_str())->BoolAttribute("cue");
+    bool FetchBool(XMLElement* el,string att_type,string key){
+#ifndef NDEBUG
+        cout<<"key: "<<key<<endl;
+#endif
+        if(!key.empty())
+            return el->FirstChildElement(key.c_str())->BoolAttribute(att_type.c_str());
+        else
+            return el->BoolAttribute(att_type.c_str());
     }
     
-    double FetchDouble(XMLElement* el, string obj){
-        return el->FirstChildElement(obj.c_str())->DoubleAttribute("value");
+    double FetchDouble(XMLElement* el,string att_type,string key){
+#ifndef NDEBUG
+        cout<<"key: "<<key<<endl;
+#endif
+        if(!key.empty())
+            return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str());
+        else
+            return el->DoubleAttribute(att_type.c_str());
     }
     // get real components from fftw_complex arrays
     void complex2real(const fftw_complex *input,double *output,const std::size_t &size){
