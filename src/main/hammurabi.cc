@@ -41,8 +41,7 @@ int main(int , char **argv) {
     unique_ptr<Brnd> brnd;
     unique_ptr<CRE> cre;
     
-    unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
-    doc->LoadFile(file_name.c_str());
+    unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
     
     // regular FE field
     string fetype {doc->FirstChildElement("root")->FirstChildElement("FreeElectron")->FirstChildElement("Regular")->Attribute("type")};

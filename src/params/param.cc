@@ -9,18 +9,16 @@ using namespace tinyxml2;
 using namespace std;
 
 Param::Param(std::string file_name){
-    XMLDocument *doc = new XMLDocument();
-    doc->LoadFile(file_name.c_str());
+    unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
     // gc sun position
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("SunPosition")};
     SunPosition = vec3_t<double> {CGS_U_kpc*toolkit::FetchDouble(ptr,"x"),
         CGS_U_kpc*toolkit::FetchDouble(ptr,"y"),
         CGS_U_pc*toolkit::FetchDouble(ptr,"z")};
     
-    b_param(doc);
-    fe_param(doc);
-    cre_param(doc);
-    delete doc;
+    b_param(doc.get());
+    fe_param(doc.get());
+    cre_param(doc.get());
 }
 
 // magnetic field

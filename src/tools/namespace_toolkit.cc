@@ -10,7 +10,7 @@
 #include <sstream>
 #include <tinyxml2.h>
 #include <cassert>
-
+#include <memory>
 using namespace std;
 using namespace tinyxml2;
 
@@ -185,7 +185,13 @@ namespace toolkit {
         gettimeofday(&tv,nullptr);
         return tv.tv_sec*1.e+3 + tv.tv_usec*1e-3;
     }
-    // auxiliary functions for class Grid and Param
+    // auxiliary functions for parsing parameters
+    unique_ptr<XMLDocument> loadxml(string filename){
+        unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument>(new XMLDocument());
+        doc->LoadFile(filename.c_str());
+        assert(!doc->Error());
+        return move(doc);
+    }
     std::string FetchString(XMLElement* el, string obj){
         return el->FirstChildElement(obj.c_str())->Attribute("value");
     }
@@ -205,7 +211,6 @@ namespace toolkit {
     double FetchDouble(XMLElement* el, string obj){
         return el->FirstChildElement(obj.c_str())->DoubleAttribute("value");
     }
-    
     // get real components from fftw_complex arrays
     void complex2real(const fftw_complex *input,double *output,const std::size_t &size){
 #ifdef _OPENMP

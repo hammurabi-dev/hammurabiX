@@ -11,6 +11,7 @@
 #include <fftw3.h>
 #include <cgs_units_file.h>
 #include <tinyxml2.h>
+#include <memory>
 using namespace tinyxml2;
 
 namespace toolkit {
@@ -122,6 +123,7 @@ namespace toolkit {
     ///
     void complex2real(const fftw_complex *,double *,const std::size_t &);
     // auxiliary functions for class Grid and Param
+    std::unique_ptr<XMLDocument> loadxml(std::string);
     std::string FetchString(XMLElement *,std::string);
     int FetchInt(XMLElement *,std::string);
     unsigned int FetchUnsigned(XMLElement *,std::string);

@@ -19,8 +19,7 @@ using namespace tinyxml2;
 using namespace std;
 
 Grid_brnd::Grid_brnd(string file_name){
-    unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
-    doc->LoadFile(file_name.c_str());
+    unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("MagneticField")->FirstChildElement("Random")};
     // sometimes users don't want to write out random field
     // but generation of random field needs grid

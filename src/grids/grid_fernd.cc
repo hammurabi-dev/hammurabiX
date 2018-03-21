@@ -20,8 +20,7 @@ using namespace std;
 
 // turbulent free electron density field
 Grid_fernd::Grid_fernd(string file_name){
-    unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
-    doc->LoadFile(file_name.c_str());
+    unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
     XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("FreeElectron")->FirstChildElement("Random")};
     build_permission = ptr->BoolAttribute("cue");
     // sometimes users don't want to write out random field

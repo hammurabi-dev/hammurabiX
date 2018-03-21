@@ -75,6 +75,9 @@ int main(void){
     tmp = vec3_t<double> {0.1,0.00002,0.0000003};
     assert(compare(crossprod(tmp,versor(tmp)).Length(),0.,1.e-10));
     
+    // test xml parser
+    unique_ptr<XMLDocument> doc = loadxml("reference/example.xml");
+    assert(compare(FetchDouble(doc->FirstChildElement("VAL"),"double"),3.14,1e-10));
     
     // if all testing blocks pass
     cout<<"namespace toolkit ...... pass"<<endl<<endl;
