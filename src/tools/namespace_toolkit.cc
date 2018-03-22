@@ -186,13 +186,13 @@ namespace toolkit {
         return tv.tv_sec*1.e+3 + tv.tv_usec*1e-3;
     }
     // auxiliary functions for parsing parameters
-    unique_ptr<XMLDocument> loadxml(string filename){
+    unique_ptr<XMLDocument> loadxml(const string& filename){
         unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument>(new XMLDocument());
         doc->LoadFile(filename.c_str());
         assert(!doc->Error());
         return move(doc);
     }
-    XMLElement* tracexml(XMLDocument *doc,std::vector<std::string> keychain){
+    XMLElement* tracexml(XMLDocument *doc,const vector<string>& keychain){
         XMLElement* el {doc->FirstChildElement("root")};
         if(!keychain.empty()){
             for(auto key: keychain){
@@ -204,55 +204,71 @@ namespace toolkit {
         }
         return el;
     }
-    std::string FetchString(XMLElement* el,string att_type,string key){
+    std::string FetchString(XMLElement* el,const string& att_type,const string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<endl;
+        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
 #endif
-        if(!key.empty())
-            return el->FirstChildElement(key.c_str())->Attribute(att_type.c_str());
-        else
-            return el->Attribute(att_type.c_str());
+        return el->FirstChildElement(key.c_str())->Attribute(att_type.c_str());
+    }
+    std::string FetchString(XMLElement* el,const string& att_type){
+#ifndef NDEBUG
+        cout<<"attrib: "<<att_type<<endl;
+#endif
+        return el->Attribute(att_type.c_str());
     }
     
-    int FetchInt(XMLElement* el,string att_type,string key){
+    int FetchInt(XMLElement* el,const string& att_type,const string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<endl;
+        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
 #endif
-        if(!key.empty())
-            return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str());
-        else
-            return el->IntAttribute(att_type.c_str());
+        return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str());
+    }
+    int FetchInt(XMLElement* el,const string& att_type){
+#ifndef NDEBUG
+        cout<<"attrib: "<<att_type<<endl;
+#endif
+        return el->IntAttribute(att_type.c_str());
     }
     
-    unsigned int FetchUnsigned(XMLElement* el,string att_type,string key){
+    unsigned int FetchUnsigned(XMLElement* el,const string& att_type,const string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<endl;
+        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
 #endif
-        if(!key.empty())
-            return el->FirstChildElement(key.c_str())->UnsignedAttribute(att_type.c_str());
-        else
-            return el->UnsignedAttribute(att_type.c_str());
+        return el->FirstChildElement(key.c_str())->UnsignedAttribute(att_type.c_str());
+    }
+    unsigned int FetchUnsigned(XMLElement* el,const string& att_type){
+#ifndef NDEBUG
+        cout<<"attrib: "<<att_type<<endl;
+#endif
+        return el->UnsignedAttribute(att_type.c_str());
     }
     
-    bool FetchBool(XMLElement* el,string att_type,string key){
+    bool FetchBool(XMLElement* el,const string& att_type,const string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<endl;
+        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
 #endif
-        if(!key.empty())
-            return el->FirstChildElement(key.c_str())->BoolAttribute(att_type.c_str());
-        else
-            return el->BoolAttribute(att_type.c_str());
+        return el->FirstChildElement(key.c_str())->BoolAttribute(att_type.c_str());
+    }
+    bool FetchBool(XMLElement* el,const string& att_type){
+#ifndef NDEBUG
+        cout<<"attrib: "<<att_type<<endl;
+#endif
+        return el->BoolAttribute(att_type.c_str());
     }
     
-    double FetchDouble(XMLElement* el,string att_type,string key){
+    double FetchDouble(XMLElement* el,const string& att_type,const string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<endl;
+        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
 #endif
-        if(!key.empty())
-            return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str());
-        else
-            return el->DoubleAttribute(att_type.c_str());
+        return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str());
     }
+    double FetchDouble(XMLElement* el,const string& att_type){
+#ifndef NDEBUG
+        cout<<"attrib: "<<att_type<<endl;
+#endif
+        return el->DoubleAttribute(att_type.c_str());
+    }
+    
     // get real components from fftw_complex arrays
     void complex2real(const fftw_complex *input,double *output,const std::size_t &size){
 #ifdef _OPENMP

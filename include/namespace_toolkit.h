@@ -155,24 +155,34 @@ namespace toolkit {
                       double *,
                       const std::size_t &);
     // auxiliary functions for class Grid and Param
-    std::unique_ptr<XMLDocument> loadxml(std::string);
+    std::unique_ptr<XMLDocument> loadxml(const std::string&);
     XMLElement* tracexml(XMLDocument *,
-                         std::vector<std::string>);
+                         const std::vector<std::string>&);
     std::string FetchString(XMLElement *,
-                            std::string,
-                            std::string=std::string());
+                            const std::string&,
+                            const std::string&);
+    std::string FetchString(XMLElement *,
+                            const std::string&);
     int FetchInt(XMLElement *,
-                 std::string,
-                 std::string=std::string());
+                 const std::string&,
+                 const std::string&);
+    int FetchInt(XMLElement *,
+                 const std::string&);
     unsigned int FetchUnsigned(XMLElement *,
-                               std::string,
-                               std::string=std::string());
+                               const std::string&,
+                               const std::string&);
+    unsigned int FetchUnsigned(XMLElement *,
+                               const std::string&);
     bool FetchBool(XMLElement *,
-                   std::string,
-                   std::string=std::string());
+                   const std::string&,
+                   const std::string&);
+    bool FetchBool(XMLElement *,
+                   const std::string&);
     double FetchDouble(XMLElement *,
-                       std::string,
-                       std::string=std::string());
+                       const std::string&,
+                       const std::string&);
+    double FetchDouble(XMLElement *,
+                       const std::string&);
 }
 
 #endif
