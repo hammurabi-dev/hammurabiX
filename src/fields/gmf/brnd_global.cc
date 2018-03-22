@@ -8,12 +8,13 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_integration.h>
-#include "param.h"
-#include "grid.h"
-#include "brnd.h"
-#include "breg.h"
-#include "cgs_units_file.h"
-#include "namespace_toolkit.h"
+#include <param.h>
+#include <grid.h>
+#include <brnd.h>
+#include <breg.h>
+#include <cgs_units_file.h>
+#include <namespace_toolkit.h>
+#include <cassert>
 
 using namespace std;
 
@@ -36,17 +37,13 @@ double Brnd_global::anisotropy(const vec3_t<double> &pos,vec3_t<double> &H,Param
 double Brnd_global::spec(const double &k, Param *par){
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_global.rms*CGS_U_muGauss};
-    const double k0 {par->brnd_global.k0};
+    const double kr {k/par->brnd_global.k0};
     const double a0 {par->brnd_global.a0};
     const double unit = 1./(4*CGS_U_pi*k*k);
-    // avoid nan
-    if(k<=0.){
-        return 0.;
-    }
     // power law
-    double P{0.};
-    if(k>k0){
-        P = p0/pow(k/k0,a0);
+    double P {0.};
+    if(kr>1){
+        P = p0/pow(kr,a0);
     }
     return P*unit;
 }
@@ -76,24 +73,33 @@ vec3_t<double> Brnd_global::gramschmidt(const vec3_t<double> &k,const vec3_t<dou
     return b_free;
 }
 
-// get real components from fftw_complex arrays
-void Brnd_global::complex2real(const fftw_complex *input,double *output,const std::size_t &size) {
-    for(std::size_t i=0;i!=size;++i){
-        output[i] = input[i][0];
-    }
-}
-
 void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
     // PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
+    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[6*grid->full_size]());
+#ifdef _OPENMP
+    // initialize random seed
+    gsl_rng **threadvec = new gsl_rng *[omp_get_max_threads()];
+    for (int b=0;b<omp_get_max_threads();++b){
+        threadvec[b] = gsl_rng_alloc(gsl_rng_taus);
+        gsl_rng_set(threadvec[b],b+toolkit::random_seed(par->brnd_seed));
+    }
+#pragma omp parallel for schedule(static)
+    for(decltype(grid->full_size)i=0;i<6*grid->full_size;++i)
+        gaussian_num[i] = gsl_ran_gaussian(threadvec[omp_get_thread_num()],1);
+    // free random memory
+    for (int b=0;b<omp_get_max_threads();++b)
+        gsl_rng_free(threadvec[b]);
+    delete [] threadvec;
+#else
     // initialize random seed
     gsl_rng *r{gsl_rng_alloc(gsl_rng_taus)};
     gsl_rng_set(r, toolkit::random_seed(par->brnd_seed));
-    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[6*grid->full_size]());
     for(decltype(grid->full_size)i=0;i<6*grid->full_size;++i)
         gaussian_num[i] = gsl_ran_gaussian(r,1);
     // free random memory
     gsl_rng_free(r);
+#endif
     // start Fourier space filling
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};
@@ -102,7 +108,9 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
     const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
-#pragma omp parallel for
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         double kx {CGS_U_kpc*i/lx};
         if(i>=grid->nx/2) kx -= CGS_U_kpc*grid->nx/lx;
@@ -145,7 +153,9 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
     // PHASE II
     // RESCALING FIELD PROFILE IN REAL SPACE
     double b_var {toolkit::Variance(grid->fftw_b_kx[0], grid->full_size)};
-#pragma omp parallel for
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i){
         vec3_t<double> pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
         for (decltype(grid->ny) j=0;j<grid->ny;++j){
@@ -162,15 +172,7 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
                 // impose anisotropy
                 vec3_t<double> H_versor {0.,0.,0.,};
                 double rho {anisotropy(pos,H_versor,par,breg,gbreg)};
-#ifndef NDEBUG
-                if(rho<0. or rho>1.){
-                    cerr<<"ERR:"<<__FILE__
-                    <<" : in function "<<__func__<<endl
-                    <<" at line "<<__LINE__<<endl
-                    <<"WRONG VALUE"<<endl;
-                    exit(1);
-                }
-#endif
+                assert(rho>=0. and rho<=1.);
                 if(H_versor.Length()==0){
                     break;
                 }
@@ -197,7 +199,9 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
     // PHASE III
     // RE-ORTHOGONALIZING IN FOURIER SPACE
     // Gram-Schmidt process
-#pragma omp parallel for
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         vec3_t<double> tmp_k {CGS_U_kpc*i/lx,0,0};
         if(i>=grid->nx/2) tmp_k.x -= CGS_U_kpc*grid->nx/lx;
@@ -239,13 +243,15 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
     fftw_execute(grid->fftw_py_bw);
     fftw_execute(grid->fftw_pz_bw);
     // get real elements, use auxiliary function
-    complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
-    complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
-    complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
+    toolkit::complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
+    toolkit::complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
+    toolkit::complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
     // according to FFTW3 manual
     // transform forward followed by backword scale up array by nx*ny*nz
     double inv_grid_size = 1.0/grid->full_size;
-#pragma omp parallel for
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
     for(std::size_t i=0;i<grid->full_size;++i){
         grid->fftw_b_x[i] *= inv_grid_size;
         grid->fftw_b_y[i] *= inv_grid_size;

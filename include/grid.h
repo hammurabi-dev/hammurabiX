@@ -1,8 +1,8 @@
 ///
 /// allocating physical/observable fields
 ///
-#ifndef GENERIC_GRID_H
-#define GENERIC_GRID_H
+#ifndef HAMMURABI_GRID_H
+#define HAMMURABI_GRID_H
 
 #include <fftw3.h>
 #include <string>
@@ -30,14 +30,6 @@ public:
     /// import file to grid
     ///
     virtual void import_grid(void);
-    
-protected:
-    //auxiliary functions
-    std::string FetchString(XMLElement *,std::string);
-    int FetchInt(XMLElement *,std::string);
-    unsigned int FetchUnsigned(XMLElement *,std::string);
-    bool FetchBool(XMLElement *,std::string);
-    double FetchDouble(XMLElement *,std::string);
 };
 
 ///
@@ -118,7 +110,7 @@ public:
     Grid_fernd(std::string);
     virtual ~Grid_fernd(void) {
         if(build_permission or read_permission){
-            fftw_destroy_plan(fftw_p);
+            fftw_destroy_plan(fftw_p_bw);
             fftw_free(fftw_fe_k);
         }
     };
@@ -127,7 +119,7 @@ public:
     void import_grid(void) override;
     std::unique_ptr<double[]> fftw_fe;
     fftw_complex *fftw_fe_k;
-    fftw_plan fftw_p;
+    fftw_plan fftw_p_bw;
     std::string filename;
     bool read_permission, write_permission, build_permission;
     double x_max, x_min, y_max, y_min, z_max, z_min;
@@ -148,13 +140,11 @@ public:
     std::unique_ptr<double[]> cre_flux;
     std::string filename;
     bool read_permission, write_permission;
-    // 2-D spatial 1-D spectral grid
-    std::size_t nE, nr, nz;
+    
+    std::size_t nE, nz, nx, ny;
     std::size_t cre_size;
-    double r_max, z_max, z_min, E_min, E_max, E_fact;
-    // or 3+1 dimension grid
-    std::size_t nx,ny;
-    double x_max, x_min, y_max, y_min;
+    double x_max, x_min, y_max, y_min, z_max, z_min;
+    double E_min, E_max, E_fact;
 };
 
 ///
@@ -163,6 +153,7 @@ public:
 class Grid_int final : public Grid{
 public:
     Grid_int(std::string);
+    Grid_int(void) = default;
     virtual ~Grid_int(void) = default;
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;

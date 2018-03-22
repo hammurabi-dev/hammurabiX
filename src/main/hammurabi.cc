@@ -1,28 +1,26 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <tinyxml2.h>
 #include <cstdlib>
 #include <memory>
 
-#include "param.h"
-#include "grid.h"
-#include "integrator.h"
-#include "breg.h"
-#include "brnd.h"
-#include "cre.h"
-#include "fereg.h"
-#include "fernd.h"
-#include "namespace_toolkit.h"
-
+#include <param.h>
+#include <grid.h>
+#include <integrator.h>
+#include <breg.h>
+#include <brnd.h>
+#include <cre.h>
+#include <fereg.h>
+#include <fernd.h>
+#include <namespace_toolkit.h>
+#include <tinyxml2.h>
 
 using namespace std;
 using namespace tinyxml2;
 
-int main(int , char **argv) {
+int main(int /*argc*/,char **argv) {
 #ifndef NDEBUG
     double time = toolkit::timestamp();
-    cout<<"...STARTING HAMMURABI..."<<endl;
 #endif
     
     string file_name {argv[1]};
@@ -34,35 +32,29 @@ int main(int , char **argv) {
     unique_ptr<Grid_fernd> grid_fernd = unique_ptr<Grid_fernd> (new Grid_fernd(file_name));
     unique_ptr<Grid_cre> grid_cre = unique_ptr<Grid_cre> (new Grid_cre(file_name));
     unique_ptr<Grid_int> grid_int = unique_ptr<Grid_int> (new Grid_int(file_name));
-#ifndef NDEBUG
-    cout<<"INFO: ALL GRIDS BUILT"<<endl;
-#endif
+    
     unique_ptr<FEreg> fereg;
     unique_ptr<Breg> breg;
     unique_ptr<FErnd> fernd;
     unique_ptr<Brnd> brnd;
     unique_ptr<CRE> cre;
     
-    unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
-    doc->LoadFile(file_name.c_str());
+    unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
+    XMLElement *ptr;
+    string field_type;
     
     // regular FE field
-    string fetype {doc->FirstChildElement("root")->FirstChildElement("FreeElectron")->FirstChildElement("Regular")->Attribute("type")};
+    ptr = toolkit::tracexml(doc.get(),{"FreeElectron"});
+    field_type = toolkit::FetchString(ptr,"type","Regular");
     // if import from file, no need to build specific fe class
     if(grid_fereg->read_permission){
         grid_fereg->import_grid();
         fereg = unique_ptr<FEreg> (new FEreg());
     }
-    else if(fetype=="YMW16"){
-#ifndef NDEBUG
-        cout<<"INFO: USING YMW16 FE MODEL"<<endl;
-#endif
+    else if(field_type=="YMW16"){
         fereg = unique_ptr<FEreg> (new FEreg_ymw16());
     }
-    else if(fetype=="Verify"){
-#ifndef NDEBUG
-        cout<<"INFO: USING VERIFICATION FE MODEL"<<endl;
-#endif
+    else if(field_type=="Verify"){
         fereg = unique_ptr<FEreg> (new FEreg_verify());
     }
     else{return EXIT_FAILURE;}
@@ -74,27 +66,19 @@ int main(int , char **argv) {
     }
     
     // regular B field, must before random B field
-    string bregtype {doc->FirstChildElement("root")->FirstChildElement("MagneticField")->FirstChildElement("Regular")->Attribute("type")};
+    ptr = toolkit::tracexml(doc.get(),{"MagneticField"});
+    field_type = toolkit::FetchString(ptr,"type","Regular");
     if(grid_breg->read_permission){
         grid_breg->import_grid();
         breg = unique_ptr<Breg> (new Breg());
     }
-    else if(bregtype=="WMAP"){
-#ifndef NDEBUG
-        cout<<"INFO: USING WMAP LSA REGUALR B MODEL"<<endl;
-#endif
+    else if(field_type=="WMAP"){
         breg = unique_ptr<Breg> (new Breg_wmap());
     }
-    else if(bregtype=="Jaffe"){
-#ifndef NDEBUG
-        cout<<"INFO: USING JAFFE REGUALR B MODEL"<<endl;
-#endif
+    else if(field_type=="Jaffe"){
         breg = unique_ptr<Breg> (new Breg_jaffe());
     }
-    else if(bregtype=="Verify"){
-#ifndef NDEBUG
-        cout<<"INFO: USING VERIFICATION REGUALR B MODEL"<<endl;
-#endif
+    else if(field_type=="Verify"){
         breg = unique_ptr<Breg> (new Breg_verify());
     }
     else{return EXIT_FAILURE;}
@@ -110,23 +94,18 @@ int main(int , char **argv) {
         grid_fernd->import_grid();
         fernd = unique_ptr<FErnd> (new FErnd());
     }
-    else if(doc->FirstChildElement("root")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->BoolAttribute("cue")){
-        string ferndtype {doc->FirstChildElement("root")->FirstChildElement("FreeElectron")->FirstChildElement("Random")->Attribute("type")};
-        if(ferndtype=="Global"){
-#ifndef NDEBUG
-            cout<<"INFO: USING GLOBAL RANDOM FE MODEL"<<endl;
-#endif
+    else if(grid_fernd->build_permission){
+        ptr = toolkit::tracexml(doc.get(),{"FreeElectron"});
+        field_type = toolkit::FetchString(ptr,"type","Random");
+        if(field_type=="Global"){
             // non default constructor
             fernd = unique_ptr<FErnd> (new FErnd_global());
             // fill grid with random fields
-            fernd->write_grid_global(par.get(),grid_fernd.get());
+            fernd->write_grid(par.get(),grid_fernd.get());
         }
         else{return EXIT_FAILURE;}
     }
     else{
-#ifndef NDEBUG
-        cout<<"INFO: NO RANDOM FE FIELD"<<endl;
-#endif
         fernd = unique_ptr<FErnd> (new FErnd());
     }
     // if export to file
@@ -139,20 +118,15 @@ int main(int , char **argv) {
         grid_brnd->import_grid();
         brnd = unique_ptr<Brnd> (new Brnd());
     }
-    else if(doc->FirstChildElement("root")->FirstChildElement("MagneticField")->FirstChildElement("Random")->BoolAttribute("cue")){
-        string brndtype {doc->FirstChildElement("root")->FirstChildElement("MagneticField")->FirstChildElement("Random")->Attribute("type")};
-        if(brndtype=="Global"){
-#ifndef NDEBUG
-            cout<<"INFO: USING GLOBAL RANDOM B MODEL"<<endl;
-#endif
+    else if(grid_brnd->build_permission){
+        ptr = toolkit::tracexml(doc.get(),{"MagneticField"});
+        field_type = toolkit::FetchString(ptr,"type","Random");
+        if(field_type=="Global"){
             brnd = unique_ptr<Brnd> (new Brnd_global());
             // fill grid with random fields
             brnd->write_grid(par.get(),breg.get(),grid_breg.get(),grid_brnd.get());
         }
-        else if(brndtype=="Local"){
-#ifndef NDEBUG
-            cout<<"INFO: USING LOCAL RANDOM B MODEL"<<endl;
-#endif
+        else if(field_type=="Local"){
             brnd = unique_ptr<Brnd> (new Brnd_local());
             // fill grid with random fields
             brnd->write_grid(par.get(),breg.get(),grid_breg.get(),grid_brnd.get());
@@ -161,9 +135,6 @@ int main(int , char **argv) {
         
     }
     else{
-#ifndef NDEBUG
-        cout<<"INFO: NO RANDOM B FIELD"<<endl;
-#endif
         //without read permission, return zeros
         brnd = unique_ptr<Brnd> (new Brnd());
     }
@@ -173,23 +144,15 @@ int main(int , char **argv) {
     }
     
     // cre
-    string cretype {doc->FirstChildElement("root")->FirstChildElement("CRE")->Attribute("type")};
-    if(cretype=="Analytic"){
-#ifndef NDEBUG
-        cout<<"INFO: USING ANALYTIC CRE"<<endl;
-#endif
+    ptr = toolkit::tracexml(doc.get(),{});
+    field_type = toolkit::FetchString(ptr,"type","CRE");
+    if(field_type=="Analytic"){
         cre = unique_ptr<CRE> (new CRE_ana());
     }
-    else if(cretype=="Verify"){
-#ifndef NDEBUG
-        cout<<"INFO: USING VERIFICATION CRE"<<endl;
-#endif
+    else if(field_type=="Verify"){
         cre = unique_ptr<CRE> (new CRE_verify());
     }
-    else if(cretype=="Numeric"){
-#ifndef NDEBUG
-        cout<<"INFO: USING NUMERIC CRE"<<endl;
-#endif
+    else if(field_type=="Numeric"){
         grid_cre->import_grid();
         cre = unique_ptr<CRE> (new CRE_num());
     }
@@ -202,40 +165,31 @@ int main(int , char **argv) {
     
     // START INTEGRATION
     unique_ptr<Integrator> intobj = unique_ptr<Integrator> (new Integrator());
-#ifndef NDEBUG
-    cout<<"...ALL MODULES BUILT..."<<endl;
-#endif
     
     intobj->write_grid(breg.get(),brnd.get(),fereg.get(),fernd.get(),cre.get(),grid_breg.get(),grid_brnd.get(),grid_fereg.get(),grid_fernd.get(),grid_cre.get(),grid_int.get(),par.get());
-#ifndef NDEBUG
-    cout<<"...PRODUCING MAPS..."<<endl;
-#endif
+    
     grid_int->export_grid();
     
     // INSERT MULTI_OUTPUT TAKEOVER LOOP
-    if (doc->FirstChildElement("root")->FirstChildElement("Obsout")->FirstChildElement("Sync")!=nullptr){
-        for(auto e = doc->FirstChildElement("root")->FirstChildElement("Obsout")->FirstChildElement("Sync")->NextSiblingElement("Sync");e!=NULL;e=e->NextSiblingElement("Sync")){
+    ptr = toolkit::tracexml(doc.get(),{"Obsout","Sync"});
+    if (ptr!=nullptr){
+        for(auto e = ptr->NextSiblingElement("Sync");e!=nullptr;e=e->NextSiblingElement("Sync")){
             // stop producing dm and fd
             grid_int->do_dm = false;
             grid_int->do_fd = false;
-            grid_int->do_sync = e->BoolAttribute("cue");
-            par->sim_freq = e->DoubleAttribute("freq")*CGS_U_GHz;
-            grid_int->sim_sync_name = e->Attribute("filename");
-#ifndef NDEBUG
-            cout<<"...MULTI OUTPUT MODE..."<<endl;
-#endif
+            grid_int->do_sync = toolkit::FetchBool(e,"cue");
+            par->sim_freq = toolkit::FetchDouble(e,"freq")*CGS_U_GHz;
+            grid_int->sim_sync_name = toolkit::FetchString(e,"filename");
+            
             intobj->write_grid(breg.get(),brnd.get(),fereg.get(),fernd.get(),cre.get(),grid_breg.get(),grid_brnd.get(),grid_fereg.get(),grid_fernd.get(),grid_cre.get(),grid_int.get(),par.get());
-#ifndef NDEBUG
-            cout<<"...PRODUCING MAPS..."<<endl;
-#endif
+            
             grid_int->export_grid();
         }
     }
     
     // CLEANING
 #ifndef NDEBUG
-    cout<<"...ENDING HAMMURABI..."<<endl
-    <<"INFO:TIME ELAPSE "<<(toolkit::timestamp()-time)<<"sec"<<endl;
+    cout<<"walltime: "<<(toolkit::timestamp()-time)<<" ms"<<endl;
 #endif 
     return EXIT_SUCCESS;
 }

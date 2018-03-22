@@ -3,12 +3,12 @@
 #include <vector>
 #include <array>
 #include <cmath>
-
-#include "param.h"
-#include "grid.h"
-#include "breg.h"
-#include "cgs_units_file.h"
-#include "namespace_toolkit.h"
+#include <cassert>
+#include <param.h>
+#include <grid.h>
+#include <breg.h>
+#include <cgs_units_file.h>
+#include <namespace_toolkit.h>
 
 using namespace std;
 
@@ -22,11 +22,7 @@ vec3_t<double> Breg::get_breg(const vec3_t<double> &pos, Param *par, Grid_breg *
 }
 
 vec3_t<double> Breg::breg(const vec3_t<double> &, Param *){
-    cerr<<"ERR:"<<__FILE__
-    <<" : in function "<<__func__<<endl
-    <<" at line "<<__LINE__<<endl
-    <<"DYNAMIC BINDING FAILURE"<<endl;
-    exit(1);
+    assert(false);
     return vec3_t<double> {0.,0.,0.};
 }
 
@@ -43,15 +39,7 @@ vec3_t<double> Breg::read_grid(const vec3_t<double> &pos, Grid_breg *grid){
     if (tmp<0 or tmp>grid->nz-1) { return vec3_t<double>(0.,0.,0.);}
     decltype(grid->nx) zl {(std::size_t)floor(tmp)};
     const double zd {tmp - zl};
-#ifndef NDEBUG
-    if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"WRONG VALUE: "<<endl;
-        exit(1);
-    }
-#endif
+    assert(xd>=0 and yd>=0 and zd>=0 and xd<=1 and yd<=1 and zd<=1);
     vec3_t<double> b_vec3;
     // trilinear interpolation
     if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
@@ -87,27 +75,12 @@ vec3_t<double> Breg::read_grid(const vec3_t<double> &pos, Grid_breg *grid){
         std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         b_vec3 = vec3_t<double> {grid->reg_b_x[idx],grid->reg_b_y[idx],grid->reg_b_z[idx]};
     }
-#ifndef NDEBUG
-    if (b_vec3.Length()>50.*CGS_U_muGauss) {
-        cerr<<"WAR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<" too strong field at xl="<<xl<<", yl="<<yl<<", zl="<<zl<<endl
-        <<" field amplitude: "<< b_vec3.Length()/CGS_U_muGauss <<" microGauss"<<endl;
-        exit(1);
-    }
-#endif
+    assert(b_vec3.Length()>1e+5*CGS_U_muGauss);
     return b_vec3;
 }
 
 void Breg::write_grid(Param *par, Grid_breg *grid){
-    if(!grid->write_permission){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"NO PERMISSION"<<endl;
-        exit(1);
-    }
+    assert(grid->write_permission);
     vec3_t<double> gc_pos, tmp_vec;
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};

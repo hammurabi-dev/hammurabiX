@@ -8,10 +8,10 @@
 #include <vec3.h>
 #include <vector>
 #include <gsl/gsl_integration.h>
-#include "param.h"
-#include "grid.h"
-#include "cgs_units_file.h"
-#include "fereg.h"
+#include <param.h>
+#include <grid.h>
+#include <cgs_units_file.h>
+#include <fereg.h>
 
 ///
 /// base class with read_grid implemented
@@ -25,7 +25,7 @@ public:
     ///
     virtual double get_fernd(const vec3_t<double> &,Grid_fernd *);
     virtual double read_grid(const vec3_t<double> &,Grid_fernd *);
-    virtual void write_grid_global(Param *,Grid_fernd *);
+    virtual void write_grid(Param *,Grid_fernd *);
 };
 
 ///
@@ -39,7 +39,7 @@ public:
     ///
     /// trivial Fourier transform, with rescaling applied in spatial space
     ///
-    void write_grid_global(Param *,Grid_fernd *) override;
+    void write_grid(Param *,Grid_fernd *) override;
     
 protected:
     ///
@@ -50,7 +50,6 @@ protected:
     /// density variance rescaling factor
     ///
     virtual double rescal(const vec3_t<double> &,Param *);
-    void complex2real(const fftw_complex *,double *,const std::size_t &);
 };
 
 #endif

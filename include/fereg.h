@@ -6,8 +6,8 @@
 
 #include <iostream>
 #include <vec3.h>
-#include "param.h"
-#include "grid.h"
+#include <param.h>
+#include <grid.h>
 
 class FEreg{
 public:
@@ -57,8 +57,9 @@ public:
     FEreg_ymw16(void) = default;
     virtual ~FEreg_ymw16(void) = default;
     double density(const vec3_t<double> &, Param *) override;
-    
+#ifdef NDEBUG
 private:
+#endif
     ///
     /// thick disk
     ///

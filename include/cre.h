@@ -5,8 +5,8 @@
 #define HAMMURABI_CRE_H
 
 #include <gsl/gsl_sf_synchrotron.h>
-#include "param.h"
-#include "grid.h"
+#include <param.h>
+#include <grid.h>
 
 ///
 /// base class, all functions are implemented in derived class
@@ -17,8 +17,21 @@ public:
     virtual ~CRE(void) = default;
     virtual double get_emissivity_t(const vec3_t<double> &,Param *,Grid_cre *,const double &);
     virtual double get_emissivity_p(const vec3_t<double> &,Param *,Grid_cre *,const double &);
+    ///
+    /// read CRE flux from grid at given position
+    /// (E_index, sylindrical_r, sylindrical_z) with {r,z} in cgs units,
+    /// actual value of E is calculated from {E_index,Ek_min,Ek_fact}
+    /// in get_emissivity automatically select bi/trilinear interpolation
+    /// according to 2+1/3+1 spatial-spectral CRE flux grid
+    ///
     virtual double read_grid(const std::size_t &, const vec3_t<double> &,Grid_cre *);
     virtual void write_grid(Param *,Grid_cre *);
+    ///
+    /// CRE flux at given CRE energy,
+    /// input CRE energy at CGS units,
+    /// output at [GeV m^2 s sr]^-1 units
+    ///
+    virtual double flux(const vec3_t<double> &,Param *,const double &);
 };
 
 ///
@@ -30,13 +43,8 @@ public:
     virtual ~CRE_verify(void) = default;
     double get_emissivity_t(const vec3_t<double> &,Param *,Grid_cre *,const double &) override;
     double get_emissivity_p(const vec3_t<double> &,Param *,Grid_cre *,const double &) override;
+    double flux(const vec3_t<double> &,Param *,const double &) override;
 private:
-    ///
-    /// CRE flux at given CRE energy,
-    /// input CRE energy at CGS units,
-    /// output at [GeV m^2 s sr]^-1 units
-    ///
-    double flux(const vec3_t<double> &,Param *,const double &);
     ///
     /// flux normalization at given position
     ///
@@ -49,10 +57,6 @@ private:
     /// spatial CRE flux rescaling
     ///
     double rescal(const vec3_t<double> &,Param *);
-    ///
-    /// write CRE flux into field grid
-    ///
-    void write_grid(Param *,Grid_cre *) override;
 };
 
 ///
@@ -64,13 +68,8 @@ public:
     virtual ~CRE_ana(void) = default;
     double get_emissivity_t(const vec3_t<double> &,Param *,Grid_cre *,const double &) override;
     double get_emissivity_p(const vec3_t<double> &,Param *,Grid_cre *,const double &) override;
+    double flux(const vec3_t<double> &,Param *,const double &) override;
 private:
-    ///
-    /// CRE flux at given CRE energy,
-    /// input CRE energy at CGS units,
-    /// output at [GeV m^2 s sr]^-1 units
-    ///
-    double flux(const vec3_t<double> &,Param *,const double &);
     ///
     /// flux normalization at given position
     ///
@@ -83,10 +82,6 @@ private:
     /// spatial CRE flux rescaling
     ///
     double rescal(const vec3_t<double> &,Param *);
-    ///
-    /// write analytical CRE flux to field grid
-    ///
-    void write_grid(Param *,Grid_cre *) override;
 };
 
 ///
@@ -98,16 +93,6 @@ public:
     virtual ~CRE_num(void) = default;
     double get_emissivity_t(const vec3_t<double> &,Param *,Grid_cre *,const double &) override;
     double get_emissivity_p(const vec3_t<double> &,Param *,Grid_cre *,const double &) override;
-private:
-    ///
-    /// read CRE flux from grid at given position
-    /// (E_index, sylindrical_r, sylindrical_z) with {r,z} in cgs units,
-    /// actual value of E is calculated from {E_index,Ek_min,Ek_fact}
-    /// in get_emissivity automatically select bi/trilinear interpolation
-    /// according to 2+1/3+1 spatial-spectral CRE flux grid
-    ///
-    double read_grid(const std::size_t &,const vec3_t<double> &,Grid_cre *) override;
-    
 };
 #endif
 

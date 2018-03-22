@@ -1,8 +1,8 @@
 ///
 /// storing parameters (fixed or free) for physical models
 ///
-#ifndef GENERIC_PARAM_H
-#define GENERIC_PARAM_H
+#ifndef HAMMURABI_PARAM_H
+#define HAMMURABI_PARAM_H
 
 #include <string>
 #include <vector>
@@ -14,7 +14,9 @@ using namespace tinyxml2;
 class Param {
 public:
     Param(std::string);
+	Param(void) = default;
     virtual ~Param(void) = default;
+	
     // observer
     vec3_t<double> SunPosition;
     // magnetic field
@@ -72,7 +74,7 @@ public:
         double t0_Gamma_w;
         double t1_Ad, t1_Bd, t1_n1, t1_H1;
         double t2_A2, t2_B2, t2_n2, t2_K2;
-        double t3_B2s, t3_Ka, t3_narm[5], t3_warm[5], t3_Aa, t3_ncn, t3_wcn, t3_thetacn, t3_nsg, t3_wsg, t3_thetasg;
+        double t3_B2s, t3_Ka, t3_narm[5], t3_warm[5], t3_Aa, t3_ncn, t3_wcn, t3_thetacn, t3_nsg, t3_wsg, t3_thetasg, t3_rmin[5], t3_phimin[5], t3_tpitch[5], t3_cpitch[5];
         double t4_ngc, t4_Agc, t4_Hgc;
         double t5_Kgn, t5_ngn, t5_Wgn, t5_Agn;
         double t6_J_LB, t6_nlb1, t6_detlb1, t6_wlb1, t6_hlb1, t6_thetalb1, t6_nlb2, t6_detlb2, t6_wlb2, t6_hlb2, t6_thetalb2;
@@ -112,12 +114,6 @@ private:
     void b_param(XMLDocument *);
     void fe_param(XMLDocument *);
     void cre_param(XMLDocument *);
-    // auxiliary functions
-    std::string FetchString(XMLElement *,std::string);
-    int FetchInt(XMLElement *,std::string);
-    unsigned int FetchUnsigned(XMLElement *,std::string);
-    bool FetchBool(XMLElement *,std::string);
-    double FetchDouble(XMLElement *,std::string);
 };
 #endif
 // END

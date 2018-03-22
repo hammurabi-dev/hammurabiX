@@ -7,28 +7,27 @@
     <!-- observable output -->
     <Obsout>
         <!-- Dispersion Measure -->
-        <DM cue="1" filename="dm.fits"/>
+        <DM cue="0" filename=""/>
         <!-- synchrotron dmission -->
         <!-- frequency @ GHz -->
-        <Sync cue="1" freq="23" filename="iqu_sync_23.fits"/>
-        <Sync cue="1" freq="1.4" filename="iqu_sync_1.4.fits"/>
+        <Sync cue="0" freq="" filename=""/>
         <!-- Faraday depth -->
-        <Faraday cue="1" filename="fd.fits"/>
+        <Faraday cue="0" filename=""/>
     </Obsout>
     <!-- physical field grid in/out -->
     <!-- resolution defined in './Grid/Box' -->
     <!-- CRE field resolution defined in './CRE/Numeric' -->
     <Fieldout>
         <!-- regular magnetic field -->
-        <breg_grid read="0" write="0" filename="breg.bin"/>
+        <breg_grid read="0" write="0" filename=""/>
         <!-- turbulent magnetic field -->
-        <brnd_grid read="0" write="0" filename="brnd.bin"/>
+        <brnd_grid read="0" write="0" filename=""/>
         <!-- free electron field -->
-        <fereg_grid read="0" write="0" filename="ymw16.bin"/>
+        <fereg_grid read="1" write="1" filename="reference/ymw16_unitest.bin"/>
         <!-- turbulent free electron field -->
-        <fernd_grid read="0" write="0" filename="fernd.bin"/>
+        <fernd_grid read="0" write="0" filename=""/>
         <!-- cosmic ray electron field -->
-        <cre_grid read="0" write="0" filename="cre.bin"/>
+        <cre_grid read="0" write="0" filename=""/>
     </Fieldout>
     
     <!-- field & observable grid -->
@@ -41,16 +40,16 @@
         <!-- field grid -->
         <Box>
             <!-- grid vertex number -->
-            <nx value="800"/>
-            <ny value="800"/>
-            <nz value="160"/>
+            <nx value="41"/>
+            <ny value="41"/>
+            <nz value="21"/>
             <!-- box limit, in Galactic-centric frame -->
             <x_min value="-20.0"/> <!-- kpc -->
             <x_max value="20.0"/> <!-- kpc -->
             <y_min value="-20.0"/> <!-- kpc -->
             <y_max value="20.0"/> <!-- kpc -->
-            <z_min value="-4.0"/> <!-- kpc -->
-            <z_max value="4.0"/> <!-- kpc -->
+            <z_min value="-5.0"/> <!-- kpc -->
+            <z_max value="5.0"/> <!-- kpc -->
         </Box>
         <!-- LOS integration setting -->
         <Integration>
@@ -295,11 +294,15 @@
             <j0 value="0.0217"/> <!-- local CRE flux norm factor @ E0 -->
         </Analytic>
         
-        <Numeric>
+        <Numeric type="2D">
+            <!-- 2D Galactic-centric cylindric frame -->
+            <nr value="80"/> <!-- silent if type="3D" -->
             <nz value="80"/>
-            <nx value="80"/>
-            <ny value="80"/>
+            <nx value="80"/> <!-- silent if type="2D" -->
+            <ny value="80"/> <!-- silent if type="2D" -->
             
+            <!-- grid setting -->
+            <r_max value="20.0"/> <!-- kpc -->
             <x_min value="0.0"/> <!-- kpc -->
             <x_max value="0.0"/> <!-- kpc -->
             <y_min value="0.0"/> <!-- kpc -->
@@ -323,3 +326,4 @@
         </Verify>
     </CRE>
 </root>
+

@@ -10,129 +10,70 @@
 #include <fstream>
 #include <healpix_map_fitsio.h>
 #include <fitsio.h>
-#include "grid.h"
-#include "cgs_units_file.h"
-#include "namespace_toolkit.h"
-
+#include <grid.h>
+#include <cgs_units_file.h>
+#include <namespace_toolkit.h>
+#include <cassert>
 using namespace tinyxml2;
 using namespace std;
 
 Grid_fereg::Grid_fereg(string file_name){
-    unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument> (new XMLDocument());
-    doc->LoadFile(file_name.c_str());
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Fieldout")->FirstChildElement("fe_grid")};
-    read_permission = ptr->BoolAttribute("read");
-    write_permission = ptr->BoolAttribute("write");
+    unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
+    XMLElement *ptr {toolkit::tracexml(doc.get(),{"Fieldout"})};
+    read_permission = toolkit::FetchBool(ptr,"read","fereg_grid");
+    write_permission = toolkit::FetchBool(ptr,"write","fereg_grid");
     if(read_permission or write_permission){
-#ifndef NDEBUG
-        cout<<"IFNO: FE I/O ACTIVE"<<endl;
-#endif
-        filename = ptr->Attribute("filename");
+        filename = toolkit::FetchString(ptr,"filename","fereg_grid");
         build_grid(doc.get());
     }
 }
 
 void Grid_fereg::build_grid(XMLDocument *doc){
-    XMLElement *ptr {doc->FirstChildElement("root")->FirstChildElement("Grid")->FirstChildElement("Box")};
+    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box"})};
     // Cartesian grid
-    nx = FetchUnsigned(ptr,"nx");
-    ny = FetchUnsigned(ptr,"ny");
-    nz = FetchUnsigned(ptr,"nz");
+    nx = toolkit::FetchUnsigned(ptr,"value","nx");
+    ny = toolkit::FetchUnsigned(ptr,"value","ny");
+    nz = toolkit::FetchUnsigned(ptr,"value","nz");
     full_size = nx*ny*nz;
     // box limit for filling field
-    x_max = CGS_U_kpc*FetchDouble(ptr,"x_max");
-    x_min = CGS_U_kpc*FetchDouble(ptr,"x_min");
-    y_max = CGS_U_kpc*FetchDouble(ptr,"y_max");
-    y_min = CGS_U_kpc*FetchDouble(ptr,"y_min");
-    z_max = CGS_U_kpc*FetchDouble(ptr,"z_max");
-    z_min = CGS_U_kpc*FetchDouble(ptr,"z_min");
-#ifndef NDEBUG
-    // memory check
-    const double bytes {full_size*8.};
-    cout<<"INFO: FE REQUIRING "<<bytes/1.e9<<" GB MEMORY"<<endl;
-#endif
+    x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_max");
+    x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_min");
+    y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_max");
+    y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_min");
+    z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
+    z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
     fe = unique_ptr<double[]> (new double[full_size]);
 }
 
 void Grid_fereg::export_grid(void){
-    if(filename.empty()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"NONEXIST FILE"<<endl;
-        exit(1);
-    }
+    assert(!filename.empty());
     ofstream output(filename.c_str(), std::ios::out|std::ios::binary);
-    if (!output.is_open()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"COULD NOT OPEN: "<<filename<<endl;
-        exit(1);
-    }
+    assert(output.is_open());
     double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
-        if (output.eof()) {
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"UNEXPECTED END AT: "<<i<<endl;
-            exit(1);
-        }
+        assert(!output.eof());
         tmp = fe[i];
-        if(tmp<0) {
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"WRONG VALUE"<<endl;
-            exit(1);
-        }
+        assert(tmp>=0);
         output.write(reinterpret_cast<char*>(&tmp),sizeof(double));
     }
     output.close();
-    // exit program
-#ifndef NDEBUG
-    cout<<"...FREE ELECTRON FIELD EXPORTED AND CLEANED..."<<endl;
-#endif
     exit(0);
 }
 
 void Grid_fereg::import_grid(void){
-    if(filename.empty()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"NONEXIST FILE"<<endl;
-        exit(1);
-    }
+    assert(!filename.empty());
     ifstream input(filename.c_str(), std::ios::in|std::ios::binary);
-    if (!input.is_open()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"COULD NOT OPEN: "<<filename<<endl;
-        exit(1);
-    }
+    assert(input.is_open());
     double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
-        if (input.eof()) {
-            cerr<<"ERR:"<<__FILE__
-            <<" : in function "<<__func__<<endl
-            <<" at line "<<__LINE__<<endl
-            <<"UNEXPECTED END AT: "<<i<<endl;
-            exit(1);
-        }
+        assert(!input.eof());
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
         fe[i] = tmp;
     }
+#ifndef NDEBUG
     auto eof = input.tellg();
     input.seekg (0, input.end);
-    if (eof != input.tellg()){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"INCORRECT LENGTH"<<endl;
-        exit(1);
-    }
+#endif
+    assert(eof==input.tellg());
     input.close();
 }

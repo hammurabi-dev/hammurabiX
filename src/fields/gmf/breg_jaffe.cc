@@ -4,11 +4,11 @@
 #include <array>
 #include <cmath>
 
-#include "param.h"
-#include "grid.h"
-#include "breg.h"
-#include "cgs_units_file.h"
-#include "namespace_toolkit.h"
+#include <param.h>
+#include <grid.h>
+#include <breg.h>
+#include <cgs_units_file.h>
+#include <namespace_toolkit.h>
 
 using namespace std;
 
@@ -19,7 +19,7 @@ vec3_t<double> Breg_jaffe::breg(const vec3_t<double> &pos,Param *par){
     else if(par->breg_jaffe.bar)
         inner_b = par->breg_jaffe.bar_amp;
     
-    vec3_t<double> bhat {versor(pos,par)};
+    vec3_t<double> bhat {orientation(pos,par)};
     vec3_t<double> btot {0,0,0};
     btot = bhat*radial_scaling(pos,par)*(par->breg_jaffe.disk_amp*disk_scaling(pos,par) + par->breg_jaffe.halo_amp*halo_scaling(pos,par));
     // compress factor for each arm or for ring/bar
@@ -37,7 +37,7 @@ vec3_t<double> Breg_jaffe::breg(const vec3_t<double> &pos,Param *par){
     return btot;
 }
 
-vec3_t<double> Breg_jaffe::versor(const vec3_t<double> &pos,Param *par){
+vec3_t<double> Breg_jaffe::orientation(const vec3_t<double> &pos,Param *par){
     const double r {sqrt(pos.x*pos.x+pos.y*pos.y)}; // cylindrical frame
     const double r_lim {par->breg_jaffe.ring_r};
     const double bar_lim {par->breg_jaffe.bar_a + 0.5*par->breg_jaffe.comp_d};

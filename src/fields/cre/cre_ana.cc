@@ -6,12 +6,12 @@
 #include <gsl/gsl_sf_synchrotron.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_integration.h>
-#include "cre.h"
-#include "param.h"
-#include "grid.h"
-#include "cgs_units_file.h"
-#include "namespace_toolkit.h"
-
+#include <cre.h>
+#include <param.h>
+#include <grid.h>
+#include <cgs_units_file.h>
+#include <namespace_toolkit.h>
+#include <cassert>
 using namespace std;
 
 // CRE flux spatial rescaling
@@ -64,15 +64,7 @@ double CRE_ana::flux(const vec3_t<double> &pos,Param *par,const double &En){
 
 // J_tot(\nu)
 double CRE_ana::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
-#ifndef NDEBUG
-    if(grid->read_permission){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"WRONG MODULE"<<endl;
-        exit(1);
-    }
-#endif
+    assert(!grid->read_permission);
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
     const double index {flux_idx(pos,par)};
@@ -90,15 +82,7 @@ double CRE_ana::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *
 
 // J_pol(\nu)
 double CRE_ana::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
-#ifndef NDEBUG
-    if(grid->read_permission){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"WRONG MODULE"<<endl;
-        exit(1);
-    }
-#endif
+    assert(!grid->read_permission);
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
     const double index {flux_idx(pos,par)};
@@ -112,56 +96,4 @@ double CRE_ana::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *
      check eq(6.16) in Ribiki-Lightman's where Power is defined,
      we need isotropic power which means we need a 1/4pi factor!
      */
-}
-
-// writing out CRE DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
-void CRE_ana::write_grid(Param *par, Grid_cre *grid){
-#ifndef NDEBUG
-    if(!grid->write_permission){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"NO PERMISSION"<<endl;
-        exit(1);
-    }
-#endif
-    vec3_t<double> gc_pos {0.,0.,0.};
-    // 2D grid
-    if(grid->nr!=0){
-        double lr {grid->r_max};
-        double lz {grid->z_max-grid->z_min};
-        for(decltype(grid->nE) i=0;i!=grid->nE;++i){
-            double E {grid->E_min*exp(i*grid->E_fact)};
-            for(decltype(grid->nr) j=0;j!=grid->nr;++j){
-                gc_pos.x = lr*j/(grid->nr-1);
-                for(decltype(grid->nz) k=0;k!=grid->nz;++k){
-                    // on y=0 2D slide
-                    gc_pos.z = lz*k/(grid->nz-1) + grid->z_min;
-                    std::size_t idx {toolkit::Index3d(grid->nE,grid->nr,grid->nz,i,j,k)};
-                    grid->cre_flux[idx] = flux(gc_pos,par,E);
-                }
-            }
-        }
-    }
-    // 3D grid
-    else if(grid->nx!=0){
-        double lx {grid->x_max-grid->x_min};
-        double ly {grid->y_max-grid->y_min};
-        double lz {grid->z_max-grid->z_min};
-        for(decltype(grid->nE) i=0;i!=grid->nE;++i){
-            double E {grid->E_min*exp(i*grid->E_fact)};
-            for(decltype(grid->nx) j=0;j!=grid->nx;++j){
-                gc_pos.x = lx*j/(grid->nx-1) + grid->x_min;
-                for(decltype(grid->ny) k=0;k!=grid->ny;++k){
-                    gc_pos.y = ly*k/(grid->ny-1) + grid->y_min;
-                    for(decltype(grid->nz) m=0;m!=grid->nz;++m){
-                        gc_pos.z = lz*m/(grid->nz-1) + grid->z_min;
-                        std::size_t idx {toolkit::Index4d(grid->nE,grid->nx,grid->ny,grid->nz,i,j,k,m)};
-                        grid->cre_flux[idx] = flux(gc_pos,par,E);
-                    }
-                }
-            }
-        }
-    }
-    
 }

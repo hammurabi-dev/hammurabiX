@@ -1,23 +1,26 @@
 #include <vector>
 #include <vec3.h>
 #include <cmath>
+#include <fftw3.h>
 #include <sys/time.h>
-#include "namespace_toolkit.h"
-#include "cgs_units_file.h"
-#include <thread>
+#include <namespace_toolkit.h>
+#include <cgs_units_file.h>
+#include <omp.h>
+#include <thread> // for random seed generator
 #include <sstream>
-
+#include <tinyxml2.h>
+#include <cassert>
+#include <memory>
 using namespace std;
+using namespace tinyxml2;
 
 namespace toolkit {
-    
     // calculate the perpendicular to LOS component of a vector
     double get_perp2LOS (const vec3_t<double> &input,const double &the_los,const double &phi_los){
         const vec3_t<double> unit_vec {get_LOS_unit_vec(the_los, phi_los)};
         const vec3_t<double> perp_vec {crossprod(unit_vec,input)};
         return perp_vec.Length();
     }
-    
     // calculate the parallel to LOS component of a vector
     double get_par2LOS (const vec3_t<double> &input,const double &the_los,const double &phi_los){
         const vec3_t<double> unit_vec {get_LOS_unit_vec(the_los, phi_los)};
@@ -27,56 +30,37 @@ namespace toolkit {
     double get_intr_pol_ang(const vec3_t<double> &input,const double &the_ec,const double &phi_ec){
         vec3_t<double> sph_unit_v_the;
         vec3_t<double> sph_unit_v_phi;
-        
         sph_unit_v_the = vec3_t<double> {cos(the_ec)*cos(phi_ec),
             cos(the_ec)*sin(phi_ec),
             -sin(the_ec)};
-        
         sph_unit_v_phi = vec3_t<double> {-sin(phi_ec),
             cos(phi_ec),
             0.};
-        
         // IAU convention
         const double y_component {-dotprod(sph_unit_v_the, input)};
         const double x_component {-dotprod(sph_unit_v_phi, input)};
-        
-        double result {atan2(y_component, x_component)};
-        /*
-         if(result<0.) {result+=2.*CGS_U_pi;}
-         #ifndef NDEBUG
-         if (result<0 or result>2.*CGS_U_pi){
-         cerr<<"ERR:"<<__FILE__
-         <<" : in function "<<__func__<<endl
-         <<" at line "<<__LINE__<<endl;
-         exit(1);
-         }
-         #endif
-         */
-        return result;
+        return atan2(y_component, x_component);
     }
-    
-    // from cartesian coordiante to cylindrical coordinate
+    // from Cartesian coordiante to cylindrical coordinate
     void cart_coord2cyl_coord(const vec3_t<double> &input, double &r, double &phi, double &z){
         r = sqrt(input.x*input.x+input.y*input.y);
         phi = atan2(input.y,input.x);
-        if(phi<0.) {phi+=2.*CGS_U_pi;}
+        //if(phi<0.) {phi+=2.*CGS_U_pi;} // may not be necessary
         z = input.z;
     }
     // overload for vec3 to vec3
     void cart_coord2cyl_coord(const vec3_t<double> &input, vec3_t<double> &cyl_vec){
         cyl_vec.x = sqrt(input.x*input.x+input.y*input.y);
         cyl_vec.y = atan2(input.y,input.x);
-        if(cyl_vec.y<0.) {cyl_vec.y+=2.*CGS_U_pi;}
+        //if(cyl_vec.y<0.) {cyl_vec.y+=2.*CGS_U_pi;} // may not be necessary
         cyl_vec.z = input.z;
     }
-    
+    // get versor of a vector
     vec3_t<double> versor(const vec3_t<double> &b){
         if(b.Length()==0.) {return vec3_t<double> {0.,0.,0.};}
-        vec3_t<double> V = b;
-        V.Normalize();
-        return V;
+        const double L = 1./sqrt(b.x*b.x+b.y*b.y+b.z*b.z);
+        return vec3_t<double> {b.x*L,b.y*L,b.z*L};
     }
-    
     // Mean for array
     double Mean(const double *arr,const std::size_t &size){
         double avg {0};
@@ -88,10 +72,7 @@ namespace toolkit {
     }
     // Mean for vector
     double Mean(const std::vector<double> &vect){
-        if(vect.empty()){
-            cerr<<"ERR: EMPTY VECTOR"<<endl;
-            exit(1);
-        }
+        assert(!vect.empty());
         double avg {0};
         for(auto &i : vect) {
             avg += i;
@@ -99,7 +80,6 @@ namespace toolkit {
         avg/=vect.size();
         return avg;
     }
-    
     // Variance for array
     double Variance(const double *arr,const std::size_t &size){
         const double avg {Mean(arr,size)};
@@ -112,10 +92,7 @@ namespace toolkit {
     }
     // Variance for vector
     double Variance(const std::vector<double> &vect){
-        if(vect.empty()){
-            cerr<<"ERR: EMPTY VECTOR"<<endl;
-            exit(1);
-        }
+        assert(!vect.empty());
         const double avg {Mean(vect)};
         double var {0.};
         for(auto &i : vect){
@@ -137,10 +114,7 @@ namespace toolkit {
     }
     // cov for vector
     double Covariance (const vector<double> &vect1,const vector<double> &vect2){
-        if(vect1.size()!=vect2.size()){
-            cerr<<"ERR: NON EQUAL VECTOR SIZE"<<endl;
-            exit(1);
-        }
+        assert(vect1.size()==vect2.size());
         double avg1 {Mean(vect1)};
         double avg2 {Mean(vect2)};
         double covar {0.};
@@ -150,15 +124,15 @@ namespace toolkit {
         covar /= vect1.size();
         return covar;
     }
-    
     // get ranked array
-    void Rank(double *arr,const std::size_t &size){
+    void Rank(double *arr,const size_t &size){
         // get max and min
         double max {arr[0]}; double min {arr[0]};
         for(std::size_t i=0;i!=size;++i){
             if(arr[i]>max) max=arr[i];
             else if(arr[i]<min) min=arr[i];
         }
+        assert(max!=min);
         // get elements ranked
         for(std::size_t i=0;i!=size;++i){
             arr[i] = (arr[i]-min)/(max-min);
@@ -166,10 +140,7 @@ namespace toolkit {
     }
     // get ranked vector
     void Rank(vector<double> &vect){
-        if(vect.empty()){
-            cerr<<"ERR: EMPTY VECTOR"<<endl;
-            exit(1);
-        }
+        assert(!vect.empty());
         // get max and min
         double max=vect[0];double min=vect[0];
         for(auto &i : vect){
@@ -181,21 +152,6 @@ namespace toolkit {
             i = (i-min)/(max-min);
         }
     }
-    
-    void Cart2LOS(const double &lat,const double &lon,const vec3_t<double> &infield,vec3_t<double> &outfield){
-        // Jennifer's final modified transform
-        outfield.x=	infield.x*cos(lat)*cos(lon)		+ infield.y*cos(lat)*sin(lon) + infield.z*sin(lat);
-        outfield.y=	-1.*infield.x*sin(lon)			+ infield.y*cos(lon);
-        outfield.z=	-1.*infield.x*sin(lat)*cos(lon)	- infield.y*sin(lat)*sin(lon) + infield.z*cos(lat);
-    }
-    // Inverse tranformation, whichis just the transpose (or swap the sign of the angles):
-    void LOS2Cart(const double &lat,const double &lon,const vec3_t<double> &infield,vec3_t<double> &outfield){
-        // Jennifer's final modified transform
-        outfield.x=	infield.x*cos(lat)*cos(lon)		- infield.y*sin(lon)	- infield.z*sin(lat)*cos(lon);
-        outfield.y=	infield.x*cos(lat)*sin(lon)		+ infield.y*cos(lon)	- infield.z*sin(lat)*sin(lon);
-        outfield.z=	infield.x*sin(lat)										+ infield.z*cos(lat);
-    }
-    
     // galactic warp of cartesian coordinate
     // with this module, we still do modelling in ordinary flat frame.
     // input, Cartesian gc_pos in cgs units, output, warp z in cgs units
@@ -210,7 +166,6 @@ namespace toolkit {
         }
         return wpos;
     }
-    
     // offer random seed
     std::size_t random_seed(const int &s){
         if(s<0){
@@ -224,11 +179,106 @@ namespace toolkit {
         }
         return s;
     }
-    
+    // record time in ms
     double timestamp(void){
         struct timeval tv;
         gettimeofday(&tv,nullptr);
-        return tv.tv_sec + tv.tv_usec*1e-6;
+        return tv.tv_sec*1.e+3 + tv.tv_usec*1e-3;
     }
-}
+    // auxiliary functions for parsing parameters
+    unique_ptr<XMLDocument> loadxml(const string& filename){
+        unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument>(new XMLDocument());
+        doc->LoadFile(filename.c_str());
+        assert(!doc->Error());
+        return move(doc);
+    }
+    XMLElement* tracexml(XMLDocument *doc,const vector<string>& keychain){
+        XMLElement* el {doc->FirstChildElement("root")};
+        if(!keychain.empty()){
+            for(auto key: keychain){
+#ifndef NDEBUG
+                cout<<"key: "<<key<<endl;
+#endif
+                el = el->FirstChildElement(key.c_str());
+            }
+        }
+        return el;
+    }
+    std::string FetchString(XMLElement* el,const string& att_type,const string& key){
+#ifndef NDEBUG
+        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+#endif
+        return el->FirstChildElement(key.c_str())->Attribute(att_type.c_str());
+    }
+    std::string FetchString(XMLElement* el,const string& att_type){
+#ifndef NDEBUG
+        cout<<"attrib: "<<att_type<<endl;
+#endif
+        return el->Attribute(att_type.c_str());
+    }
+    
+    int FetchInt(XMLElement* el,const string& att_type,const string& key){
+#ifndef NDEBUG
+        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+#endif
+        return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str());
+    }
+    int FetchInt(XMLElement* el,const string& att_type){
+#ifndef NDEBUG
+        cout<<"attrib: "<<att_type<<endl;
+#endif
+        return el->IntAttribute(att_type.c_str());
+    }
+    
+    unsigned int FetchUnsigned(XMLElement* el,const string& att_type,const string& key){
+#ifndef NDEBUG
+        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+#endif
+        return el->FirstChildElement(key.c_str())->UnsignedAttribute(att_type.c_str());
+    }
+    unsigned int FetchUnsigned(XMLElement* el,const string& att_type){
+#ifndef NDEBUG
+        cout<<"attrib: "<<att_type<<endl;
+#endif
+        return el->UnsignedAttribute(att_type.c_str());
+    }
+    
+    bool FetchBool(XMLElement* el,const string& att_type,const string& key){
+#ifndef NDEBUG
+        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+#endif
+        return el->FirstChildElement(key.c_str())->BoolAttribute(att_type.c_str());
+    }
+    bool FetchBool(XMLElement* el,const string& att_type){
+#ifndef NDEBUG
+        cout<<"attrib: "<<att_type<<endl;
+#endif
+        return el->BoolAttribute(att_type.c_str());
+    }
+    
+    double FetchDouble(XMLElement* el,const string& att_type,const string& key){
+#ifndef NDEBUG
+        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+#endif
+        return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str());
+    }
+    double FetchDouble(XMLElement* el,const string& att_type){
+#ifndef NDEBUG
+        cout<<"attrib: "<<att_type<<endl;
+#endif
+        return el->DoubleAttribute(att_type.c_str());
+    }
+    
+    // get real components from fftw_complex arrays
+    void complex2real(const fftw_complex *input,double *output,const std::size_t &size){
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+        // DO NOT CHANGE SCHEDULE TYPE
+        for(std::size_t i=0;i<size;++i){
+            output[i] = input[i][0];
+        }
+    }
+    
+}// end of namespace
 // END

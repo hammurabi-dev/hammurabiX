@@ -7,13 +7,12 @@
 #include <fftw3.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
-#include <gsl/gsl_integration.h>
-#include "param.h"
-#include "grid.h"
-#include "brnd.h"
-#include "breg.h"
-#include "cgs_units_file.h"
-#include "namespace_toolkit.h"
+#include <param.h>
+#include <grid.h>
+#include <brnd.h>
+#include <breg.h>
+#include <cgs_units_file.h>
+#include <namespace_toolkit.h>
 
 using namespace std;
 
@@ -24,43 +23,64 @@ vec3_t<double> Brnd_local::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
 }
 
 void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
+    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[3*grid->full_size]());
+    unique_ptr<double[]> uniform_num = unique_ptr<double[]>(new double[2*grid->full_size]());
+#ifdef _OPENMP
+    // initialize random seed
+    gsl_rng **threadvec = new gsl_rng *[omp_get_max_threads()];
+    for (int b=0;b<omp_get_max_threads();++b){
+        threadvec[b] = gsl_rng_alloc(gsl_rng_taus);
+        gsl_rng_set(threadvec[b],b+toolkit::random_seed(par->brnd_seed));
+    }
+#pragma omp parallel
+    {
+#pragma omp for schedule(static)
+    for(decltype(grid->full_size)i=0;i<3*grid->full_size;++i)
+        gaussian_num[i] = gsl_ran_gaussian(threadvec[omp_get_thread_num()],1);
+#pragma omp for schedule(static)
+    for(decltype(grid->full_size)i=0;i<2*grid->full_size;++i)
+        uniform_num[i] = gsl_rng_uniform(threadvec[omp_get_thread_num()]);
+    }
+    // free random memory
+    for (int b=0;b<omp_get_max_threads();++b)
+        gsl_rng_free(threadvec[b]);
+    delete [] threadvec;
+#else
     // initialize random seed
     gsl_rng *r {gsl_rng_alloc(gsl_rng_taus)};
     gsl_rng_set(r, toolkit::random_seed(par->brnd_seed));
-    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[3*grid->full_size]());
     for(decltype(grid->full_size)i=0;i<3*grid->full_size;++i)
         gaussian_num[i] = gsl_ran_gaussian(r,1);
-    unique_ptr<double[]> uniform_num = unique_ptr<double[]>(new double[2*grid->full_size]());
     for(decltype(grid->full_size)i=0;i<2*grid->full_size;++i)
         uniform_num[i] = gsl_rng_uniform(r);
     // free random memory
     gsl_rng_free(r);
-
+#endif
     // start Fourier space filling
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};
     double lz {grid->z_max-grid->z_min};
-    // physical k in 1/kpc dimension
-    vec3_t<double> k {0,0,0};
-    vec3_t<double> ep {0,0,0};
-    vec3_t<double> em {0,0,0};
     const vec3_t<double> b {breg->get_breg(par->SunPosition,par,gbreg)};
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
     const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
-    // how to safely parallel this part?
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
-        k.x = CGS_U_kpc*i/lx;
-        if(i>=grid->nx/2) k.x -= grid->nx*CGS_U_kpc/lx;
+        // physical k in 1/kpc dimension
+        vec3_t<double> k {CGS_U_kpc*i/lx,0,0};
+        vec3_t<double> ep {0,0,0};
+        vec3_t<double> em {0,0,0};
+        if(i>=grid->nx/2) k.x -= CGS_U_kpc*grid->nx/lx;
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             k.y = CGS_U_kpc*j/ly;
             if(j>=grid->ny/2) k.y -= CGS_U_kpc*grid->ny/ly;
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
-                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+                size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 // FFT expects up to n/2 positive while n/2 to n negative
                 k.z = CGS_U_kpc*l/lz;
                 if(l>=grid->nz/2) k.z -= CGS_U_kpc*grid->nz/lz;
-                
                 const double ks {k.Length()};
                 if(ks==0) continue;
                 
@@ -129,19 +149,15 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
     fftw_execute(grid->fftw_py_bw);
     fftw_execute(grid->fftw_pz_bw);
     // get real elements, use auxiliary function
-    complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
-    complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
-    complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
+    toolkit::complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
+    toolkit::complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
+    toolkit::complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
 }
 
 // PRIVATE FUNCTIONS FOR LOW-BETA SUB-ALFVENIC PLASMA
-double Brnd_local::cosa(const vec3_t<double> &b,const vec3_t<double> &k){
-    return dotprod(toolkit::versor(b),toolkit::versor(k));
-}
-
 vec3_t<double> Brnd_local::eplus(const vec3_t<double> &b,const vec3_t<double> &k){
     vec3_t<double> tmp {crossprod(toolkit::versor(k),toolkit::versor(b))};
-    if(tmp.Length()<1e-6){
+    if(tmp.SquaredLength()<1e-12){
         return tmp;
     }
     else{
@@ -151,16 +167,12 @@ vec3_t<double> Brnd_local::eplus(const vec3_t<double> &b,const vec3_t<double> &k
 
 vec3_t<double> Brnd_local::eminus(const vec3_t<double> &b,const vec3_t<double> &k){
     vec3_t<double> tmp {crossprod(crossprod(toolkit::versor(k),toolkit::versor(b)),toolkit::versor(k))};
-    if(tmp.Length()<1e-6){
+    if(tmp.SquaredLength()<1e-12){
         return tmp;
     }
     else{
         return tmp/tmp.Length();
     }
-}
-
-double Brnd_local::dynamo(const double &beta,const double &cosa){
-    return (1+0.5*beta)*(1+0.5*beta) - 2.*beta*cosa*cosa;
 }
 
 double Brnd_local::hs(const double &beta,const double &cosa){
@@ -185,28 +197,16 @@ double Brnd_local::hf(const double &beta,const double &cosa){
     }
 }
 
-double Brnd_local::fa(const double &ma,const double &cosa){
-    return exp( -pow(ma,-1.33333333)*cosa*cosa/pow(1-cosa*cosa,0.66666667) );
-}
-
-double Brnd_local::fs(const double &ma,const double &cosa){
-    return exp( -pow(ma,-1.33333333)*cosa*cosa/pow(1-cosa*cosa,0.66666667) );
-}
-
 double Brnd_local::speca(const double &k,Param *par){
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_local.pa0};
-    const double k0 {par->brnd_local.k0};
+    const double kr {k/par->brnd_local.k0};
     const double a0 {par->brnd_local.aa0};
     const double unit = 1./(4*CGS_U_pi*k*k);
-    // avoid nan
-    if(k<=0.){
-        return 0.;
-    }
     // power law
-    double P{0.};
-    if(k>k0){
-        P = p0/pow(k/k0,a0);
+    double P {0.};
+    if(kr>=1.){
+        P = p0/pow(kr,a0);
     }
     return P*unit;
 }
@@ -214,17 +214,13 @@ double Brnd_local::speca(const double &k,Param *par){
 double Brnd_local::specf(const double &k,Param *par){
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_local.pf0};
-    const double k0 {par->brnd_local.k0};
+    const double kr {k/par->brnd_local.k0};
     const double a0 {par->brnd_local.af0};
     const double unit = 1./(4*CGS_U_pi*k*k);
-    // avoid nan
-    if(k<=0.){
-        return 0.;
-    }
     // power law
     double P{0.};
-    if(k>k0){
-        P = p0/pow(k/k0,a0);
+    if(kr>=1.){
+        P = p0/pow(kr,a0);
     }
     return P*unit;
 }
@@ -232,25 +228,14 @@ double Brnd_local::specf(const double &k,Param *par){
 double Brnd_local::specs(const double &k,Param *par){
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_local.ps0};
-    const double k0 {par->brnd_local.k0};
+    const double kr {k/par->brnd_local.k0};
     const double a0 {par->brnd_local.as0};
     const double unit = 1./(4*CGS_U_pi*k*k);
-    // avoid nan
-    if(k<=0.){
-        return 0.;
-    }
     // power law
-    double P{0.};
-    if(k>k0){
-        P = p0/pow(k/k0,a0);
+    double P {0.};
+    if(kr>=1.){
+        P = p0/pow(kr,a0);
     }
     return P*unit;
-}
-
-// get real components from fftw_complex arrays
-void Brnd_local::complex2real(const fftw_complex *input,double *output,const std::size_t &size) {
-    for(std::size_t i=0;i!=size;++i){
-        output[i] = input[i][0];
-    }
 }
 // END

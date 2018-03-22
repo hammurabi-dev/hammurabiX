@@ -8,13 +8,13 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_integration.h>
-#include "param.h"
-#include "grid.h"
-#include "brnd.h"
-#include "breg.h"
-#include "cgs_units_file.h"
-#include "namespace_toolkit.h"
-
+#include <param.h>
+#include <grid.h>
+#include <brnd.h>
+#include <breg.h>
+#include <cgs_units_file.h>
+#include <namespace_toolkit.h>
+#include <cassert>
 using namespace std;
 
 vec3_t<double> Brnd::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
@@ -43,18 +43,10 @@ vec3_t<double> Brnd::read_grid(const vec3_t<double> &pos, Grid_brnd *grid){
     if (tmp<0 or tmp>grid->nz-1) { return vec3_t<double> {0.,0.,0.};}
     decltype(grid->nx) zl {(std::size_t)floor(tmp)};
     const double zd {tmp - zl};
-#ifndef NDEBUG
-    if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"WRONG VALUE"<<endl;
-        exit(1);
-    }
-#endif
+    assert(xd>=0 and yd>=0 and zd>=0 and xd<=1 and yd<=1 and zd<=1);
     vec3_t<double> b_vec3;
     //trilinear interpolation
-    if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
+    if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz){
         std::size_t idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         std::size_t idx2 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
         vec3_t<double> i1 {grid->fftw_b_x[idx1]*(1.-zd) + grid->fftw_b_x[idx2]*zd,
@@ -85,29 +77,16 @@ vec3_t<double> Brnd::read_grid(const vec3_t<double> &pos, Grid_brnd *grid){
         b_vec3 = w1*(1.-xd) + w2*xd;
     }
     // on the boundary
-    else {
+    else{
         std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         b_vec3 = vec3_t<double> {grid->fftw_b_x[idx],grid->fftw_b_y[idx],grid->fftw_b_z[idx]};
     }
-#ifndef NDEBUG
-    if (b_vec3.Length()>50.*CGS_U_muGauss) {
-        cerr<<"WAR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<" too strong field at xl="<<xl<<", yl="<<yl<<", zl="<<zl<<endl
-        <<" b_strength = "<< b_vec3.Length()/CGS_U_muGauss <<" microGauss"<<endl;
-        exit(1);
-    }
-#endif
+    assert(b_vec3.Length()<1e+5*CGS_U_muGauss);
     return b_vec3;
 }
 
 void Brnd::write_grid(Param *, Breg *, Grid_breg *, Grid_brnd *){
-    cerr<<"WAR:"<<__FILE__
-    <<" : in function "<<__func__<<endl
-    <<" at line "<<__LINE__<<endl
-    <<"DYNAMIC BINDING FAILURE"<<endl;
-    exit(1);
+    assert(false);
 }
 
 // END

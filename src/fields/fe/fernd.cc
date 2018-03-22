@@ -7,13 +7,13 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_integration.h>
-#include "param.h"
-#include "grid.h"
-#include "fernd.h"
-#include "fereg.h"
-#include "cgs_units_file.h"
-#include "namespace_toolkit.h"
-
+#include <param.h>
+#include <grid.h>
+#include <fernd.h>
+#include <fereg.h>
+#include <cgs_units_file.h>
+#include <namespace_toolkit.h>
+#include <cassert>
 using namespace std;
 
 double FErnd::get_fernd(const vec3_t<double> &pos,Grid_fernd *grid){
@@ -42,15 +42,7 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     if (tmp<0 or tmp>grid->nz-1) { return 0.;}
     decltype(grid->nx) zl {(std::size_t)floor(tmp)};
     const double zd {tmp - zl};
-#ifndef NDEBUG
-    if(xd<0 or yd<0 or zd<0 or xd>1 or yd>1 or zd>1){
-        cerr<<"ERR:"<<__FILE__
-        <<" : in function "<<__func__<<endl
-        <<" at line "<<__LINE__<<endl
-        <<"WRONG VALUE"<<endl;
-        exit(1);
-    }
-#endif
+    assert(xd>=0 and yd>=0 and zd>=0 and xd<=1 and yd<=1 and zd<=1);
     double density;
     //trilinear interpolation
     if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
@@ -84,12 +76,8 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     return density;
 }
 
-void FErnd::write_grid_global(Param *,Grid_fernd *){
-    cerr<<"WAR:"<<__FILE__
-    <<" : in function "<<__func__<<endl
-    <<" at line "<<__LINE__<<endl
-    <<"DYNAMIC BINDING FAILURE"<<endl;
-    exit(1);
+void FErnd::write_grid(Param *,Grid_fernd *){
+    assert(false);
 }
 
 // END
