@@ -295,15 +295,11 @@
             <j0 value="0.0217"/> <!-- local CRE flux norm factor @ E0 -->
         </Analytic>
         
-        <Numeric type="2D">
-            <!-- 2D Galactic-centric cylindric frame -->
-            <nr value="80"/> <!-- silent if type="3D" -->
+        <Numeric>
             <nz value="80"/>
-            <nx value="80"/> <!-- silent if type="2D" -->
-            <ny value="80"/> <!-- silent if type="2D" -->
+            <nx value="80"/>
+            <ny value="80"/>
             
-            <!-- grid setting -->
-            <r_max value="20.0"/> <!-- kpc -->
             <x_min value="0.0"/> <!-- kpc -->
             <x_max value="0.0"/> <!-- kpc -->
             <y_min value="0.0"/> <!-- kpc -->

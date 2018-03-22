@@ -140,13 +140,11 @@ public:
     std::unique_ptr<double[]> cre_flux;
     std::string filename;
     bool read_permission, write_permission;
-    // 2-D spatial 1-D spectral grid
-    std::size_t nE, nr, nz;
+    
+    std::size_t nE, nz, nx, ny;
     std::size_t cre_size;
-    double r_max, z_max, z_min, E_min, E_max, E_fact;
-    // or 3+1 dimension grid
-    std::size_t nx,ny;
-    double x_max, x_min, y_max, y_min;
+    double x_max, x_min, y_max, y_min, z_max, z_min;
+    double E_min, E_max, E_fact;
 };
 
 ///

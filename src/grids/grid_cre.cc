@@ -35,35 +35,17 @@ void Grid_cre::build_grid(XMLDocument *doc){
     E_max = CGS_U_GeV*toolkit::FetchDouble(ptr,"value","E_max");
     E_fact = toolkit::FetchDouble(ptr,"value","E_fact");
     nE = ceil(log(E_max/E_min)/E_fact);
-    // spatial 2D
-    if(toolkit::FetchString(ptr,"type")=="2D"){
-        nr = toolkit::FetchUnsigned(ptr,"value","nr");
-        nz = toolkit::FetchUnsigned(ptr,"value","nz");
-        nx = 0; ny = 0;
-        r_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","r_max");
-        z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
-        z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
-        x_max = 0.; x_min = 0.; y_max = 0.; y_min = 0.;
-        cre_size = nE*nr*nz;
-    }
     // spatial 3D
-    else if(toolkit::FetchString(ptr,"type")=="3D"){
-        nr = 0;
-        nz = toolkit::FetchUnsigned(ptr,"value","nz");
-        nx = toolkit::FetchUnsigned(ptr,"value","nx");
-        ny = toolkit::FetchUnsigned(ptr,"value","ny");
-        x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_max");
-        x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_min");
-        y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_max");
-        y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_min");
-        z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
-        z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
-        r_max = 0.;
-        cre_size = nE*nx*ny*nz;
-    }
-    else{
-        assert(false);
-    }
+    nz = toolkit::FetchUnsigned(ptr,"value","nz");
+    nx = toolkit::FetchUnsigned(ptr,"value","nx");
+    ny = toolkit::FetchUnsigned(ptr,"value","ny");
+    x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_max");
+    x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_min");
+    y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_max");
+    y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_min");
+    z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
+    z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
+    cre_size = nE*nx*ny*nz;
     cre_flux = unique_ptr<double[]> (new double[cre_size]);
 }
 
