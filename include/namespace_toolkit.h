@@ -141,11 +141,6 @@ namespace toolkit {
     ///
     std::size_t random_seed(const int &);
     ///
-    /// simple time stamp
-    /// return time in ms
-    ///
-    double timestamp(void);
-    ///
     /// substract real part of a fftw complex array
     /// 1st argument: input fftw complex array
     /// 2nd argument: output double array

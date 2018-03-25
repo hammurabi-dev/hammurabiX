@@ -2,7 +2,8 @@
 #include <vec3.h>
 #include <cmath>
 #include <fftw3.h>
-#include <sys/time.h>
+#include <ctime>
+#include <chrono>
 #include <namespace_toolkit.h>
 #include <cgs_units_file.h>
 #include <omp.h>
@@ -169,22 +170,19 @@ namespace toolkit {
     // offer random seed
     std::size_t random_seed(const int &s){
         if(s<0){
-            struct timeval tv;
-            gettimeofday(&tv,nullptr);
+            auto p = chrono::system_clock::now();
+            // valid until 19 January, 2038 03:14:08 UTC
+            time_t today_time = chrono::system_clock::to_time_t(p);
             // casting thread id into unsinged long
             stringstream ss;
             ss << this_thread::get_id();
             auto th_id = stoul(ss.str());
-            return (th_id + tv.tv_sec + tv.tv_usec);
+            // precision in (thread,second)
+            return (th_id + today_time);
         }
         return s;
     }
-    // record time in ms
-    double timestamp(void){
-        struct timeval tv;
-        gettimeofday(&tv,nullptr);
-        return tv.tv_sec*1.e+3 + tv.tv_usec*1e-3;
-    }
+    
     // auxiliary functions for parsing parameters
     unique_ptr<XMLDocument> loadxml(const string& filename){
         unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument>(new XMLDocument());

@@ -209,7 +209,7 @@ void Integrator::radial_integration(struct_shell *shell_ref,pointing &ptg_in, st
             double qui_2 {qui_base+intr_pol_ang[i+1]};
             
             assert(abs(qui_0)+abs(qui_1)+abs(qui_2)<1e30);
-            assert(F_Jtot[i-1]>0 and F_Jtot[i]>0 and F_Jtot[i+1]>0);
+            assert(F_Jtot[i-1]>=0 and F_Jtot[i]>=0 and F_Jtot[i+1]>=0);
             
             pixobs.Is += (F_Jtot[i-1]+4.*F_Jtot[i]+F_Jtot[i+1])*0.16666667;
             pixobs.Qs += (cos(2.*qui_0)*F_Jpol[i-1]+4.*cos(2.*qui_1)*F_Jpol[i]+cos(2.*qui_2)*F_Jpol[i+1])*0.16666667;

@@ -14,13 +14,15 @@
 #include <fernd.h>
 #include <namespace_toolkit.h>
 #include <tinyxml2.h>
+#include <timer.h>
 
 using namespace std;
 using namespace tinyxml2;
 
 int main(int /*argc*/,char **argv) {
 #ifndef NDEBUG
-    double time = toolkit::timestamp();
+    Timer tmr;
+    tmr.start("main");
 #endif
     
     string file_name {argv[1]};
@@ -189,7 +191,8 @@ int main(int /*argc*/,char **argv) {
     
     // CLEANING
 #ifndef NDEBUG
-    cout<<"walltime: "<<(toolkit::timestamp()-time)<<" ms"<<endl;
+    tmr.stop("main");
+    tmr.print();
 #endif 
     return EXIT_SUCCESS;
 }
