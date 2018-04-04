@@ -66,6 +66,11 @@ public:
             fftw_free(fftw_b_kx);
             fftw_free(fftw_b_ky);
             fftw_free(fftw_b_kz);
+#ifdef _OPENMP
+            fftw_cleanup_threads();
+#else
+            fftw_cleanup();
+#endif
         }
     };
     void build_grid(XMLDocument *) override;
@@ -112,6 +117,11 @@ public:
         if(build_permission or read_permission){
             fftw_destroy_plan(fftw_p_bw);
             fftw_free(fftw_fe_k);
+#ifdef _OPENMP
+            fftw_cleanup_threads();
+#else
+            fftw_cleanup();
+#endif
         }
     };
     void build_grid(XMLDocument *) override;
