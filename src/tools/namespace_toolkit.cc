@@ -4,31 +4,32 @@
 #include <fftw3.h>
 #include <ctime>
 #include <chrono>
-#include <namespace_toolkit.h>
-#include <cgs_units_file.h>
+#include <cassert>
+#include <memory>
 #include <omp.h>
 #include <thread> // for random seed generator
 #include <sstream>
+#include <namespace_toolkit.h>
+#include <cgs_units_file.h>
 #include <tinyxml2.h>
-#include <cassert>
-#include <memory>
+
 using namespace std;
 using namespace tinyxml2;
 
 namespace toolkit {
     // calculate the perpendicular to LOS component of a vector
-    double get_perp2LOS (const vec3_t<double> &input,const double &the_los,const double &phi_los){
-        const vec3_t<double> unit_vec {get_LOS_unit_vec(the_los, phi_los)};
+    double perp2los (const vec3_t<double> &input,const double &the_los,const double &phi_los){
+        const vec3_t<double> unit_vec {los_versor(the_los, phi_los)};
         const vec3_t<double> perp_vec {crossprod(unit_vec,input)};
         return perp_vec.Length();
     }
     // calculate the parallel to LOS component of a vector
-    double get_par2LOS (const vec3_t<double> &input,const double &the_los,const double &phi_los){
-        const vec3_t<double> unit_vec {get_LOS_unit_vec(the_los, phi_los)};
+    double par2los (const vec3_t<double> &input,const double &the_los,const double &phi_los){
+        const vec3_t<double> unit_vec {los_versor(the_los, phi_los)};
         return dotprod(unit_vec,input);
     }
     // calculate intrinsic polarization angle
-    double get_intr_pol_ang(const vec3_t<double> &input,const double &the_ec,const double &phi_ec){
+    double intr_pol_ang(const vec3_t<double> &input,const double &the_ec,const double &phi_ec){
         vec3_t<double> sph_unit_v_the;
         vec3_t<double> sph_unit_v_phi;
         sph_unit_v_the = vec3_t<double> {cos(the_ec)*cos(phi_ec),
@@ -169,7 +170,8 @@ namespace toolkit {
     }
     // offer random seed
     std::size_t random_seed(const int &s){
-        if(s<0){
+        assert(s>=0);
+        if(s==0){
             auto p = chrono::system_clock::now();
             // valid until 19 January, 2038 03:14:08 UTC
             time_t today_time = chrono::system_clock::to_time_t(p);
@@ -190,6 +192,7 @@ namespace toolkit {
         assert(!doc->Error());
         return move(doc);
     }
+    //
     XMLElement* tracexml(XMLDocument *doc,const vector<string>& keychain){
         XMLElement* el {doc->FirstChildElement("root")};
         if(!keychain.empty()){
@@ -202,71 +205,76 @@ namespace toolkit {
         }
         return el;
     }
+    //
     std::string FetchString(XMLElement* el,const string& att_type,const string& key){
 #ifndef NDEBUG
         cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
 #endif
         return el->FirstChildElement(key.c_str())->Attribute(att_type.c_str());
     }
+    //
     std::string FetchString(XMLElement* el,const string& att_type){
 #ifndef NDEBUG
         cout<<"attrib: "<<att_type<<endl;
 #endif
         return el->Attribute(att_type.c_str());
     }
-    
+    //
     int FetchInt(XMLElement* el,const string& att_type,const string& key){
 #ifndef NDEBUG
         cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
 #endif
         return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str());
     }
+    //
     int FetchInt(XMLElement* el,const string& att_type){
 #ifndef NDEBUG
         cout<<"attrib: "<<att_type<<endl;
 #endif
         return el->IntAttribute(att_type.c_str());
     }
-    
+    //
     unsigned int FetchUnsigned(XMLElement* el,const string& att_type,const string& key){
 #ifndef NDEBUG
         cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
 #endif
         return el->FirstChildElement(key.c_str())->UnsignedAttribute(att_type.c_str());
     }
+    //
     unsigned int FetchUnsigned(XMLElement* el,const string& att_type){
 #ifndef NDEBUG
         cout<<"attrib: "<<att_type<<endl;
 #endif
         return el->UnsignedAttribute(att_type.c_str());
     }
-    
+    //
     bool FetchBool(XMLElement* el,const string& att_type,const string& key){
 #ifndef NDEBUG
         cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
 #endif
         return el->FirstChildElement(key.c_str())->BoolAttribute(att_type.c_str());
     }
+    //
     bool FetchBool(XMLElement* el,const string& att_type){
 #ifndef NDEBUG
         cout<<"attrib: "<<att_type<<endl;
 #endif
         return el->BoolAttribute(att_type.c_str());
     }
-    
+    //
     double FetchDouble(XMLElement* el,const string& att_type,const string& key){
 #ifndef NDEBUG
         cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
 #endif
         return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str());
     }
+    //
     double FetchDouble(XMLElement* el,const string& att_type){
 #ifndef NDEBUG
         cout<<"attrib: "<<att_type<<endl;
 #endif
         return el->DoubleAttribute(att_type.c_str());
     }
-    
     // get real components from fftw_complex arrays
     void complex2real(const fftw_complex *input,double *output,const std::size_t &size){
 #ifdef _OPENMP
@@ -277,6 +285,24 @@ namespace toolkit {
             output[i] = input[i][0];
         }
     }
-    
+    //
+    void complex2imag(const fftw_complex *input,double *output,const std::size_t &size){
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) // DO NOT CHANGE SCHEDULE TYPE
+#endif
+        for(std::size_t i=0;i<size;++i){
+            output[i] = input[i][1];
+        }
+    }
+    //
+    void complex2rni(const fftw_complex *input,double *realout,double *imagout,const std::size_t &size){
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) // DO NOT CHANGE SCHEDULE TYPE
+#endif
+        for(std::size_t i=0;i<size;++i){
+            realout[i] = input[i][0];
+            imagout[i] = input[i][1];
+        }
+    }
 }// end of namespace
 // END

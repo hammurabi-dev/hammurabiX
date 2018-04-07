@@ -138,10 +138,12 @@
             </Verify>
         </Regular>
         <!-- turbulent fields -->
+        <!-- seed should be non-negative int -->
+        <!-- seed=0, seed according to thread id and time -->
         <Random cue="0" type="Local" seed="0">
             <!-- global anisotropy -->
             <Global>
-                <rms value="0.8"/> <!-- RMS at k0 -->
+                <rms value="0.8"/> <!-- RMS -->
                 <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
                 <a0 value="1.7"/> <!-- 5/3, Kolmogorov -->
                 <rho value="0.5"/> <!-- [0,1] -->

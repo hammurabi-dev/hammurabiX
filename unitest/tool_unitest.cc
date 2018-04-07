@@ -31,31 +31,31 @@ int main(void){
     vec3_t<double> C {0.,1.,0.};
     vec3_t<double> tmp;
     
-    // test get_LOS_unit_vec
-    assert(compare(get_LOS_unit_vec(theta[0],phi[0]).x,0.,1e-10));
-    assert(compare(get_LOS_unit_vec(theta[0],phi[0]).y,0.,1e-10));
-    assert(compare(get_LOS_unit_vec(theta[0],phi[0]).z,1.,1e-10));
-    assert(compare(get_LOS_unit_vec(theta[1],phi[1]).x,-1.,1e-10));
-    assert(compare(get_LOS_unit_vec(theta[1],phi[1]).y,0.,1e-10));
-    assert(compare(get_LOS_unit_vec(theta[1],phi[1]).z,0.,1e-10));
-    assert(compare(get_LOS_unit_vec(theta[2],phi[2]).x,0.,1e-10));
-    assert(compare(get_LOS_unit_vec(theta[2],phi[2]).y,-1.,1e-10));
-    assert(compare(get_LOS_unit_vec(theta[2],phi[2]).z,0.,1e-10));
+    // test los_versor
+    assert(compare(los_versor(theta[0],phi[0]).x,0.,1e-10));
+    assert(compare(los_versor(theta[0],phi[0]).y,0.,1e-10));
+    assert(compare(los_versor(theta[0],phi[0]).z,1.,1e-10));
+    assert(compare(los_versor(theta[1],phi[1]).x,-1.,1e-10));
+    assert(compare(los_versor(theta[1],phi[1]).y,0.,1e-10));
+    assert(compare(los_versor(theta[1],phi[1]).z,0.,1e-10));
+    assert(compare(los_versor(theta[2],phi[2]).x,0.,1e-10));
+    assert(compare(los_versor(theta[2],phi[2]).y,-1.,1e-10));
+    assert(compare(los_versor(theta[2],phi[2]).z,0.,1e-10));
     
-    // test get_par2LOS
+    // test par2los
     
-    assert(compare(get_par2LOS(A,theta[0],phi[0]),0.,1e-10));
-    assert(compare(get_par2LOS(A,theta[1],phi[1]),-1.,1e-10));
-    assert(compare(get_par2LOS(A,theta[2],phi[2]),0.,1e-10));
+    assert(compare(par2los(A,theta[0],phi[0]),0.,1e-10));
+    assert(compare(par2los(A,theta[1],phi[1]),-1.,1e-10));
+    assert(compare(par2los(A,theta[2],phi[2]),0.,1e-10));
     
     // test get_per2LOS
-    assert(compare(get_perp2LOS(A,theta[0],phi[0]),1.,1e-10));
-    assert(compare(get_perp2LOS(A,theta[1],phi[1]),0.,1e-10));
-    assert(compare(get_perp2LOS(A,theta[2],phi[2]),1.,1e-10));
+    assert(compare(perp2los(A,theta[0],phi[0]),1.,1e-10));
+    assert(compare(perp2los(A,theta[1],phi[1]),0.,1e-10));
+    assert(compare(perp2los(A,theta[2],phi[2]),1.,1e-10));
     
-    // test get_intr_pol_ang
-    assert(compare(get_intr_pol_ang(A,theta[0],phi[0]),-90.*CGS_U_rad,1e-10));
-    assert(compare(get_intr_pol_ang(A,theta[2],phi[2]),180.*CGS_U_rad,1e-10));
+    // test intr_pol_ang
+    assert(compare(intr_pol_ang(A,theta[0],phi[0]),-90.*CGS_U_rad,1e-10));
+    assert(compare(intr_pol_ang(A,theta[2],phi[2]),180.*CGS_U_rad,1e-10));
     
     // test cart_coord2cyl_coord
     cart_coord2cyl_coord(A,tmp);

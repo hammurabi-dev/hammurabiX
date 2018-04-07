@@ -1,6 +1,6 @@
-///
-/// allocating physical/observable fields
-///
+/**
+ * allocating physical/observable fields
+ */
 #ifndef HAMMURABI_GRID_H
 #define HAMMURABI_GRID_H
 
@@ -18,23 +18,23 @@ class Grid{
 public:
     Grid(void) = default;
     virtual ~Grid(void) = default;
-    ///
-    /// build up grid and allocate memory
-    ///
+    /**
+     * build up grid and allocate memory
+     */
     virtual void build_grid(XMLDocument *);
-    ///
-    /// export grid to file
-    ///
+    /**
+     * export grid to file
+     */
     virtual void export_grid(void);
-    ///
-    /// import file to grid
-    ///
+    /**
+     * import file to grid
+     */
     virtual void import_grid(void);
 };
 
-///
-/// regular GMF grid
-///
+/**
+ * regular GMF grid
+ */
 class Grid_breg final : public Grid{
 public:
     Grid_breg(std::string);
@@ -42,30 +42,27 @@ public:
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
     void import_grid(void) override;
-    std::unique_ptr<double[]> reg_b_x, reg_b_y, reg_b_z; ///< 3D regular GMF arrays
+    std::unique_ptr<double[]> bx, by, bz;
     std::string filename;
     bool read_permission, write_permission;
     double x_max, x_min, y_max, y_min, z_max, z_min;
     std::size_t nx, ny, nz, full_size;
 };
 
-///
-/// turbulent GMF grid
-///
+/**
+ * turbulent GMF grid
+ */
 class Grid_brnd final : public Grid{
 public:
     Grid_brnd(std::string);
     virtual ~Grid_brnd(void) {
         if(build_permission or read_permission){
-            fftw_destroy_plan(fftw_px_bw);
-            fftw_destroy_plan(fftw_py_bw);
-            fftw_destroy_plan(fftw_pz_bw);
-            fftw_destroy_plan(fftw_px_fw);
-            fftw_destroy_plan(fftw_py_fw);
-            fftw_destroy_plan(fftw_pz_fw);
-            fftw_free(fftw_b_kx);
-            fftw_free(fftw_b_ky);
-            fftw_free(fftw_b_kz);
+            fftw_destroy_plan(plan_c0_bw);
+            fftw_destroy_plan(plan_c1_bw);
+            fftw_destroy_plan(plan_c0_fw);
+            fftw_destroy_plan(plan_c1_fw);
+            fftw_free(c0);
+            fftw_free(c1);
 #ifdef _OPENMP
             fftw_cleanup_threads();
 #else
@@ -77,21 +74,21 @@ public:
     void export_grid(void) override;
     void import_grid(void) override;
     // spatial space
-    std::unique_ptr<double[]> fftw_b_x, fftw_b_y, fftw_b_z;
+    std::unique_ptr<double[]> bx, by, bz;
     // Fourier space
-    fftw_complex *fftw_b_kx, *fftw_b_ky, *fftw_b_kz;
+    fftw_complex *c0, *c1;
     // for/backward plans
-    fftw_plan fftw_px_bw, fftw_py_bw, fftw_pz_bw;
-    fftw_plan fftw_px_fw, fftw_py_fw, fftw_pz_fw;
+    fftw_plan plan_c0_bw, plan_c1_bw;
+    fftw_plan plan_c0_fw, plan_c1_fw;
     std::string filename;
     bool read_permission, write_permission, build_permission;
     double x_max, x_min, y_max, y_min, z_max, z_min;
     std::size_t nx, ny, nz, full_size;
 };
 
-///
-/// regular free electron field grid
-///
+/**
+ * regular free electron field grid
+ */
 class Grid_fereg final : public Grid{
 public:
     Grid_fereg(std::string);
@@ -103,20 +100,19 @@ public:
     std::string filename;
     bool read_permission, write_permission;
     double x_max, x_min, y_max, y_min, z_max, z_min;
-    std::size_t nx, ny, nz;
-    std::size_t full_size;
+    std::size_t nx, ny, nz, full_size;
 };
 
-///
-/// turbulent free electron field grid
-///
+/**
+ * turbulent free electron field grid
+ */
 class Grid_fernd final : public Grid{
 public:
     Grid_fernd(std::string);
     virtual ~Grid_fernd(void) {
         if(build_permission or read_permission){
-            fftw_destroy_plan(fftw_p_bw);
-            fftw_free(fftw_fe_k);
+            fftw_destroy_plan(plan_fe_bw);
+            fftw_free(fe_k);
 #ifdef _OPENMP
             fftw_cleanup_threads();
 #else
@@ -127,19 +123,18 @@ public:
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
     void import_grid(void) override;
-    std::unique_ptr<double[]> fftw_fe;
-    fftw_complex *fftw_fe_k;
-    fftw_plan fftw_p_bw;
+    std::unique_ptr<double[]> fe;
+    fftw_complex *fe_k;
+    fftw_plan plan_fe_bw;
     std::string filename;
     bool read_permission, write_permission, build_permission;
     double x_max, x_min, y_max, y_min, z_max, z_min;
-    std::size_t nx, ny, nz;
-    std::size_t full_size;
+    std::size_t nx, ny, nz, full_size;
 };
 
-///
-/// CRE grid
-///
+/**
+ * CRE grid
+ */
 class Grid_cre final : public Grid{
 public:
     Grid_cre(std::string);
@@ -157,9 +152,9 @@ public:
     double E_min, E_max, E_fact;
 };
 
-///
-/// observable field grid
-///
+/**
+ * observable field grid
+ */
 class Grid_int final : public Grid{
 public:
     Grid_int(std::string);
@@ -167,11 +162,11 @@ public:
     virtual ~Grid_int(void) = default;
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
-    Healpix_Map<double> dm_map; ///< dispersion measure
-    Healpix_Map<double> Is_map; ///< synchrotron total intensity
-    Healpix_Map<double> Qs_map; ///< synchrotron Sotkes Q
-    Healpix_Map<double> Us_map; ///< synchrotron Stokes U
-    Healpix_Map<double> fd_map; ///< Faraday depth
+    Healpix_Map<double> dm_map;
+    Healpix_Map<double> Is_map;
+    Healpix_Map<double> Qs_map;
+    Healpix_Map<double> Us_map;
+    Healpix_Map<double> fd_map;
     // shell parameters
     std::size_t nside_sim, npix_sim, total_shell;
     std::vector<std::size_t> nside_shell;

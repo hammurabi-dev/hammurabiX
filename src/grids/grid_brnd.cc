@@ -50,26 +50,23 @@ void Grid_brnd::build_grid(XMLDocument *doc){
     z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
     z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
     // real 3D random b field
-    fftw_b_x = unique_ptr<double[]> (new double[full_size]);
-    fftw_b_y = unique_ptr<double[]> (new double[full_size]);
-    fftw_b_z = unique_ptr<double[]> (new double[full_size]);
-    // complex random b field in k-space
-    fftw_b_kx = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*full_size));
-    fftw_b_ky = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*full_size));
-    fftw_b_kz = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*full_size));
+    bx = unique_ptr<double[]> (new double[full_size]);
+    by = unique_ptr<double[]> (new double[full_size]);
+    bz = unique_ptr<double[]> (new double[full_size]);
+    // complex a field in k-space
+    c0 = fftw_alloc_complex(full_size);
+    c1 = fftw_alloc_complex(full_size);
     // DFT plans
 #ifdef _OPENMP
     fftw_init_threads();
     fftw_plan_with_nthreads(omp_get_max_threads());
 #endif
     // backword plan
-    fftw_px_bw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_kx,fftw_b_kx,FFTW_BACKWARD,FFTW_ESTIMATE);
-    fftw_py_bw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_ky,fftw_b_ky,FFTW_BACKWARD,FFTW_ESTIMATE);
-    fftw_pz_bw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_kz,fftw_b_kz,FFTW_BACKWARD,FFTW_ESTIMATE);
+    plan_c0_bw = fftw_plan_dft_3d(nx,ny,nz,c0,c0,FFTW_BACKWARD,FFTW_ESTIMATE);
+    plan_c1_bw = fftw_plan_dft_3d(nx,ny,nz,c1,c1,FFTW_BACKWARD,FFTW_ESTIMATE);
     // forward plan
-    fftw_px_fw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_kx,fftw_b_kx,FFTW_FORWARD,FFTW_ESTIMATE);
-    fftw_py_fw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_ky,fftw_b_ky,FFTW_FORWARD,FFTW_ESTIMATE);
-    fftw_pz_fw = fftw_plan_dft_3d(nx,ny,nz,fftw_b_kz,fftw_b_kz,FFTW_FORWARD,FFTW_ESTIMATE);
+    plan_c0_fw = fftw_plan_dft_3d(nx,ny,nz,c0,c0,FFTW_FORWARD,FFTW_ESTIMATE);
+    plan_c1_fw = fftw_plan_dft_3d(nx,ny,nz,c1,c1,FFTW_FORWARD,FFTW_ESTIMATE);
 }
 
 void Grid_brnd::export_grid(void){
@@ -79,11 +76,11 @@ void Grid_brnd::export_grid(void){
     double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
         assert(!output.eof());
-        tmp = fftw_b_x[i];
+        tmp = bx[i];
         output.write(reinterpret_cast<char*>(&tmp),sizeof(double));
-        tmp = fftw_b_y[i];
+        tmp = by[i];
         output.write(reinterpret_cast<char*>(&tmp),sizeof(double));
-        tmp = fftw_b_z[i];
+        tmp = bz[i];
         output.write(reinterpret_cast<char*>(&tmp),sizeof(double));
     }
     output.close();
@@ -98,11 +95,11 @@ void Grid_brnd::import_grid(void){
     for(decltype(full_size) i=0;i!=full_size;++i){
         assert(!input.eof());
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
-        fftw_b_x[i] = tmp;
+        bx[i] = tmp;
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
-        fftw_b_y[i] = tmp;
+        by[i] = tmp;
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
-        fftw_b_z[i] = tmp;
+        bz[i] = tmp;
     }
 #ifndef NDEBUG
     auto eof = input.tellg();

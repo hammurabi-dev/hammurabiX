@@ -52,7 +52,6 @@ double FErnd_global::rescal(const vec3_t<double> &pos, Param *par){
 void FErnd_global::write_grid(Param *par, Grid_fernd *grid){
     //PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
-    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[2*grid->full_size]());
     // initialize random seed
 #ifdef _OPENMP
     gsl_rng **threadvec = new gsl_rng *[omp_get_max_threads()];
@@ -60,25 +59,13 @@ void FErnd_global::write_grid(Param *par, Grid_fernd *grid){
         threadvec[b] = gsl_rng_alloc(gsl_rng_taus);
         gsl_rng_set(threadvec[b],b+toolkit::random_seed(par->brnd_seed));
     }
-#pragma omp parallel for schedule(static)
-    for(decltype(grid->full_size)i=0;i<2*grid->full_size;++i)
-        gaussian_num[i] = gsl_ran_gaussian(threadvec[omp_get_thread_num()],1);
-    // free random memory
-    for (int b=0;b<omp_get_max_threads();++b)
-        gsl_rng_free(threadvec[b]);
-    delete [] threadvec;
 #else
-    // initialize random seed
     gsl_rng *r {gsl_rng_alloc(gsl_rng_taus)};
-    gsl_rng_set(r, toolkit::random_seed(par->fernd_seed));
-    for(decltype(grid->full_size)i=0;i<2*grid->full_size;++i)
-        gaussian_num[i] = gsl_ran_gaussian(r,1);
-    // free random memory
-    gsl_rng_free(r);
+    gsl_rng_set(r, toolkit::random_seed(par->brnd_seed));
 #endif
-    double lx {grid->x_max-grid->x_min};
-    double ly {grid->y_max-grid->y_min};
-    double lz {grid->z_max-grid->z_min};
+    const double lx {grid->x_max-grid->x_min};
+    const double ly {grid->y_max-grid->y_min};
+    const double lz {grid->z_max-grid->z_min};
     // physical k in 1/kpc dimension
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
@@ -87,36 +74,51 @@ void FErnd_global::write_grid(Param *par, Grid_fernd *grid){
 #pragma omp parallel for schedule(static)
 #endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
+#ifdef _OPENMP
+        auto seed_id = threadvec[omp_get_thread_num()];
+#else
+        auto seed_id = r;
+#endif
         double kx {CGS_U_kpc*i/lx};
-        if(i>=grid->nx/2) kx -= CGS_U_kpc*grid->nx/lx;
+        if(i>=(grid->nx+1)/2) kx -= CGS_U_kpc*grid->nx/lx;
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             double ky {CGS_U_kpc*j/ly};
-            if(j>=grid->ny/2) ky -= CGS_U_kpc*grid->ny/ly;
+            if(j>=(grid->ny+1)/2) ky -= CGS_U_kpc*grid->ny/ly;
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
-                size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-                // FFT expects up to n/2 positive while n/2 to n negative
                 double kz {CGS_U_kpc*l/lz};
-                if(l>=grid->nz/2) kz -= CGS_U_kpc*grid->nz/lz;
-                const double k {sqrt(kx*kx + ky*ky + kz*kz)};
-                
+                if(l>=(grid->nz+1)/2) kz -= CGS_U_kpc*grid->nz/lz;
+                const double ks {sqrt(kx*kx + ky*ky + kz*kz)};
+                const size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
                 // simpson's rule
-                double element {2.*spec(k,par)/3.};
-                element += spec(k+halfdk,par)/6.;
-                element += spec(k-halfdk,par)/6.;
-                // amplitude, dividing by two because equal allocation to Re and Im parts
-                const double sigma {sqrt(0.5*element*dk3)};
-                grid->fftw_fe_k[idx][0] = sigma*gaussian_num[2*idx];
-                grid->fftw_fe_k[idx][1] = sigma*gaussian_num[2*idx+1];
+                double element {spec(ks,par)*0.66666667};
+                element += spec(ks+halfdk,par)*0.16666667;
+                element += spec(ks-halfdk,par)*0.16666667;
+                /**
+                 * since we drop Im part after FFT
+                 * P ~ fe_Re^2 ~ fe_Im^2
+                 */
+                const double sigma {sqrt(element*dk3)};
+                grid->fe_k[idx][0] = sigma*gsl_ran_ugaussian(seed_id);
+                grid->fe_k[idx][1] = sigma*gsl_ran_ugaussian(seed_id);
             }// l
         }// j
     }// i
-    grid->fftw_fe_k[0][0] = 0.;
-    grid->fftw_fe_k[0][1] = 0.;
+    // free random memory
+#ifdef _OPENMP
+    for (int b=0;b<omp_get_max_threads();++b)
+        gsl_rng_free(threadvec[b]);
+    delete [] threadvec;
+#else
+    gsl_rng_free(r);
+#endif
+    grid->fe_k[0][0] = 0.;
+    grid->fe_k[0][1] = 0.;
     // execute DFT backward plan
-    fftw_execute(grid->fftw_p_bw);
+    fftw_execute(grid->plan_fe_bw);
     // PHASE II
     // RESCALING FIELD PROFILE IN REAL SPACE
-    double fe_var {toolkit::Variance(grid->fftw_fe_k[0],grid->full_size)};
+    // 1/sqrt(fe_var)
+    const double fe_var_invsq {1./sqrt(toolkit::Variance(grid->fe_k[0],grid->full_size))};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
@@ -128,12 +130,12 @@ void FErnd_global::write_grid(Param *par, Grid_fernd *grid){
                 // get physical position
                 pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
-                double ratio {sqrt(rescal(pos,par))*par->fernd_global.rms/sqrt(fe_var)};
+                double ratio {sqrt(rescal(pos,par))*par->fernd_global.rms*fe_var_invsq};
                 size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-                grid->fftw_fe_k[idx][0] *= ratio;
+                grid->fe_k[idx][0] *= ratio;
             }
         }
     }
     // get real elements, use auxiliary function
-    toolkit::complex2real(grid->fftw_fe_k, grid->fftw_fe.get(), grid->full_size);
+    toolkit::complex2real(grid->fe_k, grid->fe.get(), grid->full_size);
 }

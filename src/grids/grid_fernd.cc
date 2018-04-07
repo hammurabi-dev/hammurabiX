@@ -51,15 +51,15 @@ void Grid_fernd::build_grid(XMLDocument *doc){
     z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
     z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
     // real random fe field
-    fftw_fe = unique_ptr<double[]> (new double[full_size]);
+    fe = unique_ptr<double[]> (new double[full_size]);
     // complex random b field in k-space
-    fftw_fe_k = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex)*full_size));
+    fe_k = fftw_alloc_complex(full_size);
     // DFT plan
 #ifdef _OPENMP
     fftw_init_threads();
     fftw_plan_with_nthreads(omp_get_max_threads());
 #endif
-    fftw_p_bw = fftw_plan_dft_3d(nx,ny,nz,fftw_fe_k,fftw_fe_k,FFTW_BACKWARD,FFTW_ESTIMATE);
+    plan_fe_bw = fftw_plan_dft_3d(nx,ny,nz,fe_k,fe_k,FFTW_BACKWARD,FFTW_ESTIMATE);
 }
 
 void Grid_fernd::export_grid(void){
@@ -69,7 +69,7 @@ void Grid_fernd::export_grid(void){
     double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
         assert(!output.eof());
-        tmp = fftw_fe[i];
+        tmp = fe[i];
         output.write(reinterpret_cast<char*>(&tmp),sizeof(double));
     }
     output.close();
@@ -84,7 +84,7 @@ void Grid_fernd::import_grid(void){
     for(decltype(full_size) i=0;i!=full_size;++i){
         assert(!input.eof());
         input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
-        fftw_fe[i] = tmp;
+        fe[i] = tmp;
     }
 #ifndef NDEBUG
     auto eof = input.tellg();

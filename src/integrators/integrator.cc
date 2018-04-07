@@ -152,7 +152,7 @@ void Integrator::radial_integration(struct_shell *shell_ref,pointing &ptg_in, st
     decltype(shell_ref->step) looper;
     for(looper=0;looper<shell_ref->step;++looper){
         // ec and gc position
-        vec3_t<double> ec_pos {toolkit::get_LOS_unit_vec(THE,PHI)*shell_ref->dist[looper]};
+        vec3_t<double> ec_pos {toolkit::los_versor(THE,PHI)*shell_ref->dist[looper]};
         vec3_t<double> pos {ec_pos + par->SunPosition};
         // check LOS depth limit
         if (check_simulation_upper_limit(pos.Length(),gint->gc_r_max)) {break;}
@@ -161,10 +161,10 @@ void Integrator::radial_integration(struct_shell *shell_ref,pointing &ptg_in, st
         vec3_t<double> B_vec {breg->get_breg(pos,par,gbreg)};
         // add random field
         B_vec += brnd->get_brnd(pos,gbrnd);
-        const double B_par {toolkit::get_par2LOS(B_vec,THE,PHI)};
+        const double B_par {toolkit::par2los(B_vec,THE,PHI)};
         // un-scaled B_per, if random B is active, we scale up this
         // in calculating emissivity, so it is not constant
-        double B_per {toolkit::get_perp2LOS(B_vec,THE,PHI)};
+        double B_per {toolkit::perp2los(B_vec,THE,PHI)};
         // FE field
         double te {fereg->get_density(pos,par,gfereg)};
         // add random field
@@ -187,7 +187,7 @@ void Integrator::radial_integration(struct_shell *shell_ref,pointing &ptg_in, st
             // J_pol receive no contribution from missing random
             F_Jpol.push_back(cre->get_emissivity_p(pos,par,gcre,B_per)*shell_ref->delta_d*i2bt);
             // intrinsic polarization angle, following IAU definition
-            intr_pol_ang.push_back(toolkit::get_intr_pol_ang(B_vec,THE,PHI));
+            intr_pol_ang.push_back(toolkit::intr_pol_ang(B_vec,THE,PHI));
         }
     }// first iteration end
     // applying Simpson's rule
