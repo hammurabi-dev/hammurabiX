@@ -42,7 +42,6 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
     const vec3_t<double> B {breg->get_breg(par->SunPosition,par,gbreg)};
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
-    const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) // DO NOT CHANGE SCHEDULE TYPE
 #endif
@@ -54,15 +53,25 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
 #endif
         vec3_t<double> k {CGS_U_kpc*i/lx,0,0};
         if(i>=(grid->nx+1)/2) k.x -= CGS_U_kpc*grid->nx/lx;
+        /**
+         * it's better to calculate indeces manually
+         * just for reference, how indeces are calculated
+         * const size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+         */
+        const size_t idx_lv1 {i*grid->ny*grid->nz};
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             k.y = CGS_U_kpc*j/ly;
             if(j>=(grid->ny+1)/2) k.y -= CGS_U_kpc*grid->ny/ly;
+            const size_t idx_lv2 {idx_lv1+j*grid->nz};
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
+                /**
+                 * the very 0th term is fixed to zero in allocation
+                 */
+                if(i==0 and j==0 and l==0) continue;
                 k.z = CGS_U_kpc*l/lz;
                 if(l>=(grid->nz+1)/2) k.z -= CGS_U_kpc*grid->nz/lz;
                 const double ks {k.Length()};
-                if(ks==0) continue;
-                const size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+                const size_t idx {idx_lv2+l};
                 vec3_t<double> ep {eplus(B,k)};
                 vec3_t<double> em {eminus(B,k)};
                 /**
@@ -73,12 +82,9 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
                  */
                 if(ep.SquaredLength()>1e-6){
                     double ang {cosa(B,k)};
-                    double Pa {speca(ks,par)*0.66666667 + (speca(ks+halfdk,par) + speca(ks-halfdk,par))*0.16666667};
-                    Pa *= fa(par->brnd_local.ma,ang)*dk3;
-                    double Pf {specf(ks,par)*0.66666667 + (specf(ks+halfdk,par) + specf(ks-halfdk,par))*0.16666667};
-                    Pf *= hf(par->brnd_local.beta,ang)*dk3;
-                    double Ps {specs(ks,par)*0.66666667 + (specs(ks+halfdk,par) + specs(ks-halfdk,par))*0.16666667};
-                    Ps *= fs(par->brnd_local.ma,ang)*hs(par->brnd_local.beta,ang)*dk3;
+                    const double Pa {speca(ks,par)*fa(par->brnd_local.ma,ang)*dk3};
+                    double Pf {specf(ks,par)*hf(par->brnd_local.beta,ang)*dk3};
+                    double Ps {specs(ks,par)*fs(par->brnd_local.ma,ang)*hs(par->brnd_local.beta,ang)*dk3};
                     /**
                      * b+ is independent from b- in terms of power
                      * fast and slow modes are independent
@@ -94,16 +100,15 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
                      * c1_I = by_Im + bz_Re
                      * bx_R = bkp_Re.x+bkm_Re.x;
                      * etc.
-                     * note that all Im parts are zero
+                     * note that all Im parts are zero, c1_I = c0_R
                      */
                     grid->c0[idx][0] = bkp.x + bkm.x;
                     grid->c0[idx][1] = bkp.y + bkm.y;
-                    grid->c1[idx][0] = grid->c0[idx][1];
+                    grid->c1[idx][0] = bkp.y + bkm.y;
                     grid->c1[idx][1] = bkp.z + bkm.z;
                 }
                 else{
-                    double Pf {specf(ks,par)*0.66666667 + (specf(ks+halfdk,par) + specf(ks-halfdk,par))*0.16666667};
-                    Pf *= hf(par->brnd_local.beta,1)*dk3;
+                    double Pf {specf(ks,par)*hf(par->brnd_local.beta,1)*dk3};
                     if(i==0 and j==0){
                         ep.x = k.x;
                         em.y = k.y;
@@ -139,11 +144,6 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
 #else
     gsl_rng_free(r);
 #endif
-    // fix the very 0th
-    grid->c0[0][0] = 0.;
-    grid->c0[0][1] = 0.;
-    grid->c1[0][0] = 0.;
-    grid->c1[0][1] = 0.;
     // execute DFT backward plan
     fftw_execute(grid->plan_c0_bw);
     fftw_execute(grid->plan_c1_bw);
@@ -158,17 +158,24 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         decltype(grid->nx) i_sym {grid->nx-i};// apply Hermitian symmetry
         if(i==0) i_sym = i;
+        /**
+         * it's better to calculate indeces manually
+         * just for reference, how indeces are calculated
+         * const size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+         * const size_t idx_sym {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i_sym,j_sym,l_sym)};
+         */
+        const size_t idx_lv1 {i*grid->ny*grid->nz};
+        const size_t idx_sym_lv1 {i_sym*grid->ny*grid->nz};
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             decltype(grid->ny) j_sym {grid->ny-j};// apply Hermitian symmetry
             if(j==0) j_sym = j;
+            const size_t idx_lv2 {idx_lv1+j*grid->nz};
+            const size_t idx_sym_lv2 {idx_sym_lv1+j_sym*grid->nz};
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
                 decltype(grid->nz) l_sym {grid->nz-l};// apply Hermitian symmetry
                 if(l==0) l_sym = l;
-                /**
-                 * for more performance, calculate indeces manually
-                 */
-                const size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)}; // k
-                const size_t idx_sym {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i_sym,j_sym,l_sym)}; // -k
+                const size_t idx {idx_lv2+l}; //k
+                const size_t idx_sym {idx_sym_lv2+l_sym}; //-k
                 /**
                  * reconstruct bx,by,bz from c0,c1,c*0,c*1
                  *

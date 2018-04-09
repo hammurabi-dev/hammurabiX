@@ -54,6 +54,7 @@ void Grid_fernd::build_grid(XMLDocument *doc){
     fe = unique_ptr<double[]> (new double[full_size]);
     // complex random b field in k-space
     fe_k = fftw_alloc_complex(full_size);
+    fe_k[0][0]=0;fe_k[0][1]=0; // 0th term should be zero
     // DFT plan
 #ifdef _OPENMP
     fftw_init_threads();

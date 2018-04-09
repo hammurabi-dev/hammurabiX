@@ -69,7 +69,6 @@ void FErnd_global::write_grid(Param *par, Grid_fernd *grid){
     // physical k in 1/kpc dimension
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
-    const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
@@ -81,28 +80,36 @@ void FErnd_global::write_grid(Param *par, Grid_fernd *grid){
 #endif
         double kx {CGS_U_kpc*i/lx};
         if(i>=(grid->nx+1)/2) kx -= CGS_U_kpc*grid->nx/lx;
+        /**
+         * it's better to calculate indeces manually
+         * just for reference, how indeces are calculated
+         * const size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+         */
+        const size_t idx_lv1 {i*grid->ny*grid->nz};
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             double ky {CGS_U_kpc*j/ly};
             if(j>=(grid->ny+1)/2) ky -= CGS_U_kpc*grid->ny/ly;
+            const size_t idx_lv2 {idx_lv1+j*grid->nz};
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
+                /**
+                 * the very 0th term is fixed to zero in allocation
+                 */
+                if(i==0 and j==0 and l==0) continue;
                 double kz {CGS_U_kpc*l/lz};
                 if(l>=(grid->nz+1)/2) kz -= CGS_U_kpc*grid->nz/lz;
                 const double ks {sqrt(kx*kx + ky*ky + kz*kz)};
-                const size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-                // simpson's rule
-                double element {spec(ks,par)*0.66666667};
-                element += spec(ks+halfdk,par)*0.16666667;
-                element += spec(ks-halfdk,par)*0.16666667;
+                const size_t idx {idx_lv2+l};
                 /**
-                 * since we drop Im part after FFT
+                 * since we drop Im part after DFT
                  * P ~ fe_Re^2 ~ fe_Im^2
                  */
-                const double sigma {sqrt(element*dk3)};
+                const double sigma {sqrt(spec(ks,par)*dk3)};
                 grid->fe_k[idx][0] = sigma*gsl_ran_ugaussian(seed_id);
                 grid->fe_k[idx][1] = sigma*gsl_ran_ugaussian(seed_id);
             }// l
         }// j
     }// i
+    // ks=0 should be automatically addressed in P(k)
     // free random memory
 #ifdef _OPENMP
     for (int b=0;b<omp_get_max_threads();++b)
@@ -111,8 +118,6 @@ void FErnd_global::write_grid(Param *par, Grid_fernd *grid){
 #else
     gsl_rng_free(r);
 #endif
-    grid->fe_k[0][0] = 0.;
-    grid->fe_k[0][1] = 0.;
     // execute DFT backward plan
     fftw_execute(grid->plan_fe_bw);
     // PHASE II
@@ -124,18 +129,24 @@ void FErnd_global::write_grid(Param *par, Grid_fernd *grid){
 #endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
         vec3_t<double> pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
+        /**
+         * it's better to calculate indeces manually
+         * just for reference, how indeces are calculated
+         * const size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+         */
+        const size_t idx_lv1 {i*grid->ny*grid->nz};
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             pos.y = j*ly/(grid->ny-1) + grid->y_min;
+            const size_t idx_lv2 {idx_lv1+j*grid->nz};
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
                 // get physical position
                 pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
                 double ratio {sqrt(rescal(pos,par))*par->fernd_global.rms*fe_var_invsq};
-                size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-                grid->fe_k[idx][0] *= ratio;
+                const size_t idx {idx_lv2+l};
+                // manually pass back rescaled Re part
+                grid->fe[idx] = grid->fe_k[idx][0]*ratio;
             }
         }
     }
-    // get real elements, use auxiliary function
-    toolkit::complex2real(grid->fe_k, grid->fe.get(), grid->full_size);
 }

@@ -55,7 +55,9 @@ void Grid_brnd::build_grid(XMLDocument *doc){
     bz = unique_ptr<double[]> (new double[full_size]);
     // complex a field in k-space
     c0 = fftw_alloc_complex(full_size);
+    c0[0][0]=0;c0[0][1]=0; // 0th term should be zero
     c1 = fftw_alloc_complex(full_size);
+    c1[0][0]=0;c1[0][1]=0; // 0th term should be zero
     // DFT plans
 #ifdef _OPENMP
     fftw_init_threads();
