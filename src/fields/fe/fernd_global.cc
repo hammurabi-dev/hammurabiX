@@ -119,7 +119,7 @@ void FErnd_global::write_grid(Param *par, Grid_fernd *grid){
     gsl_rng_free(r);
 #endif
     // execute DFT backward plan
-    fftw_execute(grid->plan_fe_bw);
+    fftw_execute_dft(grid->plan_fe_bw,grid->fe_k,grid->fe_k);
     // PHASE II
     // RESCALING FIELD PROFILE IN REAL SPACE
     // 1/sqrt(fe_var)

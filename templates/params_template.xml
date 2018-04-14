@@ -53,8 +53,8 @@
             <z_max value="4.0"/> <!-- kpc -->
         </Box>
         <!-- LOS integration setting -->
-        <Integration>
-            <shell type="auto">
+        <Shell>
+            <layer type="auto">
                 <auto>
                     <shell_num value="1"/> <!-- total shell number -->
                     <nside_min value="32"/> <!-- inner most shell resolution -->
@@ -64,7 +64,7 @@
                     <nside value="32"/> <!-- inner most shell Nside -->
                     <nside value="16"/>
                 </manual>
-            </shell>
+            </layer>
             <nside_sim value="32"/> <!-- output map resolution -->
             <!-- maximum radius in earth/Galactic centric frame -->
             <ec_r_max value="30.0"/> <!-- kpc -->
@@ -75,7 +75,7 @@
             <ec_r_res value="0.05"/> <!-- kpc -->
             <!-- galactic latitude lower limit -->
             <lat_lim value="0."/> <!-- [0,90] -->
-        </Integration>
+        </Shell>
     </Grid>
     
     <!-- magnetic fields -->

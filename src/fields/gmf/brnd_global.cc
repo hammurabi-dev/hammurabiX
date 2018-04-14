@@ -140,8 +140,8 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
     }// i
     // ks=0 should be automatically addressed in P(k)
     // execute DFT backward plan
-    fftw_execute(grid->plan_c0_bw);
-    fftw_execute(grid->plan_c1_bw);
+    fftw_execute_dft(grid->plan_c0_bw,grid->c0,grid->c0);
+    fftw_execute_dft(grid->plan_c1_bw,grid->c1,grid->c1);
     // free random memory
 #ifdef _OPENMP
     for (int b=0;b<omp_get_max_threads();++b)
@@ -194,8 +194,8 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
         } //j
     } //i
     // execute DFT forward plan
-    fftw_execute(grid->plan_c0_fw);
-    fftw_execute(grid->plan_c1_fw);
+    fftw_execute_dft(grid->plan_c0_fw,grid->c0,grid->c0);
+    fftw_execute_dft(grid->plan_c1_fw,grid->c1,grid->c1);
     // PHASE III
     // RE-ORTHOGONALIZING IN FOURIER SPACE
     // Gram-Schmidt process
@@ -260,8 +260,8 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
         }// j
     }// i
     // execute DFT backward plan
-    fftw_execute(grid->plan_c0_bw);
-    fftw_execute(grid->plan_c1_bw);
+    fftw_execute_dft(grid->plan_c0_bw,grid->c0,grid->c0);
+    fftw_execute_dft(grid->plan_c1_bw,grid->c1,grid->c1);
     // according to FFTW convention
     // transform forward followed by backword scale up array by nx*ny*nz
     double inv_grid_size = 1.0/grid->full_size;

@@ -145,8 +145,8 @@ void Brnd_local::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd 
     gsl_rng_free(r);
 #endif
     // execute DFT backward plan
-    fftw_execute(grid->plan_c0_bw);
-    fftw_execute(grid->plan_c1_bw);
+    fftw_execute_dft(grid->plan_c0_bw,grid->c0,grid->c0);
+    fftw_execute_dft(grid->plan_c1_bw,grid->c1,grid->c1);
     /**
      * now we need to get real parts manually
      * since we start in k-space real fields

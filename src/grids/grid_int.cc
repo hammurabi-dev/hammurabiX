@@ -22,11 +22,11 @@ Grid_int::Grid_int(string file_name){
 }
 
 void Grid_int::build_grid(XMLDocument *doc){
-    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Integration"})};
+    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Shell"})};
     // get shell Nside
-    string shell_type {toolkit::FetchString(ptr,"type","shell")};
+    string shell_type {toolkit::FetchString(ptr,"type","layer")};
     if(shell_type=="auto"){
-        XMLElement *subptr {toolkit::tracexml(doc,{"Grid","Integration","shell","auto"})};
+        XMLElement *subptr {toolkit::tracexml(doc,{"Grid","Shell","layer","auto"})};
         total_shell = toolkit::FetchUnsigned(subptr,"value","shell_num");
         size_t nside_min {toolkit::FetchUnsigned(subptr,"value","nside_min")};
         for(std::size_t i=0;i!=total_shell;++i){
@@ -34,7 +34,7 @@ void Grid_int::build_grid(XMLDocument *doc){
         }
     }
     else if(shell_type=="manual"){
-        XMLElement *subptr {toolkit::tracexml(doc,{"Grid","Integration","shell","manual"})};
+        XMLElement *subptr {toolkit::tracexml(doc,{"Grid","Shell","layer","manual"})};
         total_shell = 0;
         for(auto e = subptr->FirstChildElement("nside");e!=nullptr;e=e->NextSiblingElement("nside")){
             total_shell++;
