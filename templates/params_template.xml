@@ -312,7 +312,7 @@
             <!-- E_max = E_min*exp(nE*E_fact) -->
             <E_min value="0.1"/> <!-- GeV -->
             <E_max value="100.0"/> <!-- GeV -->
-            <E_fact value="0.1"/> <!-- dimensionless -->
+            <nE value="80"/>
         </Numeric>
         
         <!-- verification -->

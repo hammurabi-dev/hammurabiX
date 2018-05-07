@@ -9,8 +9,6 @@
 #include <tinyxml2.h>
 #include <vec3.h>
 
-using namespace tinyxml2;
-
 class Param {
 public:
     Param(std::string);
@@ -111,9 +109,9 @@ public:
     }cre_verify;
     
 private:
-    void b_param(XMLDocument *);
-    void fe_param(XMLDocument *);
-    void cre_param(XMLDocument *);
+    void b_param(tinyxml2::XMLDocument *);
+    void fe_param(tinyxml2::XMLDocument *);
+    void cre_param(tinyxml2::XMLDocument *);
 };
 #endif
 // END

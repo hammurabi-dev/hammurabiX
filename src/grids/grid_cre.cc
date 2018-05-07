@@ -33,8 +33,8 @@ void Grid_cre::build_grid(XMLDocument *doc){
     XMLElement *ptr {toolkit::tracexml(doc,{"CRE","Numeric"})};
     E_min = CGS_U_GeV*toolkit::FetchDouble(ptr,"value","E_min");
     E_max = CGS_U_GeV*toolkit::FetchDouble(ptr,"value","E_max");
-    E_fact = toolkit::FetchDouble(ptr,"value","E_fact");
-    nE = ceil(log(E_max/E_min)/E_fact);
+    nE = toolkit::FetchUnsigned(ptr,"value","nE");
+    E_fact = log(E_max/E_min)/(nE-1);
     // spatial 3D
     nz = toolkit::FetchUnsigned(ptr,"value","nz");
     nx = toolkit::FetchUnsigned(ptr,"value","nx");
