@@ -12,25 +12,34 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 #include <cassert>
-using namespace std;
 
-double CRE::flux(const vec3_t<double> &,Param *,const double &){
+double CRE::flux(const vec3_t<double> &,
+                 Param *,
+                 const double &){
     assert(false);
     return 0;
 }
 
-double CRE::get_emissivity_t(const vec3_t<double> &,Param *,Grid_cre *,const double &){
+double CRE::get_emissivity_t(const vec3_t<double> &,
+                             Param *,
+                             Grid_cre *,
+                             const double &){
     assert(false);
     return 0;
 }
 
-double CRE::get_emissivity_p(const vec3_t<double> &,Param *,Grid_cre *,const double &){
+double CRE::get_emissivity_p(const vec3_t<double> &,
+                             Param *,
+                             Grid_cre *,
+                             const double &){
     assert(false);
     return 0;
 }
 
 // use bilinear/trilinear interpolationi according to the dimension of CRE flux grid
-double CRE::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Grid_cre *grid){
+double CRE::read_grid(const std::size_t &Eidx,
+                      const vec3_t<double> &pos,
+                      Grid_cre *grid){
     //trilinear interpolation
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
     if (tmp<0 or tmp>grid->nx-1) { return 0.;}
@@ -73,7 +82,8 @@ double CRE::read_grid(const std::size_t &Eidx, const vec3_t<double> &pos,Grid_cr
 }
 
 // writing out CRE DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
-void CRE::write_grid(Param *par, Grid_cre *grid){
+void CRE::write_grid(Param *par,
+                     Grid_cre *grid){
     assert(grid->write_permission);
     vec3_t<double> gc_pos {0.,0.,0.};
     

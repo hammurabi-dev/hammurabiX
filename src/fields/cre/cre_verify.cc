@@ -12,10 +12,11 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 #include <cassert>
-using namespace std;
+
 
 // CRE flux spatial rescaling
-double CRE_verify::rescal(const vec3_t<double> &pos,Param *par){
+double CRE_verify::rescal(const vec3_t<double> &pos,
+                          Param *par){
     if((pos-par->SunPosition).Length() > par->cre_verify.r0){
         return 0;
     }
@@ -24,14 +25,16 @@ double CRE_verify::rescal(const vec3_t<double> &pos,Param *par){
 }
 
 // CRE spectral index
-double CRE_verify::flux_idx(const vec3_t<double> &/*pos*/,Param *par){
+double CRE_verify::flux_idx(const vec3_t<double> &/*pos*/,
+                            Param *par){
     return -(par->cre_verify.alpha);
 }
 
 // analytical CRE flux
 // give values to spectral index and norm factor, in cgs units
 // analytical CRE integration use N(\gamma)
-double CRE_verify::flux_norm(const vec3_t<double> &pos,Param *par){
+double CRE_verify::flux_norm(const vec3_t<double> &pos,
+                             Param *par){
     // je is in [GeV m^2 s sr]^-1 units
     const double je {par->cre_verify.j0};
     const double gamma0 {par->cre_verify.E0/CGS_U_MEC2+1};
@@ -45,7 +48,9 @@ double CRE_verify::flux_norm(const vec3_t<double> &pos,Param *par){
 
 // analytical modeling use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
-double CRE_verify::flux(const vec3_t<double> &pos,Param *par,const double &En){
+double CRE_verify::flux(const vec3_t<double> &pos,
+                        Param *par,
+                        const double &En){
     // je is in [GeV m^2 s sr]^-1 units
     const double je {par->cre_verify.j0};
     const double gamma {En/CGS_U_MEC2};
@@ -58,8 +63,11 @@ double CRE_verify::flux(const vec3_t<double> &pos,Param *par,const double &En){
 }
 
 // J_tot(\nu)
-double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
-    assert(!grid->read_permission);
+double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,
+                                    Param *par,
+                                    Grid_cre */*grid*/,
+                                    const double &Bper){
+    //assert(!grid->read_permission);
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
     const double index {flux_idx(pos,par)};
@@ -76,8 +84,11 @@ double CRE_verify::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cr
 }
 
 // J_pol(\nu)
-double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
-    assert(!grid->read_permission);
+double CRE_verify::get_emissivity_p(const vec3_t<double> &pos,
+                                    Param *par,
+                                    Grid_cre */*grid*/,
+                                    const double &Bper){
+    //assert(!grid->read_permission);
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
     const double index {flux_idx(pos,par)};

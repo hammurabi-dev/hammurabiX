@@ -13,8 +13,8 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 #include <cassert>
+
 using namespace tinyxml2;
-using namespace std;
 
 void Grid::build_grid(XMLDocument *){
     assert(false);

@@ -14,9 +14,10 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 #include <cassert>
-using namespace std;
 
-double FErnd::get_fernd(const vec3_t<double> &pos,Grid_fernd *grid){
+
+double FErnd::get_fernd(const vec3_t<double> &pos,
+                        Grid_fernd *grid){
     if(grid->read_permission){
         return read_grid(pos,grid);
     }
@@ -27,7 +28,8 @@ double FErnd::get_fernd(const vec3_t<double> &pos,Grid_fernd *grid){
     }
 }
 
-double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
+double FErnd::read_grid(const vec3_t<double> &pos,
+                        Grid_fernd *grid){
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
     if (tmp<0 or tmp>grid->nx-1) { return 0.;}
     decltype(grid->nx) xl {(std::size_t)floor(tmp)};
@@ -76,7 +78,8 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     return density;
 }
 
-void FErnd::write_grid(Param *,Grid_fernd *){
+void FErnd::write_grid(Param *,
+                       Grid_fernd *){
     assert(false);
 }
 

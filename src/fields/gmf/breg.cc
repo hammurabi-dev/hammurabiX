@@ -10,9 +10,10 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 
-using namespace std;
 
-vec3_t<double> Breg::get_breg(const vec3_t<double> &pos, Param *par, Grid_breg *grid){
+vec3_t<double> Breg::get_breg(const vec3_t<double> &pos,
+                              Param *par,
+                              Grid_breg *grid){
     if(grid->read_permission){
         return read_grid(pos,grid);
     }
@@ -21,12 +22,14 @@ vec3_t<double> Breg::get_breg(const vec3_t<double> &pos, Param *par, Grid_breg *
     }
 }
 
-vec3_t<double> Breg::breg(const vec3_t<double> &, Param *){
+vec3_t<double> Breg::breg(const vec3_t<double> &,
+                          Param *){
     assert(false);
     return vec3_t<double> {0.,0.,0.};
 }
 
-vec3_t<double> Breg::read_grid(const vec3_t<double> &pos, Grid_breg *grid){
+vec3_t<double> Breg::read_grid(const vec3_t<double> &pos,
+                               Grid_breg *grid){
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
     if (tmp<0 or tmp>grid->nx-1) { return vec3_t<double>(0.,0.,0.);}
     decltype(grid->nx) xl {(std::size_t)floor(tmp)};
@@ -79,7 +82,8 @@ vec3_t<double> Breg::read_grid(const vec3_t<double> &pos, Grid_breg *grid){
     return b_vec3;
 }
 
-void Breg::write_grid(Param *par, Grid_breg *grid){
+void Breg::write_grid(Param *par,
+                      Grid_breg *grid){
     assert(grid->write_permission);
     vec3_t<double> gc_pos, tmp_vec;
     double lx {grid->x_max-grid->x_min};

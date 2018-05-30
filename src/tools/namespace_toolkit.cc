@@ -13,7 +13,6 @@
 #include <cgs_units_file.h>
 #include <tinyxml2.h>
 
-using namespace std;
 using namespace tinyxml2;
 
 namespace toolkit {
@@ -115,7 +114,7 @@ namespace toolkit {
         return covar;
     }
     // cov for vector
-    double Covariance (const vector<double> &vect1,const vector<double> &vect2){
+    double Covariance (const std::vector<double> &vect1,const std::vector<double> &vect2){
         assert(vect1.size()==vect2.size());
         double avg1 {Mean(vect1)};
         double avg2 {Mean(vect2)};
@@ -127,7 +126,7 @@ namespace toolkit {
         return covar;
     }
     // get ranked array
-    void Rank(double *arr,const size_t &size){
+    void Rank(double *arr,const std::size_t &size){
         // get max and min
         double max {arr[0]}; double min {arr[0]};
         for(std::size_t i=0;i!=size;++i){
@@ -141,7 +140,7 @@ namespace toolkit {
         }
     }
     // get ranked vector
-    void Rank(vector<double> &vect){
+    void Rank(std::vector<double> &vect){
         assert(!vect.empty());
         // get max and min
         double max=vect[0];double min=vect[0];
@@ -172,13 +171,13 @@ namespace toolkit {
     std::size_t random_seed(const int &s){
         assert(s>=0);
         if(s==0){
-            auto p = chrono::system_clock::now();
+            auto p = std::chrono::system_clock::now();
             // valid until 19 January, 2038 03:14:08 UTC
-            time_t today_time = chrono::system_clock::to_time_t(p);
+            time_t today_time = std::chrono::system_clock::to_time_t(p);
             // casting thread id into unsinged long
-            stringstream ss;
-            ss << this_thread::get_id();
-            auto th_id = stoul(ss.str());
+            std::stringstream ss;
+            ss << std::this_thread::get_id();
+            auto th_id = std::stoul(ss.str());
             // precision in (thread,second)
             return (th_id + today_time);
         }
@@ -186,19 +185,19 @@ namespace toolkit {
     }
     
     // auxiliary functions for parsing parameters
-    unique_ptr<XMLDocument> loadxml(const string& filename){
-        unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument>(new XMLDocument());
+    std::unique_ptr<XMLDocument> loadxml(const std::string& filename){
+        std::unique_ptr<XMLDocument> doc = std::make_unique<XMLDocument>();
         doc->LoadFile(filename.c_str());
         assert(!doc->Error());
         return move(doc);
     }
     //
-    XMLElement* tracexml(XMLDocument *doc,const vector<string>& keychain){
+    XMLElement* tracexml(XMLDocument *doc,const std::vector<std::string>& keychain){
         XMLElement* el {doc->FirstChildElement("root")};
         if(!keychain.empty()){
             for(auto key: keychain){
 #ifndef NDEBUG
-                cout<<"key: "<<key<<endl;
+                std::cout<<"key: "<<key<<std::endl;
 #endif
                 el = el->FirstChildElement(key.c_str());
             }
@@ -206,72 +205,72 @@ namespace toolkit {
         return el;
     }
     //
-    std::string FetchString(XMLElement* el,const string& att_type,const string& key){
+    std::string FetchString(XMLElement* el,const std::string& att_type,const std::string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+        std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->Attribute(att_type.c_str());
     }
     //
-    std::string FetchString(XMLElement* el,const string& att_type){
+    std::string FetchString(XMLElement* el,const std::string& att_type){
 #ifndef NDEBUG
-        cout<<"attrib: "<<att_type<<endl;
+        std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->Attribute(att_type.c_str());
     }
     //
-    int FetchInt(XMLElement* el,const string& att_type,const string& key){
+    int FetchInt(XMLElement* el,const std::string& att_type,const std::string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+        std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str());
     }
     //
-    int FetchInt(XMLElement* el,const string& att_type){
+    int FetchInt(XMLElement* el,const std::string& att_type){
 #ifndef NDEBUG
-        cout<<"attrib: "<<att_type<<endl;
+        std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->IntAttribute(att_type.c_str());
     }
     //
-    unsigned int FetchUnsigned(XMLElement* el,const string& att_type,const string& key){
+    unsigned int FetchUnsigned(XMLElement* el,const std::string& att_type,const std::string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+        std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->UnsignedAttribute(att_type.c_str());
     }
     //
-    unsigned int FetchUnsigned(XMLElement* el,const string& att_type){
+    unsigned int FetchUnsigned(XMLElement* el,const std::string& att_type){
 #ifndef NDEBUG
-        cout<<"attrib: "<<att_type<<endl;
+        std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->UnsignedAttribute(att_type.c_str());
     }
     //
-    bool FetchBool(XMLElement* el,const string& att_type,const string& key){
+    bool FetchBool(XMLElement* el,const std::string& att_type,const std::string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+        std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->BoolAttribute(att_type.c_str());
     }
     //
-    bool FetchBool(XMLElement* el,const string& att_type){
+    bool FetchBool(XMLElement* el,const std::string& att_type){
 #ifndef NDEBUG
-        cout<<"attrib: "<<att_type<<endl;
+        std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->BoolAttribute(att_type.c_str());
     }
     //
-    double FetchDouble(XMLElement* el,const string& att_type,const string& key){
+    double FetchDouble(XMLElement* el,const std::string& att_type,const std::string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+        std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str());
     }
     //
-    double FetchDouble(XMLElement* el,const string& att_type){
+    double FetchDouble(XMLElement* el,const std::string& att_type){
 #ifndef NDEBUG
-        cout<<"attrib: "<<att_type<<endl;
+        std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->DoubleAttribute(att_type.c_str());
     }

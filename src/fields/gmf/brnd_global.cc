@@ -16,16 +16,20 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 
-using namespace std;
 
-vec3_t<double> Brnd_global::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
+vec3_t<double> Brnd_global::get_brnd(const vec3_t<double> &pos,
+                                     Grid_brnd *grid){
     // interpolate written grid to given position
     // check if you have called ::write_grid
     return read_grid(pos,grid);
 }
 
 // global anisotropic turbulent field
-double Brnd_global::anisotropy(const vec3_t<double> &pos,vec3_t<double> &H,Param *par,Breg *breg,Grid_breg *gbreg){
+double Brnd_global::anisotropy(const vec3_t<double> &pos,
+                               vec3_t<double> &H,
+                               Param *par,
+                               Breg *breg,
+                               Grid_breg *gbreg){
     // H, direction of anisotropy
     H = toolkit::versor(breg->get_breg(pos,par,gbreg));
     // the simplest case, const.
@@ -34,7 +38,8 @@ double Brnd_global::anisotropy(const vec3_t<double> &pos,vec3_t<double> &H,Param
 
 // since we are using rms normalization
 // p0 is hidden and not affecting anything
-double Brnd_global::spec(const double &k, Param *par){
+double Brnd_global::spec(const double &k,
+                         Param *par){
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_global.rms*CGS_U_muGauss};
     const double kr {k/par->brnd_global.k0};
@@ -50,7 +55,8 @@ double Brnd_global::spec(const double &k, Param *par){
 
 // galactic scaling of random field energy density
 // set to 1 at observer's place
-double Brnd_global::rescal(const vec3_t<double> &pos, Param *par){
+double Brnd_global::rescal(const vec3_t<double> &pos,
+                           Param *par){
     const double r_cyl {sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x)};
     const double z {fabs(pos.z) - fabs(par->SunPosition.z)};
     const double r0 {par->brnd_global.r0};
@@ -60,7 +66,8 @@ double Brnd_global::rescal(const vec3_t<double> &pos, Param *par){
 
 // Gram-Schimdt, rewritten using Healpix vec3 library
 // tiny error caused by machine is inevitable
-vec3_t<double> Brnd_global::gramschmidt(const vec3_t<double> &k,const vec3_t<double> &b){
+vec3_t<double> Brnd_global::gramschmidt(const vec3_t<double> &k,
+                                        const vec3_t<double> &b){
     if(k.SquaredLength()==0 or b.SquaredLength()==0){
         return vec3_t<double> {0,0,0};
     }
@@ -73,7 +80,10 @@ vec3_t<double> Brnd_global::gramschmidt(const vec3_t<double> &k,const vec3_t<dou
     return b_free;
 }
 
-void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
+void Brnd_global::write_grid(Param *par,
+                             Breg *breg,
+                             Grid_breg *gbreg,
+                             Grid_brnd *grid){
     // PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
     // initialize random seed
@@ -109,11 +119,11 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
          * just for reference, how indeces are calculated
          * const size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
          */
-        const size_t idx_lv1 {i*grid->ny*grid->nz};
+        const std::size_t idx_lv1 {i*grid->ny*grid->nz};
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             double ky {CGS_U_kpc*j/ly};
             if(j>=(grid->ny+1)/2) ky -= CGS_U_kpc*grid->ny/ly;
-            const size_t idx_lv2 {idx_lv1+j*grid->nz};
+            const std::size_t idx_lv2 {idx_lv1+j*grid->nz};
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
                 /**
                  * 0th term is fixed to zero in allocation
@@ -122,7 +132,7 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
                 double kz {CGS_U_kpc*l/lz};
                 if(l>=(grid->nz+1)/2) kz -= CGS_U_kpc*grid->nz/lz;
                 const double ks {sqrt(kx*kx + ky*ky + kz*kz)};
-                const size_t idx {idx_lv2+l};
+                const std::size_t idx {idx_lv2+l};
                 /**
                  * turbulent power is shared in following pattern
                  * P ~ (bx^2 + by^2 + bz^2)
@@ -161,16 +171,16 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
 #endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i){
         vec3_t<double> pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
-        const size_t idx_lv1 {i*grid->ny*grid->nz};
+        const std::size_t idx_lv1 {i*grid->ny*grid->nz};
         for (decltype(grid->ny) j=0;j<grid->ny;++j){
             pos.y = j*ly/(grid->ny-1) + grid->y_min;
-            const size_t idx_lv2 {idx_lv1+j*grid->nz};
+            const std::size_t idx_lv2 {idx_lv1+j*grid->nz};
             for (decltype(grid->nz) l=0;l<grid->nz;++l){
                 // get physical position
                 pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
                 double ratio {sqrt(rescal(pos,par))*par->brnd_global.rms*b_var_invsq};
-                const size_t idx {idx_lv2+l};
+                const std::size_t idx {idx_lv2+l};
                 // assemble b_Re
                 // after 1st Fourier transformation, c0_R = bx, c0_I = by, c1_I = bz
                 vec3_t<double> b_re {grid->c0[idx][0]*ratio,
@@ -209,26 +219,26 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
         /**
          * it's better to calculate indeces manually
          * just for reference, how indeces are calculated
-         * const size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-         * const size_t idx_sym {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i_sym,j_sym,l_sym)};
+         * const std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+         * const std::size_t idx_sym {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i_sym,j_sym,l_sym)};
          */
-        const size_t idx_lv1 {i*grid->ny*grid->nz};
-        const size_t idx_sym_lv1 {i_sym*grid->ny*grid->nz};
+        const std::size_t idx_lv1 {i*grid->ny*grid->nz};
+        const std::size_t idx_sym_lv1 {i_sym*grid->ny*grid->nz};
         if(i>=(grid->nx+1)/2) tmp_k.x -= CGS_U_kpc*grid->nx/lx;
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             decltype(grid->ny) j_sym {grid->ny-j};// apply Hermitian symmetry
             if(j==0) j_sym = j;
             tmp_k.y = CGS_U_kpc*j/ly;
             if(j>=(grid->ny+1)/2) tmp_k.y -= CGS_U_kpc*grid->ny/ly;
-            const size_t idx_lv2 {idx_lv1+j*grid->nz};
-            const size_t idx_sym_lv2 {idx_sym_lv1+j_sym*grid->nz};
+            const std::size_t idx_lv2 {idx_lv1+j*grid->nz};
+            const std::size_t idx_sym_lv2 {idx_sym_lv1+j_sym*grid->nz};
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
                 decltype(grid->nz) l_sym {grid->nz-l};// apply Hermitian symmetry
                 if(l==0) l_sym = l;
                 tmp_k.z = CGS_U_kpc*l/lz;
                 if(l>=(grid->nz+1)/2) tmp_k.z -= CGS_U_kpc*grid->nz/lz;
-                const size_t idx {idx_lv2+l}; //k
-                const size_t idx_sym {idx_sym_lv2+l_sym}; //-k
+                const std::size_t idx {idx_lv2+l}; //k
+                const std::size_t idx_sym {idx_sym_lv2+l_sym}; //-k
                 /**
                  * reconstruct bx,by,bz from c0,c1,c*0,c*1
                  *
@@ -268,7 +278,7 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-    for(size_t i=0;i<grid->full_size;++i){
+    for(std::size_t i=0;i<grid->full_size;++i){
         grid->bx[i] = grid->c0[i][0]*inv_grid_size;
         grid->by[i] = grid->c0[i][1]*inv_grid_size;
         grid->bz[i] = grid->c1[i][1]*inv_grid_size;

@@ -12,19 +12,19 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 #include <cassert>
+
 using namespace tinyxml2;
-using namespace std;
 
 /* line of sight integrator */
-Grid_int::Grid_int(string file_name){
-    unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
+Grid_int::Grid_int(const std::string &file_name){
+    std::unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
     build_grid(doc.get());
 }
 
 void Grid_int::build_grid(XMLDocument *doc){
     XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Shell"})};
     // get shell Nside
-    string shell_type {toolkit::FetchString(ptr,"type","layer")};
+    std::string shell_type {toolkit::FetchString(ptr,"type","layer")};
     if(shell_type=="auto"){
         XMLElement *subptr {toolkit::tracexml(doc,{"Grid","Shell","layer","auto"})};
         total_shell = toolkit::FetchUnsigned(subptr,"value","shell_num");
@@ -84,31 +84,39 @@ void Grid_int::export_grid(void){
         // in units pc/cm^3, conventional units
         dm_map.Scale(CGS_U_ccm/CGS_U_pc);
         fitshandle out_dm;
-        if(ifstream(sim_dm_name.c_str())){
+        if(std::ifstream(sim_dm_name.c_str())){
             remove(sim_dm_name.c_str());
         }
         out_dm.create(sim_dm_name);
-        write_Healpix_map_to_fits(out_dm, dm_map, PLANCK_FLOAT64);
+        write_Healpix_map_to_fits(out_dm,
+                                  dm_map,
+                                  PLANCK_FLOAT64);
         out_dm.close();
     }
     if(do_sync){
         fitshandle out_sc;
-        if(ifstream(sim_sync_name.c_str())){
+        if(std::ifstream(sim_sync_name.c_str())){
             remove(sim_sync_name.c_str());
         }
         out_sc.create(sim_sync_name);
-        write_Healpix_map_to_fits(out_sc, Is_map, Qs_map, Us_map, PLANCK_FLOAT64);
+        write_Healpix_map_to_fits(out_sc,
+                                  Is_map,
+                                  Qs_map,
+                                  Us_map,
+                                  PLANCK_FLOAT64);
         out_sc.close();
     }
     if(do_fd){
         // FD units is rad*m^(-2) in our calculation
         fd_map.Scale(CGS_U_m*CGS_U_m);
         fitshandle out_fd;
-        if(ifstream(sim_fd_name.c_str())){
+        if(std::ifstream(sim_fd_name.c_str())){
             remove(sim_fd_name.c_str());
         }
         out_fd.create(sim_fd_name);
-        write_Healpix_map_to_fits(out_fd, fd_map, PLANCK_FLOAT64);
+        write_Healpix_map_to_fits(out_fd,
+                                  fd_map,
+                                  PLANCK_FLOAT64);
         out_fd.close();
     }
 }

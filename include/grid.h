@@ -37,7 +37,7 @@ public:
  */
 class Grid_breg final : public Grid{
 public:
-    Grid_breg(std::string);
+    Grid_breg(const std::string &);
     virtual ~Grid_breg(void) = default;
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
@@ -54,7 +54,7 @@ public:
  */
 class Grid_brnd final : public Grid{
 public:
-    Grid_brnd(std::string);
+    Grid_brnd(const std::string &);
     virtual ~Grid_brnd(void) {
         if(build_permission or read_permission){
             fftw_destroy_plan(plan_c0_bw);
@@ -91,7 +91,7 @@ public:
  */
 class Grid_fereg final : public Grid{
 public:
-    Grid_fereg(std::string);
+    Grid_fereg(const std::string &);
     virtual ~Grid_fereg(void) = default;
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
@@ -108,7 +108,7 @@ public:
  */
 class Grid_fernd final : public Grid{
 public:
-    Grid_fernd(std::string);
+    Grid_fernd(const std::string &);
     virtual ~Grid_fernd(void) {
         if(build_permission or read_permission){
             fftw_destroy_plan(plan_fe_bw);
@@ -137,7 +137,7 @@ public:
  */
 class Grid_cre final : public Grid{
 public:
-    Grid_cre(std::string);
+    Grid_cre(const std::string &);
     virtual ~Grid_cre(void) = default;
     void build_grid(XMLDocument *) override;
     void export_grid(void) override;
@@ -157,7 +157,7 @@ public:
  */
 class Grid_int final : public Grid{
 public:
-    Grid_int(std::string);
+    Grid_int(const std::string &);
     Grid_int(void) = default;
     virtual ~Grid_int(void) = default;
     void build_grid(XMLDocument *) override;

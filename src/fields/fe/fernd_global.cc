@@ -15,10 +15,10 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 
-using namespace std;
 
 // isotropic turbulent field
-double FErnd_global::get_fernd(const vec3_t<double> &pos, Grid_fernd *grid){
+double FErnd_global::get_fernd(const vec3_t<double> &pos,
+                               Grid_fernd *grid){
     // interpolate written grid to given position
     // check if you have called ::write_grid
     return read_grid(pos,grid);
@@ -26,7 +26,8 @@ double FErnd_global::get_fernd(const vec3_t<double> &pos, Grid_fernd *grid){
 
 // since we are using rms normalization
 // p0 is hidden and not affecting anything
-double FErnd_global::spec(const double &k, Param *par){
+double FErnd_global::spec(const double &k,
+                          Param *par){
     //units fixing
     const double p0 {par->fernd_global.rms}; //pccm
     const double kr {k/par->fernd_global.k0};
@@ -41,7 +42,8 @@ double FErnd_global::spec(const double &k, Param *par){
 
 // galactic scaling of random field energy density
 // set to 1 at observer's place
-double FErnd_global::rescal(const vec3_t<double> &pos, Param *par){
+double FErnd_global::rescal(const vec3_t<double> &pos,
+                            Param *par){
     const double r_cyl {sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x)};
     const double z {fabs(pos.z) - fabs(par->SunPosition.z)};
     const double r0 {par->fernd_global.r0};
@@ -49,7 +51,8 @@ double FErnd_global::rescal(const vec3_t<double> &pos, Param *par){
     return exp(-r_cyl/r0)*exp(-z/z0);
 }
 
-void FErnd_global::write_grid(Param *par, Grid_fernd *grid){
+void FErnd_global::write_grid(Param *par,
+                              Grid_fernd *grid){
     //PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
     // initialize random seed

@@ -1,10 +1,9 @@
 #include <iostream>
-#include <gsl/gsl_sf_gamma.h>
-#include <gsl/gsl_sf_synchrotron.h>
-#include <gsl/gsl_errno.h>
+#include <vector>
 #include <omp.h>
 #include <cmath>
 #include <cassert>
+
 #include <fitshandle.h>
 #include <healpix_map_fitsio.h>
 #include <healpix_base.h>
@@ -24,26 +23,42 @@
 
 using namespace std;
 
-void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fereg *gfereg,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Param *par) {
+void Integrator::write_grid(Breg *breg,
+                            Brnd *brnd,
+                            FEreg *fereg,
+                            FErnd *fernd,
+                            CRE *cre,
+                            Grid_breg *gbreg,
+                            Grid_brnd *gbrnd,
+                            Grid_fereg *gfereg,
+                            Grid_fernd *gfernd,
+                            Grid_cre *gcre,
+                            Grid_int *gint,
+                            Param *par) {
     // unsigned int, pre-calculated in gint
-    size_t npix_sim {gint->npix_sim};
+    std::size_t npix_sim {gint->npix_sim};
     if (gint->do_dm) {
-        gint->dm_map.SetNside(gint->nside_sim, RING);
+        gint->dm_map.SetNside(gint->nside_sim,
+                              RING);
         gint->dm_map.fill(0.);
     }
     if (gint->do_sync) {
-        gint->Is_map.SetNside(gint->nside_sim, RING);
-        gint->Qs_map.SetNside(gint->nside_sim, RING);
-        gint->Us_map.SetNside(gint->nside_sim, RING);
+        gint->Is_map.SetNside(gint->nside_sim,
+                              RING);
+        gint->Qs_map.SetNside(gint->nside_sim,
+                              RING);
+        gint->Us_map.SetNside(gint->nside_sim,
+                              RING);
         gint->Is_map.fill(0.);
         gint->Qs_map.fill(0.);
         gint->Us_map.fill(0.);
     }
     if (gint->do_fd or gint->do_sync) {
-        gint->fd_map.SetNside(gint->nside_sim, RING);
+        gint->fd_map.SetNside(gint->nside_sim,
+                              RING);
         gint->fd_map.fill(0.);
     }
-    unique_ptr<struct_shell> shell_ref = unique_ptr<struct_shell>(new struct_shell);
+    unique_ptr<struct_shell> shell_ref = std::make_unique<struct_shell>();
     for (decltype(gint->total_shell) current_shell=1;current_shell!=(gint->total_shell+1);++current_shell) {
         Healpix_Map<double> current_Is_map;
         Healpix_Map<double> current_Qs_map;
@@ -51,28 +66,35 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
         Healpix_Map<double> current_fd_map;
         Healpix_Map<double> current_dm_map;
         
-        size_t current_nside {gint->nside_shell[current_shell-1]};
-        size_t current_npix {12*current_nside*current_nside};
+        std::size_t current_nside {gint->nside_shell[current_shell-1]};
+        std::size_t current_npix {12*current_nside*current_nside};
         if (gint->do_dm) {
-            current_dm_map.SetNside(current_nside, RING);
+            current_dm_map.SetNside(current_nside,
+                                    RING);
             current_dm_map.fill(0.);
         }
         if (gint->do_sync) {
-            current_Is_map.SetNside(current_nside, RING);
-            current_Qs_map.SetNside(current_nside, RING);
-            current_Us_map.SetNside(current_nside, RING);
+            current_Is_map.SetNside(current_nside,
+                                    RING);
+            current_Qs_map.SetNside(current_nside,
+                                    RING);
+            current_Us_map.SetNside(current_nside,
+                                    RING);
             current_Is_map.fill(0.);
             current_Qs_map.fill(0.);
             current_Us_map.fill(0.);
         }
         if (gint->do_fd or gint->do_sync) {
-            current_fd_map.SetNside(current_nside, RING);
+            current_fd_map.SetNside(current_nside,
+                                    RING);
             current_fd_map.fill(0.);
         }
         // setting for radial_integration
         // call auxiliary function assemble_shell_ref
         // use unique_ptr to avoid stack overflow
-        assemble_shell_ref(shell_ref.get(),gint,current_shell);
+        assemble_shell_ref(shell_ref.get(),
+                           gint,
+                           current_shell);
         
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
@@ -93,7 +115,21 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
                 observables.fd = gint->fd_map.interpolated_value(ptg);
             }
             // core function!
-            radial_integration(shell_ref.get(),ptg,observables,breg,brnd,fereg,fernd,cre,gbreg,gbrnd,gfereg,gfernd,gcre,gint,par);
+            radial_integration(shell_ref.get(),
+                               ptg,
+                               observables,
+                               breg,
+                               brnd,
+                               fereg,
+                               fernd,
+                               cre,
+                               gbreg,
+                               gbrnd,
+                               gfereg,
+                               gfernd,
+                               gcre,
+                               gint,
+                               par);
             
             // assembling new shell
             if (gint->do_dm) {
@@ -132,7 +168,21 @@ void Integrator::write_grid(Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE 
     }//end shell iteration
 }
 
-void Integrator::radial_integration(struct_shell *shell_ref,pointing &ptg_in, struct_observables &pixobs,Breg *breg,Brnd *brnd,FEreg *fereg,FErnd *fernd,CRE *cre,Grid_breg *gbreg,Grid_brnd *gbrnd,Grid_fereg *gfereg,Grid_fernd *gfernd,Grid_cre *gcre,Grid_int *gint,Param *par) {
+void Integrator::radial_integration(struct_shell *shell_ref,
+                                    pointing &ptg_in,
+                                    struct_observables &pixobs,
+                                    Breg *breg,
+                                    Brnd *brnd,
+                                    FEreg *fereg,
+                                    FErnd *fernd,
+                                    CRE *cre,
+                                    Grid_breg *gbreg,
+                                    Grid_brnd *gbrnd,
+                                    Grid_fereg *gfereg,
+                                    Grid_fernd *gfernd,
+                                    Grid_cre *gcre,
+                                    Grid_int *gint,
+                                    Param *par) {
     // pass in fd, zero others
     double inner_shells_fd {0.};
     if (gint->do_fd or gint->do_sync) {inner_shells_fd=pixobs.fd;}
@@ -148,7 +198,7 @@ void Integrator::radial_integration(struct_shell *shell_ref,pointing &ptg_in, st
     const double i2bt {CGS_U_C_light*CGS_U_C_light/(2.*CGS_U_kB*par->sim_freq*par->sim_freq)};
     const double fd_forefactor {-(CGS_U_qe*CGS_U_qe*CGS_U_qe)/(2.*CGS_U_pi*CGS_U_MEC2*CGS_U_MEC2)};
     // for Simpson's rule
-    vector<double> F_dm,F_fd,F_Jtot,F_Jpol,intr_pol_ang;
+    std::vector<double> F_dm,F_fd,F_Jtot,F_Jpol,intr_pol_ang;
     decltype(shell_ref->step) looper;
     for(looper=0;looper<shell_ref->step;++looper){
         // ec and gc position
@@ -222,37 +272,43 @@ void Integrator::radial_integration(struct_shell *shell_ref,pointing &ptg_in, st
 //---------------------------------------------------------
 
 // compute upper radial boundary at given shell
-double Integrator::get_max_shell_radius(const size_t &shell_numb,const size_t &total_shell,const double &radius) const {
+double Integrator::get_max_shell_radius(const std::size_t &shell_numb,
+                                        const std::size_t &total_shell,
+                                        const double &radius) const {
     assert(shell_numb>=1 and shell_numb<=total_shell);
     double max_shell_radius {radius};
-    for (size_t n=total_shell;n!=shell_numb;--n) {
+    for (std::size_t n=total_shell;n!=shell_numb;--n) {
         max_shell_radius *= 0.5;
     }
     return max_shell_radius;
 }
 
 // compute lower radial boundary at given shell
-double Integrator::get_min_shell_radius(const size_t &shell_numb,const size_t &total_shell,const double &radius) const {
+double Integrator::get_min_shell_radius(const std::size_t &shell_numb,
+                                        const std::size_t &total_shell,
+                                        const double &radius) const {
     assert(shell_numb>=1 and shell_numb<=total_shell);
     // min_shell_radius for the first shell is always zero.
     if(shell_numb==1){
         return 0.;
     }
     double min_shell_radius {radius};
-    for (size_t n=total_shell;n!=(shell_numb-1);--n) {
+    for (std::size_t n=total_shell;n!=(shell_numb-1);--n) {
         min_shell_radius *= 0.5;
     }
     return min_shell_radius;
 }
 
 // assembling shell_ref structure
-void Integrator::assemble_shell_ref(struct_shell *target,const Grid_int *info,const size_t &shell_num){
+void Integrator::assemble_shell_ref(struct_shell *target,
+                                    const Grid_int *info,
+                                    const std::size_t &shell_num){
     target->shell_num = shell_num;
     target->d_start = get_min_shell_radius(shell_num,info->total_shell,info->ec_r_max);
     target->d_stop = get_max_shell_radius(shell_num,info->total_shell,info->ec_r_max);
     target->delta_d = info->radial_res;
     target->step = floor((2.*target->d_stop - 2.*target->d_start)/(target->delta_d))+1;
-    for(size_t i=0;i<target->step;++i){
+    for(std::size_t i=0;i<target->step;++i){
         target->dist.push_back(target->d_start+i*0.5*target->delta_d);
     }
 }

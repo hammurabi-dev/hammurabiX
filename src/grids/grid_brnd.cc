@@ -15,11 +15,11 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 #include <cassert>
-using namespace tinyxml2;
-using namespace std;
 
-Grid_brnd::Grid_brnd(string file_name){
-    unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
+using namespace tinyxml2;
+
+Grid_brnd::Grid_brnd(const std::string &file_name){
+    std::unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
     XMLElement *ptr {toolkit::tracexml(doc.get(),{"MagneticField"})};
     // sometimes users don't want to write out random field
     // but generation of random field needs grid
@@ -50,9 +50,9 @@ void Grid_brnd::build_grid(XMLDocument *doc){
     z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
     z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
     // real 3D random b field
-    bx = unique_ptr<double[]> (new double[full_size]);
-    by = unique_ptr<double[]> (new double[full_size]);
-    bz = unique_ptr<double[]> (new double[full_size]);
+    bx = std::make_unique<double[]>(full_size);
+    by = std::make_unique<double[]>(full_size);
+    bz = std::make_unique<double[]>(full_size);
     // complex a field in k-space
     c0 = fftw_alloc_complex(full_size);
     c0[0][0]=0;c0[0][1]=0; // 0th term should be zero
@@ -73,7 +73,7 @@ void Grid_brnd::build_grid(XMLDocument *doc){
 
 void Grid_brnd::export_grid(void){
     assert(!filename.empty());
-    ofstream output(filename.c_str(), std::ios::out|std::ios::binary);
+    std::ofstream output(filename.c_str(),std::ios::out|std::ios::binary);
     assert(output.is_open());
     double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
@@ -91,7 +91,7 @@ void Grid_brnd::export_grid(void){
 
 void Grid_brnd::import_grid(void){
     assert(!filename.empty());
-    ifstream input(filename.c_str(), std::ios::in|std::ios::binary);
+    std::ifstream input(filename.c_str(),std::ios::in|std::ios::binary);
     assert(input.is_open());
     double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
@@ -105,7 +105,7 @@ void Grid_brnd::import_grid(void){
     }
 #ifndef NDEBUG
     auto eof = input.tellg();
-    input.seekg (0, input.end);
+    input.seekg(0,input.end);
 #endif
     assert(eof==input.tellg());
     input.close();

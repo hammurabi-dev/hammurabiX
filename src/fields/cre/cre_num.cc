@@ -13,18 +13,20 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 #include <cassert>
-using namespace std;
 
 // numerical CRE flux
 // J_tot(\nu)
-double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
+double CRE_num::get_emissivity_t(const vec3_t<double> &pos,
+                                 Param *par,
+                                 Grid_cre *grid,
+                                 const double &Bper){
     double J {0.};
     assert(grid->read_permission);
     // allocate energy grid
-    unique_ptr<double[]> KE = unique_ptr<double[]> (new double[grid->nE] {0.});
+    std::unique_ptr<double[]> KE = std::make_unique<double[]>(grid->nE);
     // we need F(x[E]) and G(x[E]) in spectral integration
-    unique_ptr<double[]> x = unique_ptr<double[]> (new double[grid->nE] {0.});
-    unique_ptr<double[]> beta = unique_ptr<double[]> (new double[grid->nE] {0.});
+    std::unique_ptr<double[]> x = std::make_unique<double[]>(grid->nE);
+    std::unique_ptr<double[]> beta = std::make_unique<double[]>(grid->nE);
     // consts used in loop, using cgs units
     const double x_fact {(2.*CGS_U_MEC*CGS_U_MEC2*CGS_U_MEC2*2.*CGS_U_pi*par->sim_freq)/(3.*CGS_U_qe*Bper)};
     // KE in cgs units
@@ -52,14 +54,17 @@ double CRE_num::get_emissivity_t(const vec3_t<double> &pos,Param *par,Grid_cre *
 }
 
 // J_pol(\nu)
-double CRE_num::get_emissivity_p(const vec3_t<double> &pos,Param *par,Grid_cre *grid,const double &Bper){
+double CRE_num::get_emissivity_p(const vec3_t<double> &pos,
+                                 Param *par,
+                                 Grid_cre *grid,
+                                 const double &Bper){
     double J {0.};
     assert(grid->read_permission);
     // allocate energy grid
-    unique_ptr<double[]> KE = unique_ptr<double[]> (new double[grid->nE] {0.});
+    std::unique_ptr<double[]> KE = std::make_unique<double[]>(grid->nE);
     // we need F(x[E]) and G(x[E]) in spectral integration
-    unique_ptr<double[]> x = unique_ptr<double[]> (new double[grid->nE] {0.});
-    unique_ptr<double[]> beta = unique_ptr<double[]> (new double[grid->nE] {0.});
+    std::unique_ptr<double[]> x = std::make_unique<double[]>(grid->nE);
+    std::unique_ptr<double[]> beta = std::make_unique<double[]>(grid->nE);
     // consts used in loop, using cgs units
     const double x_fact {(2.*CGS_U_MEC*CGS_U_MEC2*CGS_U_MEC2*2.*CGS_U_pi*par->sim_freq)/(3.*CGS_U_qe*Bper)};
     // KE in cgs units
