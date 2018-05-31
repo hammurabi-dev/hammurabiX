@@ -1,6 +1,6 @@
-///
-/// numerical tools
-///
+/**
+ * auxiliary functions
+ */
 #ifndef HAMMURABI_TOOLKIT_H
 #define HAMMURABI_TOOLKIT_H
 
@@ -15,73 +15,73 @@
 using namespace tinyxml2;
 
 namespace toolkit {
-    ///
-    /// perpendicular component of a vector wrt LOS direction
-    /// 1st argument: vector in Cartesian frame
-    /// 2nd argument: polar angle (in rad)
-    /// 3rd argument: azimuthal angle (in rad)
-    ///
-    double get_perp2LOS (const vec3_t<double> &,
+    /**
+     * perpendicular component of a vector wrt LOS direction
+     * 1st argument: vector in Cartesian frame
+     * 2nd argument: polar angle (in rad)
+     * 3rd argument: azimuthal angle (in rad)
+     */
+    double perp2los (const vec3_t<double> &,
                          const double &,
                          const double &);
-    ///
-    /// (signed) parallel component of a vector wrt LOS direction
-    /// 1st argument: vector in Cartesian frame
-    /// 2nd argument: polar angle (in rad)
-    /// 3rd argument: azimuthal angle (in rad)
-    ///
-    double get_par2LOS (const vec3_t<double> &,
+    /**
+     * (signed) parallel component of a vector wrt LOS direction
+     * 1st argument: vector in Cartesian frame
+     * 2nd argument: polar angle (in rad)
+     * 3rd argument: azimuthal angle (in rad)
+     */
+    double par2los (const vec3_t<double> &,
                         const double &,
                         const double &);
-    ///
-    /// intrinsic polarization angle (in rad)
-    /// 1st argument: magnetic field in Cartesian frame
-    /// 2nd argument: polar angle (in rad) of LOS direction
-    /// 3rd argument: azimuthal angle (in rad) of LOS direction
-    /// use with caution, since vector can be parallel to LOS direction
-    ///
-    double get_intr_pol_ang(const vec3_t<double> &,
+    /**
+     * intrinsic polarization angle (in rad)
+     * 1st argument: magnetic field in Cartesian frame
+     * 2nd argument: polar angle (in rad) of LOS direction
+     * 3rd argument: azimuthal angle (in rad) of LOS direction
+     * use with caution, since vector can be parallel to LOS direction
+     */
+    double intr_pol_ang (const vec3_t<double> &,
                             const double &,
                             const double &);
-    ///
-    /// Carteisan unit vector of given LOS direction
-    /// 1st argument: polar angle (in rad)
-    /// 2nd argument: azimuthal angle (in rad)
-    ///
-    inline vec3_t<double> get_LOS_unit_vec(const double &the_los,
+    /**
+     * Carteisan unit vector of given LOS direction
+     * 1st argument: polar angle (in rad)
+     * 2nd argument: azimuthal angle (in rad)
+     */
+    inline vec3_t<double> los_versor (const double &the_los,
                                            const double &phi_los){
         return vec3_t<double> {cos(phi_los)*sin(the_los),
             sin(phi_los)*sin(the_los),
             cos(the_los)};
     }
-    ///
-    /// convert coordinate from Cartesian to cylindrical frame
-    /// 1st argument: coordinate in Cartesian frame
-    /// 2nd argument: r in cylindrical frame
-    /// 3rd argument: phi in cylindrical frame
-    /// 4th argument: z in cylindrical frame
-    ///
-    void cart_coord2cyl_coord(const vec3_t<double> &,
+    /**
+     * convert coordinate from Cartesian to cylindrical frame
+     * 1st argument: coordinate in Cartesian frame
+     * 2nd argument: r in cylindrical frame
+     * 3rd argument: phi in cylindrical frame
+     * 4th argument: z in cylindrical frame
+     */
+    void cart_coord2cyl_coord (const vec3_t<double> &,
                               double &,
                               double &,
                               double &);
-    ///
-    /// convert coordinate from Cartesian to cylindrical frame
-    /// 1st argument: coordinate in Cartesian frame
-    /// 2nd argument: vec3_t{r,phi,z} in cylindrical frame
-    ///
-    void cart_coord2cyl_coord(const vec3_t<double> &,
+    /**
+     * convert coordinate from Cartesian to cylindrical frame
+     * 1st argument: coordinate in Cartesian frame
+     * 2nd argument: vec3_t{r,phi,z} in cylindrical frame
+     */
+    void cart_coord2cyl_coord (const vec3_t<double> &,
                               vec3_t<double> &);
-    ///
-    /// get versor of given vector
-    /// 1st argument: vector in an orthogonal frame
-    /// return: versor of given vector
-    ///
-    vec3_t<double> versor(const vec3_t<double> &);
-    ///
-    /// find index of 3D grid
-    ///
-    inline std::size_t Index3d(const std::size_t &/* n1 */,
+    /**
+     * get versor of given vector
+     * 1st argument: vector in an orthogonal frame
+     * return: versor of given vector
+     */
+    vec3_t<double> versor (const vec3_t<double> &);
+    /**
+     * find index of 3D grid
+     */
+    inline std::size_t Index3d (const std::size_t &/* n1 */,
                                const std::size_t &n2,
                                const std::size_t &n3,
                                const std::size_t &i,
@@ -89,10 +89,10 @@ namespace toolkit {
                                const std::size_t &l){
         return (i*n2*n3 + j*n3 + l);
     }
-    ///
-    /// find index for 4D grid
-    ///
-    inline std::size_t Index4d(const std::size_t &/* n1 */,
+    /**
+     * find index for 4D grid
+     */
+    inline std::size_t Index4d (const std::size_t &/* n1 */,
                                const std::size_t &n2,
                                const std::size_t &n3,
                                const std::size_t &n4,
@@ -104,84 +104,164 @@ namespace toolkit {
     }
     double Mean (const double *,
                  const std::size_t &);
-    double Mean(const std::vector<double> &);
+    double Mean (const std::vector<double> &);
     double Variance (const double *,
                      const std::size_t &);
     double Variance(const std::vector<double> &);
     double Covariance (const double *,
                        const double *,
                        const std::size_t &);
-    double Covariance(const std::vector<double> &,
+    double Covariance (const std::vector<double> &,
                       const std::vector<double> &);
-    ///
-    /// convert an array into rank array
-    /// 1st argument: array pointer
-    /// 2nd argument: array size
-    ///
-    void Rank(double *,
+    /**
+     * convert an array into rank array
+     * 1st argument: array pointer
+     * 2nd argument: array size
+     */
+    void Rank (double *,
               const std::size_t &);
-    ///
-    /// convert a vector into rank vector
-    ///
-    void Rank(std::vector<double> &);
-    ///
-    /// converting brightness temp into thermal temp with T_0 = 2.725K, Prog.Theor.Exp.Phys. (2014) 2014 (6): 06B109.
-    ///
-    inline double temp_convert(const double &temp_br,
+    /**
+     * convert a vector into rank vector
+     */
+    void Rank (std::vector<double> &);
+    /**
+     * converting brightness temp into thermal temp with T_0 = 2.725K, Prog.Theor.Exp.Phys. (2014) 2014 (6): 06B109.
+     */
+    inline double temp_convert (const double &temp_br,
                                const double &freq) {
         const double p {CGS_U_h_planck*freq/(CGS_U_kB*2.725)};
         return temp_br*(exp(p)-1.)*(exp(p)-1.)/(p*p*exp(p));;
     }
-    ///
-    /// convert cartesian coordiante into frame with galacitc warp, while fields built in warpped frame as in ordinary frame
-    ///
-    vec3_t<double> warp(const vec3_t<double> &);
-    ///
-    /// use given seed number or generate random seed according to thread and clock
-    ///
-    std::size_t random_seed(const int &);
-    ///
-    /// simple time stamp
-    /// return time in ms
-    ///
-    double timestamp(void);
-    ///
-    /// substract real part of a fftw complex array
-    /// 1st argument: input fftw complex array
-    /// 2nd argument: output double array
-    /// 3rd argument: (output) array size
-    ///
-    void complex2real(const fftw_complex *,
+    /**
+     * convert cartesian coordiante into frame with galacitc warp, while fields built in warpped frame as in ordinary frame
+     */
+    vec3_t<double> warp (const vec3_t<double> &);
+    /**
+     * use given seed number or generate random seed according to thread and clock
+     */
+    std::size_t random_seed (const int &);
+    /**
+     * substract real part of a fftw complex array
+     * 1st argument: input fftw complex array
+     * 2nd argument: output double array
+     * 3rd argument: (output) array size
+     */
+    void complex2real (const fftw_complex *,
                       double *,
                       const std::size_t &);
-    // auxiliary functions for class Grid and Param
-    std::unique_ptr<XMLDocument> loadxml(const std::string&);
-    XMLElement* tracexml(XMLDocument *,
+    /**
+     * substract imaginary part of a fftw complex array
+     * 1st argument: input fftw complex array
+     * 2nd argument: output double array
+     * 3rd argument: (output) array size
+     */
+    void complex2imag (const fftw_complex *,
+                       double *,
+                       const std::size_t &);
+    /**
+     * substract real and imaginary part of a fftw complex array
+     * 1st argument: input fftw complex array
+     * 2nd argument: output double array (real part)
+     * 3nd argument: output double array (imaginary part)
+     * 4th argument: (output) array size
+     */
+    void complex2rni (const fftw_complex *,
+                      double *,
+                      double *,
+                      const std::size_t &);
+    /**
+     * load XML file
+     * 1st argument: XML file name (with dir)
+     */
+    std::unique_ptr<XMLDocument> loadxml (const std::string&);
+    /**
+     * trace down a key inside XML "document"
+     * 1st argument: pointer to XMLDocument
+     * 2nd argument: a vector of string, with key chain for tracing
+     * the last string in 2nd argument is the target key
+     * <root> is automatically included
+     */
+    XMLElement* tracexml (XMLDocument *,
                          const std::vector<std::string>&);
-    std::string FetchString(XMLElement *,
+    /**
+     * get string attribute
+     * 1st argument: ptr to XMLElement (key)
+     * 2nd argument: attribute name
+     * 3rd argument: sub-key under 1st argument
+     */
+    std::string FetchString (XMLElement *,
                             const std::string&,
                             const std::string&);
-    std::string FetchString(XMLElement *,
+    /**
+     * get string attribute
+     * 1st argument: ptr to XMLElement (key)
+     * 2nd argument: attribute name
+     */
+    std::string FetchString (XMLElement *,
                             const std::string&);
-    int FetchInt(XMLElement *,
+    /**
+     * get integer attribute
+     * 1st argument: ptr to XMLElement (key)
+     * 2nd argument: attribute name
+     * 3rd argument: sub-key under 1st argument
+     */
+    int FetchInt (XMLElement *,
                  const std::string&,
                  const std::string&);
-    int FetchInt(XMLElement *,
+    /**
+     * get integer attribute
+     * 1st argument: ptr to XMLElement (key)
+     * 2nd argument: attribute name
+     */
+    int FetchInt (XMLElement *,
                  const std::string&);
-    unsigned int FetchUnsigned(XMLElement *,
+    /**
+     * get unsigned integer attribute
+     * 1st argument: ptr to XMLElement (key)
+     * 2nd argument: attribute name
+     * 3rd argument: sub-key under 1st argument
+     */
+    unsigned int FetchUnsigned (XMLElement *,
                                const std::string&,
                                const std::string&);
-    unsigned int FetchUnsigned(XMLElement *,
+    /**
+     * get unsigned integer attribute
+     * 1st argument: ptr to XMLElement (key)
+     * 2nd argument: attribute name
+     */
+    unsigned int FetchUnsigned (XMLElement *,
                                const std::string&);
-    bool FetchBool(XMLElement *,
+    /**
+     * get bool attribute
+     * 1st argument: ptr to XMLElement (key)
+     * 2nd argument: attribute name
+     * 3rd argument: sub-key under 1st argument
+     */
+    bool FetchBool (XMLElement *,
                    const std::string&,
                    const std::string&);
-    bool FetchBool(XMLElement *,
+    /**
+     * get bool attribute
+     * 1st argument: ptr to XMLElement (key)
+     * 2nd argument: attribute name
+     */
+    bool FetchBool (XMLElement *,
                    const std::string&);
-    double FetchDouble(XMLElement *,
+    /**
+     * get double attribute
+     * 1st argument: ptr to XMLElement (key)
+     * 2nd argument: attribute name
+     * 3rd argument: sub-key under 1st argument
+     */
+    double FetchDouble (XMLElement *,
                        const std::string&,
                        const std::string&);
-    double FetchDouble(XMLElement *,
+    /**
+     * get double attribute
+     * 1st argument: ptr to XMLElement (key)
+     * 2nd argument: attribute name
+     */
+    double FetchDouble (XMLElement *,
                        const std::string&);
 }
 

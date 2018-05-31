@@ -43,7 +43,7 @@ MBJ=$(patsubst $(MRCDIR)/%,$(MBJDIR)/%,$(MOURCES:.cc=.o))
 
 
 # COMPILE OPTIONS
-CXXFLAGS = -std=c++11 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread $(DEBUG)
+CXXFLAGS = -std=c++14 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread $(DEBUG)
 
 EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
 	-I$(HEALPIX_FULL)/include \

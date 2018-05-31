@@ -10,9 +10,10 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 
-using namespace std;
 
-vec3_t<double> Breg::get_breg(const vec3_t<double> &pos, Param *par, Grid_breg *grid){
+vec3_t<double> Breg::get_breg(const vec3_t<double> &pos,
+                              Param *par,
+                              Grid_breg *grid){
     if(grid->read_permission){
         return read_grid(pos,grid);
     }
@@ -21,12 +22,14 @@ vec3_t<double> Breg::get_breg(const vec3_t<double> &pos, Param *par, Grid_breg *
     }
 }
 
-vec3_t<double> Breg::breg(const vec3_t<double> &, Param *){
+vec3_t<double> Breg::breg(const vec3_t<double> &,
+                          Param *){
     assert(false);
     return vec3_t<double> {0.,0.,0.};
 }
 
-vec3_t<double> Breg::read_grid(const vec3_t<double> &pos, Grid_breg *grid){
+vec3_t<double> Breg::read_grid(const vec3_t<double> &pos,
+                               Grid_breg *grid){
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
     if (tmp<0 or tmp>grid->nx-1) { return vec3_t<double>(0.,0.,0.);}
     decltype(grid->nx) xl {(std::size_t)floor(tmp)};
@@ -46,24 +49,24 @@ vec3_t<double> Breg::read_grid(const vec3_t<double> &pos, Grid_breg *grid){
         // interpolate along z direction, there are four interpolated vectors
         std::size_t idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         std::size_t idx2 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
-        vec3_t<double> i1 = {grid->reg_b_x[idx1]*(1.-zd) + grid->reg_b_x[idx2]*zd,
-            grid->reg_b_y[idx1]*(1.-zd) + grid->reg_b_y[idx2]*zd,
-            grid->reg_b_z[idx1]*(1.-zd) + grid->reg_b_z[idx2]*zd};
+        vec3_t<double> i1 = {grid->bx[idx1]*(1.-zd) + grid->bx[idx2]*zd,
+            grid->by[idx1]*(1.-zd) + grid->by[idx2]*zd,
+            grid->bz[idx1]*(1.-zd) + grid->bz[idx2]*zd};
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl);
         idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl+1);
-        vec3_t<double> i2 {grid->reg_b_x[idx1]*(1.-zd) + grid->reg_b_x[idx2]*zd,
-            grid->reg_b_y[idx1]*(1.-zd) + grid->reg_b_y[idx2]*zd,
-            grid->reg_b_z[idx1]*(1.-zd) + grid->reg_b_z[idx2]*zd};
+        vec3_t<double> i2 {grid->bx[idx1]*(1.-zd) + grid->bx[idx2]*zd,
+            grid->by[idx1]*(1.-zd) + grid->by[idx2]*zd,
+            grid->bz[idx1]*(1.-zd) + grid->bz[idx2]*zd};
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl,zl);
         idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl,zl+1);
-        vec3_t<double> j1 {grid->reg_b_x[idx1]*(1.-zd) + grid->reg_b_x[idx2]*zd,
-            grid->reg_b_y[idx1]*(1.-zd) + grid->reg_b_y[idx2]*zd,
-            grid->reg_b_z[idx1]*(1.-zd) + grid->reg_b_z[idx2]*zd};
+        vec3_t<double> j1 {grid->bx[idx1]*(1.-zd) + grid->bx[idx2]*zd,
+            grid->by[idx1]*(1.-zd) + grid->by[idx2]*zd,
+            grid->bz[idx1]*(1.-zd) + grid->bz[idx2]*zd};
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl+1,zl);
         idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl+1,zl+1);
-        vec3_t<double> j2 {grid->reg_b_x[idx1]*(1.-zd) + grid->reg_b_x[idx2]*zd,
-            grid->reg_b_y[idx1]*(1.-zd) + grid->reg_b_y[idx2]*zd,
-            grid->reg_b_z[idx1]*(1.-zd) + grid->reg_b_z[idx2]*zd};
+        vec3_t<double> j2 {grid->bx[idx1]*(1.-zd) + grid->bx[idx2]*zd,
+            grid->by[idx1]*(1.-zd) + grid->by[idx2]*zd,
+            grid->bz[idx1]*(1.-zd) + grid->bz[idx2]*zd};
         // interpolate along y direction, two interpolated vectors
         vec3_t<double> w1 {i1*(1.-yd) + i2*yd};
         vec3_t<double> w2 {j1*(1.-yd) + j2*yd};
@@ -73,13 +76,14 @@ vec3_t<double> Breg::read_grid(const vec3_t<double> &pos, Grid_breg *grid){
     // no interpolation
     else {
         std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
-        b_vec3 = vec3_t<double> {grid->reg_b_x[idx],grid->reg_b_y[idx],grid->reg_b_z[idx]};
+        b_vec3 = vec3_t<double> {grid->bx[idx],grid->by[idx],grid->bz[idx]};
     }
     assert(b_vec3.Length()>1e+5*CGS_U_muGauss);
     return b_vec3;
 }
 
-void Breg::write_grid(Param *par, Grid_breg *grid){
+void Breg::write_grid(Param *par,
+                      Grid_breg *grid){
     assert(grid->write_permission);
     vec3_t<double> gc_pos, tmp_vec;
     double lx {grid->x_max-grid->x_min};
@@ -93,9 +97,9 @@ void Breg::write_grid(Param *par, Grid_breg *grid){
                 gc_pos.z = k*lz/(grid->nz-1) + grid->z_min;
                 tmp_vec = breg(gc_pos,par);
                 std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,k)};
-                grid->reg_b_x[idx] = tmp_vec.x;
-                grid->reg_b_y[idx] = tmp_vec.y;
-                grid->reg_b_z[idx] = tmp_vec.z;
+                grid->bx[idx] = tmp_vec.x;
+                grid->by[idx] = tmp_vec.y;
+                grid->bz[idx] = tmp_vec.z;
             }
         }
     }

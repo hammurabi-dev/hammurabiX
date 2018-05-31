@@ -12,7 +12,8 @@
 
 using namespace std;
 
-vec3_t<double> Breg_jaffe::breg(const vec3_t<double> &pos,Param *par){
+vec3_t<double> Breg_jaffe::breg(const vec3_t<double> &pos,
+                                Param *par){
     double inner_b {0};
     if(par->breg_jaffe.ring)
         inner_b = par->breg_jaffe.ring_amp;
@@ -23,7 +24,7 @@ vec3_t<double> Breg_jaffe::breg(const vec3_t<double> &pos,Param *par){
     vec3_t<double> btot {0,0,0};
     btot = bhat*radial_scaling(pos,par)*(par->breg_jaffe.disk_amp*disk_scaling(pos,par) + par->breg_jaffe.halo_amp*halo_scaling(pos,par));
     // compress factor for each arm or for ring/bar
-    vector<double> arm {arm_compress(pos,par)};
+    std::vector<double> arm {arm_compress(pos,par)};
     // only inner region
     if(arm.size()==1){
         btot += bhat*arm[0]*inner_b;
@@ -37,7 +38,8 @@ vec3_t<double> Breg_jaffe::breg(const vec3_t<double> &pos,Param *par){
     return btot;
 }
 
-vec3_t<double> Breg_jaffe::orientation(const vec3_t<double> &pos,Param *par){
+vec3_t<double> Breg_jaffe::orientation(const vec3_t<double> &pos,
+                                       Param *par){
     const double r {sqrt(pos.x*pos.x+pos.y*pos.y)}; // cylindrical frame
     const double r_lim {par->breg_jaffe.ring_r};
     const double bar_lim {par->breg_jaffe.bar_a + 0.5*par->breg_jaffe.comp_d};
@@ -89,7 +91,8 @@ vec3_t<double> Breg_jaffe::orientation(const vec3_t<double> &pos,Param *par){
     return tmp;
 }
 
-double Breg_jaffe::radial_scaling(const vec3_t<double> &pos,Param *par){
+double Breg_jaffe::radial_scaling(const vec3_t<double> &pos,
+                                  Param *par){
     const double r2 {pos.x*pos.x+pos.y*pos.y};
     // separate into 3 parts for better view
     const double s1 {1.-exp(-r2/(par->breg_jaffe.r_inner*par->breg_jaffe.r_inner))};
@@ -98,10 +101,11 @@ double Breg_jaffe::radial_scaling(const vec3_t<double> &pos,Param *par){
     return s1*( s2 + s3 );
 }
 
-vector<double> Breg_jaffe::arm_compress(const vec3_t<double> &pos,Param *par){
+std::vector<double> Breg_jaffe::arm_compress(const vec3_t<double> &pos,
+                                             Param *par){
     const double r {sqrt(pos.x*pos.x+pos.y*pos.y)/par->breg_jaffe.comp_r};
     const double c0 {1./par->breg_jaffe.comp_c -1.};
-    vector<double> a0 = dist2arm(pos,par);
+    std::vector<double> a0 = dist2arm(pos,par);
     const double r_scaling {radial_scaling(pos,par)};
     const double z_scaling {arm_scaling(pos,par)};
     // for saving computing time
@@ -121,10 +125,11 @@ vector<double> Breg_jaffe::arm_compress(const vec3_t<double> &pos,Param *par){
     return a0;
 }
 
-vector<double> Breg_jaffe::arm_compress_dust(const vec3_t<double> &pos,Param *par){
+std::vector<double> Breg_jaffe::arm_compress_dust(const vec3_t<double> &pos,
+                                                  Param *par){
     const double r {sqrt(pos.x*pos.x+pos.y*pos.y)/par->breg_jaffe.comp_r};
     const double c0 {1./par->breg_jaffe.comp_c -1.};
-    vector<double> a0 = dist2arm(pos,par);
+    std::vector<double> a0 = dist2arm(pos,par);
     const double r_scaling {radial_scaling(pos,par)};
     const double z_scaling {arm_scaling(pos,par)};
     // only difference from normal arm_compress
@@ -144,8 +149,9 @@ vector<double> Breg_jaffe::arm_compress_dust(const vec3_t<double> &pos,Param *pa
     return a0;
 }
 
-vector<double> Breg_jaffe::dist2arm(const vec3_t<double> &pos,Param *par){
-    vector<double> d;
+std::vector<double> Breg_jaffe::dist2arm(const vec3_t<double> &pos,
+                                         Param *par){
+    std::vector<double> d;
     const double r {sqrt(pos.x*pos.x+pos.y*pos.y)};
     const double r_lim {par->breg_jaffe.ring_r};
     const double bar_lim {par->breg_jaffe.bar_a + 0.5*par->breg_jaffe.comp_d};

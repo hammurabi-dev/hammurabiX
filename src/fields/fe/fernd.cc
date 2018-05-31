@@ -14,9 +14,10 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 #include <cassert>
-using namespace std;
 
-double FErnd::get_fernd(const vec3_t<double> &pos,Grid_fernd *grid){
+
+double FErnd::get_fernd(const vec3_t<double> &pos,
+                        Grid_fernd *grid){
     if(grid->read_permission){
         return read_grid(pos,grid);
     }
@@ -27,7 +28,8 @@ double FErnd::get_fernd(const vec3_t<double> &pos,Grid_fernd *grid){
     }
 }
 
-double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
+double FErnd::read_grid(const vec3_t<double> &pos,
+                        Grid_fernd *grid){
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
     if (tmp<0 or tmp>grid->nx-1) { return 0.;}
     decltype(grid->nx) xl {(std::size_t)floor(tmp)};
@@ -49,19 +51,19 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
         //interpolate along z direction, there are four interpolated vectors
         std::size_t idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         std::size_t idx2 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
-        double i1 {grid->fftw_fe[idx1]*(1.-zd) + grid->fftw_fe[idx2]*zd};
+        double i1 {grid->fe[idx1]*(1.-zd) + grid->fe[idx2]*zd};
         
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl);
         idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl+1);
-        double i2 {grid->fftw_fe[idx1]*(1.-zd) + grid->fftw_fe[idx2]*zd};
+        double i2 {grid->fe[idx1]*(1.-zd) + grid->fe[idx2]*zd};
         
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl,zl);
         idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl,zl+1);
-        double j1 {grid->fftw_fe[idx1]*(1.-zd) + grid->fftw_fe[idx2]*zd};
+        double j1 {grid->fe[idx1]*(1.-zd) + grid->fe[idx2]*zd};
         
         idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl+1,zl);
         idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl+1,zl+1);
-        double j2 {grid->fftw_fe[idx1]*(1.-zd) + grid->fftw_fe[idx2]*zd};
+        double j2 {grid->fe[idx1]*(1.-zd) + grid->fe[idx2]*zd};
         // interpolate along y direction, two interpolated vectors
         double w1 {i1*(1.-yd) + i2*yd};
         double w2 {j1*(1.-yd) + j2*yd};
@@ -71,12 +73,13 @@ double FErnd::read_grid(const vec3_t<double> &pos, Grid_fernd *grid){
     // on the boundary
     else {
         std::size_t idx{toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
-        density = grid->fftw_fe[idx];
+        density = grid->fe[idx];
     }
     return density;
 }
 
-void FErnd::write_grid(Param *,Grid_fernd *){
+void FErnd::write_grid(Param *,
+                       Grid_fernd *){
     assert(false);
 }
 

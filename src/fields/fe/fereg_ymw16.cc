@@ -12,10 +12,9 @@
 #include <namespace_toolkit.h>
 #include <cgs_units_file.h>
 
-using namespace std;
-
 // YMW16
-double FEreg_ymw16::density(const vec3_t<double> &pos, Param *par){
+double FEreg_ymw16::density(const vec3_t<double> &pos,
+                            Param *par){
     // YMW16 using a different Cartesian frame from our default one
     vec3_t<double> gc_pos {pos.y,-pos.x,pos.z};
     // sylindrical r
@@ -48,11 +47,11 @@ double FEreg_ymw16::density(const vec3_t<double> &pos, Param *par){
         NE[6] = localbubble(gc_pos.x,gc_pos.y,gc_pos.z,ec_l,RLB,par);
         NE[7] = nps(gc_pos.x,gc_pos.y,gc_pos.z,par);
         //adding up rules
-        NE[0] = NE[1]+max(NE[2],NE[3]);
+        NE[0] = NE[1]+std::max(NE[2],NE[3]);
         // distance to local bubble
         const double rlb {sqrt( pow(((gc_pos.y-8.34*CGS_U_kpc)*0.94-0.34*gc_pos.z),2) + pow(gc_pos.x,2) )};
         if(rlb<RLB){ //inside local bubble
-            NE[0]=par->fereg_ymw16.t6_J_LB*NE[1]+max(NE[2],NE[3]);
+            NE[0]=par->fereg_ymw16.t6_J_LB*NE[1]+std::max(NE[2],NE[3]);
             if(NE[6]>NE[0]) {WLB=1;}
         }
         else{ //outside local bubble
@@ -68,7 +67,9 @@ double FEreg_ymw16::density(const vec3_t<double> &pos, Param *par){
     
 }
 // thick disk
-double FEreg_ymw16::thick(const double &zz, const double &rr, Param *par){
+double FEreg_ymw16::thick(const double &zz,
+                          const double &rr,
+                          Param *par){
     if(zz>10.*par->fereg_ymw16.t1_H1) return 0.; // timesaving
     double gd {1.};
     if(rr>par->fereg_ymw16.t1_Bd)
@@ -76,7 +77,9 @@ double FEreg_ymw16::thick(const double &zz, const double &rr, Param *par){
     return par->fereg_ymw16.t1_n1*gd*pow(1/cosh(zz/par->fereg_ymw16.t1_H1),2);;
 }
 // thin disk
-double FEreg_ymw16::thin(const double &zz,const double &rr, Param *par){
+double FEreg_ymw16::thin(const double &zz,
+                         const double &rr,
+                         Param *par){
     // z scaling, K_2*H in ref
     double H {par->fereg_ymw16.t2_K2*(32*CGS_U_pc+1.6e-3*rr+(4.e-7/CGS_U_pc)*pow(rr,2))};
     if(zz>10.*H) return 0.; // timesaving
@@ -87,7 +90,11 @@ double FEreg_ymw16::thin(const double &zz,const double &rr, Param *par){
     return par->fereg_ymw16.t2_n2*gd*pow(1/cosh((rr-par->fereg_ymw16.t2_B2)/par->fereg_ymw16.t2_A2),2)*pow(1/cosh(zz/H),2);
 }
 // spiral arms
-double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,const double &rr,Param *par){
+double FEreg_ymw16::spiral(const double &xx,
+                           const double &yy,
+                           const double &zz,
+                           const double &rr,
+                           Param *par){
     // structure scaling
     double scaling {1.};
     if(rr>par->fereg_ymw16.t1_Bd){
@@ -113,7 +120,7 @@ double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,co
             if (d_phi<0) d_phi += 2.*CGS_U_pi;
             double d = fabs(par->fereg_ymw16.t3_rmin[i]*exp(d_phi*par->fereg_ymw16.t3_tpitch[i])-rr);
             double d_p = fabs(par->fereg_ymw16.t3_rmin[i]*exp((d_phi+2.*CGS_U_pi)*par->fereg_ymw16.t3_tpitch[i])-rr);
-            smin = min(d,d_p)*par->fereg_ymw16.t3_cpitch[i];
+            smin = std::min(d,d_p)*par->fereg_ymw16.t3_cpitch[i];
         }
         else if(i==4 and theta>=par->fereg_ymw16.t3_phimin[i] and theta<2){ //Local arm
             smin = fabs(par->fereg_ymw16.t3_rmin[i]*exp((theta+2*CGS_U_pi-par->fereg_ymw16.t3_phimin[i])*par->fereg_ymw16.t3_tpitch[i])-rr)*par->fereg_ymw16.t3_cpitch[i];
@@ -138,7 +145,10 @@ double FEreg_ymw16::spiral(const double &xx,const double &yy,const double &zz,co
     return ne3s;
 }
 // galactic center
-double FEreg_ymw16::galcen(const double &xx,const double &yy,const double &zz,Param *par){
+double FEreg_ymw16::galcen(const double &xx,
+                           const double &yy,
+                           const double &zz,
+                           Param *par){
     //pos of center
     const double Xgc {50.*CGS_U_pc};
     const double Ygc {0.};
@@ -151,7 +161,10 @@ double FEreg_ymw16::galcen(const double &xx,const double &yy,const double &zz,Pa
     return par->fereg_ymw16.t4_ngc*Ar*Az;
 }
 // gum nebula
-double FEreg_ymw16::gum(const double &xx,const double &yy,const double &zz,Param *par){
+double FEreg_ymw16::gum(const double &xx,
+                        const double &yy,
+                        const double &zz,
+                        Param *par){
     if(yy<0 or xx>0) return 0.; // timesaving
     //center of Gum Nebula
     const double lc {264.*CGS_U_rad};
@@ -173,23 +186,31 @@ double FEreg_ymw16::gum(const double &xx,const double &yy,const double &zz,Param
     return par->fereg_ymw16.t5_ngn*exp(-pow(Dmin/par->fereg_ymw16.t5_Wgn,2));
 }
 // local bubble
-double FEreg_ymw16::localbubble(const double &xx,const double &yy,const double &zz,const double &ll,const double &Rlb,Param *par){
+double FEreg_ymw16::localbubble(const double &xx,
+                                const double &yy,
+                                const double &zz,
+                                const double &ll,
+                                const double &Rlb,
+                                Param *par){
     if(yy<0) return 0.; // timesaving
     double nel {0.};
     // r_LB in ref
     const double rLB {sqrt(pow(((yy-8.34*CGS_U_kpc)*0.94-0.34*zz),2)+pow(xx,2))};
     // l-l_LB1 in ref
-    const double dl1 {min(fabs(ll+360.-par->fereg_ymw16.t6_thetalb1),fabs(par->fereg_ymw16.t6_thetalb1-(ll)))};
+    const double dl1 {std::min(fabs(ll+360.-par->fereg_ymw16.t6_thetalb1),fabs(par->fereg_ymw16.t6_thetalb1-(ll)))};
     if(dl1<10.*par->fereg_ymw16.t6_detlb1 or (rLB-Rlb)<10.*par->fereg_ymw16.t6_wlb1 or zz<10.*par->fereg_ymw16.t6_hlb1) // timesaving
         nel += par->fereg_ymw16.t6_nlb1*pow(1/cosh(dl1/par->fereg_ymw16.t6_detlb1),2)*pow(1/cosh((rLB-Rlb)/par->fereg_ymw16.t6_wlb1),2)*pow(1/cosh(zz/par->fereg_ymw16.t6_hlb1),2);
     // l-l_LB2 in ref
-    const double dl2 {min(fabs(ll+360-par->fereg_ymw16.t6_thetalb2),fabs(par->fereg_ymw16.t6_thetalb2-(ll)))};
+    const double dl2 {std::min(fabs(ll+360-par->fereg_ymw16.t6_thetalb2),fabs(par->fereg_ymw16.t6_thetalb2-(ll)))};
     if(dl2<10.*par->fereg_ymw16.t6_detlb2 or (rLB-Rlb)<10.*par->fereg_ymw16.t6_wlb2 or zz<10.*par->fereg_ymw16.t6_hlb2) // timesaving
         nel += par->fereg_ymw16.t6_nlb2*pow(1/cosh(dl2/par->fereg_ymw16.t6_detlb2),2)*pow(1/cosh((rLB-Rlb)/par->fereg_ymw16.t6_wlb2),2)*pow(1/cosh(zz/par->fereg_ymw16.t6_hlb2),2);
     return nel;
 }
 // north spur
-double FEreg_ymw16::nps(const double &xx,const double &yy,const double &zz,Param *par){
+double FEreg_ymw16::nps(const double &xx,
+                        const double &yy,
+                        const double &zz,
+                        Param *par){
     if(yy<0) return 0.; // timesaving
     const double theta_LI {(par->fereg_ymw16.t7_thetaLI)*CGS_U_rad};
     const double x_c {-10.156*CGS_U_pc};

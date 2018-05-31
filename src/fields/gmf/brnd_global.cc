@@ -3,6 +3,7 @@
 #include <vector>
 #include <array>
 #include <cmath>
+#include <cassert>
 #include <omp.h>
 #include <fftw3.h>
 #include <gsl/gsl_randist.h>
@@ -14,18 +15,21 @@
 #include <breg.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-#include <cassert>
 
-using namespace std;
 
-vec3_t<double> Brnd_global::get_brnd(const vec3_t<double> &pos, Grid_brnd *grid){
+vec3_t<double> Brnd_global::get_brnd(const vec3_t<double> &pos,
+                                     Grid_brnd *grid){
     // interpolate written grid to given position
     // check if you have called ::write_grid
     return read_grid(pos,grid);
 }
 
 // global anisotropic turbulent field
-double Brnd_global::anisotropy(const vec3_t<double> &pos,vec3_t<double> &H,Param *par,Breg *breg,Grid_breg *gbreg){
+double Brnd_global::anisotropy(const vec3_t<double> &pos,
+                               vec3_t<double> &H,
+                               Param *par,
+                               Breg *breg,
+                               Grid_breg *gbreg){
     // H, direction of anisotropy
     H = toolkit::versor(breg->get_breg(pos,par,gbreg));
     // the simplest case, const.
@@ -34,7 +38,8 @@ double Brnd_global::anisotropy(const vec3_t<double> &pos,vec3_t<double> &H,Param
 
 // since we are using rms normalization
 // p0 is hidden and not affecting anything
-double Brnd_global::spec(const double &k, Param *par){
+double Brnd_global::spec(const double &k,
+                         Param *par){
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_global.rms*CGS_U_muGauss};
     const double kr {k/par->brnd_global.k0};
@@ -50,7 +55,8 @@ double Brnd_global::spec(const double &k, Param *par){
 
 // galactic scaling of random field energy density
 // set to 1 at observer's place
-double Brnd_global::rescal(const vec3_t<double> &pos, Param *par){
+double Brnd_global::rescal(const vec3_t<double> &pos,
+                           Param *par){
     const double r_cyl {sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x)};
     const double z {fabs(pos.z) - fabs(par->SunPosition.z)};
     const double r0 {par->brnd_global.r0};
@@ -60,8 +66,9 @@ double Brnd_global::rescal(const vec3_t<double> &pos, Param *par){
 
 // Gram-Schimdt, rewritten using Healpix vec3 library
 // tiny error caused by machine is inevitable
-vec3_t<double> Brnd_global::gramschmidt(const vec3_t<double> &k,const vec3_t<double> &b){
-    if(k.Length()==0 or b.Length()==0){
+vec3_t<double> Brnd_global::gramschmidt(const vec3_t<double> &k,
+                                        const vec3_t<double> &b){
+    if(k.SquaredLength()==0 or b.SquaredLength()==0){
         return vec3_t<double> {0,0,0};
     }
     const double inv_k_mod = 1./k.SquaredLength();
@@ -73,129 +80,132 @@ vec3_t<double> Brnd_global::gramschmidt(const vec3_t<double> &k,const vec3_t<dou
     return b_free;
 }
 
-void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd *grid){
+void Brnd_global::write_grid(Param *par,
+                             Breg *breg,
+                             Grid_breg *gbreg,
+                             Grid_brnd *grid){
     // PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
-    unique_ptr<double[]> gaussian_num = unique_ptr<double[]>(new double[6*grid->full_size]());
-#ifdef _OPENMP
     // initialize random seed
+#ifdef _OPENMP
     gsl_rng **threadvec = new gsl_rng *[omp_get_max_threads()];
     for (int b=0;b<omp_get_max_threads();++b){
         threadvec[b] = gsl_rng_alloc(gsl_rng_taus);
         gsl_rng_set(threadvec[b],b+toolkit::random_seed(par->brnd_seed));
     }
-#pragma omp parallel for schedule(static)
-    for(decltype(grid->full_size)i=0;i<6*grid->full_size;++i)
-        gaussian_num[i] = gsl_ran_gaussian(threadvec[omp_get_thread_num()],1);
-    // free random memory
-    for (int b=0;b<omp_get_max_threads();++b)
-        gsl_rng_free(threadvec[b]);
-    delete [] threadvec;
 #else
-    // initialize random seed
     gsl_rng *r{gsl_rng_alloc(gsl_rng_taus)};
     gsl_rng_set(r, toolkit::random_seed(par->brnd_seed));
-    for(decltype(grid->full_size)i=0;i<6*grid->full_size;++i)
-        gaussian_num[i] = gsl_ran_gaussian(r,1);
-    // free random memory
-    gsl_rng_free(r);
 #endif
-    // start Fourier space filling
-    double lx {grid->x_max-grid->x_min};
-    double ly {grid->y_max-grid->y_min};
-    double lz {grid->z_max-grid->z_min};
-    // physical k in 1/kpc dimension
+    // start Fourier space filling, physical k in 1/kpc dimension
+    const double lx {grid->x_max-grid->x_min};
+    const double ly {grid->y_max-grid->y_min};
+    const double lz {grid->z_max-grid->z_min};
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
-    const double halfdk {0.5*sqrt( CGS_U_kpc*CGS_U_kpc/(lx*lx) + CGS_U_kpc*CGS_U_kpc/(ly*ly) + CGS_U_kpc*CGS_U_kpc/(lz*lz) )};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
+#ifdef _OPENMP
+        auto seed_id = threadvec[omp_get_thread_num()];
+#else
+        auto seed_id = r;
+#endif
         double kx {CGS_U_kpc*i/lx};
-        if(i>=grid->nx/2) kx -= CGS_U_kpc*grid->nx/lx;
+        if(i>=(grid->nx+1)/2) kx -= CGS_U_kpc*grid->nx/lx;
+        /**
+         * it's better to calculate indeces manually
+         * just for reference, how indeces are calculated
+         * const size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+         */
+        const std::size_t idx_lv1 {i*grid->ny*grid->nz};
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
             double ky {CGS_U_kpc*j/ly};
-            if(j>=grid->ny/2) ky -= CGS_U_kpc*grid->ny/ly;
+            if(j>=(grid->ny+1)/2) ky -= CGS_U_kpc*grid->ny/ly;
+            const std::size_t idx_lv2 {idx_lv1+j*grid->nz};
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
-                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-                // FFT expects up to n/2 positive while n/2 to n negative
+                /**
+                 * 0th term is fixed to zero in allocation
+                 */
+                if(i==0 and j==0 and l==0) continue;
                 double kz {CGS_U_kpc*l/lz};
-                if(l>=grid->nz/2) kz -= CGS_U_kpc*grid->nz/lz;
-                const double k {sqrt(kx*kx + ky*ky + kz*kz)};
-                // simpson's rule
-                double element {spec(k,par)*0.66666667};
-                element += spec(k+halfdk,par)*0.16666667;
-                element += spec(k-halfdk,par)*0.16666667;
-                // amplitude, dividing by two because equal allocation to Re and Im parts
-                const double sigma {sqrt(0.5*element*dk3)};
-                grid->fftw_b_kx[idx][0] = sigma*gaussian_num[6*idx];
-                grid->fftw_b_ky[idx][0] = sigma*gaussian_num[6*idx+1];
-                grid->fftw_b_kz[idx][0] = sigma*gaussian_num[6*idx+2];
-                grid->fftw_b_kx[idx][1] = sigma*gaussian_num[6*idx+3];
-                grid->fftw_b_ky[idx][1] = sigma*gaussian_num[6*idx+4];
-                grid->fftw_b_kz[idx][1] = sigma*gaussian_num[6*idx+5];
+                if(l>=(grid->nz+1)/2) kz -= CGS_U_kpc*grid->nz/lz;
+                const double ks {sqrt(kx*kx + ky*ky + kz*kz)};
+                const std::size_t idx {idx_lv2+l};
+                /**
+                 * turbulent power is shared in following pattern
+                 * P ~ (bx^2 + by^2 + bz^2)
+                 * c0^2 ~ c1^2 ~ (bx^2 + by^2) ~ P*2/3
+                 * as renormalization comes in PHASE II,
+                 * 2/3, P0 in spec, dk3 are numerically redundant
+                 */
+                const double sigma {sqrt(0.66666667*spec(ks,par)*dk3)};
+                grid->c0[idx][0] = sigma*gsl_ran_ugaussian(seed_id);
+                grid->c0[idx][1] = sigma*gsl_ran_ugaussian(seed_id);
+                grid->c1[idx][0] = sigma*gsl_ran_ugaussian(seed_id);
+                grid->c1[idx][1] = sigma*gsl_ran_ugaussian(seed_id);
             }// l
         }// j
     }// i
-    // fix the very 0th
-    grid->fftw_b_kx[0][0] = 0.;
-    grid->fftw_b_ky[0][0] = 0.;
-    grid->fftw_b_kz[0][0] = 0.;
-    grid->fftw_b_kx[0][1] = 0.;
-    grid->fftw_b_ky[0][1] = 0.;
-    grid->fftw_b_kz[0][1] = 0.;
-    // no Hermiticity fixing, complex 2 complex
+    // ks=0 should be automatically addressed in P(k)
     // execute DFT backward plan
-    fftw_execute(grid->fftw_px_bw);
-    fftw_execute(grid->fftw_py_bw);
-    fftw_execute(grid->fftw_pz_bw);
+    fftw_execute_dft(grid->plan_c0_bw,grid->c0,grid->c0);
+    fftw_execute_dft(grid->plan_c1_bw,grid->c1,grid->c1);
+    // free random memory
+#ifdef _OPENMP
+    for (int b=0;b<omp_get_max_threads();++b)
+        gsl_rng_free(threadvec[b]);
+    delete [] threadvec;
+#else
+    // free random memory
+    gsl_rng_free(r);
+#endif
     // PHASE II
     // RESCALING FIELD PROFILE IN REAL SPACE
-    double b_var {toolkit::Variance(grid->fftw_b_kx[0], grid->full_size)};
+    // 1./sqrt(3*bi_var)
+    // after 1st Fourier transformation, c0_R = bx, c0_I = by, c1_I = bz
+    const double b_var_invsq {1./sqrt(3.*toolkit::Variance(grid->c0[0],grid->full_size))};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i){
         vec3_t<double> pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
+        const std::size_t idx_lv1 {i*grid->ny*grid->nz};
         for (decltype(grid->ny) j=0;j<grid->ny;++j){
             pos.y = j*ly/(grid->ny-1) + grid->y_min;
+            const std::size_t idx_lv2 {idx_lv1+j*grid->nz};
             for (decltype(grid->nz) l=0;l<grid->nz;++l){
                 // get physical position
                 pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
-                double ratio {sqrt(rescal(pos,par))*par->brnd_global.rms/sqrt(3.*b_var)};
-                // assemble b_Re and b_Im
-                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-                vec3_t<double> b_re {grid->fftw_b_kx[idx][0]*ratio,grid->fftw_b_ky[idx][0]*ratio,grid->fftw_b_kz[idx][0]*ratio};
-                vec3_t<double> b_im {grid->fftw_b_kx[idx][1]*ratio,grid->fftw_b_ky[idx][1]*ratio,grid->fftw_b_kz[idx][1]*ratio};
+                double ratio {sqrt(rescal(pos,par))*par->brnd_global.rms*b_var_invsq};
+                const std::size_t idx {idx_lv2+l};
+                // assemble b_Re
+                // after 1st Fourier transformation, c0_R = bx, c0_I = by, c1_I = bz
+                vec3_t<double> b_re {grid->c0[idx][0]*ratio,
+                                    grid->c0[idx][1]*ratio,
+                                    grid->c1[idx][1]*ratio};
                 // impose anisotropy
                 vec3_t<double> H_versor {0.,0.,0.,};
                 double rho {anisotropy(pos,H_versor,par,breg,gbreg)};
                 assert(rho>=0. and rho<=1.);
-                if(H_versor.Length()==0){
-                    break;
-                }
+                if(H_versor.SquaredLength()<1e-10)// zero regular field, no prefered anisotropy
+                    continue;
                 vec3_t<double> b_re_par {H_versor*dotprod(H_versor,b_re)};
                 vec3_t<double> b_re_perp {b_re - b_re_par};
                 b_re = toolkit::versor(b_re_par*rho + b_re_perp*(1-rho))*b_re.Length();
-                vec3_t<double> b_im_par {H_versor*dotprod(H_versor,b_im)};
-                vec3_t<double> b_im_perp {b_im - b_im_par};
-                b_im = toolkit::versor(b_im_par*rho + b_im_perp*(1-rho))*b_im.Length();
-                // add anisotropic field to random one
-                grid->fftw_b_kx[idx][0] = b_re.x;
-                grid->fftw_b_ky[idx][0] = b_re.y;
-                grid->fftw_b_kz[idx][0] = b_re.z;
-                grid->fftw_b_kx[idx][1] = b_im.x;
-                grid->fftw_b_ky[idx][1] = b_im.y;
-                grid->fftw_b_kz[idx][1] = b_im.z;
+                // push b_re back to c0 and c1
+                grid->c0[idx][0] = b_re.x;
+                grid->c0[idx][1] = b_re.y;
+                grid->c1[idx][0] = b_re.y;
+                grid->c1[idx][1] = b_re.z;
             } //l
         } //j
     } //i
     // execute DFT forward plan
-    fftw_execute(grid->fftw_px_fw);
-    fftw_execute(grid->fftw_py_fw);
-    fftw_execute(grid->fftw_pz_fw);
+    fftw_execute_dft(grid->plan_c0_fw,grid->c0,grid->c0);
+    fftw_execute_dft(grid->plan_c1_fw,grid->c1,grid->c1);
     // PHASE III
     // RE-ORTHOGONALIZING IN FOURIER SPACE
     // Gram-Schmidt process
@@ -203,58 +213,74 @@ void Brnd_global::write_grid(Param *par, Breg *breg, Grid_breg *gbreg, Grid_brnd
 #pragma omp parallel for schedule(static)
 #endif
     for (decltype(grid->nx) i=0;i<grid->nx;++i) {
+        decltype(grid->nx) i_sym {grid->nx-i};// apply Hermitian symmetry
+        if(i==0) i_sym = i;
         vec3_t<double> tmp_k {CGS_U_kpc*i/lx,0,0};
-        if(i>=grid->nx/2) tmp_k.x -= CGS_U_kpc*grid->nx/lx;
+        /**
+         * it's better to calculate indeces manually
+         * just for reference, how indeces are calculated
+         * const std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+         * const std::size_t idx_sym {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i_sym,j_sym,l_sym)};
+         */
+        const std::size_t idx_lv1 {i*grid->ny*grid->nz};
+        const std::size_t idx_sym_lv1 {i_sym*grid->ny*grid->nz};
+        if(i>=(grid->nx+1)/2) tmp_k.x -= CGS_U_kpc*grid->nx/lx;
         for (decltype(grid->ny) j=0;j<grid->ny;++j) {
+            decltype(grid->ny) j_sym {grid->ny-j};// apply Hermitian symmetry
+            if(j==0) j_sym = j;
             tmp_k.y = CGS_U_kpc*j/ly;
-            if(j>=grid->ny/2) tmp_k.y -= CGS_U_kpc*grid->ny/ly;
+            if(j>=(grid->ny+1)/2) tmp_k.y -= CGS_U_kpc*grid->ny/ly;
+            const std::size_t idx_lv2 {idx_lv1+j*grid->nz};
+            const std::size_t idx_sym_lv2 {idx_sym_lv1+j_sym*grid->nz};
             for (decltype(grid->nz) l=0;l<grid->nz;++l) {
-                std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-                // FFT expects up to n/2 positive while n/2 to n negative
-                // physical k in 1/kpc
+                decltype(grid->nz) l_sym {grid->nz-l};// apply Hermitian symmetry
+                if(l==0) l_sym = l;
                 tmp_k.z = CGS_U_kpc*l/lz;
-                if(l>=grid->nz/2) tmp_k.z -= CGS_U_kpc*grid->nz/lz;
+                if(l>=(grid->nz+1)/2) tmp_k.z -= CGS_U_kpc*grid->nz/lz;
+                const std::size_t idx {idx_lv2+l}; //k
+                const std::size_t idx_sym {idx_sym_lv2+l_sym}; //-k
+                /**
+                 * reconstruct bx,by,bz from c0,c1,c*0,c*1
+                 *
+                 * c0(k) = bx(k) + i by(k)
+                 * c*0(-k) = bx(k) - i by(k)
+                 * c1(k) = by(k) + i bz(k)
+                 * c1*1(-k) = by(k) - i bz(k)
+                 */
+                const vec3_t<double> tmp_b_re {0.5*(grid->c0[idx][0]+grid->c0[idx_sym][0]),
+                                                0.5*(grid->c1[idx][0]+grid->c1[idx_sym][0]),
+                                                0.5*(grid->c1[idx_sym][1]+grid->c1[idx][1])};
                 
-                const vec3_t<double> tmp_b_re {grid->fftw_b_kx[idx][0],grid->fftw_b_ky[idx][0],grid->fftw_b_kz[idx][0]};
-                const vec3_t<double> tmp_b_im {grid->fftw_b_kx[idx][1],grid->fftw_b_ky[idx][1],grid->fftw_b_kz[idx][1]};
+                const vec3_t<double> tmp_b_im {0.5*(grid->c0[idx][1]-grid->c0[idx_sym][1]),
+                                                0.5*(grid->c1[idx][1]-grid->c1[idx_sym][1]),
+                                                0.5*(grid->c1[idx_sym][0]-grid->c1[idx][0])};
                 
                 const vec3_t<double> free_b_re {gramschmidt(tmp_k,tmp_b_re)};
                 const vec3_t<double> free_b_im {gramschmidt(tmp_k,tmp_b_im)};
-                
-                grid->fftw_b_kx[idx][0] = free_b_re.x;
-                grid->fftw_b_ky[idx][0] = free_b_re.y;
-                grid->fftw_b_kz[idx][0] = free_b_re.z;
-                grid->fftw_b_kx[idx][1] = free_b_im.x;
-                grid->fftw_b_ky[idx][1] = free_b_im.y;
-                grid->fftw_b_kz[idx][1] = free_b_im.z;
+                /**
+                 * reassemble c0,c1 from bx,by,bz
+                 * c0(k) = bx(k) + i by(k)
+                 * c1(k) = by(k) + i bz(k)
+                 */
+                grid->c0[idx][0] = free_b_re.x-free_b_im.y;
+                grid->c0[idx][1] = free_b_im.x+free_b_re.y;
+                grid->c1[idx][0] = free_b_re.y-free_b_im.z;
+                grid->c1[idx][1] = free_b_im.y+free_b_re.z;
             }// l
         }// j
     }// i
-    // fixing the very 0th
-    grid->fftw_b_kx[0][0] = 0.;
-    grid->fftw_b_ky[0][0] = 0.;
-    grid->fftw_b_kz[0][0] = 0.;
-    grid->fftw_b_kx[0][1] = 0.;
-    grid->fftw_b_ky[0][1] = 0.;
-    grid->fftw_b_kz[0][1] = 0.;
-    
     // execute DFT backward plan
-    fftw_execute(grid->fftw_px_bw);
-    fftw_execute(grid->fftw_py_bw);
-    fftw_execute(grid->fftw_pz_bw);
-    // get real elements, use auxiliary function
-    toolkit::complex2real(grid->fftw_b_kx, grid->fftw_b_x.get(), grid->full_size);
-    toolkit::complex2real(grid->fftw_b_ky, grid->fftw_b_y.get(), grid->full_size);
-    toolkit::complex2real(grid->fftw_b_kz, grid->fftw_b_z.get(), grid->full_size);
-    // according to FFTW3 manual
+    fftw_execute_dft(grid->plan_c0_bw,grid->c0,grid->c0);
+    fftw_execute_dft(grid->plan_c1_bw,grid->c1,grid->c1);
+    // according to FFTW convention
     // transform forward followed by backword scale up array by nx*ny*nz
     double inv_grid_size = 1.0/grid->full_size;
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
     for(std::size_t i=0;i<grid->full_size;++i){
-        grid->fftw_b_x[i] *= inv_grid_size;
-        grid->fftw_b_y[i] *= inv_grid_size;
-        grid->fftw_b_z[i] *= inv_grid_size;
+        grid->bx[i] = grid->c0[i][0]*inv_grid_size;
+        grid->by[i] = grid->c0[i][1]*inv_grid_size;
+        grid->bz[i] = grid->c1[i][1]*inv_grid_size;
     }
 }

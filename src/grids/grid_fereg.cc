@@ -14,11 +14,11 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 #include <cassert>
-using namespace tinyxml2;
-using namespace std;
 
-Grid_fereg::Grid_fereg(string file_name){
-    unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
+using namespace tinyxml2;
+
+Grid_fereg::Grid_fereg(const std::string &file_name){
+    std::unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
     XMLElement *ptr {toolkit::tracexml(doc.get(),{"Fieldout"})};
     read_permission = toolkit::FetchBool(ptr,"read","fereg_grid");
     write_permission = toolkit::FetchBool(ptr,"write","fereg_grid");
@@ -42,12 +42,12 @@ void Grid_fereg::build_grid(XMLDocument *doc){
     y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_min");
     z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
     z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
-    fe = unique_ptr<double[]> (new double[full_size]);
+    fe = std::make_unique<double[]>(full_size);
 }
 
 void Grid_fereg::export_grid(void){
     assert(!filename.empty());
-    ofstream output(filename.c_str(), std::ios::out|std::ios::binary);
+    std::ofstream output(filename.c_str(),std::ios::out|std::ios::binary);
     assert(output.is_open());
     double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
@@ -62,7 +62,7 @@ void Grid_fereg::export_grid(void){
 
 void Grid_fereg::import_grid(void){
     assert(!filename.empty());
-    ifstream input(filename.c_str(), std::ios::in|std::ios::binary);
+    std::ifstream input(filename.c_str(),std::ios::in|std::ios::binary);
     assert(input.is_open());
     double tmp;
     for(decltype(full_size) i=0;i!=full_size;++i){
@@ -72,7 +72,7 @@ void Grid_fereg::import_grid(void){
     }
 #ifndef NDEBUG
     auto eof = input.tellg();
-    input.seekg (0, input.end);
+    input.seekg(0,input.end);
 #endif
     assert(eof==input.tellg());
     input.close();

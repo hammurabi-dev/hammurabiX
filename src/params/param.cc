@@ -1,6 +1,6 @@
 #include <string>
 #include <cmath>
-
+#include <memory>
 #include <vec3.h>
 #include <tinyxml2.h>
 #include <param.h>
@@ -8,10 +8,9 @@
 #include <namespace_toolkit.h>
 
 using namespace tinyxml2;
-using namespace std;
 
 Param::Param(std::string file_name){
-    unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
+    std::unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
     // gc sun position
     XMLElement *ptr {toolkit::tracexml(doc.get(),{"Grid","SunPosition"})};
     SunPosition = vec3_t<double> {CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x"),
@@ -26,7 +25,7 @@ Param::Param(std::string file_name){
 // magnetic field
 void Param::b_param(XMLDocument *doc){
     XMLElement *ptr {toolkit::tracexml(doc,{"MagneticField"})};
-    string breg_type {toolkit::FetchString(ptr,"type","Regular")};
+    std::string breg_type {toolkit::FetchString(ptr,"type","Regular")};
     // bwmap
     if(breg_type=="WMAP"){
         XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Regular","WMAP"})};
@@ -83,7 +82,7 @@ void Param::b_param(XMLDocument *doc){
     if(toolkit::FetchBool(ptr,"cue","Random")){
         // random seed
         brnd_seed = toolkit::FetchUnsigned(ptr,"seed","Random");
-        string brnd_type {toolkit::FetchString(ptr,"type","Random")};
+        std::string brnd_type {toolkit::FetchString(ptr,"type","Random")};
         // brnd_global
         if(brnd_type=="Global"){
             XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Random","Global"})};
@@ -112,7 +111,7 @@ void Param::b_param(XMLDocument *doc){
 
 void Param::fe_param(XMLDocument *doc){
     XMLElement *ptr {toolkit::tracexml(doc,{"FreeElectron"})};
-    string fereg_type {toolkit::FetchString(ptr,"type","Regular")};
+    std::string fereg_type {toolkit::FetchString(ptr,"type","Regular")};
     // YMW16
     if(fereg_type=="YMW16"){
         // Warp_Sun
@@ -215,7 +214,7 @@ void Param::fe_param(XMLDocument *doc){
     if(toolkit::FetchBool(ptr,"cue","Random")){
         // random seed
         fernd_seed = toolkit::FetchUnsigned(ptr,"seed","Random");
-        string fernd_type {toolkit::FetchString(ptr,"type","Random")};
+        std::string fernd_type {toolkit::FetchString(ptr,"type","Random")};
         // global turbulent
         if(fernd_type=="Global"){
             XMLElement *subptr {toolkit::tracexml(doc,{"FreeElectron","Random","Global"})};
@@ -237,7 +236,7 @@ void Param::cre_param(XMLDocument *doc){
     else{
         sim_freq = 0.;
     }
-    string cre_type {ptr->Attribute("type")};
+    std::string cre_type {ptr->Attribute("type")};
     // analytical
     if(cre_type=="Analytic"){
         XMLElement *subptr {toolkit::tracexml(doc,{"CRE","Analytic"})};

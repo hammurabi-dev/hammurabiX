@@ -10,9 +10,9 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 
-using namespace std;
 
-vec3_t<double> Breg_verify::breg(const vec3_t<double> &,Param *par){
+vec3_t<double> Breg_verify::breg(const vec3_t<double> &,
+                                 Param *par){
     // units
     const double b0 {par->breg_verify.b0};
     const double l0 {par->breg_verify.l0};

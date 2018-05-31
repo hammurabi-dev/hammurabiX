@@ -2,32 +2,33 @@
 #include <vec3.h>
 #include <cmath>
 #include <fftw3.h>
-#include <sys/time.h>
-#include <namespace_toolkit.h>
-#include <cgs_units_file.h>
+#include <ctime>
+#include <chrono>
+#include <cassert>
+#include <memory>
 #include <omp.h>
 #include <thread> // for random seed generator
 #include <sstream>
+#include <namespace_toolkit.h>
+#include <cgs_units_file.h>
 #include <tinyxml2.h>
-#include <cassert>
-#include <memory>
-using namespace std;
+
 using namespace tinyxml2;
 
 namespace toolkit {
     // calculate the perpendicular to LOS component of a vector
-    double get_perp2LOS (const vec3_t<double> &input,const double &the_los,const double &phi_los){
-        const vec3_t<double> unit_vec {get_LOS_unit_vec(the_los, phi_los)};
+    double perp2los (const vec3_t<double> &input,const double &the_los,const double &phi_los){
+        const vec3_t<double> unit_vec {los_versor(the_los, phi_los)};
         const vec3_t<double> perp_vec {crossprod(unit_vec,input)};
         return perp_vec.Length();
     }
     // calculate the parallel to LOS component of a vector
-    double get_par2LOS (const vec3_t<double> &input,const double &the_los,const double &phi_los){
-        const vec3_t<double> unit_vec {get_LOS_unit_vec(the_los, phi_los)};
+    double par2los (const vec3_t<double> &input,const double &the_los,const double &phi_los){
+        const vec3_t<double> unit_vec {los_versor(the_los, phi_los)};
         return dotprod(unit_vec,input);
     }
     // calculate intrinsic polarization angle
-    double get_intr_pol_ang(const vec3_t<double> &input,const double &the_ec,const double &phi_ec){
+    double intr_pol_ang(const vec3_t<double> &input,const double &the_ec,const double &phi_ec){
         vec3_t<double> sph_unit_v_the;
         vec3_t<double> sph_unit_v_phi;
         sph_unit_v_the = vec3_t<double> {cos(the_ec)*cos(phi_ec),
@@ -113,7 +114,7 @@ namespace toolkit {
         return covar;
     }
     // cov for vector
-    double Covariance (const vector<double> &vect1,const vector<double> &vect2){
+    double Covariance (const std::vector<double> &vect1,const std::vector<double> &vect2){
         assert(vect1.size()==vect2.size());
         double avg1 {Mean(vect1)};
         double avg2 {Mean(vect2)};
@@ -125,7 +126,7 @@ namespace toolkit {
         return covar;
     }
     // get ranked array
-    void Rank(double *arr,const size_t &size){
+    void Rank(double *arr,const std::size_t &size){
         // get max and min
         double max {arr[0]}; double min {arr[0]};
         for(std::size_t i=0;i!=size;++i){
@@ -139,7 +140,7 @@ namespace toolkit {
         }
     }
     // get ranked vector
-    void Rank(vector<double> &vect){
+    void Rank(std::vector<double> &vect){
         assert(!vect.empty());
         // get max and min
         double max=vect[0];double min=vect[0];
@@ -168,107 +169,111 @@ namespace toolkit {
     }
     // offer random seed
     std::size_t random_seed(const int &s){
-        if(s<0){
-            struct timeval tv;
-            gettimeofday(&tv,nullptr);
+        assert(s>=0);
+        if(s==0){
+            auto p = std::chrono::system_clock::now();
+            // valid until 19 January, 2038 03:14:08 UTC
+            time_t today_time = std::chrono::system_clock::to_time_t(p);
             // casting thread id into unsinged long
-            stringstream ss;
-            ss << this_thread::get_id();
-            auto th_id = stoul(ss.str());
-            return (th_id + tv.tv_sec + tv.tv_usec);
+            std::stringstream ss;
+            ss << std::this_thread::get_id();
+            auto th_id = std::stoul(ss.str());
+            // precision in (thread,second)
+            return (th_id + today_time);
         }
         return s;
     }
-    // record time in ms
-    double timestamp(void){
-        struct timeval tv;
-        gettimeofday(&tv,nullptr);
-        return tv.tv_sec*1.e+3 + tv.tv_usec*1e-3;
-    }
+    
     // auxiliary functions for parsing parameters
-    unique_ptr<XMLDocument> loadxml(const string& filename){
-        unique_ptr<XMLDocument> doc = unique_ptr<XMLDocument>(new XMLDocument());
+    std::unique_ptr<XMLDocument> loadxml(const std::string& filename){
+        std::unique_ptr<XMLDocument> doc = std::make_unique<XMLDocument>();
         doc->LoadFile(filename.c_str());
         assert(!doc->Error());
         return move(doc);
     }
-    XMLElement* tracexml(XMLDocument *doc,const vector<string>& keychain){
+    //
+    XMLElement* tracexml(XMLDocument *doc,const std::vector<std::string>& keychain){
         XMLElement* el {doc->FirstChildElement("root")};
         if(!keychain.empty()){
             for(auto key: keychain){
 #ifndef NDEBUG
-                cout<<"key: "<<key<<endl;
+                std::cout<<"key: "<<key<<std::endl;
 #endif
                 el = el->FirstChildElement(key.c_str());
             }
         }
         return el;
     }
-    std::string FetchString(XMLElement* el,const string& att_type,const string& key){
+    //
+    std::string FetchString(XMLElement* el,const std::string& att_type,const std::string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+        std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->Attribute(att_type.c_str());
     }
-    std::string FetchString(XMLElement* el,const string& att_type){
+    //
+    std::string FetchString(XMLElement* el,const std::string& att_type){
 #ifndef NDEBUG
-        cout<<"attrib: "<<att_type<<endl;
+        std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->Attribute(att_type.c_str());
     }
-    
-    int FetchInt(XMLElement* el,const string& att_type,const string& key){
+    //
+    int FetchInt(XMLElement* el,const std::string& att_type,const std::string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+        std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str());
     }
-    int FetchInt(XMLElement* el,const string& att_type){
+    //
+    int FetchInt(XMLElement* el,const std::string& att_type){
 #ifndef NDEBUG
-        cout<<"attrib: "<<att_type<<endl;
+        std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->IntAttribute(att_type.c_str());
     }
-    
-    unsigned int FetchUnsigned(XMLElement* el,const string& att_type,const string& key){
+    //
+    unsigned int FetchUnsigned(XMLElement* el,const std::string& att_type,const std::string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+        std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->UnsignedAttribute(att_type.c_str());
     }
-    unsigned int FetchUnsigned(XMLElement* el,const string& att_type){
+    //
+    unsigned int FetchUnsigned(XMLElement* el,const std::string& att_type){
 #ifndef NDEBUG
-        cout<<"attrib: "<<att_type<<endl;
+        std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->UnsignedAttribute(att_type.c_str());
     }
-    
-    bool FetchBool(XMLElement* el,const string& att_type,const string& key){
+    //
+    bool FetchBool(XMLElement* el,const std::string& att_type,const std::string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+        std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->BoolAttribute(att_type.c_str());
     }
-    bool FetchBool(XMLElement* el,const string& att_type){
+    //
+    bool FetchBool(XMLElement* el,const std::string& att_type){
 #ifndef NDEBUG
-        cout<<"attrib: "<<att_type<<endl;
+        std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->BoolAttribute(att_type.c_str());
     }
-    
-    double FetchDouble(XMLElement* el,const string& att_type,const string& key){
+    //
+    double FetchDouble(XMLElement* el,const std::string& att_type,const std::string& key){
 #ifndef NDEBUG
-        cout<<"key: "<<key<<" attrib: "<<att_type<<endl;
+        std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str());
     }
-    double FetchDouble(XMLElement* el,const string& att_type){
+    //
+    double FetchDouble(XMLElement* el,const std::string& att_type){
 #ifndef NDEBUG
-        cout<<"attrib: "<<att_type<<endl;
+        std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->DoubleAttribute(att_type.c_str());
     }
-    
     // get real components from fftw_complex arrays
     void complex2real(const fftw_complex *input,double *output,const std::size_t &size){
 #ifdef _OPENMP
@@ -279,6 +284,24 @@ namespace toolkit {
             output[i] = input[i][0];
         }
     }
-    
+    //
+    void complex2imag(const fftw_complex *input,double *output,const std::size_t &size){
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) // DO NOT CHANGE SCHEDULE TYPE
+#endif
+        for(std::size_t i=0;i<size;++i){
+            output[i] = input[i][1];
+        }
+    }
+    //
+    void complex2rni(const fftw_complex *input,double *realout,double *imagout,const std::size_t &size){
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static) // DO NOT CHANGE SCHEDULE TYPE
+#endif
+        for(std::size_t i=0;i<size;++i){
+            realout[i] = input[i][0];
+            imagout[i] = input[i][1];
+        }
+    }
 }// end of namespace
 // END
