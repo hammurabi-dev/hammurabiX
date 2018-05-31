@@ -207,7 +207,7 @@ void Pipeline::assemble_obs(){
 }
 
 int main(int /*argc*/,char **argv) {
-#ifndef NDEBUG
+#ifndef NTIMING
     Timer tmr;
     tmr.start("main");
 #endif
@@ -220,7 +220,7 @@ int main(int /*argc*/,char **argv) {
     run.assemble_brnd();
     run.assemble_cre();
     run.assemble_obs();
-#ifndef NDEBUG
+#ifndef NTIMING
     tmr.stop("main");
     tmr.print();
 #endif 
