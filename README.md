@@ -21,8 +21,8 @@ Not all modelings have been thoroughly cross-checked with original hammurabi!
 A full release of version X.02 is scheduled in 2018-2019.*
 
 ### contact
-*bug reports and code contributions are warmly welcomed,
-feel free to contact*
+*bug reports and code contributions are warmly welcomed, feel free to contact*
+
 * [Tess Jaffe](https://science.gsfc.nasa.gov/sed/bio/tess.jaffe)
 * [Torsten Ensslin](https://wwwmpa.mpa-garching.mpg.de/~ensslin/)
 * [Jiaxin Wang](http://www.sissa.it/app/members.php?ID=222)

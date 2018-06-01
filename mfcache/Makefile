@@ -1,7 +1,15 @@
-include ../INSTALL/makefile.ini
+include ./makefile.ini
+
+ifeq ($(INS_PATH),)
+INS_PATH=/usr/local/hammurabi
+endif
 
 ifeq ($(CXX),)
 CXX=g++
+endif
+
+ifeq ($(DEBUG),)
+DEBUG= -DNDEBUG
 endif
 
 ifeq ($(GSL),)
@@ -26,21 +34,14 @@ endif
 
 HEALPIX_FULL = $(HEALPIX)/src/cxx/$(HEALPIX_TARGET)
 
-SRCDIR=.
-SOURCES=$(wildcard *.cc)
-OBJDIR=./build
+SRCDIR=../src
+OBJDIR=../build
+SOURCES=$(shell find $(SRCDIR) -type f -name "*.cc")
 OBJ=$(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(SOURCES:.cc=.o))
-LIBDIR=../lib
 INCDIR=../include
 HEADS=$(wildcard $(INCDIR)*.h)
-EXEDIR=./bin
-TESTEXE=$(addprefix $(EXEDIR)/,$(SOURCES:.cc=.x))
-
-MRCDIR=../src
-MBJDIR=../build
-MOURCES=$(shell find $(MRCDIR) -type f -name "*.cc")
-MBJ=$(patsubst $(MRCDIR)/%,$(MBJDIR)/%,$(MOURCES:.cc=.o))
-
+LIBDIR=../lib
+EXEDIR=../bin
 
 # COMPILE OPTIONS
 CXXFLAGS = -std=c++14 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread $(DEBUG)
@@ -51,50 +52,57 @@ EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
 CXXFLAGS += $(EXT_INC)
  
 ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
-	-L$(HEALPIX_FULL)/lib -L$(LIBDIR) -L.
+	-L$(HEALPIX_FULL)/lib
 LD_FLAGS = $(ALL_L) \
 	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
 	-lgsl -lgslcblas -lfftw3_omp -lfftw3 -lm -fopenmp $(DEBUG)
-LFLAGS = $(ALL_L) -lhammurabi -Wl,-rpath=$(abspath $(LIBDIR)) \
-	-lhealpix_cxx -lcxxsupport -lc_utils -lfftpack -lcfitsio \
-	-lgsl -lgslcblas -lfftw3_omp -lfftw3 -lm -fopenmp $(DEBUG)
+LFLAGS = $(LD_FLAGS)
 
 # RULES
 
-default: $(LIBDIR)/libhammurabi.so $(TESTEXE)
+default: $(EXE)
 
-$(LIBDIR)/libhammurabi.so: $(MBJ)
-	mkdir -p $(LIBDIR)
-	$(CXX) -o $@ -shared -fPIC $(LD_FLAGS) $^
-
-$(MBJDIR)/%.o: $(MRCDIR)/%.cc $(HEADS)
-	mkdir -p $(dir $@)
-	$(CXX) -c $< -o $@ $(CXXFLAGS)
-
-$(TESTEXE): | $(EXEDIR)
+$(EXE): | $(EXEDIR)
 
 $(EXEDIR):
 	mkdir -p $(EXEDIR)
 
-$(EXEDIR)/%.x: $(OBJDIR)/%.o
-	$(CXX) $^ -o $@ $(LFLAGS)
+$(EXE): $(OBJ)
+	$(CXX) $^ -o $(EXEDIR)/$(EXE) $(LFLAGS)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cc
+$(OBJDIR)/%.o: $(SRCDIR)/%.cc $(HEADS)
 	mkdir -p $(dir $@)
 	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
+$(LIBDIR)/libhammurabi.so: $(OBJ)
+	mkdir -p $(LIBDIR)
+	$(CXX) -o $@ -shared -fPIC $(LD_FLAGS) $^
+
+.PHONY: help
 help:
-	echo $(MBJ)
+	echo $(OBJ)
+
+.PHONY: doc
+doc: install/doxy.in
+	doxygen $^
+
+.PHONY: lib
+lib: $(LIBDIR)/libhammurabi.so
+
 
 .PHONY: clean
 clean:
-	rm -rf $(OBJDIR) $(MBJDIR)
+	rm -rf $(OBJDIR)
 
 .PHONY: wipe
 wipe:
-	rm -rf $(EXEDIR) $(LIBDIR)
+	rm -rf $(LIBDIR) $(EXEDIR) thml latex
 
-run: $(TESTEXE)
-	$(foreach exec,$(TESTEXE),$(exec);)
+.PHONY: install
+install:
+	mkdir -p $(INS_PATH)/bin
+	mkdir -p $(INS_PATH)/lib
+	mkdir -p $(INS_PATH)/include
+	cp $(EXEDIR)/* $(INS_PATH)/bin; cp $(LIBDIR)/* $(INS_PATH)/lib; cp $(INCDIR)/* $(INS_PATH)/include
 
-#END
+# END
