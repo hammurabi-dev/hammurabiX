@@ -55,9 +55,12 @@ double FEreg::density_blur(const vec3_t<double> &pos,
     return ne_blur/step;
 }
 
+/**
+ * if no specified field model is built
+ * FEreg object link directly here and return null field when invoked
+ */
 double FEreg::density(const vec3_t<double> &,
                       Param *){
-    assert(false);
     return 0.;
 }
 

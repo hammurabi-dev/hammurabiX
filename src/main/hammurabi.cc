@@ -62,6 +62,10 @@ void Pipeline::assemble_grid(){
 }
 // regular FE field
 void Pipeline::assemble_fereg(){
+    if(!grid_fereg->build_permission){
+        fereg = std::make_unique<FEreg>();
+        return;
+    }
     XMLElement *ptr {toolkit::tracexml(doc.get(),{"FreeElectron"})};
     std::string field_type {toolkit::FetchString(ptr,"type","Regular")};
     // if import from file, no need to build specific fe class
@@ -85,6 +89,10 @@ void Pipeline::assemble_fereg(){
 }
 // regular B field, must before random B field
 void Pipeline::assemble_breg(){
+    if(!grid_breg->build_permission){
+        breg = std::make_unique<Breg>();
+        return;
+    }
     XMLElement *ptr {toolkit::tracexml(doc.get(),{"MagneticField"})};
     std::string field_type {toolkit::FetchString(ptr,"type","Regular")};
     if(grid_breg->read_permission){

@@ -37,7 +37,7 @@ Grid_fernd::Grid_fernd(const std::string &file_name){
 }
 
 void Grid_fernd::build_grid(XMLDocument *doc){
-    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box"})};
+    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_FE"})};
     // Cartesian grid
     nx = toolkit::FetchUnsigned(ptr,"value","nx");
     ny = toolkit::FetchUnsigned(ptr,"value","ny");

@@ -44,7 +44,7 @@ public:
     void import_grid(void) override;
     std::unique_ptr<double[]> bx, by, bz;
     std::string filename;
-    bool read_permission, write_permission;
+    bool build_permission, read_permission, write_permission;
     double x_max, x_min, y_max, y_min, z_max, z_min;
     std::size_t nx, ny, nz, full_size;
 };
@@ -98,7 +98,7 @@ public:
     void import_grid(void) override;
     std::unique_ptr<double[]> fe;
     std::string filename;
-    bool read_permission, write_permission;
+    bool build_permission, read_permission, write_permission;
     double x_max, x_min, y_max, y_min, z_max, z_min;
     std::size_t nx, ny, nz, full_size;
 };

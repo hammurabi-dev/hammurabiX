@@ -30,7 +30,7 @@ Grid_cre::Grid_cre(const std::string &file_name){
 }
 
 void Grid_cre::build_grid(XMLDocument *doc){
-    XMLElement *ptr {toolkit::tracexml(doc,{"CRE","Numeric"})};
+    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_CRE"})};
     E_min = CGS_U_GeV*toolkit::FetchDouble(ptr,"value","E_min");
     E_max = CGS_U_GeV*toolkit::FetchDouble(ptr,"value","E_max");
     nE = toolkit::FetchUnsigned(ptr,"value","nE");

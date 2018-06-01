@@ -22,9 +22,12 @@ vec3_t<double> Breg::get_breg(const vec3_t<double> &pos,
     }
 }
 
+/**
+ * if no specified field model is built
+ * Breg object link directly here and return null field when invoked
+ */
 vec3_t<double> Breg::breg(const vec3_t<double> &,
                           Param *){
-    assert(false);
     return vec3_t<double> {0.,0.,0.};
 }
 

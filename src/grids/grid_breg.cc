@@ -19,7 +19,9 @@ using namespace tinyxml2;
 
 Grid_breg::Grid_breg(const std::string &file_name){
     std::unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
-    XMLElement *ptr {toolkit::tracexml(doc.get(),{"Fieldout"})};
+    XMLElement *ptr {toolkit::tracexml(doc.get(),{"MagneticField"})};
+    build_permission = toolkit::FetchBool(ptr,"cue","Regular");
+    ptr = toolkit::tracexml(doc.get(),{"Fieldout"});
     read_permission = toolkit::FetchBool(ptr,"read","breg_grid");
     write_permission = toolkit::FetchBool(ptr,"write","breg_grid");
     // build up grid when have read or write permission
@@ -30,7 +32,7 @@ Grid_breg::Grid_breg(const std::string &file_name){
 }
 
 void Grid_breg::build_grid(XMLDocument *doc){
-    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box"})};
+    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_GMF"})};
     // Cartesian grid
     nx = toolkit::FetchUnsigned(ptr,"value","nx");
     ny = toolkit::FetchUnsigned(ptr,"value","ny");

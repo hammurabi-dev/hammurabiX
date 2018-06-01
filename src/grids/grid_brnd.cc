@@ -36,7 +36,7 @@ Grid_brnd::Grid_brnd(const std::string &file_name){
 }
 
 void Grid_brnd::build_grid(XMLDocument *doc){
-    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box"})};
+    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_GMF"})};
     // Cartesian grid
     nx = toolkit::FetchUnsigned(ptr,"value","nx");
     ny = toolkit::FetchUnsigned(ptr,"value","ny");
