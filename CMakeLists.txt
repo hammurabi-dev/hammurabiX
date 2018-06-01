@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2.3)
-project(hammurabiX CXX)
 
 #-------------- customized zone --------------#
+set(CMAKE_CXX_COMPILER "g++")
 option(ENABLE_TESTING "Enable testing for this project" OFF)
 option(ENABLE_TIMING "Enable timing for this porect" ON)
 option(ON_DOCKER "Build on docker image" ON)
@@ -25,9 +25,12 @@ else()
 	set(FFTW_HINTS /u/shared/programs/x86_64/fftw/3.3.4/gnu/4.9.2)
 	set(CFITSIO_HINTS /home/jiwang/package/cfitsio)
 	set(HEALPIX_HINTS /home/jiwang/package/Healpix_3.30/src/cxx/generic_gcc)
+	set(GTEST_HINTS /home/jiwang/package/gtest)
 	set(CMAKE_INSTALL_PREFIX /home/jiwang/package/hammurabi)
 endif()
 #---------------------------------------------#
+
+project(hammurabiX CXX)
 
 # setup cxx standard
 set(CMAKE_CXX_STANDARD 14)
@@ -220,6 +223,7 @@ if(ENABLE_TESTING)
 		NAMES gtest
 		HINTS
 		${GTEST_HINTS}/lib
+		${GTEST_HINTS}/lib64
 	)
 	if(GTEST_INCLUDE_DIR)
 		list(APPEND ALL_INCLUDE_DIR ${GTEST_INCLUDE_DIR})
