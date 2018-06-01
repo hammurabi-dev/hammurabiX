@@ -4,10 +4,10 @@ project(hammurabiX CXX)
 #-------------- customized zone --------------#
 option(ENABLE_TESTING "Enable testing for this project" OFF)
 option(ENABLE_TIMING "Enable timing for this porect" ON)
-option(ON_DOCKER "Build on docker image" OFF)
-option(BUILD_SHARED_LIBS "Build shared library" OFF)
+option(ON_DOCKER "Build on docker image" ON)
+option(BUILD_SHARED_LIBS "Build shared library" ON)
 #-------------- instruction ------------------#
-# you have to specify your local paths of external libraries just below here 
+# you have to specify your local paths of external libraries just below here
 # in some special cases you have to modify find_path/find_library functions
 #
 # if you add new modules/derived classes beyond original code
@@ -18,6 +18,7 @@ if(ON_DOCKER)
 	set(FFTW_HINTS /usr/local)
 	set(CFITSIO_HINTS /usr/local)
 	set(HEALPIX_HINTS /home/lab/Healpix_3.31/src/cxx/optimized_gcc)
+	set(GTEST_HINTS /usr/local)
 	set(CMAKE_INSTALL_PREFIX /usr/local/hammurabi)
 else()
 	message("apply customized fftw3/cfitsio/healpix paths")
@@ -124,32 +125,32 @@ find_library(HEALPIX_SHA_LIBRARY
 if(HEALPIX_INCLUDE_DIR)
 	list(APPEND ALL_INCLUDE_DIR ${HEALPIX_INCLUDE_DIR})
 else()
-	message(FATAL_ERROR "${HEALPIX_INCLUDE_DIR} not found")
+	message(FATAL_ERROR "${HEALPIX_INCLUDE_DIR}")
 endif()
 if(HEALPIX_CXX_LIBRARY)
 	list(APPEND ALL_LIBRARIES ${HEALPIX_CXX_LIBRARY})
 else()
-	message(FATAL_ERROR "${HEALPIX_CXX_LIBRARY} not found")
+	message(FATAL_ERROR "${HEALPIX_CXX_LIBRARY}")
 endif()
 if(HEALPIX_SUP_LIBRARY)
 	list(APPEND ALL_LIBRARIES ${HEALPIX_SUP_LIBRARY})
 else()
-	message(FATAL_ERROR "${HEALPIX_SUP_LIBRARY} not found")
+	message(FATAL_ERROR "${HEALPIX_SUP_LIBRARY}")
 endif()
 if(HEALPIX_UTI_LIBRARY)
 	list(APPEND ALL_LIBRARIES ${HEALPIX_UTI_LIBRARY})
 else()
-	message(FATAL_ERROR "${HEALPIX_UTI_LIBRARY} not found")
+	message(FATAL_ERROR "${HEALPIX_UTI_LIBRARY}")
 endif()
 if(HEALPIX_FFT_LIBRARY)
 	list(APPEND ALL_LIBRARIES ${HEALPIX_FFT_LIBRARY})
 else()
-	message(FATAL_ERROR "${HEALPIX_FFT_LIBRARY} not found")
+	message(FATAL_ERROR "${HEALPIX_FFT_LIBRARY}")
 endif()
 if(HEALPIX_SHA_LIBRARY)
 	list(APPEND ALL_LIBRARIES ${HEALPIX_SHA_LIBRARY})
 else()
-	message(FATAL_ERROR "${HEALPIX_SHA_LIBRARY} not found")
+	message(FATAL_ERROR "${HEALPIX_SHA_LIBRARY}")
 endif()
 
 
@@ -167,12 +168,12 @@ find_library(CFITSIO_LIBRARY
 if(CFITSIO_INCLUDE_DIR)
 	list(APPEND ALL_INCLUDE_DIR ${CFITSIO_INCLUDE_DIR})
 else()
-	message(FATAL_ERROR "${CFITSIO_INCLUDE_DIR} not found")
+	message(FATAL_ERROR "${CFITSIO_INCLUDE_DIR}")
 endif()
 if(CFITSIO_LIBRARY)
 	list(APPEND ALL_LIBRARIES ${CFITSIO_LIBRARY})
 else()
-	message(FATAL_ERROR "${CFITSIO_LIBRARY} not found")
+	message(FATAL_ERROR "${CFITSIO_LIBRARY}")
 endif()
 
 # find FFTW, FFTW_OMP
@@ -194,17 +195,42 @@ find_library(FFTW_OMP_LIBRARY
 if(FFTW_INCLUDE_DIR)
 	list(APPEND ALL_INCLUDE_DIR ${FFTW_INCLUDE_DIR})
 else()
-	message(FATAL_ERROR "${FFTW_INCLUDE_DIR} not found")
+	message(FATAL_ERROR "${FFTW_INCLUDE_DIR}")
 endif()
 if(FFTW_LIBRARY)
 	list(APPEND ALL_LIBRARIES ${FFTW_LIBRARY})
 else()
-	message(FATAL_ERROR "${FFTW_LIBRARY} not found")
+	message(FATAL_ERROR "${FFTW_LIBRARY}")
 endif()
 if(FFTW_OMP_LIBRARY)
 	list(APPEND ALL_LIBRARIES ${FFTW_OMP_LIBRARY})
 else()
-	message(FATAL_ERROR "${FFTW_OMP_LIBRARY} not found")
+	message(FATAL_ERROR "${FFTW_OMP_LIBRARY}")
+endif()
+
+# find GoogleTest
+if(ENABLE_TESTING)
+	find_path(GTEST_INCLUDE_DIR
+		NAMES gtest.h
+		HINTS
+		${GTEST_HINTS}/include
+		PATH_SUFFIXES gtest
+	)
+	find_library(GTEST_LIBRARY
+		NAMES gtest
+		HINTS
+		${GTEST_HINTS}/lib
+	)
+	if(GTEST_INCLUDE_DIR)
+		list(APPEND ALL_INCLUDE_DIR ${GTEST_INCLUDE_DIR})
+	else()
+		message(FATAL_ERROR "${GTEST_INCLUDE_DIR}")
+	endif()
+	if(GTEST_LIBRARY)
+		list(APPEND ALL_LIBRARIES ${GTEST_LIBRARY})
+	else()
+		message(FATAL_ERROR "${GTEST_LIBRARY}")
+	endif()
 endif()
 
 # find GSL, GSL-cblas

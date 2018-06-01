@@ -10,19 +10,19 @@ WORKDIR /home/lab
 
 # CFITSIO
 RUN wget http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio_latest.tar.gz && tar xzf cfitsio_latest.tar.gz
-WORKDIR cfitsio
+WORKDIR /home/lab/cfitsio
 RUN ./configure --prefix=/usr/local/ && make && make install 
-WORKDIR ..
+WORKDIR /home/lab
 
 # FFTW
 RUN wget http://www.fftw.org/fftw-3.3.8.tar.gz && tar xzf fftw-3.3.8.tar.gz
 WORKDIR fftw-3.3.8
 RUN ./configure --enable-threads --enable-openmp --enable-shared --prefix=/usr/local/ && make && make install
-WORKDIR ..
+WORKDIR /home/lab
 
 # HEALPIX
 RUN wget http://downloads.sourceforge.net/project/healpix/Healpix_3.31/Healpix_3.31_2016Aug26.tar.gz && tar xzf Healpix_3.31_2016Aug26.tar.gz
-WORKDIR Healpix_3.31
+WORKDIR /home/lab/Healpix_3.31
 # write config file on fly
 RUN echo '4\n\
 	/sur/local/bin\n\
@@ -32,9 +32,17 @@ RUN echo '4\n\
 	0\n'\
 	> hlpx_config
 RUN ./configure < hlpx_config && make 
-WORKDIR ..
+WORKDIR /home/lab
 ENV HEALPIX_TARGET optimized_gcc 
 ENV HEALPIX /home/lab/Healpix_3.31
+
+# GOOGLE TEST
+RUN git clone https://github.com/google/googletest.git googletest
+WORKDIR /home/lab/googletest
+RUN mkdir /home/lab/googletest/build
+WORKDIR /home/lab/googletest/build
+RUN cmake .. && make && make install
+WORKDIR /home/lab
 
 # CLEAN PACKAGES
 RUN rm -f *.tar.gz
@@ -42,13 +50,11 @@ RUN rm -f *.tar.gz
 ENV LD_LIBRARY_PATH /usr/local/lib:${LD_LIBRARY_PATH}
 
 # HAMMURABI X
-RUN git clone https://bitbucket.org/hammurabicode/hamx
-WORKDIR hamx
-RUN mkdir /home/hamx/build
-WORKDIR /home/hamx/build
-RUN cmake ..
-RUN make
-RUN make install
+RUN git clone https://bitbucket.org/hammurabicode/hamx hamx
+WORKDIR /home/lab/hamx
+RUN mkdir /home/lab/hamx/build
+WORKDIR /home/lab/hamx/build
+RUN cmake .. && make && make install
 # SET PATH
 ENV PATH /usr/local/hammurabi/bin:${PATH}
 ENV LD_LIBRARY_PATH /usr/local/hammurabi/lib:${LD_LIBRARY_PATH}
