@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.2.3)
 project(hammurabiX CXX)
 
 #-------------- customized zone --------------#
@@ -15,34 +15,44 @@ option(BUILD_SHARED_LIBS "Build shared library" OFF)
 #
 
 if(ON_DOCKER)
-	set(GSL_HINTS /usr)
 	set(FFTW_HINTS /usr/local)
 	set(CFITSIO_HINTS /usr/local)
 	set(HEALPIX_HINTS /home/lab/Healpix_3.31/src/cxx/optimized_gcc)
 	set(CMAKE_INSTALL_PREFIX /usr/local/hammurabi)
 else()
-	message("apply customized gsl/fftw3/cfitsio/healpix paths")
-	set(GSL_HINTS /u/shared/programs/x86_64/gsl/2.2/gnu/4.9.2)
+	message("apply customized fftw3/cfitsio/healpix paths")
 	set(FFTW_HINTS /u/shared/programs/x86_64/fftw/3.3.4/gnu/4.9.2)
 	set(CFITSIO_HINTS /home/jiwang/package/cfitsio)
 	set(HEALPIX_HINTS /home/jiwang/package/Healpix_3.30/src/cxx/generic_gcc)
 	set(CMAKE_INSTALL_PREFIX /home/jiwang/package/hammurabi)
 endif()
-
 #---------------------------------------------#
 
 # setup cxx standard
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 # compile flags under defferent options
 if(ENABLE_TESTING AND ENABLE_TIMING)
-	set(CMAKE_CXX_FLAGS "-std=c++14 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread")
+	set(CMAKE_CXX_FLAGS "-std=c++14 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated")
 elseif(ENABLE_TIMING)
-	set(CMAKE_CXX_FLAGS "-std=c++14 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread -DNDEBUG")
+	set(CMAKE_CXX_FLAGS "-std=c++14 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -DNDEBUG")
 elseif(ENABLE_TESTING)
-	set(CMAKE_CXX_FLAGS "-std=c++14 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread -DNTIMING")
+	set(CMAKE_CXX_FLAGS "-std=c++14 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -DNTIMING")
 else()
-	set(CMAKE_CXX_FLAGS "-std=c++14 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread -DNTIMING -DNDEBUG")
+	set(CMAKE_CXX_FLAGS "-std=c++14 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -DNTIMING -DNDEBUG")
+endif()
+
+# openmp and thread support
+include(FindOpenMP)
+if(OPENMP_FOUND)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+else()
+	message(FATAL_ERROR "openmp unsupported")
+endif()
+if(ENABLE_TESTING)
+	find_package(Threads REQUIRED)
+	list(APPEND ALL_LIBRARIES ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 set(ALL_INCLUDE_DIR include)
@@ -197,48 +207,13 @@ else()
 	message(FATAL_ERROR "${FFTW_OMP_LIBRARY} not found")
 endif()
 
-# find GSL, GSL_CBLAS
-find_path(GSL_INCLUDE_DIR
-	NAMES gsl_math.h
-	HINTS 
-	${GSL_HINTS}/include
-	PATH_SUFFIXES gsl
-)
-find_library(GSL_LIBRARY
-	NAMES gsl
-	HINTS 
-	${GSL_HINTS}/lib
-	PATH_SUFFIXES x86_64-linux-gnu
-)
-find_library(GSL_CBLAS_LIBRARY
-	NAMES gslcblas
-	HINTS
-	${GSL_HINTS}/lib
-	PATH_SUFFIXES x86_64-linux-gnu
-)
-if(GSL_INCLUDE_DIR)
-	list(APPEND ALL_INCLUDE_DIR ${GSL_INCLUDE_DIR})
-else()
-	message(FATAL_ERROR "${GSL_INCLUDE_DIR} not found")
-endif()
-if(GSL_LIBRARY)
-	list(APPEND ALL_LIBRARIES ${GSL_LIBRARY})
-else()
-	message(FATAL_ERROR "${GSL_LIBRARY} not found")
-endif()
-if(GSL_CBLAS_LIBRARY)
-	list(APPEND ALL_LIBRARIES ${GSL_CBLAS_LIBRARY})
-else()
-	message(FATAL_ERROR "${GSL_CBLAS_LIBRARY} not found")
-endif()
-
-# debug info
-#message("suffix: ${CMAKE_FIND_LIBRARY_SUFFIXES}")
+# find GSL, GSL-cblas
+find_package(GSL REQUIRED)
 
 # assemble static lib
 include_directories(${ALL_INCLUDE_DIR})
 add_library(hammurabi ${SRC_FILES})
-target_link_libraries(hammurabi ${ALL_LIBRARIES})
+target_link_libraries(hammurabi ${ALL_LIBRARIES} GSL::gsl GSL::gslcblas)
 
 # build executable
 add_executable(hamx src/main/hammurabi.cc)
