@@ -41,7 +41,7 @@ RUN git clone https://github.com/google/googletest.git googletest
 WORKDIR /home/lab/googletest
 RUN mkdir /home/lab/googletest/build
 WORKDIR /home/lab/googletest/build
-RUN cmake .. && make && make install
+RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local .. && make && make install && cp -r ../src /usr/local/src
 WORKDIR /home/lab
 
 # CLEAN PACKAGES

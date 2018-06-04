@@ -37,8 +37,8 @@
             <y value="0"/> <!-- kpc -->
             <z value="6"/> <!-- pc -->
         </SunPosition>
-        <!-- field grid -->
-        <Box>
+        <!-- GMF field grid -->
+        <Box_GMF>
             <!-- grid vertex number -->
             <nx value="41"/>
             <ny value="41"/>
@@ -50,7 +50,37 @@
             <y_max value="20.0"/> <!-- kpc -->
             <z_min value="-5.0"/> <!-- kpc -->
             <z_max value="5.0"/> <!-- kpc -->
-        </Box>
+        </Box_GMF>
+        <!-- FE field grid -->
+        <Box_FE>
+            <!-- grid vertex number -->
+            <nx value="41"/>
+            <ny value="41"/>
+            <nz value="21"/>
+            <!-- box limit, in Galactic-centric frame -->
+            <x_min value="-20.0"/> <!-- kpc -->
+            <x_max value="20.0"/> <!-- kpc -->
+            <y_min value="-20.0"/> <!-- kpc -->
+            <y_max value="20.0"/> <!-- kpc -->
+            <z_min value="-5.0"/> <!-- kpc -->
+            <z_max value="5.0"/> <!-- kpc -->
+        </Box_FE>
+        <!-- CRE field grid -->
+        <Box_CRE>
+            <nz value="80"/>
+            <nx value="80"/>
+            <ny value="80"/>
+            <nE value="80"/>
+            <x_min value="0.0"/> <!-- kpc -->
+            <x_max value="0.0"/> <!-- kpc -->
+            <y_min value="0.0"/> <!-- kpc -->
+            <y_max value="0.0"/> <!-- kpc -->
+            <z_min value="-4.0"/> <!-- kpc -->
+            <z_max value="4.0"/> <!-- kpc -->
+            <!-- E_max = E_min*exp(nE*E_fact) -->
+            <E_min value="0.1"/> <!-- GeV -->
+            <E_max value="100.0"/> <!-- GeV -->
+        </Box_CRE>
         <!-- LOS integration setting -->
         <Shell>
             <layer type="auto">
@@ -80,7 +110,7 @@
     <!-- magnetic fields -->
     <MagneticField>
         <!-- regular fields -->
-        <Regular type="Verify">
+        <Regular cue="1" type="Verify">
             <!-- WMAP LSA -->
             <WMAP>
                 <b0 value="1.2"/> <!-- microG -->
@@ -169,7 +199,7 @@
     
     <!-- free electron field -->
     <FreeElectron>
-        <Regular type="YMW16">
+        <Regular cue="1" type="YMW16">
             <!-- YMW16 -->
             <YMW16>
                 <Warp>
@@ -294,26 +324,8 @@
             <j0 value="0.0217"/> <!-- local CRE flux norm factor @ E0 -->
         </Analytic>
         
-        <Numeric type="2D">
-            <!-- 2D Galactic-centric cylindric frame -->
-            <nr value="80"/> <!-- silent if type="3D" -->
-            <nz value="80"/>
-            <nx value="80"/> <!-- silent if type="2D" -->
-            <ny value="80"/> <!-- silent if type="2D" -->
-            
-            <!-- grid setting -->
-            <r_max value="20.0"/> <!-- kpc -->
-            <x_min value="0.0"/> <!-- kpc -->
-            <x_max value="0.0"/> <!-- kpc -->
-            <y_min value="0.0"/> <!-- kpc -->
-            <y_max value="0.0"/> <!-- kpc -->
-            <z_min value="-4.0"/> <!-- kpc -->
-            <z_max value="4.0"/> <!-- kpc -->
-            
-            <!-- E_max = E_min*exp(nE*E_fact) -->
-            <E_min value="0.1"/> <!-- GeV -->
-            <E_max value="100.0"/> <!-- GeV -->
-            <E_fact value="0.1"/> <!-- dimensionless -->
+        <Numeric>
+            <!-- info of numeric CRE in root->Grid->Box_CRE -->
         </Numeric>
         
         <!-- verification -->

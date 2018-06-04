@@ -1,5 +1,7 @@
 /** 
- * timer class, extendable
+ * timer module
+ * timer record time elapse from Timer::start to Timer::stop
+ * timer support nested/overlaped recording
  */
 #ifndef HAMMURABI_TIMR_H
 #define HAMMURABI_TIMR_H

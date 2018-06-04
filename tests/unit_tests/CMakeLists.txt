@@ -1,0 +1,26 @@
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/reference DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+set(_timer_tests timer_tests.cc)
+set(_tools_tests tools_tests.cc)
+
+set(_int_tests int_tests.cc)
+
+foreach (_t ${_timer_tests})
+  add_executable(${_t}_exe ${_t} ${GTEST_LIB_SOURCES} ${GTEST_MAIN_SOURCES})
+  target_include_directories(${_t}_exe PRIVATE ${ALL_INCLUDE_DIR} ${GTEST_INCLUDE_DIRS})
+  target_link_libraries(${_t}_exe ${CMAKE_THREAD_LIBS_INIT} ${ALL_LIBRARIES} hammurabi)
+  add_test(${_t} ${_t}_exe)
+endforeach()
+
+foreach (_t ${_tools_tests})
+  add_executable(${_t}_exe ${_t} ${GTEST_LIB_SOURCES} ${GTEST_MAIN_SOURCES})
+  target_include_directories(${_t}_exe PRIVATE ${ALL_INCLUDE_DIR} ${GTEST_INCLUDE_DIRS})
+  target_link_libraries(${_t}_exe ${CMAKE_THREAD_LIBS_INIT} ${ALL_LIBRARIES} hammurabi)
+  add_test(${_t} ${_t}_exe)
+endforeach()
+
+foreach (_t ${_int_tests})
+  add_executable(${_t}_exe ${_t} ${GTEST_LIB_SOURCES} ${GTEST_MAIN_SOURCES})
+  target_include_directories(${_t}_exe PRIVATE ${ALL_INCLUDE_DIR} ${GTEST_INCLUDE_DIRS})
+  target_link_libraries(${_t}_exe ${CMAKE_THREAD_LIBS_INIT} ${ALL_LIBRARIES} hammurabi)
+  add_test(${_t} ${_t}_exe)
+endforeach()
