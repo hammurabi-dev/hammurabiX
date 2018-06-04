@@ -12,6 +12,7 @@
 #include <cgs_units_file.h>
 #include <tinyxml2.h>
 #include <memory>
+#include <cassert>
 using namespace tinyxml2;
 
 namespace toolkit {
@@ -87,6 +88,7 @@ namespace toolkit {
                                const std::size_t &i,
                                const std::size_t &j,
                                const std::size_t &l){
+        assert(j<=n2 and l<=n3);
         return (i*n2*n3 + j*n3 + l);
     }
     /**
@@ -100,6 +102,7 @@ namespace toolkit {
                                const std::size_t &i,
                                const std::size_t &j,
                                const std::size_t &l){
+        assert(i<=n2 and j<=n3 and l<=n4);
         return (e*n2*n3*n4 + i*n3*n4 + j*n4 + l);
     }
     double Mean (const double *,
@@ -114,17 +117,6 @@ namespace toolkit {
     double Covariance (const std::vector<double> &,
                       const std::vector<double> &);
     /**
-     * convert an array into rank array
-     * 1st argument: array pointer
-     * 2nd argument: array size
-     */
-    void Rank (double *,
-              const std::size_t &);
-    /**
-     * convert a vector into rank vector
-     */
-    void Rank (std::vector<double> &);
-    /**
      * converting brightness temp into thermal temp with T_0 = 2.725K, Prog.Theor.Exp.Phys. (2014) 2014 (6): 06B109.
      */
     inline double temp_convert (const double &temp_br,
@@ -132,10 +124,6 @@ namespace toolkit {
         const double p {CGS_U_h_planck*freq/(CGS_U_kB*2.725)};
         return temp_br*(exp(p)-1.)*(exp(p)-1.)/(p*p*exp(p));;
     }
-    /**
-     * convert cartesian coordiante into frame with galacitc warp, while fields built in warpped frame as in ordinary frame
-     */
-    vec3_t<double> warp (const vec3_t<double> &);
     /**
      * use given seed number or generate random seed according to thread and clock
      */

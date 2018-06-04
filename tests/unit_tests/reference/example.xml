@@ -3,4 +3,5 @@
     <integer value="23"/>
     <double value="3.14"/>
     <string value="string"/>
+    <bool value="1"/>
 </root>
