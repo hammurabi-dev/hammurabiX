@@ -15,7 +15,7 @@ Original hammurabi source code can be found [**here**](https://sourceforge.net/p
 Please cite the original [Waelkens et al. (2009)](https://www.aanda.org/articles/aa/abs/2009/08/aa10564-08/aa10564-08.html) paper if you use hammurabi.
 
 ### version X.01
-*Currently we are in [TESTING](./unitest) release,
+*Currently we are in [TESTING](./tests) release,
 with limited amount of features available.
 Not all modelings have been thoroughly cross-checked with original hammurabi!
 A full release of version X.02 is scheduled in 2018-2019.*
