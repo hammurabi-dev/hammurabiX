@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.2.3)
 
 #-------------- customized zone --------------#
 set(CMAKE_CXX_COMPILER "g++")
-option(ENABLE_TESTING "Enable testing for this project" OFF)
+option(ENABLE_TESTING "Enable testing for this project" ON)
 option(ENABLE_TIMING "Enable timing for this porect" ON)
 option(ON_DOCKER "Build on docker image" ON)
 option(BUILD_SHARED_LIBS "Build shared library" ON)
