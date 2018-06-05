@@ -18,7 +18,7 @@
 
 double FErnd::get_fernd(const vec3_t<double> &pos,
                         Grid_fernd *grid){
-    if(grid->read_permission){
+    if(grid->read_permission or grid->build_permission){
         return read_grid(pos,grid);
     }
     // if no specific turbulent field model is called

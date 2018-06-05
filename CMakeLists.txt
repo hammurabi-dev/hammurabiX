@@ -94,8 +94,8 @@ set(SRC_FILES
 	src/fields/gmf/breg_verify.cc
 	src/fields/gmf/breg_wmap.cc
 	src/fields/gmf/breg.cc
-	src/fields/gmf/brnd_global.cc
-	src/fields/gmf/brnd_local.cc
+	src/fields/gmf/brnd_es.cc
+	src/fields/gmf/brnd_mhd.cc
 	src/fields/gmf/brnd.cc
 	src/fields/cre/cre.cc
 	src/fields/cre/cre_num.cc
@@ -103,7 +103,7 @@ set(SRC_FILES
 	src/fields/cre/cre_ana.cc
 	src/fields/fe/fereg_verify.cc
 	src/fields/fe/fereg.cc
-	src/fields/fe/fernd_global.cc
+	src/fields/fe/fernd_dft.cc
 	src/fields/fe/fernd.cc
 	src/fields/fe/fereg_ymw16.cc
 	src/params/param.cc
@@ -316,6 +316,8 @@ endif()
 # build executable
 add_executable(hamx src/main/hammurabi.cc)
 target_link_libraries(hamx hammurabi)
+# copy template parameter file into build directory
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/templates/params_template.xml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # install package
 install(TARGETS hamx DESTINATION bin)

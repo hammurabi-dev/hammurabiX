@@ -16,16 +16,8 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 
-
-vec3_t<double> Brnd_global::get_brnd(const vec3_t<double> &pos,
-                                     Grid_brnd *grid){
-    // interpolate written grid to given position
-    // check if you have called ::write_grid
-    return read_grid(pos,grid);
-}
-
 // global anisotropic turbulent field
-double Brnd_global::anisotropy(const vec3_t<double> &pos,
+double Brnd_es::anisotropy(const vec3_t<double> &pos,
                                vec3_t<double> &H,
                                Param *par,
                                Breg *breg,
@@ -33,17 +25,17 @@ double Brnd_global::anisotropy(const vec3_t<double> &pos,
     // H, direction of anisotropy
     H = toolkit::versor(breg->get_breg(pos,par,gbreg));
     // the simplest case, const.
-    return par->brnd_global.rho;
+    return par->brnd_es.rho;
 }
 
 // since we are using rms normalization
 // p0 is hidden and not affecting anything
-double Brnd_global::spec(const double &k,
+double Brnd_es::spec(const double &k,
                          Param *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_global.rms*CGS_U_muGauss};
-    const double kr {k/par->brnd_global.k0};
-    const double a0 {par->brnd_global.a0};
+    const double p0 {par->brnd_es.rms*CGS_U_muGauss};
+    const double kr {k/par->brnd_es.k0};
+    const double a0 {par->brnd_es.a0};
     const double unit = 1./(4*CGS_U_pi*k*k);
     // power law
     double P {0.};
@@ -55,18 +47,18 @@ double Brnd_global::spec(const double &k,
 
 // galactic scaling of random field energy density
 // set to 1 at observer's place
-double Brnd_global::rescal(const vec3_t<double> &pos,
+double Brnd_es::rescal(const vec3_t<double> &pos,
                            Param *par){
     const double r_cyl {sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x)};
     const double z {fabs(pos.z) - fabs(par->SunPosition.z)};
-    const double r0 {par->brnd_global.r0};
-    const double z0 {par->brnd_global.z0};
+    const double r0 {par->brnd_es.r0};
+    const double z0 {par->brnd_es.z0};
     return exp(-r_cyl/r0)*exp(-z/z0);
 }
 
 // Gram-Schimdt, rewritten using Healpix vec3 library
 // tiny error caused by machine is inevitable
-vec3_t<double> Brnd_global::gramschmidt(const vec3_t<double> &k,
+vec3_t<double> Brnd_es::gramschmidt(const vec3_t<double> &k,
                                         const vec3_t<double> &b){
     if(k.SquaredLength()==0 or b.SquaredLength()==0){
         return vec3_t<double> {0,0,0};
@@ -80,7 +72,7 @@ vec3_t<double> Brnd_global::gramschmidt(const vec3_t<double> &k,
     return b_free;
 }
 
-void Brnd_global::write_grid(Param *par,
+void Brnd_es::write_grid(Param *par,
                              Breg *breg,
                              Grid_breg *gbreg,
                              Grid_brnd *grid){
@@ -179,13 +171,13 @@ void Brnd_global::write_grid(Param *par,
                 // get physical position
                 pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
-                double ratio {sqrt(rescal(pos,par))*par->brnd_global.rms*b_var_invsq};
+                double ratio {sqrt(rescal(pos,par))*par->brnd_es.rms*b_var_invsq};
                 const std::size_t idx {idx_lv2+l};
                 // assemble b_Re
                 // after 1st Fourier transformation, c0_R = bx, c0_I = by, c1_I = bz
                 vec3_t<double> b_re {grid->c0[idx][0]*ratio,
-                                    grid->c0[idx][1]*ratio,
-                                    grid->c1[idx][1]*ratio};
+                    grid->c0[idx][1]*ratio,
+                    grid->c1[idx][1]*ratio};
                 // impose anisotropy
                 vec3_t<double> H_versor {0.,0.,0.,};
                 double rho {anisotropy(pos,H_versor,par,breg,gbreg)};
@@ -248,12 +240,12 @@ void Brnd_global::write_grid(Param *par,
                  * c1*1(-k) = by(k) - i bz(k)
                  */
                 const vec3_t<double> tmp_b_re {0.5*(grid->c0[idx][0]+grid->c0[idx_sym][0]),
-                                                0.5*(grid->c1[idx][0]+grid->c1[idx_sym][0]),
-                                                0.5*(grid->c1[idx_sym][1]+grid->c1[idx][1])};
+                    0.5*(grid->c1[idx][0]+grid->c1[idx_sym][0]),
+                    0.5*(grid->c1[idx_sym][1]+grid->c1[idx][1])};
                 
                 const vec3_t<double> tmp_b_im {0.5*(grid->c0[idx][1]-grid->c0[idx_sym][1]),
-                                                0.5*(grid->c1[idx][1]-grid->c1[idx_sym][1]),
-                                                0.5*(grid->c1[idx_sym][0]-grid->c1[idx][0])};
+                    0.5*(grid->c1[idx][1]-grid->c1[idx_sym][1]),
+                    0.5*(grid->c1[idx_sym][0]-grid->c1[idx][0])};
                 
                 const vec3_t<double> free_b_re {gramschmidt(tmp_k,tmp_b_re)};
                 const vec3_t<double> free_b_im {gramschmidt(tmp_k,tmp_b_im)};
@@ -284,3 +276,4 @@ void Brnd_global::write_grid(Param *par,
         grid->bz[i] = grid->c1[i][1]*inv_grid_size;
     }
 }
+

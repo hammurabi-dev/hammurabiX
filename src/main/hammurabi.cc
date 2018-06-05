@@ -123,11 +123,13 @@ void Pipeline::assemble_fernd(){
         fernd = std::make_unique<FErnd>();
     }
     else if(grid_fernd->build_permission){
-        XMLElement *ptr {toolkit::tracexml(doc.get(),{"FreeElectron"})};
-        std::string field_type {toolkit::FetchString(ptr,"type","Random")};
+        XMLElement *ptr {toolkit::tracexml(doc.get(),{"FreeElectron","Random"})};
+        std::string field_type {toolkit::FetchString(ptr,"type")};
         if(field_type=="Global"){
-            // non default constructor
-            fernd = std::make_unique<FErnd_global>();
+            std::string field_method {toolkit::FetchString(ptr,"type","Global")};
+            if(field_method=="DFT"){
+                fernd = std::make_unique<FErnd_dft>();
+            }
             // fill grid with random fields
             fernd->write_grid(par.get(),grid_fernd.get());
         }
@@ -148,20 +150,29 @@ void Pipeline::assemble_brnd(){
         brnd = std::make_unique<Brnd>();
     }
     else if(grid_brnd->build_permission){
-        XMLElement *ptr {toolkit::tracexml(doc.get(),{"MagneticField"})};
-        std::string field_type {toolkit::FetchString(ptr,"type","Random")};
+        XMLElement *ptr {toolkit::tracexml(doc.get(),{"MagneticField","Random"})};
+        std::string field_type {toolkit::FetchString(ptr,"type")};
         if(field_type=="Global"){
-            brnd = std::make_unique<Brnd_global>();
+            std::string field_method {toolkit::FetchString(ptr,"type","Global")};
+            if(field_method=="ES"){
+                brnd = std::make_unique<Brnd_es>();
+            }
+            //else if(field_method=="Jaffe"){
+            // to be implemented
+            //brnd = std::make_unique<Brnd_jaffe>();
+            //}
             // fill grid with random fields
             brnd->write_grid(par.get(),breg.get(),grid_breg.get(),grid_brnd.get());
         }
         else if(field_type=="Local"){
-            brnd = std::make_unique<Brnd_local>();
+            std::string field_method {toolkit::FetchString(ptr,"type","Local")};
+            if(field_method=="MHD"){
+                brnd = std::make_unique<Brnd_mhd>();
+            }
             // fill grid with random fields
             brnd->write_grid(par.get(),breg.get(),grid_breg.get(),grid_brnd.get());
         }
         else assert(false);
-        
     }
     else{
         //without read permission, return zeros

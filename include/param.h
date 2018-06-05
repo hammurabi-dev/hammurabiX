@@ -51,20 +51,20 @@ public:
     // random seed
     std::size_t brnd_seed;
     // global
-    struct param_brnd_global{
+    struct param_brnd_global_es{
         double rms;
         double k0;
         double a0;
         double rho;
         double r0,z0;
-    }brnd_global;
+    }brnd_es;
     // local
-    struct param_brnd_local{
+    struct param_brnd_local_mhd{
         double pa0,pf0,ps0;
         double aa0,af0,as0;
         double k0;
         double ma,beta;
-    }brnd_local;
+    }brnd_mhd;
     // FE
     // ymw16
     struct param_fereg_ymw16{
@@ -86,13 +86,13 @@ public:
     // random seed
     std::size_t fernd_seed;
     // isotropic
-    struct param_fernd_global{
+    struct param_fernd_global_dft{
         double rms;
         double k0;
         double a0;
         double r0;
         double z0;
-    }fernd_global;
+    }fernd_dft;
     // CRE
     // analytical
     double sim_freq;

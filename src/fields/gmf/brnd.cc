@@ -15,11 +15,10 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 #include <cassert>
-using namespace std;
 
 vec3_t<double> Brnd::get_brnd(const vec3_t<double> &pos,
                               Grid_brnd *grid){
-    if(grid->read_permission){
+    if(grid->read_permission or grid->build_permission){
         return read_grid(pos,grid);
     }
     // if no specific random field model is called

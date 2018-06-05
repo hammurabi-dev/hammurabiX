@@ -55,14 +55,32 @@ public:
 };
 
 /**
- * global (an)isotropic turbulent GMF,
+ * global (an)isotropic turbulent GMF
+ * this class is treated as a covering class for specific methods
  */
-class Brnd_global final : public Brnd{
+class Brnd_global : public Brnd{
 public:
     Brnd_global(void) = default;
     virtual ~Brnd_global(void) = default;
-    vec3_t<double> get_brnd(const vec3_t<double> &,
-                            Grid_brnd *) override;
+};
+
+/**
+ * local (an)isotropic turbulent GMF
+ * this class is treated as a covering class for specific methods
+ */
+class Brnd_local : public Brnd{
+public:
+    Brnd_local(void) = default;
+    virtual ~Brnd_local(void) = default;
+};
+
+/**
+ * Ensslin-Steininger method of global (an)isotropic turbulent GMF
+ */
+class Brnd_es final : public Brnd_global{
+public:
+    Brnd_es(void) = default;
+    virtual ~Brnd_es(void) = default;
     /**
      * use triple Fourier transform scheme
      * check technical report for details
@@ -71,7 +89,6 @@ public:
                     Breg *,
                     Grid_breg *,
                     Grid_brnd *) override;
-    
 private:
     /**
      * isotropic power-spectrum
@@ -112,16 +129,19 @@ private:
 };
 
 /**
+ * Jaffe method of global (an)isotropic turbulent GMF
+ */
+//class Brnd_Jaffe final : public Brnd_global
+
+/**
  * local anisotropic turbulent GMF
  * in compressive MHD plasma
  * check technical report for details
  */
-class Brnd_local final : public Brnd{
+class Brnd_mhd final : public Brnd_local{
 public:
-    Brnd_local(void) = default;
-    virtual ~Brnd_local(void) = default;
-    vec3_t<double> get_brnd(const vec3_t<double> &,
-                            Grid_brnd *) override;
+    Brnd_mhd(void) = default;
+    virtual ~Brnd_mhd(void) = default;
     /**
      * use vector field decomposition scheme
      * use regular GMF at position of the Sun

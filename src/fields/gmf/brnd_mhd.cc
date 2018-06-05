@@ -15,15 +15,7 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 
-
-vec3_t<double> Brnd_local::get_brnd(const vec3_t<double> &pos,
-                                    Grid_brnd *grid){
-    // interpolate written grid to given position
-    // check if you have called ::write_grid
-    return read_grid(pos,grid);
-}
-
-void Brnd_local::write_grid(Param *par,
+void Brnd_mhd::write_grid(Param *par,
                             Breg *breg,
                             Grid_breg *gbreg,
                             Grid_brnd *grid){
@@ -85,9 +77,9 @@ void Brnd_local::write_grid(Param *par,
                  */
                 if(ep.SquaredLength()>1e-6){
                     double ang {cosa(B,k)};
-                    const double Pa {speca(ks,par)*fa(par->brnd_local.ma,ang)*dk3};
-                    double Pf {specf(ks,par)*hf(par->brnd_local.beta,ang)*dk3};
-                    double Ps {specs(ks,par)*fs(par->brnd_local.ma,ang)*hs(par->brnd_local.beta,ang)*dk3};
+                    const double Pa {speca(ks,par)*fa(par->brnd_mhd.ma,ang)*dk3};
+                    double Pf {specf(ks,par)*hf(par->brnd_mhd.beta,ang)*dk3};
+                    double Ps {specs(ks,par)*fs(par->brnd_mhd.ma,ang)*hs(par->brnd_mhd.beta,ang)*dk3};
                     /**
                      * b+ is independent from b- in terms of power
                      * fast and slow modes are independent
@@ -111,7 +103,7 @@ void Brnd_local::write_grid(Param *par,
                     grid->c1[idx][1] = bkp.z + bkm.z;
                 }
                 else{
-                    double Pf {specf(ks,par)*hf(par->brnd_local.beta,1)*dk3};
+                    double Pf {specf(ks,par)*hf(par->brnd_mhd.beta,1)*dk3};
                     if(i==0 and j==0){
                         ep.x = k.x;
                         em.y = k.y;
@@ -196,7 +188,7 @@ void Brnd_local::write_grid(Param *par,
 }
 
 // PRIVATE FUNCTIONS FOR LOW-BETA SUB-ALFVENIC PLASMA
-vec3_t<double> Brnd_local::eplus(const vec3_t<double> &b,
+vec3_t<double> Brnd_mhd::eplus(const vec3_t<double> &b,
                                  const vec3_t<double> &k){
     vec3_t<double> tmp {crossprod(toolkit::versor(k),toolkit::versor(b))};
     if(tmp.SquaredLength()<1e-12){
@@ -207,7 +199,7 @@ vec3_t<double> Brnd_local::eplus(const vec3_t<double> &b,
     }
 }
 
-vec3_t<double> Brnd_local::eminus(const vec3_t<double> &b,
+vec3_t<double> Brnd_mhd::eminus(const vec3_t<double> &b,
                                   const vec3_t<double> &k){
     vec3_t<double> tmp {crossprod(crossprod(toolkit::versor(k),toolkit::versor(b)),toolkit::versor(k))};
     if(tmp.SquaredLength()<1e-12){
@@ -218,7 +210,7 @@ vec3_t<double> Brnd_local::eminus(const vec3_t<double> &b,
     }
 }
 
-double Brnd_local::hs(const double &beta,
+double Brnd_mhd::hs(const double &beta,
                       const double &cosa){
     if(cosa<1e-6){
         return 0;
@@ -230,7 +222,7 @@ double Brnd_local::hs(const double &beta,
     }
 }
 
-double Brnd_local::hf(const double &beta,
+double Brnd_mhd::hf(const double &beta,
                       const double &cosa){
     if(cosa<1e-6){
         return 0;
@@ -242,12 +234,12 @@ double Brnd_local::hf(const double &beta,
     }
 }
 
-double Brnd_local::speca(const double &k,
+double Brnd_mhd::speca(const double &k,
                          Param *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_local.pa0};
-    const double kr {k/par->brnd_local.k0};
-    const double a0 {par->brnd_local.aa0};
+    const double p0 {par->brnd_mhd.pa0};
+    const double kr {k/par->brnd_mhd.k0};
+    const double a0 {par->brnd_mhd.aa0};
     const double unit = 1./(4*CGS_U_pi*k*k);
     // power law
     double P {0.};
@@ -257,12 +249,12 @@ double Brnd_local::speca(const double &k,
     return P*unit;
 }
 
-double Brnd_local::specf(const double &k,
+double Brnd_mhd::specf(const double &k,
                          Param *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_local.pf0};
-    const double kr {k/par->brnd_local.k0};
-    const double a0 {par->brnd_local.af0};
+    const double p0 {par->brnd_mhd.pf0};
+    const double kr {k/par->brnd_mhd.k0};
+    const double a0 {par->brnd_mhd.af0};
     const double unit = 1./(4*CGS_U_pi*k*k);
     // power law
     double P{0.};
@@ -272,12 +264,12 @@ double Brnd_local::specf(const double &k,
     return P*unit;
 }
 
-double Brnd_local::specs(const double &k,
+double Brnd_mhd::specs(const double &k,
                          Param *par){
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_local.ps0};
-    const double kr {k/par->brnd_local.k0};
-    const double a0 {par->brnd_local.as0};
+    const double p0 {par->brnd_mhd.ps0};
+    const double kr {k/par->brnd_mhd.k0};
+    const double a0 {par->brnd_mhd.as0};
     const double unit = 1./(4*CGS_U_pi*k*k);
     // power law
     double P {0.};

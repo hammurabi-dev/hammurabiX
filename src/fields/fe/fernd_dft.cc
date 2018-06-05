@@ -15,23 +15,14 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 
-
-// isotropic turbulent field
-double FErnd_global::get_fernd(const vec3_t<double> &pos,
-                               Grid_fernd *grid){
-    // interpolate written grid to given position
-    // check if you have called ::write_grid
-    return read_grid(pos,grid);
-}
-
 // since we are using rms normalization
 // p0 is hidden and not affecting anything
-double FErnd_global::spec(const double &k,
+double FErnd_dft::spec(const double &k,
                           Param *par){
     //units fixing
-    const double p0 {par->fernd_global.rms}; //pccm
-    const double kr {k/par->fernd_global.k0};
-    const double a0 {par->fernd_global.a0};
+    const double p0 {par->fernd_dft.rms}; //pccm
+    const double kr {k/par->fernd_dft.k0};
+    const double a0 {par->fernd_dft.a0};
     const double unit = 1./(4*CGS_U_pi*k*k);
     double P {0.};
     if(kr>1){
@@ -42,16 +33,16 @@ double FErnd_global::spec(const double &k,
 
 // galactic scaling of random field energy density
 // set to 1 at observer's place
-double FErnd_global::rescal(const vec3_t<double> &pos,
+double FErnd_dft::rescal(const vec3_t<double> &pos,
                             Param *par){
     const double r_cyl {sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x)};
     const double z {fabs(pos.z) - fabs(par->SunPosition.z)};
-    const double r0 {par->fernd_global.r0};
-    const double z0 {par->fernd_global.z0};
+    const double r0 {par->fernd_dft.r0};
+    const double z0 {par->fernd_dft.z0};
     return exp(-r_cyl/r0)*exp(-z/z0);
 }
 
-void FErnd_global::write_grid(Param *par,
+void FErnd_dft::write_grid(Param *par,
                               Grid_fernd *grid){
     //PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
@@ -145,7 +136,7 @@ void FErnd_global::write_grid(Param *par,
                 // get physical position
                 pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
-                double ratio {sqrt(rescal(pos,par))*par->fernd_global.rms*fe_var_invsq};
+                double ratio {sqrt(rescal(pos,par))*par->fernd_dft.rms*fe_var_invsq};
                 const size_t idx {idx_lv2+l};
                 // manually pass back rescaled Re part
                 grid->fe[idx] = grid->fe_k[idx][0]*ratio;

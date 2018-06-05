@@ -86,25 +86,37 @@ void Param::b_param(XMLDocument *doc){
         // brnd_global
         if(brnd_type=="Global"){
             XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Random","Global"})};
-            brnd_global.rms = toolkit::FetchDouble(subptr,"value","rms")*CGS_U_muGauss;
-            brnd_global.k0 = toolkit::FetchDouble(subptr,"value","k0");
-            brnd_global.a0 = toolkit::FetchDouble(subptr,"value","a0");
-            brnd_global.rho = toolkit::FetchDouble(subptr,"value","rho");
-            brnd_global.r0 = toolkit::FetchDouble(subptr,"value","r0")*CGS_U_kpc;
-            brnd_global.z0 = toolkit::FetchDouble(subptr,"value","z0")*CGS_U_kpc;
+            std::string brnd_method {toolkit::FetchString(subptr,"type")};
+            if(brnd_method=="ES"){
+                subptr = toolkit::tracexml(doc,{"MagneticField","Random","Global","ES"});
+                brnd_es.rms = toolkit::FetchDouble(subptr,"value","rms")*CGS_U_muGauss;
+                brnd_es.k0 = toolkit::FetchDouble(subptr,"value","k0");
+                brnd_es.a0 = toolkit::FetchDouble(subptr,"value","a0");
+                brnd_es.rho = toolkit::FetchDouble(subptr,"value","rho");
+                brnd_es.r0 = toolkit::FetchDouble(subptr,"value","r0")*CGS_U_kpc;
+                brnd_es.z0 = toolkit::FetchDouble(subptr,"value","z0")*CGS_U_kpc;
+            }
+            else if(brnd_method=="Jaffe"){
+                subptr = toolkit::tracexml(doc,{"MagneticField","Random","Global","Jaffe"});
+                // to be implemented
+            }
         }
         // brnd_local
         else if(brnd_type=="Local"){
             XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Random","Local"})};
-            brnd_local.pa0 = toolkit::FetchDouble(subptr,"value","pa0")*CGS_U_muGauss*CGS_U_muGauss;
-            brnd_local.pf0 = toolkit::FetchDouble(subptr,"value","pf0")*CGS_U_muGauss*CGS_U_muGauss;
-            brnd_local.ps0 = toolkit::FetchDouble(subptr,"value","ps0")*CGS_U_muGauss*CGS_U_muGauss;
-            brnd_local.aa0 = toolkit::FetchDouble(subptr,"value","aa0");
-            brnd_local.af0 = toolkit::FetchDouble(subptr,"value","af0");
-            brnd_local.as0 = toolkit::FetchDouble(subptr,"value","as0");
-            brnd_local.k0 = toolkit::FetchDouble(subptr,"value","k0");
-            brnd_local.beta = toolkit::FetchDouble(subptr,"value","beta");
-            brnd_local.ma = toolkit::FetchDouble(subptr,"value","ma");
+            std::string brnd_method {toolkit::FetchString(subptr,"type")};
+            if(brnd_method=="MHD"){
+                subptr = toolkit::tracexml(doc,{"MagneticField","Random","Local","MHD"});
+                brnd_mhd.pa0 = toolkit::FetchDouble(subptr,"value","pa0")*CGS_U_muGauss*CGS_U_muGauss;
+                brnd_mhd.pf0 = toolkit::FetchDouble(subptr,"value","pf0")*CGS_U_muGauss*CGS_U_muGauss;
+                brnd_mhd.ps0 = toolkit::FetchDouble(subptr,"value","ps0")*CGS_U_muGauss*CGS_U_muGauss;
+                brnd_mhd.aa0 = toolkit::FetchDouble(subptr,"value","aa0");
+                brnd_mhd.af0 = toolkit::FetchDouble(subptr,"value","af0");
+                brnd_mhd.as0 = toolkit::FetchDouble(subptr,"value","as0");
+                brnd_mhd.k0 = toolkit::FetchDouble(subptr,"value","k0");
+                brnd_mhd.beta = toolkit::FetchDouble(subptr,"value","beta");
+                brnd_mhd.ma = toolkit::FetchDouble(subptr,"value","ma");
+            }
         }
     }
 }
@@ -218,11 +230,15 @@ void Param::fe_param(XMLDocument *doc){
         // global turbulent
         if(fernd_type=="Global"){
             XMLElement *subptr {toolkit::tracexml(doc,{"FreeElectron","Random","Global"})};
-            fernd_global.rms = toolkit::FetchDouble(subptr,"value","rms");
-            fernd_global.k0 = toolkit::FetchDouble(subptr,"value","k0");
-            fernd_global.a0 = toolkit::FetchDouble(subptr,"value","a0");
-            fernd_global.r0 = toolkit::FetchDouble(subptr,"value","r0")*CGS_U_kpc;
-            fernd_global.z0 = toolkit::FetchDouble(subptr,"value","z0")*CGS_U_kpc;
+            std::string fernd_method {toolkit::FetchString(subptr,"type")};
+            if(fernd_method=="DFT"){
+                subptr = toolkit::tracexml(doc,{"FreeElectron","Random","Global","DFT"});
+                fernd_dft.rms = toolkit::FetchDouble(subptr,"value","rms");
+                fernd_dft.k0 = toolkit::FetchDouble(subptr,"value","k0");
+                fernd_dft.a0 = toolkit::FetchDouble(subptr,"value","a0");
+                fernd_dft.r0 = toolkit::FetchDouble(subptr,"value","r0")*CGS_U_kpc;
+                fernd_dft.z0 = toolkit::FetchDouble(subptr,"value","z0")*CGS_U_kpc;
+            }
         }
     }
 }

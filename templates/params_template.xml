@@ -167,36 +167,42 @@
                 <r value="0.3"/>
             </Verify>
         </Regular>
-        <!-- turbulent fields -->
+        <!-- random/turbulent fields -->
         <!-- seed should be non-negative int -->
         <!-- seed=0, seed according to thread id and time -->
         <Random cue="0" type="Local" seed="0">
-            <!-- global anisotropy -->
-            <Global>
-                <rms value="0.8"/> <!-- RMS -->
-                <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
-                <a0 value="1.7"/> <!-- 5/3, Kolmogorov -->
-                <rho value="0.5"/> <!-- [0,1] -->
-                <!-- energy density rescaling -->
-                <r0 value="8.0"/> <!-- in kpc -->
-                <z0 value="1.0"/> <!-- in kpc -->
+            <!-- global generators -->
+            <Global type="ES">
+                <!-- Ensslin-Steininger method -->
+                <ES>
+                    <rms value="0.8"/> <!-- RMS -->
+                    <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
+                    <a0 value="1.7"/> <!-- 5/3, Kolmogorov -->
+                    <rho value="0.5"/> <!-- [0,1] -->
+                    <!-- energy density rescaling -->
+                    <r0 value="8.0"/> <!-- in kpc -->
+                    <z0 value="1.0"/> <!-- in kpc -->
+                </ES>
+                <!-- Jaffe method -->
+                <Jaffe>
+                    <!-- to be implemented -->
+                </Jaffe>
             </Global>
-            <!-- local turbulent -->
-            <Local>
-                <pa0  value="1"/> <!-- Alfven power norm at k0 -->
-                <pf0 value="1"/> <!-- fast power norm at k0 -->
-                <ps0 value="1"/> <!-- slow power norm at k0 -->
-                <aa0 value="1.7"/> <!-- Kolmogorov -->
-                <af0 value="1.5"/>
-                <as0 value="1.7"/>
-                <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
-                <beta value="0.1"/> <!-- plasma beta -->
-                <ma value="0.5"/> <!-- Alfven Mach number -->
+            <!-- local generators -->
+            <Local type="MHD">
+                <!-- compressive MHD approximation -->
+                <MHD>
+                    <pa0  value="1"/> <!-- Alfven power norm at k0 -->
+                    <pf0 value="1"/> <!-- fast power norm at k0 -->
+                    <ps0 value="1"/> <!-- slow power norm at k0 -->
+                    <aa0 value="1.7"/> <!-- Kolmogorov -->
+                    <af0 value="1.5"/>
+                    <as0 value="1.7"/>
+                    <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
+                    <beta value="0.1"/> <!-- plasma beta -->
+                    <ma value="0.5"/> <!-- Alfven Mach number -->
+                </MHD>
             </Local>
-            <!-- Jaffe turbulent -->
-            <Jaffe>
-                
-            </Jaffe>
         </Random>
     </MagneticField>
     
@@ -297,18 +303,23 @@
                 <r0 value="3.0"/> <!-- kpc -->
             </Verify>
         </Regular>
-        <!-- turbulent free electron -->
+        <!-- random/turbulent free electron -->
         <Random cue="0" type="Global" seed="0">
-            <Global>
-                <rms value="1.0"/>
-                <k0 value="2.0"/> <!-- cutoff 1/Lambda in kpc -->
-                <a0 value="-1.7"/>
-                <!-- field strength rescaling -->
-                <r0 value="8.0"/> <!-- in kpc -->
-                <z0 value="1.0"/> <!-- in kpc -->
+            <!-- global generator -->
+            <Global type="DFT">
+                <!-- default global generator -->
+                <DFT>
+                    <rms value="1.0"/>
+                    <k0 value="2.0"/> <!-- cutoff 1/Lambda in kpc -->
+                    <a0 value="-1.7"/>
+                    <!-- field strength rescaling -->
+                    <r0 value="8.0"/> <!-- in kpc -->
+                    <z0 value="1.0"/> <!-- in kpc -->
+                </DFT>
             </Global>
+            <!-- local generator -->
             <Local>
-                
+                <!-- to be implemented -->
             </Local>
         </Random>
     </FreeElectron>
