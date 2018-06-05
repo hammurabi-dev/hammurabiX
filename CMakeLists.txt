@@ -15,13 +15,19 @@ option(BUILD_SHARED_LIBS "Build shared library" ON)
 # 
 # you have to specify your local paths of external libraries just below here
 # in some special cases you have to modify find_path/find_library functions
+#
+# in some special cases, you may want to manually fix LFLAGS or CFLAGS
 # 
 # update your CMake as much as you can
 #
 # if you add new modules/derived classes beyond original code
 # please manually add source file paths to set(SRC_FILES ...) function
 #
-# complain any inconvenience to J.Wang (jiwang@sissa.it)
+# the last resort would be manually calling homemade Makefile building system
+# you can find cached building files in mfcache
+#
+# if even the last resort fails you
+# complain your issue to J.Wang (jiwang@sissa.it)
 #
 # @ enthusiastic or paranoid developers:
 # we use GoogleTest for tests
@@ -29,7 +35,6 @@ option(BUILD_SHARED_LIBS "Build shared library" ON)
 # you can either install GoogleTest and cp src dir into install path
 # or just download GoogleTest and specify root dir to GTEST_HINTS
 #--------------------------------------------#
-
 # we set GSL_HINTS just in case FindGSL fails
 if(ON_DOCKER)
 	set(GSL_HINTS /usr) 
@@ -37,15 +42,16 @@ if(ON_DOCKER)
 	set(CFITSIO_HINTS /usr/local)
 	set(HEALPIX_HINTS /home/lab/Healpix_3.31/src/cxx/optimized_gcc)
 	set(GTEST_HINTS /usr/local)
-	set(CMAKE_INSTALL_PREFIX /usr/local/hammurabi)
+	set(INSTALL_ROOT_DIR /usr/local/hammurabi)
 else()
 	message("apply customized fftw3/cfitsio/healpix paths")
 	set(GSL_HINTS /u/shared/programs/x86_64/gsl/2.2/gnu/4.9.2)
-	set(FFTW_HINTS /u/shared/programs/x86_64/fftw/3.3.4/gnu/4.9.2)
+	set(FFTW_HINTS /home/jiwang/package/fftw)
 	set(CFITSIO_HINTS /home/jiwang/package/cfitsio)
-	set(HEALPIX_HINTS /home/jiwang/package/Healpix_3.30/src/cxx/generic_gcc)
-	set(GTEST_HINTS /home/jiwang/package/gtest)
-	set(CMAKE_INSTALL_PREFIX /home/jiwang/package/hammurabi)
+	set(HEALPIX_HINTS /home/jiwang/package/Healpix_3.31/src/cxx/optimized_gcc)
+	set(GTEST_HINTS /home/jiwang/package/googletest)
+	set(INSTALL_ROOT_DIR /home/jiwang/package/hammurabi)
+	set(CMAKE_EXE_LINKER_FLAGS -lcurl)
 endif()
 #---------------------------------------------#
 
@@ -320,6 +326,7 @@ target_link_libraries(hamx hammurabi)
 file(COPY ${CMAKE_CURRENT_LIST_DIR}/templates/params_template.xml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # install package
+set(CMAKE_INSTALL_PREFIX ${INSTALL_ROOT_DIR})
 install(TARGETS hamx DESTINATION bin)
 install(FILES 
 	include/breg.h

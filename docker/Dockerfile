@@ -31,7 +31,7 @@ RUN echo '4\n\
 	y\n\
 	0\n'\
 	> hlpx_config
-RUN ./configure < hlpx_config && make 
+RUN ./configure -L < hlpx_config && make 
 WORKDIR /home/lab
 ENV HEALPIX_TARGET optimized_gcc 
 ENV HEALPIX /home/lab/Healpix_3.31
