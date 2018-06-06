@@ -14,9 +14,8 @@
 #include <namespace_toolkit.h>
 #include <cassert>
 
-using namespace tinyxml2;
 
-void Grid::build_grid(XMLDocument *){
+void Grid::build_grid(tinyxml2::XMLDocument *){
     assert(false);
 }
 

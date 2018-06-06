@@ -14,8 +14,6 @@
 #include <cgs_units_file.h>
 #include <tinyxml2.h>
 
-using namespace tinyxml2;
-
 namespace toolkit {
     // calculate the perpendicular to LOS component of a vector
     double perp2los (const vec3_t<double> &input,
@@ -159,16 +157,16 @@ namespace toolkit {
     }
     
     // auxiliary functions for parsing parameters
-    std::unique_ptr<XMLDocument> loadxml(const std::string& filename){
-        std::unique_ptr<XMLDocument> doc = std::make_unique<XMLDocument>();
+    std::unique_ptr<tinyxml2::XMLDocument> loadxml(const std::string& filename){
+        std::unique_ptr<tinyxml2::XMLDocument> doc = std::make_unique<tinyxml2::XMLDocument>();
         doc->LoadFile(filename.c_str());
         assert(!doc->Error());
         return move(doc);
     }
     //
-    XMLElement* tracexml(XMLDocument *doc,
+    tinyxml2::XMLElement* tracexml(tinyxml2::XMLDocument *doc,
                          const std::vector<std::string>& keychain){
-        XMLElement* el {doc->FirstChildElement("root")};
+        tinyxml2::XMLElement* el {doc->FirstChildElement("root")};
         if(!keychain.empty()){
             for(auto key: keychain){
 #ifndef NDEBUG
@@ -180,7 +178,7 @@ namespace toolkit {
         return el;
     }
     //
-    std::string FetchString(XMLElement* el,
+    std::string FetchString(tinyxml2::XMLElement* el,
                             const std::string& att_type,
                             const std::string& key){
 #ifndef NDEBUG
@@ -189,7 +187,7 @@ namespace toolkit {
         return el->FirstChildElement(key.c_str())->Attribute(att_type.c_str());
     }
     //
-    std::string FetchString(XMLElement* el,
+    std::string FetchString(tinyxml2::XMLElement* el,
                             const std::string& att_type){
 #ifndef NDEBUG
         std::cout<<"attrib: "<<att_type<<std::endl;
@@ -197,7 +195,7 @@ namespace toolkit {
         return el->Attribute(att_type.c_str());
     }
     //
-    int FetchInt(XMLElement* el,
+    int FetchInt(tinyxml2::XMLElement* el,
                  const std::string& att_type,
                  const std::string& key){
 #ifndef NDEBUG
@@ -206,7 +204,7 @@ namespace toolkit {
         return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str());
     }
     //
-    int FetchInt(XMLElement* el,
+    int FetchInt(tinyxml2::XMLElement* el,
                  const std::string& att_type){
 #ifndef NDEBUG
         std::cout<<"attrib: "<<att_type<<std::endl;
@@ -214,7 +212,7 @@ namespace toolkit {
         return el->IntAttribute(att_type.c_str());
     }
     //
-    unsigned int FetchUnsigned(XMLElement* el,
+    unsigned int FetchUnsigned(tinyxml2::XMLElement* el,
                                const std::string& att_type,
                                const std::string& key){
 #ifndef NDEBUG
@@ -223,7 +221,7 @@ namespace toolkit {
         return el->FirstChildElement(key.c_str())->UnsignedAttribute(att_type.c_str());
     }
     //
-    unsigned int FetchUnsigned(XMLElement* el,
+    unsigned int FetchUnsigned(tinyxml2::XMLElement* el,
                                const std::string& att_type){
 #ifndef NDEBUG
         std::cout<<"attrib: "<<att_type<<std::endl;
@@ -231,7 +229,7 @@ namespace toolkit {
         return el->UnsignedAttribute(att_type.c_str());
     }
     //
-    bool FetchBool(XMLElement* el,
+    bool FetchBool(tinyxml2::XMLElement* el,
                    const std::string& att_type,
                    const std::string& key){
 #ifndef NDEBUG
@@ -240,7 +238,7 @@ namespace toolkit {
         return el->FirstChildElement(key.c_str())->BoolAttribute(att_type.c_str());
     }
     //
-    bool FetchBool(XMLElement* el,
+    bool FetchBool(tinyxml2::XMLElement* el,
                    const std::string& att_type){
 #ifndef NDEBUG
         std::cout<<"attrib: "<<att_type<<std::endl;
@@ -248,7 +246,7 @@ namespace toolkit {
         return el->BoolAttribute(att_type.c_str());
     }
     //
-    double FetchDouble(XMLElement* el,
+    double FetchDouble(tinyxml2::XMLElement* el,
                        const std::string& att_type,
                        const std::string& key){
 #ifndef NDEBUG
@@ -257,7 +255,7 @@ namespace toolkit {
         return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str());
     }
     //
-    double FetchDouble(XMLElement* el,
+    double FetchDouble(tinyxml2::XMLElement* el,
                        const std::string& att_type){
 #ifndef NDEBUG
         std::cout<<"attrib: "<<att_type<<std::endl;

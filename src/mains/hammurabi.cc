@@ -16,7 +16,6 @@
 #include <tinyxml2.h>
 #include <timer.h>
 
-using namespace tinyxml2;
 
 class Pipeline{
 public:
@@ -30,7 +29,7 @@ public:
     void assemble_obs();
 private:
     std::string file_name;
-    std::unique_ptr<XMLDocument> doc;
+    std::unique_ptr<tinyxml2::XMLDocument> doc;
     std::unique_ptr<Param> par;
     std::unique_ptr<Grid_fereg> grid_fereg;
     std::unique_ptr<Grid_breg> grid_breg;
@@ -66,7 +65,7 @@ void Pipeline::assemble_fereg(){
         fereg = std::make_unique<FEreg>();
         return;
     }
-    XMLElement *ptr {toolkit::tracexml(doc.get(),{"FreeElectron"})};
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{"FreeElectron"})};
     std::string field_type {toolkit::FetchString(ptr,"type","Regular")};
     // if import from file, no need to build specific fe class
     if(grid_fereg->read_permission){
@@ -93,7 +92,7 @@ void Pipeline::assemble_breg(){
         breg = std::make_unique<Breg>();
         return;
     }
-    XMLElement *ptr {toolkit::tracexml(doc.get(),{"MagneticField"})};
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{"MagneticField"})};
     std::string field_type {toolkit::FetchString(ptr,"type","Regular")};
     if(grid_breg->read_permission){
         grid_breg->import_grid();
@@ -123,7 +122,7 @@ void Pipeline::assemble_fernd(){
         fernd = std::make_unique<FErnd>();
     }
     else if(grid_fernd->build_permission){
-        XMLElement *ptr {toolkit::tracexml(doc.get(),{"FreeElectron","Random"})};
+        tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{"FreeElectron","Random"})};
         std::string field_type {toolkit::FetchString(ptr,"type")};
         if(field_type=="Global"){
             std::string field_method {toolkit::FetchString(ptr,"type","Global")};
@@ -150,7 +149,7 @@ void Pipeline::assemble_brnd(){
         brnd = std::make_unique<Brnd>();
     }
     else if(grid_brnd->build_permission){
-        XMLElement *ptr {toolkit::tracexml(doc.get(),{"MagneticField","Random"})};
+        tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{"MagneticField","Random"})};
         std::string field_type {toolkit::FetchString(ptr,"type")};
         if(field_type=="Global"){
             std::string field_method {toolkit::FetchString(ptr,"type","Global")};
@@ -185,7 +184,7 @@ void Pipeline::assemble_brnd(){
 }
 // cre
 void Pipeline::assemble_cre(){
-    XMLElement *ptr {toolkit::tracexml(doc.get(),{})};
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{})};
     std::string field_type {toolkit::FetchString(ptr,"type","CRE")};
     if(field_type=="Analytic"){
         cre = std::make_unique<CRE_ana>();
@@ -210,7 +209,7 @@ void Pipeline::assemble_obs(){
     intobj->write_grid(breg.get(),brnd.get(),fereg.get(),fernd.get(),cre.get(),grid_breg.get(),grid_brnd.get(),grid_fereg.get(),grid_fernd.get(),grid_cre.get(),grid_int.get(),par.get());
     grid_int->export_grid();
     // INSERT MULTI_OUTPUT TAKEOVER LOOP
-    XMLElement *ptr {toolkit::tracexml(doc.get(),{"Obsout","Sync"})};
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{"Obsout","Sync"})};
     if (ptr!=nullptr){
         for(auto e = ptr->NextSiblingElement("Sync");e!=nullptr;e=e->NextSiblingElement("Sync")){
             // stop producing dm and fd

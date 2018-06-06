@@ -13,7 +13,6 @@
 #include <tinyxml2.h>
 #include <memory>
 #include <cassert>
-using namespace tinyxml2;
 
 namespace toolkit {
     /**
@@ -158,98 +157,98 @@ namespace toolkit {
                       double *,
                       const std::size_t &);
     /**
-     * load XML file
-     * 1st argument: XML file name (with dir)
+     * load tinyxml2::XML file
+     * 1st argument: tinyxml2::XML file name (with dir)
      */
-    std::unique_ptr<XMLDocument> loadxml (const std::string&);
+    std::unique_ptr<tinyxml2::XMLDocument> loadxml (const std::string&);
     /**
-     * trace down a key inside XML "document"
-     * 1st argument: pointer to XMLDocument
+     * trace down a key inside tinyxml2::XML "document"
+     * 1st argument: pointer to tinyxml2::XMLDocument
      * 2nd argument: a vector of string, with key chain for tracing
      * the last string in 2nd argument is the target key
      * <root> is automatically included
      */
-    XMLElement* tracexml (XMLDocument *,
+    tinyxml2::XMLElement* tracexml (tinyxml2::XMLDocument *,
                          const std::vector<std::string>&);
     /**
      * get string attribute
-     * 1st argument: ptr to XMLElement (key)
+     * 1st argument: ptr to tinyxml2::XMLElement (key)
      * 2nd argument: attribute name
      * 3rd argument: sub-key under 1st argument
      */
-    std::string FetchString (XMLElement *,
+    std::string FetchString (tinyxml2::XMLElement *,
                             const std::string&,
                             const std::string&);
     /**
      * get string attribute
-     * 1st argument: ptr to XMLElement (key)
+     * 1st argument: ptr to tinyxml2::XMLElement (key)
      * 2nd argument: attribute name
      */
-    std::string FetchString (XMLElement *,
+    std::string FetchString (tinyxml2::XMLElement *,
                             const std::string&);
     /**
      * get integer attribute
-     * 1st argument: ptr to XMLElement (key)
+     * 1st argument: ptr to tinyxml2::XMLElement (key)
      * 2nd argument: attribute name
      * 3rd argument: sub-key under 1st argument
      */
-    int FetchInt (XMLElement *,
+    int FetchInt (tinyxml2::XMLElement *,
                  const std::string&,
                  const std::string&);
     /**
      * get integer attribute
-     * 1st argument: ptr to XMLElement (key)
+     * 1st argument: ptr to tinyxml2::XMLElement (key)
      * 2nd argument: attribute name
      */
-    int FetchInt (XMLElement *,
+    int FetchInt (tinyxml2::XMLElement *,
                  const std::string&);
     /**
      * get unsigned integer attribute
-     * 1st argument: ptr to XMLElement (key)
+     * 1st argument: ptr to tinyxml2::XMLElement (key)
      * 2nd argument: attribute name
      * 3rd argument: sub-key under 1st argument
      */
-    unsigned int FetchUnsigned (XMLElement *,
+    unsigned int FetchUnsigned (tinyxml2::XMLElement *,
                                const std::string&,
                                const std::string&);
     /**
      * get unsigned integer attribute
-     * 1st argument: ptr to XMLElement (key)
+     * 1st argument: ptr to tinyxml2::XMLElement (key)
      * 2nd argument: attribute name
      */
-    unsigned int FetchUnsigned (XMLElement *,
+    unsigned int FetchUnsigned (tinyxml2::XMLElement *,
                                const std::string&);
     /**
      * get bool attribute
-     * 1st argument: ptr to XMLElement (key)
+     * 1st argument: ptr to tinyxml2::XMLElement (key)
      * 2nd argument: attribute name
      * 3rd argument: sub-key under 1st argument
      */
-    bool FetchBool (XMLElement *,
+    bool FetchBool (tinyxml2::XMLElement *,
                    const std::string&,
                    const std::string&);
     /**
      * get bool attribute
-     * 1st argument: ptr to XMLElement (key)
+     * 1st argument: ptr to tinyxml2::XMLElement (key)
      * 2nd argument: attribute name
      */
-    bool FetchBool (XMLElement *,
+    bool FetchBool (tinyxml2::XMLElement *,
                    const std::string&);
     /**
      * get double attribute
-     * 1st argument: ptr to XMLElement (key)
+     * 1st argument: ptr to tinyxml2::XMLElement (key)
      * 2nd argument: attribute name
      * 3rd argument: sub-key under 1st argument
      */
-    double FetchDouble (XMLElement *,
+    double FetchDouble (tinyxml2::XMLElement *,
                        const std::string&,
                        const std::string&);
     /**
      * get double attribute
-     * 1st argument: ptr to XMLElement (key)
+     * 1st argument: ptr to tinyxml2::XMLElement (key)
      * 2nd argument: attribute name
      */
-    double FetchDouble (XMLElement *,
+    double FetchDouble (tinyxml2::XMLElement *,
                        const std::string&);
 }
 

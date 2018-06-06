@@ -15,11 +15,10 @@
 #include <namespace_toolkit.h>
 #include <cassert>
 
-using namespace tinyxml2;
 
 Grid_fereg::Grid_fereg(const std::string &file_name){
-    std::unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
-    XMLElement *ptr {toolkit::tracexml(doc.get(),{"FreeElectron"})};
+    std::unique_ptr<tinyxml2::XMLDocument> doc = toolkit::loadxml(file_name);
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{"FreeElectron"})};
     build_permission = toolkit::FetchBool(ptr,"cue","Regular");
     ptr = toolkit::tracexml(doc.get(),{"Fieldout"});
     read_permission = toolkit::FetchBool(ptr,"read","fereg_grid");
@@ -30,8 +29,8 @@ Grid_fereg::Grid_fereg(const std::string &file_name){
     }
 }
 
-void Grid_fereg::build_grid(XMLDocument *doc){
-    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_FE"})};
+void Grid_fereg::build_grid(tinyxml2::XMLDocument *doc){
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_FE"})};
     // Cartesian grid
     nx = toolkit::FetchUnsigned(ptr,"value","nx");
     ny = toolkit::FetchUnsigned(ptr,"value","ny");

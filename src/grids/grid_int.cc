@@ -13,20 +13,19 @@
 #include <namespace_toolkit.h>
 #include <cassert>
 
-using namespace tinyxml2;
 
 /* line of sight integrator */
 Grid_int::Grid_int(const std::string &file_name){
-    std::unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
+    std::unique_ptr<tinyxml2::XMLDocument> doc = toolkit::loadxml(file_name);
     build_grid(doc.get());
 }
 
-void Grid_int::build_grid(XMLDocument *doc){
-    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Shell"})};
+void Grid_int::build_grid(tinyxml2::XMLDocument *doc){
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Shell"})};
     // get shell Nside
     std::string shell_type {toolkit::FetchString(ptr,"type","layer")};
     if(shell_type=="auto"){
-        XMLElement *subptr {toolkit::tracexml(doc,{"Grid","Shell","layer","auto"})};
+        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"Grid","Shell","layer","auto"})};
         total_shell = toolkit::FetchUnsigned(subptr,"value","shell_num");
         size_t nside_min {toolkit::FetchUnsigned(subptr,"value","nside_min")};
         for(std::size_t i=0;i!=total_shell;++i){
@@ -34,7 +33,7 @@ void Grid_int::build_grid(XMLDocument *doc){
         }
     }
     else if(shell_type=="manual"){
-        XMLElement *subptr {toolkit::tracexml(doc,{"Grid","Shell","layer","manual"})};
+        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"Grid","Shell","layer","manual"})};
         total_shell = 0;
         for(auto e = subptr->FirstChildElement("nside");e!=nullptr;e=e->NextSiblingElement("nside")){
             total_shell++;

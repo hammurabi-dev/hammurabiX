@@ -16,12 +16,11 @@
 #include <namespace_toolkit.h>
 #include <cassert>
 
-using namespace tinyxml2;
 
 // turbulent free electron density field
 Grid_fernd::Grid_fernd(const std::string &file_name){
-    std::unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
-    XMLElement *ptr {toolkit::tracexml(doc.get(),{"FreeElectron"})};
+    std::unique_ptr<tinyxml2::XMLDocument> doc = toolkit::loadxml(file_name);
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{"FreeElectron"})};
     build_permission = toolkit::FetchBool(ptr,"cue","Random");
     // sometimes users don't want to write out random field
     // but generation of random field needs grid
@@ -36,8 +35,8 @@ Grid_fernd::Grid_fernd(const std::string &file_name){
     }
 }
 
-void Grid_fernd::build_grid(XMLDocument *doc){
-    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_FE"})};
+void Grid_fernd::build_grid(tinyxml2::XMLDocument *doc){
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_FE"})};
     // Cartesian grid
     nx = toolkit::FetchUnsigned(ptr,"value","nx");
     ny = toolkit::FetchUnsigned(ptr,"value","ny");

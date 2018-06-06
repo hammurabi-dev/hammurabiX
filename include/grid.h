@@ -12,8 +12,6 @@
 #include <healpix_map.h>
 #include <memory>
 
-using namespace tinyxml2;
-
 class Grid{
 public:
     Grid(void) = default;
@@ -21,7 +19,7 @@ public:
     /**
      * build up grid and allocate memory
      */
-    virtual void build_grid(XMLDocument *);
+    virtual void build_grid(tinyxml2::XMLDocument *);
     /**
      * export grid to file
      */
@@ -39,7 +37,7 @@ class Grid_breg final : public Grid{
 public:
     Grid_breg(const std::string &);
     virtual ~Grid_breg(void) = default;
-    void build_grid(XMLDocument *) override;
+    void build_grid(tinyxml2::XMLDocument *) override;
     void export_grid(void) override;
     void import_grid(void) override;
     std::unique_ptr<double[]> bx, by, bz;
@@ -70,7 +68,7 @@ public:
 #endif
         }
     };
-    void build_grid(XMLDocument *) override;
+    void build_grid(tinyxml2::XMLDocument *) override;
     void export_grid(void) override;
     void import_grid(void) override;
     // spatial space
@@ -93,7 +91,7 @@ class Grid_fereg final : public Grid{
 public:
     Grid_fereg(const std::string &);
     virtual ~Grid_fereg(void) = default;
-    void build_grid(XMLDocument *) override;
+    void build_grid(tinyxml2::XMLDocument *) override;
     void export_grid(void) override;
     void import_grid(void) override;
     std::unique_ptr<double[]> fe;
@@ -120,7 +118,7 @@ public:
 #endif
         }
     };
-    void build_grid(XMLDocument *) override;
+    void build_grid(tinyxml2::XMLDocument *) override;
     void export_grid(void) override;
     void import_grid(void) override;
     std::unique_ptr<double[]> fe;
@@ -139,7 +137,7 @@ class Grid_cre final : public Grid{
 public:
     Grid_cre(const std::string &);
     virtual ~Grid_cre(void) = default;
-    void build_grid(XMLDocument *) override;
+    void build_grid(tinyxml2::XMLDocument *) override;
     void export_grid(void) override;
     void import_grid(void) override;
     std::unique_ptr<double[]> cre_flux;
@@ -160,7 +158,7 @@ public:
     Grid_int(const std::string &);
     Grid_int(void) = default;
     virtual ~Grid_int(void) = default;
-    void build_grid(XMLDocument *) override;
+    void build_grid(tinyxml2::XMLDocument *) override;
     void export_grid(void) override;
     Healpix_Map<double> dm_map;
     Healpix_Map<double> Is_map;

@@ -14,8 +14,6 @@
 #include <cgs_units_file.h>
 #include <tinyxml2.h>
 
-using namespace tinyxml2;
-
 TEST(toolkit, los_versor){
     const double theta[3] = {0.,90.*CGS_U_rad,90.*CGS_U_rad};
     const double phi[3] = {0.,180.*CGS_U_rad,270.*CGS_U_rad};
@@ -171,7 +169,7 @@ TEST(toolkit, complex_stripping){
 TEST(toolkit, xml_parser){
     auto doc = toolkit::loadxml("reference/example.xml");
     
-    XMLElement* el = toolkit::tracexml(doc.get(),{"double"});
+    tinyxml2::XMLElement* el = toolkit::tracexml(doc.get(),{"double"});
     EXPECT_EQ(toolkit::FetchDouble(el,"value"),3.14);
     
     el = toolkit::tracexml(doc.get(),{"integer"});

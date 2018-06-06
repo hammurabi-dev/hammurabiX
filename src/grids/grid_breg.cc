@@ -15,11 +15,10 @@
 #include <namespace_toolkit.h>
 #include <cassert>
 
-using namespace tinyxml2;
 
 Grid_breg::Grid_breg(const std::string &file_name){
-    std::unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
-    XMLElement *ptr {toolkit::tracexml(doc.get(),{"MagneticField"})};
+    std::unique_ptr<tinyxml2::XMLDocument> doc = toolkit::loadxml(file_name);
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{"MagneticField"})};
     build_permission = toolkit::FetchBool(ptr,"cue","Regular");
     ptr = toolkit::tracexml(doc.get(),{"Fieldout"});
     read_permission = toolkit::FetchBool(ptr,"read","breg_grid");
@@ -31,8 +30,8 @@ Grid_breg::Grid_breg(const std::string &file_name){
     }
 }
 
-void Grid_breg::build_grid(XMLDocument *doc){
-    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_GMF"})};
+void Grid_breg::build_grid(tinyxml2::XMLDocument *doc){
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_GMF"})};
     // Cartesian grid
     nx = toolkit::FetchUnsigned(ptr,"value","nx");
     ny = toolkit::FetchUnsigned(ptr,"value","ny");

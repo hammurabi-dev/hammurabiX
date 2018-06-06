@@ -15,11 +15,10 @@
 #include <namespace_toolkit.h>
 #include <cassert>
 
-using namespace tinyxml2;
 
 Grid_cre::Grid_cre(const std::string &file_name){
-    std::unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
-    XMLElement *ptr {toolkit::tracexml(doc.get(),{"Fieldout"})};
+    std::unique_ptr<tinyxml2::XMLDocument> doc = toolkit::loadxml(file_name);
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{"Fieldout"})};
     read_permission = toolkit::FetchBool(ptr,"read","cre_grid");
     write_permission = toolkit::FetchBool(ptr,"write","cre_grid");
     // build up grid when have read or write permission
@@ -29,8 +28,8 @@ Grid_cre::Grid_cre(const std::string &file_name){
     }
 }
 
-void Grid_cre::build_grid(XMLDocument *doc){
-    XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_CRE"})};
+void Grid_cre::build_grid(tinyxml2::XMLDocument *doc){
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_CRE"})};
     E_min = CGS_U_GeV*toolkit::FetchDouble(ptr,"value","E_min");
     E_max = CGS_U_GeV*toolkit::FetchDouble(ptr,"value","E_max");
     nE = toolkit::FetchUnsigned(ptr,"value","nE");
