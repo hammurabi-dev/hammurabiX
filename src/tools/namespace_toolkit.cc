@@ -1,4 +1,5 @@
 #include <vector>
+#include <string>
 #include <vec3.h>
 #include <cmath>
 #include <fftw3.h>

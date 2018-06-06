@@ -320,7 +320,7 @@ if(ENABLE_TESTING)
 endif()
 
 # build executable
-add_executable(hamx src/main/hammurabi.cc)
+add_executable(hamx src/mains/hammurabi.cc)
 target_link_libraries(hamx hammurabi)
 # copy template parameter file into build directory
 file(COPY ${CMAKE_CURRENT_LIST_DIR}/templates/params_template.xml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

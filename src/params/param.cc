@@ -7,12 +7,10 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 
-using namespace tinyxml2;
-
 Param::Param(std::string file_name){
-    std::unique_ptr<XMLDocument> doc = toolkit::loadxml(file_name);
+    std::unique_ptr<tinyxml2::XMLDocument> doc = toolkit::loadxml(file_name);
     // gc sun position
-    XMLElement *ptr {toolkit::tracexml(doc.get(),{"Grid","SunPosition"})};
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{"Grid","SunPosition"})};
     SunPosition = vec3_t<double> {CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x"),
         CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y"),
         CGS_U_pc*toolkit::FetchDouble(ptr,"value","z")};
@@ -23,12 +21,12 @@ Param::Param(std::string file_name){
 }
 
 // magnetic field
-void Param::b_param(XMLDocument *doc){
-    XMLElement *ptr {toolkit::tracexml(doc,{"MagneticField"})};
+void Param::b_param(tinyxml2::XMLDocument *doc){
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"MagneticField"})};
     std::string breg_type {toolkit::FetchString(ptr,"type","Regular")};
     // bwmap
     if(breg_type=="WMAP"){
-        XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Regular","WMAP"})};
+        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Regular","WMAP"})};
         breg_wmap.b0 = toolkit::FetchDouble(subptr,"value","b0")*CGS_U_muGauss; //microGauss
         breg_wmap.psi0 = toolkit::FetchDouble(subptr,"value","psi0")*CGS_U_rad; //rad
         breg_wmap.psi1 = toolkit::FetchDouble(subptr,"value","psi1")*CGS_U_rad; //rad
@@ -36,7 +34,7 @@ void Param::b_param(XMLDocument *doc){
     }
     // bjaffe
     else if(breg_type=="Jaffe"){
-        XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Regular","Jaffe"})};
+        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Regular","Jaffe"})};
         breg_jaffe.quadruple = toolkit::FetchBool(subptr,"cue","quadruple");
         breg_jaffe.bss = toolkit::FetchBool(subptr,"cue","bss");
         breg_jaffe.disk_amp = toolkit::FetchDouble(subptr,"value","disk_amp")*CGS_U_muGauss; //microG
@@ -73,7 +71,7 @@ void Param::b_param(XMLDocument *doc){
     }
     // bverify
     else if(breg_type=="Verify"){
-        XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Regular","Verify"})};
+        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Regular","Verify"})};
         breg_verify.b0 = toolkit::FetchDouble(subptr,"value","b0")*CGS_U_muGauss; //microGauss
         breg_verify.l0 = toolkit::FetchDouble(subptr,"value","l0")*CGS_U_rad; //rad
         breg_verify.r = toolkit::FetchDouble(subptr,"value","r");
@@ -85,7 +83,7 @@ void Param::b_param(XMLDocument *doc){
         std::string brnd_type {toolkit::FetchString(ptr,"type","Random")};
         // brnd_global
         if(brnd_type=="Global"){
-            XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Random","Global"})};
+            tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Random","Global"})};
             std::string brnd_method {toolkit::FetchString(subptr,"type")};
             if(brnd_method=="ES"){
                 subptr = toolkit::tracexml(doc,{"MagneticField","Random","Global","ES"});
@@ -103,7 +101,7 @@ void Param::b_param(XMLDocument *doc){
         }
         // brnd_local
         else if(brnd_type=="Local"){
-            XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Random","Local"})};
+            tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Random","Local"})};
             std::string brnd_method {toolkit::FetchString(subptr,"type")};
             if(brnd_method=="MHD"){
                 subptr = toolkit::tracexml(doc,{"MagneticField","Random","Local","MHD"});
@@ -121,13 +119,13 @@ void Param::b_param(XMLDocument *doc){
     }
 }
 
-void Param::fe_param(XMLDocument *doc){
-    XMLElement *ptr {toolkit::tracexml(doc,{"FreeElectron"})};
+void Param::fe_param(tinyxml2::XMLDocument *doc){
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"FreeElectron"})};
     std::string fereg_type {toolkit::FetchString(ptr,"type","Regular")};
     // YMW16
     if(fereg_type=="YMW16"){
         // Warp_Sun
-        XMLElement *subptr {toolkit::tracexml(doc,{"FreeElectron","Regular","YMW16","Warp"})};
+        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"FreeElectron","Regular","YMW16","Warp"})};
         fereg_ymw16.R_warp = toolkit::FetchDouble(subptr,"value","R_warp")*CGS_U_kpc; //kpc
         fereg_ymw16.R0 = toolkit::FetchDouble(subptr,"value","R0")*CGS_U_kpc; //kpc
         fereg_ymw16.t0_Gamma_w = toolkit::FetchDouble(subptr,"value","Gamma_w");
@@ -218,7 +216,7 @@ void Param::fe_param(XMLDocument *doc){
     }
     // verify
     else if(fereg_type=="Verify"){
-        XMLElement *subptr {toolkit::tracexml(doc,{"FreeElectron","Regular","Verify"})};
+        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"FreeElectron","Regular","Verify"})};
         fereg_verify.n0 = toolkit::FetchDouble(subptr,"value","n0");
         fereg_verify.r0 = toolkit::FetchDouble(subptr,"value","r0")*CGS_U_kpc; //kpc
     }
@@ -229,7 +227,7 @@ void Param::fe_param(XMLDocument *doc){
         std::string fernd_type {toolkit::FetchString(ptr,"type","Random")};
         // global turbulent
         if(fernd_type=="Global"){
-            XMLElement *subptr {toolkit::tracexml(doc,{"FreeElectron","Random","Global"})};
+            tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"FreeElectron","Random","Global"})};
             std::string fernd_method {toolkit::FetchString(subptr,"type")};
             if(fernd_method=="DFT"){
                 subptr = toolkit::tracexml(doc,{"FreeElectron","Random","Global","DFT"});
@@ -243,10 +241,10 @@ void Param::fe_param(XMLDocument *doc){
     }
 }
 
-void Param::cre_param(XMLDocument *doc){
-    XMLElement *ptr {toolkit::tracexml(doc,{"CRE"})};
+void Param::cre_param(tinyxml2::XMLDocument *doc){
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"CRE"})};
     if (toolkit::tracexml(doc,{"Obsout","Sync"})!=nullptr){
-        XMLElement *subptr {toolkit::tracexml(doc,{"Obsout"})};
+        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"Obsout"})};
         sim_freq = toolkit::FetchDouble(subptr,"freq","Sync")*CGS_U_GHz;
     }
     else{
@@ -255,7 +253,7 @@ void Param::cre_param(XMLDocument *doc){
     std::string cre_type {ptr->Attribute("type")};
     // analytical
     if(cre_type=="Analytic"){
-        XMLElement *subptr {toolkit::tracexml(doc,{"CRE","Analytic"})};
+        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"CRE","Analytic"})};
         cre_ana.alpha = toolkit::FetchDouble(subptr,"value","alpha");
         cre_ana.beta = toolkit::FetchDouble(subptr,"value","beta");
         cre_ana.theta = toolkit::FetchDouble(subptr,"value","theta");
@@ -266,7 +264,7 @@ void Param::cre_param(XMLDocument *doc){
     }
     // verification
     else if(cre_type=="Verify"){
-        XMLElement *subptr {toolkit::tracexml(doc,{"CRE","Verify"})};
+        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"CRE","Verify"})};
         cre_verify.alpha = toolkit::FetchDouble(subptr,"value","alpha");
         cre_verify.r0 = toolkit::FetchDouble(subptr,"value","r0")*CGS_U_kpc; //kpc
         cre_verify.E0 = toolkit::FetchDouble(subptr,"value","E0")*CGS_U_GeV; //GeV
