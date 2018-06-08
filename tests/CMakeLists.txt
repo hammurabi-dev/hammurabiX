@@ -1,3 +1,3 @@
-add_subdirectory(integration_tests)
+ADD_SUBDIRECTORY(integration_tests)
 
-add_subdirectory(unit_tests)
+ADD_SUBDIRECTORY(unit_tests)
