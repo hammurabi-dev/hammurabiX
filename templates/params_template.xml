@@ -325,6 +325,7 @@
     </FreeElectron>
     
     <!-- analytic/numeric CRE -->
+    <!-- flux norm comes with unit [GeV m^2 s Sr]^-1 -->
     <CRE type="Verify">
         <Analytic>
             <!-- CRE spectral index: -alpha+beta*r+theta*z, Galactic cylindric frame -->

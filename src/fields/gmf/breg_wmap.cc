@@ -12,10 +12,10 @@
 
 
 /* wmap-3yr */
-vec3_t<double> Breg_wmap::breg(const vec3_t<double> &pos,
-                               Param *par){
+vec3_t<double> Breg_wmap::breg (const vec3_t<double> &pos,
+                                const Param *par){
     const double r {sqrt(pos.x*pos.x + pos.y*pos.y)};
-    if (r>(20.*CGS_U_kpc) or r<(3.*CGS_U_kpc)) {
+    if (r>(20.*CGS_U_kpc) or r<(3.*CGS_U_kpc)){
         return vec3_t<double> {0.,0.,0.};
     }
     // units

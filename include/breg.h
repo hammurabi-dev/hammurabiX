@@ -16,8 +16,8 @@
  */
 class Breg{
 public:
-    Breg(void) = default;
-    virtual ~Breg(void) = default;
+    Breg () = default;
+    virtual ~Breg () = default;
     /**
      * fetch regular magnetic field
      * 1st argument: Galactic centric Cartesian frame position
@@ -25,30 +25,30 @@ public:
      * 3rd argument: regular GMF grid class object
      * inovke read_grid regardless of field type if permitted, otherwise invoke breg
      */
-    virtual vec3_t<double> get_breg(const vec3_t<double> &,
-                                    Param *,
-                                    Grid_breg *);
+    virtual vec3_t<double> get_breg (const vec3_t<double> &,
+                                     const Param *,
+                                     const Grid_breg *);
     /**
      * GMF assembler, specified only in derived class
      * 1st argument: Galactic centric Cartesian frame position
      * 2nd argument: parameter class object
      */
-    virtual vec3_t<double> breg(const vec3_t<double> &,
-                                Param *);
+    virtual vec3_t<double> breg (const vec3_t<double> &,
+                                 const Param *);
     /**
      * read from field grid with trilinear interpolation
      * 1st argument: Galactic centric Cartesian frame position
      * 2nd argument: regular GMF grid class object
      */
-    virtual vec3_t<double> read_grid(const vec3_t<double> &,
-                                     Grid_breg *);
+    virtual vec3_t<double> read_grid (const vec3_t<double> &,
+                                      const Grid_breg *);
     /**
      * write to field grid
      * 1st argument: parameter class object
      * 2nd argument: regular GMF grid class object
      */
-    virtual void write_grid(Param *,
-                            Grid_breg *);
+    virtual void write_grid (const Param *,
+                             const Grid_breg *);
 };
 
 /**
@@ -56,10 +56,10 @@ public:
  */
 class Breg_verify final : public Breg{
 public:
-    Breg_verify(void) = default;
-    virtual ~Breg_verify(void) = default;
-    vec3_t<double> breg(const vec3_t<double> &,
-                        Param *) override;
+    Breg_verify () = default;
+    virtual ~Breg_verify () = default;
+    vec3_t<double> breg (const vec3_t<double> &,
+                         const Param *) override;
 };
 
 /**
@@ -70,10 +70,10 @@ public:
  */
 class Breg_wmap final : public Breg {
 public:
-    Breg_wmap(void) = default;
-    virtual ~Breg_wmap(void) = default;
-    vec3_t<double> breg(const vec3_t<double> &,
-                        Param *) override;
+    Breg_wmap () = default;
+    virtual ~Breg_wmap () = default;
+    vec3_t<double> breg (const vec3_t<double> &,
+                         const Param *) override;
 };
 
 /**
@@ -83,33 +83,33 @@ public:
  */
 class Breg_jaffe final : public Breg{
 public:
-    Breg_jaffe(void) = default;
-    virtual ~Breg_jaffe(void) = default;
-    vec3_t<double> breg(const vec3_t<double> &,
-                        Param *) override;
+    Breg_jaffe () = default;
+    virtual ~Breg_jaffe  () = default;
+    vec3_t<double> breg (const vec3_t<double> &,
+                         const Param *) override;
 private:
     /**
      * field orientation
      * 1st argument: Galactic centric Cartesian frame position
      * 2nd argument: parameter class object
      */
-    vec3_t<double> orientation(const vec3_t<double> &,
-                          Param *);
+    vec3_t<double> orientation (const vec3_t<double> &,
+                                const Param *);
     /**
      * field amplitude radial scaling
      * 1st argument: Galactic centric Cartesian frame position
      * 2nd argument: parameter class object
      */
-    double radial_scaling(const vec3_t<double> &,
-                          Param *);
+    double radial_scaling (const vec3_t<double> &,
+                           const Param *);
     /**
      * spiral arm height scaling
      * 1st argument: Galactic centric Cartesian frame position
      * 2nd argument: parameter class object
      * remark: inlined function
      */
-    inline double arm_scaling(const vec3_t<double> &pos,
-                              Param *par){
+    inline double arm_scaling (const vec3_t<double> &pos,
+                               const Param *par){
         return 1./(cosh(pos.z/par->breg_jaffe.arm_z0)*cosh(pos.z/par->breg_jaffe.arm_z0));
     }
     /**
@@ -118,8 +118,8 @@ private:
      * 2nd argument: parameter class object
      * remark: inlined function
      */
-    inline double disk_scaling(const vec3_t<double> &pos,
-                               Param *par){
+    inline double disk_scaling (const vec3_t<double> &pos,
+                                const Param *par){
         return 1./(cosh(pos.z/par->breg_jaffe.disk_z0)*cosh(pos.z/par->breg_jaffe.disk_z0));
     }
     /**
@@ -128,8 +128,8 @@ private:
      * 2nd argument: parameter class object
      * remark: inlined function
      */
-    inline double halo_scaling(const vec3_t<double> &pos,
-                               Param *par){
+    inline double halo_scaling (const vec3_t<double> &pos,
+                                const Param *par){
         return 1./(cosh(pos.z/par->breg_jaffe.halo_z0)*cosh(pos.z/par->breg_jaffe.halo_z0));
     }
     /**
@@ -137,22 +137,22 @@ private:
      * 1st argument: Galactic centric Cartesian frame position
      * 2nd argument: parameter class object
      */
-    std::vector<double> arm_compress(const vec3_t<double> &,
-                                     Param *);
+    std::vector<double> arm_compress (const vec3_t<double> &,
+                                      const Param *);
     /**
      * spiral arm compression factor for dust, for each arm
      * 1st argument: Galactic centric Cartesian frame position
      * 2nd argument: parameter class object
      */
-    std::vector<double> arm_compress_dust(const vec3_t<double> &,
-                                          Param *);
+    std::vector<double> arm_compress_dust (const vec3_t<double> &,
+                                           const Param *);
     /**
      * distance to each spiral arm
      * 1st argument: Galactic centric Cartesian frame position
      * 2nd argument: parameter class object
      */
-    std::vector<double> dist2arm(const vec3_t<double> &,
-                                 Param *);
+    std::vector<double> dist2arm (const vec3_t<double> &,
+                                  const Param *);
 };
 
 #endif
