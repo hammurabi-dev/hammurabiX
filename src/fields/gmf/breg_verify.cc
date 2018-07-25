@@ -12,7 +12,7 @@
 
 
 vec3_t<double> Breg_verify::breg (const vec3_t<double> &,
-                                  const Param *par){
+                                  const Param *par) const{
     // units
     const double b0 {par->breg_verify.b0};
     const double l0 {par->breg_verify.l0};

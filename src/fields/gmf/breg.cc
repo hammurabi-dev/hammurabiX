@@ -13,7 +13,7 @@
 
 vec3_t<double> Breg::get_breg (const vec3_t<double> &pos,
                                const Param *par,
-                               const Grid_breg *grid){
+                               const Grid_breg *grid) const{
     if (grid->read_permission){
         return read_grid(pos,grid);
     }
@@ -27,12 +27,12 @@ vec3_t<double> Breg::get_breg (const vec3_t<double> &pos,
  * Breg object link directly here and return null field when invoked
  */
 vec3_t<double> Breg::breg (const vec3_t<double> &,
-                           const Param *){
+                           const Param *) const{
     return vec3_t<double> {0.,0.,0.};
 }
 
 vec3_t<double> Breg::read_grid (const vec3_t<double> &pos,
-                                const Grid_breg *grid){
+                                const Grid_breg *grid) const{
     double tmp {(grid->nx-1)*(pos.x-grid->x_min)/(grid->x_max-grid->x_min)};
     if (tmp<0 or tmp>grid->nx-1) {return vec3_t<double>(0.,0.,0.);}
     decltype(grid->nx) xl {(std::size_t)floor(tmp)};
@@ -86,7 +86,7 @@ vec3_t<double> Breg::read_grid (const vec3_t<double> &pos,
 }
 
 void Breg::write_grid (const Param *par,
-                       const Grid_breg *grid){
+                       Grid_breg *grid){
     assert(grid->write_permission);
     vec3_t<double> gc_pos, tmp_vec;
     double lx {grid->x_max-grid->x_min};

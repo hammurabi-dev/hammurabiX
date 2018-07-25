@@ -13,7 +13,7 @@
 using namespace std;
 
 vec3_t<double> Breg_jaffe::breg (const vec3_t<double> &pos,
-                                 const Param *par){
+                                 const Param *par) const{
     double inner_b {0};
     if(par->breg_jaffe.ring)
         inner_b = par->breg_jaffe.ring_amp;
@@ -39,7 +39,7 @@ vec3_t<double> Breg_jaffe::breg (const vec3_t<double> &pos,
 }
 
 vec3_t<double> Breg_jaffe::orientation (const vec3_t<double> &pos,
-                                        const Param *par){
+                                        const Param *par) const{
     const double r {sqrt(pos.x*pos.x+pos.y*pos.y)}; // cylindrical frame
     const double r_lim {par->breg_jaffe.ring_r};
     const double bar_lim {par->breg_jaffe.bar_a + 0.5*par->breg_jaffe.comp_d};
@@ -92,7 +92,7 @@ vec3_t<double> Breg_jaffe::orientation (const vec3_t<double> &pos,
 }
 
 double Breg_jaffe::radial_scaling (const vec3_t<double> &pos,
-                                   const Param *par){
+                                   const Param *par) const{
     const double r2 {pos.x*pos.x+pos.y*pos.y};
     // separate into 3 parts for better view
     const double s1 {1.-exp(-r2/(par->breg_jaffe.r_inner*par->breg_jaffe.r_inner))};
@@ -102,7 +102,7 @@ double Breg_jaffe::radial_scaling (const vec3_t<double> &pos,
 }
 
 std::vector<double> Breg_jaffe::arm_compress (const vec3_t<double> &pos,
-                                              const Param *par){
+                                              const Param *par) const{
     const double r {sqrt(pos.x*pos.x+pos.y*pos.y)/par->breg_jaffe.comp_r};
     const double c0 {1./par->breg_jaffe.comp_c -1.};
     std::vector<double> a0 = dist2arm(pos,par);
@@ -126,7 +126,7 @@ std::vector<double> Breg_jaffe::arm_compress (const vec3_t<double> &pos,
 }
 
 std::vector<double> Breg_jaffe::arm_compress_dust (const vec3_t<double> &pos,
-                                                   const Param *par){
+                                                   const Param *par) const{
     const double r {sqrt(pos.x*pos.x+pos.y*pos.y)/par->breg_jaffe.comp_r};
     const double c0 {1./par->breg_jaffe.comp_c -1.};
     std::vector<double> a0 = dist2arm(pos,par);
@@ -150,7 +150,7 @@ std::vector<double> Breg_jaffe::arm_compress_dust (const vec3_t<double> &pos,
 }
 
 std::vector<double> Breg_jaffe::dist2arm (const vec3_t<double> &pos,
-                                          const Param *par){
+                                          const Param *par) const{
     std::vector<double> d;
     const double r {sqrt(pos.x*pos.x+pos.y*pos.y)};
     const double r_lim {par->breg_jaffe.ring_r};

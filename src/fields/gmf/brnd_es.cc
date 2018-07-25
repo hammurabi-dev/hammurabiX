@@ -17,13 +17,18 @@
 #include <namespace_toolkit.h>
 
 // global anisotropic turbulent field
-double Brnd_es::anisotropy(const vec3_t<double> &pos,
-                               vec3_t<double> &H,
-                               Param *par,
-                               Breg *breg,
-                               Grid_breg *gbreg){
-    // H, direction of anisotropy
-    H = toolkit::versor(breg->get_breg(pos,par,gbreg));
+vec3_t<double> Brnd_es::anisotropy_direction (const vec3_t<double> &pos,
+                                              const Param *par,
+                                              const Breg *breg,
+                                              const Grid_breg *gbreg) const{
+    return toolkit::versor (breg->get_breg (pos,par,gbreg));
+}
+
+// global anisotropic turbulent field
+double Brnd_es::anisotropy_ratio (const vec3_t<double> &,
+                                  const Param *par,
+                                  const Breg *,
+                                  const Grid_breg *) const{
     // the simplest case, const.
     return par->brnd_es.rho;
 }
@@ -31,7 +36,7 @@ double Brnd_es::anisotropy(const vec3_t<double> &pos,
 // since we are using rms normalization
 // p0 is hidden and not affecting anything
 double Brnd_es::spec(const double &k,
-                         Param *par){
+                     const Param *par) const{
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_es.rms*CGS_U_muGauss};
     const double kr {k/par->brnd_es.k0};
@@ -47,8 +52,8 @@ double Brnd_es::spec(const double &k,
 
 // galactic scaling of random field energy density
 // set to 1 at observer's place
-double Brnd_es::rescal(const vec3_t<double> &pos,
-                           Param *par){
+double Brnd_es::rescal (const vec3_t<double> &pos,
+                        const Param *par) const{
     const double r_cyl {sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x)};
     const double z {fabs(pos.z) - fabs(par->SunPosition.z)};
     const double r0 {par->brnd_es.r0};
@@ -58,8 +63,8 @@ double Brnd_es::rescal(const vec3_t<double> &pos,
 
 // Gram-Schimdt, rewritten using Healpix vec3 library
 // tiny error caused by machine is inevitable
-vec3_t<double> Brnd_es::gramschmidt(const vec3_t<double> &k,
-                                        const vec3_t<double> &b){
+vec3_t<double> Brnd_es::gramschmidt (const vec3_t<double> &k,
+                                     const vec3_t<double> &b) const{
     if(k.SquaredLength()==0 or b.SquaredLength()==0){
         return vec3_t<double> {0,0,0};
     }
@@ -72,10 +77,10 @@ vec3_t<double> Brnd_es::gramschmidt(const vec3_t<double> &k,
     return b_free;
 }
 
-void Brnd_es::write_grid(Param *par,
-                             Breg *breg,
-                             Grid_breg *gbreg,
-                             Grid_brnd *grid){
+void Brnd_es::write_grid (const Param *par,
+                          const Breg *breg,
+                          const Grid_breg *gbreg,
+                          Grid_brnd *grid){
     // PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
     // initialize random seed
@@ -83,11 +88,11 @@ void Brnd_es::write_grid(Param *par,
     gsl_rng **threadvec = new gsl_rng *[omp_get_max_threads()];
     for (int b=0;b<omp_get_max_threads();++b){
         threadvec[b] = gsl_rng_alloc(gsl_rng_taus);
-        gsl_rng_set(threadvec[b],b+toolkit::random_seed(par->brnd_seed));
+        gsl_rng_set (threadvec[b],b+toolkit::random_seed(par->brnd_seed));
     }
 #else
-    gsl_rng *r{gsl_rng_alloc(gsl_rng_taus)};
-    gsl_rng_set(r, toolkit::random_seed(par->brnd_seed));
+    gsl_rng *r {gsl_rng_alloc(gsl_rng_taus)};
+    gsl_rng_set (r, toolkit::random_seed(par->brnd_seed));
 #endif
     // start Fourier space filling, physical k in 1/kpc dimension
     const double lx {grid->x_max-grid->x_min};
@@ -142,8 +147,8 @@ void Brnd_es::write_grid(Param *par,
     }// i
     // ks=0 should be automatically addressed in P(k)
     // execute DFT backward plan
-    fftw_execute_dft(grid->plan_c0_bw,grid->c0,grid->c0);
-    fftw_execute_dft(grid->plan_c1_bw,grid->c1,grid->c1);
+    fftw_execute_dft (grid->plan_c0_bw,grid->c0,grid->c0);
+    fftw_execute_dft (grid->plan_c1_bw,grid->c1,grid->c1);
     // free random memory
 #ifdef _OPENMP
     for (int b=0;b<omp_get_max_threads();++b)
@@ -179,9 +184,9 @@ void Brnd_es::write_grid(Param *par,
                     grid->c0[idx][1]*ratio,
                     grid->c1[idx][1]*ratio};
                 // impose anisotropy
-                vec3_t<double> H_versor {0.,0.,0.,};
-                double rho {anisotropy(pos,H_versor,par,breg,gbreg)};
-                assert(rho>=0. and rho<=1.);
+                vec3_t<double> H_versor = anisotropy_direction (pos,par,breg,gbreg);
+                double rho {anisotropy_ratio (pos,par,breg,gbreg)};
+                assert (rho>=0. and rho<=1.);
                 if(H_versor.SquaredLength()<1e-10)// zero regular field, no prefered anisotropy
                     continue;
                 vec3_t<double> b_re_par {H_versor*dotprod(H_versor,b_re)};
@@ -196,8 +201,8 @@ void Brnd_es::write_grid(Param *par,
         } //j
     } //i
     // execute DFT forward plan
-    fftw_execute_dft(grid->plan_c0_fw,grid->c0,grid->c0);
-    fftw_execute_dft(grid->plan_c1_fw,grid->c1,grid->c1);
+    fftw_execute_dft (grid->plan_c0_fw,grid->c0,grid->c0);
+    fftw_execute_dft (grid->plan_c1_fw,grid->c1,grid->c1);
     // PHASE III
     // RE-ORTHOGONALIZING IN FOURIER SPACE
     // Gram-Schmidt process
@@ -262,8 +267,8 @@ void Brnd_es::write_grid(Param *par,
         }// j
     }// i
     // execute DFT backward plan
-    fftw_execute_dft(grid->plan_c0_bw,grid->c0,grid->c0);
-    fftw_execute_dft(grid->plan_c1_bw,grid->c1,grid->c1);
+    fftw_execute_dft (grid->plan_c0_bw,grid->c0,grid->c0);
+    fftw_execute_dft (grid->plan_c1_bw,grid->c1,grid->c1);
     // according to FFTW convention
     // transform forward followed by backword scale up array by nx*ny*nz
     double inv_grid_size = 1.0/grid->full_size;

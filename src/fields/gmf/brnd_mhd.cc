@@ -15,10 +15,10 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 
-void Brnd_mhd::write_grid(Param *par,
-                            Breg *breg,
-                            Grid_breg *gbreg,
-                            Grid_brnd *grid){
+void Brnd_mhd::write_grid (const Param *par,
+                           const Breg *breg,
+                           const Grid_breg *gbreg,
+                           Grid_brnd *grid){
     // initialize random seed
 #ifdef _OPENMP
     gsl_rng **threadvec = new gsl_rng *[omp_get_max_threads()];
@@ -140,8 +140,8 @@ void Brnd_mhd::write_grid(Param *par,
     gsl_rng_free(r);
 #endif
     // execute DFT backward plan
-    fftw_execute_dft(grid->plan_c0_bw,grid->c0,grid->c0);
-    fftw_execute_dft(grid->plan_c1_bw,grid->c1,grid->c1);
+    fftw_execute_dft (grid->plan_c0_bw,grid->c0,grid->c0);
+    fftw_execute_dft (grid->plan_c1_bw,grid->c1,grid->c1);
     /**
      * now we need to get real parts manually
      * since we start in k-space real fields
@@ -188,8 +188,8 @@ void Brnd_mhd::write_grid(Param *par,
 }
 
 // PRIVATE FUNCTIONS FOR LOW-BETA SUB-ALFVENIC PLASMA
-vec3_t<double> Brnd_mhd::eplus(const vec3_t<double> &b,
-                                 const vec3_t<double> &k){
+vec3_t<double> Brnd_mhd::eplus (const vec3_t<double> &b,
+                                const vec3_t<double> &k) const{
     vec3_t<double> tmp {crossprod(toolkit::versor(k),toolkit::versor(b))};
     if(tmp.SquaredLength()<1e-12){
         return tmp;
@@ -199,8 +199,8 @@ vec3_t<double> Brnd_mhd::eplus(const vec3_t<double> &b,
     }
 }
 
-vec3_t<double> Brnd_mhd::eminus(const vec3_t<double> &b,
-                                  const vec3_t<double> &k){
+vec3_t<double> Brnd_mhd::eminus (const vec3_t<double> &b,
+                                 const vec3_t<double> &k) const{
     vec3_t<double> tmp {crossprod(crossprod(toolkit::versor(k),toolkit::versor(b)),toolkit::versor(k))};
     if(tmp.SquaredLength()<1e-12){
         return tmp;
@@ -210,8 +210,8 @@ vec3_t<double> Brnd_mhd::eminus(const vec3_t<double> &b,
     }
 }
 
-double Brnd_mhd::hs(const double &beta,
-                      const double &cosa){
+double Brnd_mhd::hs (const double &beta,
+                     const double &cosa) const{
     if(cosa<1e-6){
         return 0;
     }
@@ -222,8 +222,8 @@ double Brnd_mhd::hs(const double &beta,
     }
 }
 
-double Brnd_mhd::hf(const double &beta,
-                      const double &cosa){
+double Brnd_mhd::hf (const double &beta,
+                     const double &cosa) const{
     if(cosa<1e-6){
         return 0;
     }
@@ -234,8 +234,8 @@ double Brnd_mhd::hf(const double &beta,
     }
 }
 
-double Brnd_mhd::speca(const double &k,
-                         Param *par){
+double Brnd_mhd::speca (const double &k,
+                        const Param *par) const{
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_mhd.pa0};
     const double kr {k/par->brnd_mhd.k0};
@@ -249,8 +249,8 @@ double Brnd_mhd::speca(const double &k,
     return P*unit;
 }
 
-double Brnd_mhd::specf(const double &k,
-                         Param *par){
+double Brnd_mhd::specf (const double &k,
+                        const Param *par) const{
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_mhd.pf0};
     const double kr {k/par->brnd_mhd.k0};
@@ -264,8 +264,8 @@ double Brnd_mhd::specf(const double &k,
     return P*unit;
 }
 
-double Brnd_mhd::specs(const double &k,
-                         Param *par){
+double Brnd_mhd::specs (const double &k,
+                        const Param *par) const{
     //units fixing, wave vector in 1/kpc units
     const double p0 {par->brnd_mhd.ps0};
     const double kr {k/par->brnd_mhd.k0};
