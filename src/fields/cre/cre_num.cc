@@ -16,10 +16,10 @@
 
 // numerical CRE flux
 // J_tot(\nu)
-double CRE_num::get_emissivity_t(const vec3_t<double> &pos,
-                                 Param *par,
-                                 Grid_cre *grid,
-                                 const double &Bper){
+double CRE_num::get_emissivity_t (const vec3_t<double> &pos,
+                                  const Param *par,
+                                  const Grid_cre *grid,
+                                  const double &Bper) const{
     double J {0.};
     assert(grid->read_permission);
     // allocate energy grid
@@ -54,10 +54,10 @@ double CRE_num::get_emissivity_t(const vec3_t<double> &pos,
 }
 
 // J_pol(\nu)
-double CRE_num::get_emissivity_p(const vec3_t<double> &pos,
-                                 Param *par,
-                                 Grid_cre *grid,
-                                 const double &Bper){
+double CRE_num::get_emissivity_p (const vec3_t<double> &pos,
+                                  const Param *par,
+                                  const Grid_cre *grid,
+                                  const double &Bper) const{
     double J {0.};
     assert(grid->read_permission);
     // allocate energy grid
