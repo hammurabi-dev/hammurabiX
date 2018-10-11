@@ -94,23 +94,25 @@ SET(ALL_LIBRARIES)
 SET(SRC_FILES 
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/brnd_jaffe.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/breg_jaffe.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/breg_verify.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/breg_wmap.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/breg.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/brnd_es.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/brnd_mhd.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/brnd.cc
+
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/cre/cre.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/cre/cre_num.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/cre/cre_verify.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/cre/cre_ana.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/fe/fereg_verify.cc
+
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/fe/fereg.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/fe/fernd_dft.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/fe/fernd.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/fields/fe/fereg_ymw16.cc
+
 	${CMAKE_CURRENT_LIST_DIR}/src/params/param.cc
+
 	${CMAKE_CURRENT_LIST_DIR}/src/integrators/integrator.cc
+
 	${CMAKE_CURRENT_LIST_DIR}/src/grids/grid.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/grids/grid_int.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/grids/grid_fernd.cc
@@ -118,9 +120,17 @@ SET(SRC_FILES
 	${CMAKE_CURRENT_LIST_DIR}/src/grids/grid_cre.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/grids/grid_fereg.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/grids/grid_breg.cc
+
 	${CMAKE_CURRENT_LIST_DIR}/src/tools/tinyxml2.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/tools/namespace_toolkit.cc
 )
+IF(ENABLE_TESTING)
+	LIST(APPEND SRC_FILES
+		${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/breg_test.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/fields/cre/cre_test.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/fields/fe/fereg_test.cc
+	)
+ENDIF()
 
 # find HEALPix
 FIND_PATH(HEALPIX_INCLUDE_DIR
@@ -321,7 +331,11 @@ ENDIF()
 ADD_EXECUTABLE(hamx src/mains/hammurabi.cc)
 TARGET_LINK_LIBRARIES(hamx hammurabi)
 # copy template parameter file into build directory
-FILE(COPY ${CMAKE_CURRENT_LIST_DIR}/templates/params_template.xml DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+FILE(COPY
+	${CMAKE_CURRENT_LIST_DIR}/templates/params_template.xml
+DESTINATION
+	${CMAKE_CURRENT_BINARY_DIR}
+)
 
 # install package
 SET(CMAKE_INSTALL_PREFIX ${INSTALL_ROOT_DIR})
@@ -336,6 +350,7 @@ INSTALL(FILES
 	${CMAKE_CURRENT_LIST_DIR}/include/integrator.h
 	${CMAKE_CURRENT_LIST_DIR}/include/tinyxml2.h
 	${CMAKE_CURRENT_LIST_DIR}/include/timer.h
+	${CMAKE_CURRENT_LIST_DIR}/include/hvec.h
 	${CMAKE_CURRENT_LIST_DIR}/include/namespace_toolkit.h
 	${CMAKE_CURRENT_LIST_DIR}/include/param.h
 	${CMAKE_CURRENT_LIST_DIR}/include/grid.h	

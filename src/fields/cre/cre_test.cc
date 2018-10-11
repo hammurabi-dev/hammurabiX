@@ -1,8 +1,7 @@
-#include <cassert>
 #include <cmath>
+#include <cassert>
 
 #include <vec3.h>
-#include <gsl/gsl_sf_synchrotron.h>
 #include <gsl/gsl_sf_gamma.h>
 
 #include <cre.h>
@@ -11,56 +10,56 @@
 #include <cgs_units_file.h>
 
 // CRE flux spatial rescaling
-double CRE_ana::rescal (const vec3_t<double> &pos,
-                        const Param *par) const{
-    const double R0 {std::sqrt(par->SunPosition.x*par->SunPosition.x+par->SunPosition.y*par->SunPosition.y)};
-    const double r {std::sqrt(pos.x*pos.x+pos.y*pos.y)};
-    return std::exp((R0-r)/par->cre_ana.r0)*(1./(cosh(pos.z/par->cre_ana.z0)*cosh(pos.z/par->cre_ana.z0)));
+double CRE_test::rescal (const vec3_t<double> &pos,
+                           const Param *par) const{
+    if ((pos-par->SunPosition).Length() > par->cre_test.r0){
+        return 0;
+    }
+    else
+        return 1;
 }
 
 // CRE spectral index
-double CRE_ana::flux_idx (const vec3_t<double> &pos,
-                          const Param *par) const{
-    const double r {std::sqrt(pos.x*pos.x+pos.y*pos.y)};
-    const double z {std::fabs(pos.z)};
-    return -par->cre_ana.alpha+par->cre_ana.beta*r+par->cre_ana.theta*z;
+double CRE_test::flux_idx (const vec3_t<double> &/*pos*/,
+                             const Param *par) const{
+    return -(par->cre_test.alpha);
 }
 
-// analytical CRE flux normalization factor at E0
-// analytical CRE spectral integrations use N(\gamma)
-double CRE_ana::flux_norm (const vec3_t<double> &pos,
-                           const Param *par) const{
+// analytical CRE flux
+// give values to spectral index and norm factor, in cgs units
+// analytical CRE integration use N(\gamma)
+double CRE_test::flux_norm (const vec3_t<double> &pos,
+                              const Param *par) const{
     // j0 is in [GeV m^2 s sr]^-1 units
-    const double gamma0 {par->cre_ana.E0/CGS_U_MEC2+1};
+    const double gamma0 {par->cre_test.E0/CGS_U_MEC2+1};
     const double beta0 {std::sqrt(1.-1./gamma0)};
     // from PHI(E) to N(\gamma) convertion
     const double unit {(4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*beta0)};
-    const double norm {par->cre_ana.j0*std::pow(gamma0,-flux_idx(par->SunPosition,par))};
+    const double norm {par->cre_test.j0*std::pow(gamma0,-flux_idx(par->SunPosition,par))};
     
     return norm*unit*rescal(pos,par);
 }
 
-// analytical modelings use N(\gamma) while flux is PHI(E)
+// analytical modeling use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
-double CRE_ana::flux (const vec3_t<double> &pos,
-                      const Param *par,
-                      const double &En) const{
-    // units
+double CRE_test::flux (const vec3_t<double> &pos,
+                         const Param *par,
+                         const double &En) const{
     // j0 is in [GeV m^2 s sr]^-1 units
     const double gamma {En/CGS_U_MEC2};
-    const double gamma0 {par->cre_ana.E0/CGS_U_MEC2+1};
+    const double gamma0 {par->cre_test.E0/CGS_U_MEC2+1};
     // converting from N to PHI
     const double unit {std::sqrt((1.-1./gamma)/(1.-1./gamma0))};
-    const double norm {par->cre_ana.j0*std::pow(gamma0,-flux_idx(par->SunPosition,par))};
+    const double norm {par->cre_test.j0*std::pow(gamma0,-flux_idx(par->SunPosition,par))};
     
     return norm*unit*std::pow(gamma,flux_idx(pos,par))*rescal(pos,par);
 }
 
 // J_tot(\nu)
-double CRE_ana::get_emissivity_t (const vec3_t<double> &pos,
-                                  const Param *par,
-                                  const Grid_cre */*grid*/,
-                                  const double &Bper) const{
+double CRE_test::get_emissivity_t (const vec3_t<double> &pos,
+                                     const Param *par,
+                                     const Grid_cre */*grid*/,
+                                     const double &Bper) const{
     //assert(!grid->read_permission);
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
@@ -77,10 +76,10 @@ double CRE_ana::get_emissivity_t (const vec3_t<double> &pos,
 }
 
 // J_pol(\nu)
-double CRE_ana::get_emissivity_p (const vec3_t<double> &pos,
-                                  const Param *par,
-                                  const Grid_cre */*grid*/,
-                                  const double &Bper) const{
+double CRE_test::get_emissivity_p (const vec3_t<double> &pos,
+                                     const Param *par,
+                                     const Grid_cre */*grid*/,
+                                     const double &Bper) const{
     //assert(!grid->read_permission);
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana

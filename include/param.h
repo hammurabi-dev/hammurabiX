@@ -1,23 +1,29 @@
-///
-/// storing parameters (fixed or free) for physical models
-///
+// parameters (fixed or free) for physical models
+
 #ifndef HAMMURABI_PARAM_H
 #define HAMMURABI_PARAM_H
 
 #include <string>
 #include <vector>
+
 #include <tinyxml2.h>
 #include <vec3.h>
 
 class Param {
+    
 public:
-    Param(std::string);
-	Param(void) = default;
-    virtual ~Param(void) = default;
+    
+    Param (const std::string);
+    
+	Param () = default;
+    
+    virtual ~Param () = default;
 	
     // observer
     vec3_t<double> SunPosition;
+    
     // magnetic field
+    
     // wmap lsa
     struct param_breg_wmap{
         double b0;
@@ -25,12 +31,16 @@ public:
         double psi1;
         double chi0;
     }breg_wmap;
-    // verify
-    struct param_breg_verify{
+    
+    // test
+#ifndef NDEBUG
+    struct param_breg_test{
         double b0;
         double l0;
         double r;
-    }breg_verify;
+    }breg_test;
+#endif
+    
     // jaffe
     struct param_breg_jaffe{
         bool quadruple,bss;
@@ -48,8 +58,10 @@ public:
         // arm compress
         double comp_r,comp_c,comp_d,comp_p;
     }breg_jaffe;
+    
     // random seed
     std::size_t brnd_seed;
+    
     // global
     struct param_brnd_global_es{
         double rms;
@@ -58,6 +70,7 @@ public:
         double rho;
         double r0,z0;
     }brnd_es;
+    
     // local
     struct param_brnd_local_mhd{
         double pa0,pf0,ps0;
@@ -65,7 +78,9 @@ public:
         double k0;
         double ma,beta;
     }brnd_mhd;
+    
     // FE
+    
     // ymw16
     struct param_fereg_ymw16{
         double R_warp, R0;
@@ -78,13 +93,18 @@ public:
         double t6_J_LB, t6_nlb1, t6_detlb1, t6_wlb1, t6_hlb1, t6_thetalb1, t6_nlb2, t6_detlb2, t6_wlb2, t6_hlb2, t6_thetalb2;
         double t7_nLI, t7_RLI, t7_WLI, t7_detthetaLI, t7_thetaLI;
     }fereg_ymw16;
-    // verify
-    struct param_fereg_verify{
+    
+    // test
+#ifndef NDEBUG
+    struct param_fereg_test{
         double n0;
         double r0;
-    }fereg_verify;
+    }fereg_test;
+#endif
+    
     // random seed
     std::size_t fernd_seed;
+    
     // isotropic
     struct param_fernd_global_dft{
         double rms;
@@ -93,25 +113,35 @@ public:
         double r0;
         double z0;
     }fernd_dft;
+    
     // CRE
-    // analytical
     double sim_freq;
-    //std::vector<double> creana;
+    
+    // analytical
     struct param_cre_ana{
         double alpha,beta,theta;
         double r0,z0;
         double E0,j0;
     }cre_ana;
-    struct param_cre_verify{
+    
+    // test
+#ifndef NDEBUG
+    struct param_cre_test{
         double alpha;
         double r0;
         double E0,j0;
-    }cre_verify;
+    }cre_test;
+#endif
     
-private:
+protected:
+    
     void b_param(tinyxml2::XMLDocument *);
+    
     void fe_param(tinyxml2::XMLDocument *);
+    
     void cre_param(tinyxml2::XMLDocument *);
 };
+
 #endif
+
 // END

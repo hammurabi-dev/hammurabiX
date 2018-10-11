@@ -1,14 +1,13 @@
-#include <iostream>
-#include <vec3.h>
-#include <vector>
-#include <array>
-#include <cmath>
 #include <cassert>
 #include <omp.h>
+#include <cmath>
+
+#include <vec3.h>
 #include <fftw3.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_integration.h>
+
 #include <param.h>
 #include <grid.h>
 #include <brnd.h>
@@ -44,8 +43,8 @@ double Brnd_es::spec(const double &k,
     const double unit = 1./(4*CGS_U_pi*k*k);
     // power law
     double P {0.};
-    if(kr>1){
-        P = p0/pow(kr,a0);
+    if (kr>1){
+        P = p0/std::pow(kr,a0);
     }
     return P*unit;
 }
@@ -54,18 +53,18 @@ double Brnd_es::spec(const double &k,
 // set to 1 at observer's place
 double Brnd_es::rescal (const vec3_t<double> &pos,
                         const Param *par) const{
-    const double r_cyl {sqrt(pos.x*pos.x+pos.y*pos.y) - fabs(par->SunPosition.x)};
-    const double z {fabs(pos.z) - fabs(par->SunPosition.z)};
+    const double r_cyl {std::sqrt(pos.x*pos.x+pos.y*pos.y) - std::fabs(par->SunPosition.x)};
+    const double z {std::fabs(pos.z) - std::fabs(par->SunPosition.z)};
     const double r0 {par->brnd_es.r0};
     const double z0 {par->brnd_es.z0};
-    return exp(-r_cyl/r0)*exp(-z/z0);
+    return std::exp(-r_cyl/r0)*std::exp(-z/z0);
 }
 
 // Gram-Schimdt, rewritten using Healpix vec3 library
 // tiny error caused by machine is inevitable
 vec3_t<double> Brnd_es::gramschmidt (const vec3_t<double> &k,
                                      const vec3_t<double> &b) const{
-    if(k.SquaredLength()==0 or b.SquaredLength()==0){
+    if (k.SquaredLength()==0 or b.SquaredLength()==0){
         return vec3_t<double> {0,0,0};
     }
     const double inv_k_mod = 1./k.SquaredLength();
@@ -80,7 +79,7 @@ vec3_t<double> Brnd_es::gramschmidt (const vec3_t<double> &k,
 void Brnd_es::write_grid (const Param *par,
                           const Breg *breg,
                           const Grid_breg *gbreg,
-                          Grid_brnd *grid){
+                          Grid_brnd *grid) const{
     // PHASE I
     // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
     // initialize random seed
@@ -103,41 +102,35 @@ void Brnd_es::write_grid (const Param *par,
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-    for (decltype(grid->nx) i=0;i<grid->nx;++i) {
+    for (decltype(grid->nx) i=0;i<grid->nx;++i){
 #ifdef _OPENMP
         auto seed_id = threadvec[omp_get_thread_num()];
 #else
         auto seed_id = r;
 #endif
         double kx {CGS_U_kpc*i/lx};
-        if(i>=(grid->nx+1)/2) kx -= CGS_U_kpc*grid->nx/lx;
-        /**
-         * it's better to calculate indeces manually
-         * just for reference, how indeces are calculated
-         * const size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-         */
+        if (i>=(grid->nx+1)/2) kx -= CGS_U_kpc*grid->nx/lx;
+        // it's better to calculate indeces manually
+        // just for reference, how indeces are calculated
+        // const size_t idx {toolkit::index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
         const std::size_t idx_lv1 {i*grid->ny*grid->nz};
-        for (decltype(grid->ny) j=0;j<grid->ny;++j) {
+        for (decltype(grid->ny) j=0;j<grid->ny;++j){
             double ky {CGS_U_kpc*j/ly};
-            if(j>=(grid->ny+1)/2) ky -= CGS_U_kpc*grid->ny/ly;
+            if (j>=(grid->ny+1)/2) ky -= CGS_U_kpc*grid->ny/ly;
             const std::size_t idx_lv2 {idx_lv1+j*grid->nz};
-            for (decltype(grid->nz) l=0;l<grid->nz;++l) {
-                /**
-                 * 0th term is fixed to zero in allocation
-                 */
-                if(i==0 and j==0 and l==0) continue;
+            for (decltype(grid->nz) l=0;l<grid->nz;++l){
+                // 0th term is fixed to zero in allocation
+                if (i==0 and j==0 and l==0) continue;
                 double kz {CGS_U_kpc*l/lz};
-                if(l>=(grid->nz+1)/2) kz -= CGS_U_kpc*grid->nz/lz;
-                const double ks {sqrt(kx*kx + ky*ky + kz*kz)};
+                if (l>=(grid->nz+1)/2) kz -= CGS_U_kpc*grid->nz/lz;
+                const double ks {std::sqrt(kx*kx + ky*ky + kz*kz)};
                 const std::size_t idx {idx_lv2+l};
-                /**
-                 * turbulent power is shared in following pattern
-                 * P ~ (bx^2 + by^2 + bz^2)
-                 * c0^2 ~ c1^2 ~ (bx^2 + by^2) ~ P*2/3
-                 * as renormalization comes in PHASE II,
-                 * 2/3, P0 in spec, dk3 are numerically redundant
-                 */
-                const double sigma {sqrt(0.66666667*spec(ks,par)*dk3)};
+                // turbulent power is shared in following pattern
+                // P ~ (bx^2 + by^2 + bz^2)
+                // c0^2 ~ c1^2 ~ (bx^2 + by^2) ~ P*2/3
+                // as renormalization comes in PHASE II,
+                // 2/3, P0 in spec, dk3 are numerically redundant
+                const double sigma {std::sqrt(0.66666667*spec(ks,par)*dk3)};
                 grid->c0[idx][0] = sigma*gsl_ran_ugaussian(seed_id);
                 grid->c0[idx][1] = sigma*gsl_ran_ugaussian(seed_id);
                 grid->c1[idx][0] = sigma*gsl_ran_ugaussian(seed_id);
@@ -160,9 +153,9 @@ void Brnd_es::write_grid (const Param *par,
 #endif
     // PHASE II
     // RESCALING FIELD PROFILE IN REAL SPACE
-    // 1./sqrt(3*bi_var)
+    // 1./std::sqrt(3*bi_var)
     // after 1st Fourier transformation, c0_R = bx, c0_I = by, c1_I = bz
-    const double b_var_invsq {1./sqrt(3.*toolkit::Variance(grid->c0[0],grid->full_size))};
+    const double b_var_invsq {1./std::sqrt(3.*toolkit::variance(grid->c0[0],grid->full_size))};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
@@ -176,7 +169,7 @@ void Brnd_es::write_grid (const Param *par,
                 // get physical position
                 pos.z = l*lz/(grid->nz-1) + grid->z_min;
                 // get rescaling factor
-                double ratio {sqrt(rescal(pos,par))*par->brnd_es.rms*b_var_invsq};
+                double ratio {std::sqrt(rescal(pos,par))*par->brnd_es.rms*b_var_invsq};
                 const std::size_t idx {idx_lv2+l};
                 // assemble b_Re
                 // after 1st Fourier transformation, c0_R = bx, c0_I = by, c1_I = bz
@@ -187,7 +180,7 @@ void Brnd_es::write_grid (const Param *par,
                 vec3_t<double> H_versor = anisotropy_direction (pos,par,breg,gbreg);
                 double rho {anisotropy_ratio (pos,par,breg,gbreg)};
                 assert (rho>=0. and rho<=1.);
-                if(H_versor.SquaredLength()<1e-10)// zero regular field, no prefered anisotropy
+                if (H_versor.SquaredLength()<1e-10)// zero regular field, no prefered anisotropy
                     continue;
                 vec3_t<double> b_re_par {H_versor*dotprod(H_versor,b_re)};
                 vec3_t<double> b_re_perp {b_re - b_re_par};
@@ -209,41 +202,36 @@ void Brnd_es::write_grid (const Param *par,
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-    for (decltype(grid->nx) i=0;i<grid->nx;++i) {
+    for (decltype(grid->nx) i=0;i<grid->nx;++i){
         decltype(grid->nx) i_sym {grid->nx-i};// apply Hermitian symmetry
-        if(i==0) i_sym = i;
+        if (i==0) i_sym = i;
         vec3_t<double> tmp_k {CGS_U_kpc*i/lx,0,0};
-        /**
-         * it's better to calculate indeces manually
-         * just for reference, how indeces are calculated
-         * const std::size_t idx {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-         * const std::size_t idx_sym {toolkit::Index3d(grid->nx,grid->ny,grid->nz,i_sym,j_sym,l_sym)};
-         */
+        // it's better to calculate indeces manually
+        // just for reference, how indeces are calculated
+        // const std::size_t idx {toolkit::index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+        // const std::size_t idx_sym {toolkit::index3d(grid->nx,grid->ny,grid->nz,i_sym,j_sym,l_sym)};
         const std::size_t idx_lv1 {i*grid->ny*grid->nz};
         const std::size_t idx_sym_lv1 {i_sym*grid->ny*grid->nz};
-        if(i>=(grid->nx+1)/2) tmp_k.x -= CGS_U_kpc*grid->nx/lx;
-        for (decltype(grid->ny) j=0;j<grid->ny;++j) {
+        if (i>=(grid->nx+1)/2) tmp_k.x -= CGS_U_kpc*grid->nx/lx;
+        for (decltype(grid->ny) j=0;j<grid->ny;++j){
             decltype(grid->ny) j_sym {grid->ny-j};// apply Hermitian symmetry
-            if(j==0) j_sym = j;
+            if (j==0) j_sym = j;
             tmp_k.y = CGS_U_kpc*j/ly;
-            if(j>=(grid->ny+1)/2) tmp_k.y -= CGS_U_kpc*grid->ny/ly;
+            if (j>=(grid->ny+1)/2) tmp_k.y -= CGS_U_kpc*grid->ny/ly;
             const std::size_t idx_lv2 {idx_lv1+j*grid->nz};
             const std::size_t idx_sym_lv2 {idx_sym_lv1+j_sym*grid->nz};
-            for (decltype(grid->nz) l=0;l<grid->nz;++l) {
+            for (decltype(grid->nz) l=0;l<grid->nz;++l){
                 decltype(grid->nz) l_sym {grid->nz-l};// apply Hermitian symmetry
-                if(l==0) l_sym = l;
+                if (l==0) l_sym = l;
                 tmp_k.z = CGS_U_kpc*l/lz;
-                if(l>=(grid->nz+1)/2) tmp_k.z -= CGS_U_kpc*grid->nz/lz;
+                if (l>=(grid->nz+1)/2) tmp_k.z -= CGS_U_kpc*grid->nz/lz;
                 const std::size_t idx {idx_lv2+l}; //k
                 const std::size_t idx_sym {idx_sym_lv2+l_sym}; //-k
-                /**
-                 * reconstruct bx,by,bz from c0,c1,c*0,c*1
-                 *
-                 * c0(k) = bx(k) + i by(k)
-                 * c*0(-k) = bx(k) - i by(k)
-                 * c1(k) = by(k) + i bz(k)
-                 * c1*1(-k) = by(k) - i bz(k)
-                 */
+                // reconstruct bx,by,bz from c0,c1,c*0,c*1
+                // c0(k) = bx(k) + i by(k)
+                // c*0(-k) = bx(k) - i by(k)
+                // c1(k) = by(k) + i bz(k)
+                // c1*1(-k) = by(k) - i bz(k)
                 const vec3_t<double> tmp_b_re {0.5*(grid->c0[idx][0]+grid->c0[idx_sym][0]),
                     0.5*(grid->c1[idx][0]+grid->c1[idx_sym][0]),
                     0.5*(grid->c1[idx_sym][1]+grid->c1[idx][1])};
@@ -254,11 +242,9 @@ void Brnd_es::write_grid (const Param *par,
                 
                 const vec3_t<double> free_b_re {gramschmidt(tmp_k,tmp_b_re)};
                 const vec3_t<double> free_b_im {gramschmidt(tmp_k,tmp_b_im)};
-                /**
-                 * reassemble c0,c1 from bx,by,bz
-                 * c0(k) = bx(k) + i by(k)
-                 * c1(k) = by(k) + i bz(k)
-                 */
+                // reassemble c0,c1 from bx,by,bz
+                // c0(k) = bx(k) + i by(k)
+                // c1(k) = by(k) + i bz(k)
                 grid->c0[idx][0] = free_b_re.x-free_b_im.y;
                 grid->c0[idx][1] = free_b_im.x+free_b_re.y;
                 grid->c1[idx][0] = free_b_re.y-free_b_im.z;
@@ -275,7 +261,7 @@ void Brnd_es::write_grid (const Param *par,
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-    for(std::size_t i=0;i<grid->full_size;++i){
+    for (std::size_t i=0;i<grid->full_size;++i){
         grid->bx[i] = grid->c0[i][0]*inv_grid_size;
         grid->by[i] = grid->c0[i][1]*inv_grid_size;
         grid->bz[i] = grid->c1[i][1]*inv_grid_size;

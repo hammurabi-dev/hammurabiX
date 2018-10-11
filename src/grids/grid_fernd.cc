@@ -1,96 +1,97 @@
 #include <sstream>
-#include <iostream>
+#include <fstream>
 #include <memory>
-#include <fftw3.h>
 #include <array>
 #include <string>
 #include <vector>
+#include <cassert>
+
+#include <fftw3.h>
 #include <omp.h>
 #include <tinyxml2.h>
-#include <fitshandle.h>
-#include <fstream>
-#include <healpix_map_fitsio.h>
-#include <fitsio.h>
+
 #include <grid.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-#include <cassert>
-
 
 // turbulent free electron density field
-Grid_fernd::Grid_fernd(const std::string &file_name){
-    std::unique_ptr<tinyxml2::XMLDocument> doc = toolkit::loadxml(file_name);
-    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{"FreeElectron"})};
-    build_permission = toolkit::FetchBool(ptr,"cue","Random");
+Grid_fernd::Grid_fernd (const std::string &file_name){
+    std::unique_ptr<tinyxml2::XMLDocument> doc = toolkit::loadxml (file_name);
+    tinyxml2::XMLElement *ptr {toolkit::tracexml (doc.get(),{"FreeElectron"})};
+    build_permission = toolkit::fetchbool (ptr,"cue","Random");
     // sometimes users don't want to write out random field
     // but generation of random field needs grid
-    ptr = toolkit::tracexml(doc.get(),{"Fieldout"});
-    read_permission = toolkit::FetchBool(ptr,"read","fernd_grid");
-    write_permission = toolkit::FetchBool(ptr,"write","fernd_grid");
-    if(build_permission or read_permission){
-        build_grid(doc.get());
+    ptr = toolkit::tracexml (doc.get(),{"Fieldout"});
+    read_permission = toolkit::fetchbool (ptr,"read","fernd_grid");
+    write_permission = toolkit::fetchbool (ptr,"write","fernd_grid");
+    if (build_permission or read_permission){
+        build_grid (doc.get());
     }
-    if(read_permission or write_permission){
-        filename = toolkit::FetchString(ptr,"filename","fernd_grid");
+    if (read_permission or write_permission){
+        filename = toolkit::fetchstring (ptr,"filename","fernd_grid");
     }
 }
 
-void Grid_fernd::build_grid(tinyxml2::XMLDocument *doc){
-    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_FE"})};
+void Grid_fernd::build_grid (tinyxml2::XMLDocument *doc){
+    tinyxml2::XMLElement *ptr {toolkit::tracexml (doc,{"Grid","Box_FE"})};
     // Cartesian grid
-    nx = toolkit::FetchUnsigned(ptr,"value","nx");
-    ny = toolkit::FetchUnsigned(ptr,"value","ny");
-    nz = toolkit::FetchUnsigned(ptr,"value","nz");
+    nx = toolkit::fetchunsigned (ptr,"value","nx");
+    ny = toolkit::fetchunsigned (ptr,"value","ny");
+    nz = toolkit::fetchunsigned (ptr,"value","nz");
     full_size = nx*ny*nz;
     // box limit for filling field
-    x_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_max");
-    x_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","x_min");
-    y_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_max");
-    y_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","y_min");
-    z_max = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_max");
-    z_min = CGS_U_kpc*toolkit::FetchDouble(ptr,"value","z_min");
+    x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max");
+    x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min");
+    y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max");
+    y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min");
+    z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max");
+    z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min");
     // real random fe field
-    fe = std::make_unique<double[]>(full_size);
+    fe = std::make_unique<double[]> (full_size);
     // complex random b field in k-space
-    fe_k = fftw_alloc_complex(full_size);
+    fe_k = fftw_alloc_complex (full_size);
     fe_k[0][0]=0;fe_k[0][1]=0; // 0th term should be zero
     // DFT plan
 #ifdef _OPENMP
     fftw_init_threads();
-    fftw_plan_with_nthreads(omp_get_max_threads());
+    fftw_plan_with_nthreads (omp_get_max_threads());
 #endif
-    plan_fe_bw = fftw_plan_dft_3d(nx,ny,nz,fe_k,fe_k,FFTW_BACKWARD,FFTW_ESTIMATE);
+    plan_fe_bw = fftw_plan_dft_3d (nx,ny,nz,fe_k,fe_k,FFTW_BACKWARD,FFTW_ESTIMATE);
 }
 
-void Grid_fernd::export_grid(void){
-    assert(!filename.empty());
-    std::ofstream output(filename.c_str(),std::ios::out|std::ios::binary);
-    assert(output.is_open());
+void Grid_fernd::export_grid (){
+    assert (!filename.empty());
+    std::ofstream output (filename.c_str(),
+                          std::ios::out|std::ios::binary);
+    assert (output.is_open());
     double tmp;
-    for(decltype(full_size) i=0;i!=full_size;++i){
-        assert(!output.eof());
+    for (decltype(full_size) i=0;i!=full_size;++i){
+        assert (!output.eof());
         tmp = fe[i];
-        output.write(reinterpret_cast<char*>(&tmp),sizeof(double));
+        output.write (reinterpret_cast<char*>(&tmp),
+                      sizeof(double));
     }
     output.close();
-    exit(0);
+    exit (0);
 }
 
-void Grid_fernd::import_grid(void){
-    assert(!filename.empty());
-    std::ifstream input(filename.c_str(),std::ios::in|std::ios::binary);
-    assert(input.is_open());
+void Grid_fernd::import_grid (){
+    assert (!filename.empty());
+    std::ifstream input (filename.c_str(),
+                         std::ios::in|std::ios::binary);
+    assert (input.is_open());
     double tmp;
-    for(decltype(full_size) i=0;i!=full_size;++i){
-        assert(!input.eof());
-        input.read(reinterpret_cast<char *>(&tmp),sizeof(double));
+    for (decltype(full_size) i=0;i!=full_size;++i){
+        assert (!input.eof());
+        input.read (reinterpret_cast<char *>(&tmp),
+                    sizeof(double));
         fe[i] = tmp;
     }
 #ifndef NDEBUG
     auto eof = input.tellg();
-    input.seekg(0,input.end);
+    input.seekg (0,input.end);
 #endif
-    assert(eof==input.tellg());
+    assert (eof==input.tellg());
     input.close();
 }
 

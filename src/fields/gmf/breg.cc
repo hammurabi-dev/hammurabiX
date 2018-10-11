@@ -1,15 +1,13 @@
-#include <iostream>
-#include <vec3.h>
-#include <vector>
-#include <array>
 #include <cmath>
 #include <cassert>
+
+#include <vec3.h>
+
 #include <param.h>
 #include <grid.h>
 #include <breg.h>
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
-
 
 vec3_t<double> Breg::get_breg (const vec3_t<double> &pos,
                                const Param *par,
@@ -22,10 +20,8 @@ vec3_t<double> Breg::get_breg (const vec3_t<double> &pos,
     }
 }
 
-/**
- * if no specified field model is built
- * Breg object link directly here and return null field when invoked
- */
+// if no specified field model is built
+// Breg object link directly here and return null field when invoked
 vec3_t<double> Breg::breg (const vec3_t<double> &,
                            const Param *) const{
     return vec3_t<double> {0.,0.,0.};
@@ -50,23 +46,23 @@ vec3_t<double> Breg::read_grid (const vec3_t<double> &pos,
     // trilinear interpolation
     if (xl+1<grid->nx and yl+1<grid->ny and zl+1<grid->nz) {
         // interpolate along z direction, there are four interpolated vectors
-        std::size_t idx1 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
-        std::size_t idx2 {toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
+        std::size_t idx1 {toolkit::index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl)};
+        std::size_t idx2 {toolkit::index3d(grid->nx,grid->ny,grid->nz,xl,yl,zl+1)};
         vec3_t<double> i1 = {grid->bx[idx1]*(1.-zd) + grid->bx[idx2]*zd,
             grid->by[idx1]*(1.-zd) + grid->by[idx2]*zd,
             grid->bz[idx1]*(1.-zd) + grid->bz[idx2]*zd};
-        idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl);
-        idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl+1);
+        idx1 = toolkit::index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl);
+        idx2 = toolkit::index3d(grid->nx,grid->ny,grid->nz,xl,yl+1,zl+1);
         vec3_t<double> i2 {grid->bx[idx1]*(1.-zd) + grid->bx[idx2]*zd,
             grid->by[idx1]*(1.-zd) + grid->by[idx2]*zd,
             grid->bz[idx1]*(1.-zd) + grid->bz[idx2]*zd};
-        idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl,zl);
-        idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl,zl+1);
+        idx1 = toolkit::index3d(grid->nx,grid->ny,grid->nz,xl+1,yl,zl);
+        idx2 = toolkit::index3d(grid->nx,grid->ny,grid->nz,xl+1,yl,zl+1);
         vec3_t<double> j1 {grid->bx[idx1]*(1.-zd) + grid->bx[idx2]*zd,
             grid->by[idx1]*(1.-zd) + grid->by[idx2]*zd,
             grid->bz[idx1]*(1.-zd) + grid->bz[idx2]*zd};
-        idx1 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl+1,zl);
-        idx2 = toolkit::Index3d(grid->nx,grid->ny,grid->nz,xl+1,yl+1,zl+1);
+        idx1 = toolkit::index3d(grid->nx,grid->ny,grid->nz,xl+1,yl+1,zl);
+        idx2 = toolkit::index3d(grid->nx,grid->ny,grid->nz,xl+1,yl+1,zl+1);
         vec3_t<double> j2 {grid->bx[idx1]*(1.-zd) + grid->bx[idx2]*zd,
             grid->by[idx1]*(1.-zd) + grid->by[idx2]*zd,
             grid->bz[idx1]*(1.-zd) + grid->bz[idx2]*zd};
@@ -78,7 +74,7 @@ vec3_t<double> Breg::read_grid (const vec3_t<double> &pos,
     }
     // no interpolation
     else {
-        std::size_t idx {toolkit::Index3d (grid->nx,grid->ny,grid->nz,xl,yl,zl)};
+        std::size_t idx {toolkit::index3d (grid->nx,grid->ny,grid->nz,xl,yl,zl)};
         b_vec3 = vec3_t<double> {grid->bx[idx],grid->by[idx],grid->bz[idx]};
     }
     assert (b_vec3.Length()>1e+5*CGS_U_muGauss);
@@ -86,20 +82,20 @@ vec3_t<double> Breg::read_grid (const vec3_t<double> &pos,
 }
 
 void Breg::write_grid (const Param *par,
-                       Grid_breg *grid){
+                       Grid_breg *grid) const{
     assert(grid->write_permission);
     vec3_t<double> gc_pos, tmp_vec;
     double lx {grid->x_max-grid->x_min};
     double ly {grid->y_max-grid->y_min};
     double lz {grid->z_max-grid->z_min};
-    for(decltype(grid->nx) i=0;i!=grid->nx;++i){
+    for (decltype(grid->nx) i=0;i!=grid->nx;++i){
         gc_pos.x = i*lx/(grid->nx-1) + grid->x_min;
-        for(decltype(grid->ny) j=0;j!=grid->ny;++j){
+        for (decltype(grid->ny) j=0;j!=grid->ny;++j){
             gc_pos.y = j*ly/(grid->ny-1) + grid->y_min;
-            for(decltype(grid->nz) k=0;k!=grid->nz;++k){
+            for (decltype(grid->nz) k=0;k!=grid->nz;++k){
                 gc_pos.z = k*lz/(grid->nz-1) + grid->z_min;
-                tmp_vec = breg(gc_pos,par);
-                std::size_t idx {toolkit::Index3d (grid->nx,grid->ny,grid->nz,i,j,k)};
+                tmp_vec = breg (gc_pos,par);
+                std::size_t idx {toolkit::index3d (grid->nx,grid->ny,grid->nz,i,j,k)};
                 grid->bx[idx] = tmp_vec.x;
                 grid->by[idx] = tmp_vec.y;
                 grid->bz[idx] = tmp_vec.z;
