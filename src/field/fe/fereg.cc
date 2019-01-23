@@ -20,8 +20,11 @@ double FEreg::get_density (const vec3_t<double> &pos,
                          par,
                          grid);
     }
-    else {
+    else if (par->grid_fereg.build_permission){
         return density (pos,par);
+    }
+    else {
+        return 0.;
     }
 }
 

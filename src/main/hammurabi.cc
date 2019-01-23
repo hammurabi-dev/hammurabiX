@@ -210,7 +210,8 @@ void Pipeline::assemble_cre (){
 // LOS integration for observables
 void Pipeline::assemble_obs (){
     intobj = std::make_unique<Integrator> ();
-    for (unsigned int i=0;i<par->grid_int.do_sync.size();++i){
+    const auto repeat = par->grid_int.do_sync.size();
+    for (unsigned int i=0;i<repeat;++i){
         if (i>0) {
             par->grid_int.do_dm = false;
             par->grid_int.do_fd = false;

@@ -17,9 +17,12 @@ vec3_t<double> Breg::get_breg (const vec3_t<double> &pos,
                           par,
                           grid);
     }
-    else {
+    else if (par->grid_breg.build_permission){
         return breg (pos,
                      par);
+    }
+    else {
+        return vec3_t<double> {0.,0.,0.};
     }
 }
 

@@ -210,7 +210,7 @@
     
     <!-- free electron field -->
     <FreeElectron>
-        <Regular cue="1" type="YMW16">
+        <Regular cue="1" type="Test">
             <!-- YMW16 -->
             <YMW16>
                 <Warp>
