@@ -4,7 +4,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.2.3)
 SET(CMAKE_CXX_COMPILER "g++")
 OPTION(ENABLE_TESTING "Enable testing for this project" ON)
 OPTION(ENABLE_TIMING "Enable timing for this porect" ON)
-OPTION(ON_DOCKER "Build on docker image" OFF)
+OPTION(ON_DOCKER "Build on docker image" ON)
 OPTION(BUILD_SHARED_LIBS "Build shared library" ON)
 #-------------- instruction ------------------#
 #

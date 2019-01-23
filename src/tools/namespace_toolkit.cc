@@ -171,16 +171,16 @@ namespace toolkit {
     
     // auxiliary functions for parsing parameters
     std::unique_ptr<tinyxml2::XMLDocument> loadxml(const std::string& filename){
-        std::unique_ptr<tinyxml2::XMLDocument> doc = std::make_unique<tinyxml2::XMLDocument>();
-        doc->LoadFile(filename.c_str());
-        assert(!doc->Error());
-        return move(doc);
+        auto doc = std::make_unique<tinyxml2::XMLDocument> ();
+        doc->LoadFile (filename.c_str());
+        assert (!doc->Error());
+        return std::move (doc);
     }
     
     tinyxml2::XMLElement* tracexml (tinyxml2::XMLDocument *doc,
                                     const std::vector<std::string>& keychain){
         tinyxml2::XMLElement* el {doc->FirstChildElement("root")};
-        if(!keychain.empty()){
+        if (!keychain.empty()){
             for(auto key: keychain){
 #ifndef NDEBUG
                 std::cout<<"key: "<<key<<std::endl;

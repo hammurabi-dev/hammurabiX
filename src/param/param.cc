@@ -99,19 +99,26 @@ void Param::grid_param (tinyxml2::XMLDocument *doc){
     grid_cre.cre_size = grid_cre.nE*grid_cre.nx*grid_cre.ny*grid_cre.nz;
     // int box
     ptr = toolkit::tracexml (doc,{"Grid","Shell"});
-    if (toolkit::fetchstring (ptr,"type","layer")=="auto"){
-        tinyxml2::XMLElement *subptr {toolkit::tracexml (doc,{"Grid","Shell","layer","auto"})};
+	grid_int.nside_sim = toolkit::fetchunsigned (ptr,"value","nside_sim");
+    grid_int.npix_sim = 12*grid_int.nside_sim*grid_int.nside_sim;
+    grid_int.ec_r_max = toolkit::fetchdouble (ptr,"value","ec_r_max")*CGS_U_kpc;
+    grid_int.gc_r_max = toolkit::fetchdouble (ptr,"value","gc_r_max")*CGS_U_kpc;
+    grid_int.gc_z_max = toolkit::fetchdouble (ptr,"value","gc_z_max")*CGS_U_kpc;
+    grid_int.radial_res = toolkit::fetchdouble (ptr,"value","ec_r_res")*CGS_U_kpc;
+    grid_int.lat_lim = toolkit::fetchdouble (ptr,"value","lat_lim")*CGS_U_rad;
+	if (toolkit::fetchstring (ptr,"type","layer")=="auto"){
+        auto subptr = toolkit::tracexml (doc,{"Grid","Shell","layer","auto"});
         grid_int.total_shell = toolkit::fetchunsigned (subptr,"value","shell_num");
         for (std::size_t i=0;i!=grid_int.total_shell;++i){
             grid_int.nside_shell.push_back (pow(2,i)*toolkit::fetchunsigned (subptr,"value","nside_min"));
         }
         grid_int.radii_shell.push_back (0.);
-        for (std::size_t i=1;i<grid_int.total_shell;++i) {
-            grid_int.radii_shell.push_back (grid_int.ec_r_max*std::pow(0.5,grid_int.total_shell-i));
+        for (std::size_t i=0;i<grid_int.total_shell;++i) {
+            grid_int.radii_shell.push_back (grid_int.ec_r_max*std::pow(0.5,grid_int.total_shell-i-1));
         }
     }
     else if (toolkit::fetchstring (ptr,"type","layer")=="manual"){
-        tinyxml2::XMLElement *subptr {toolkit::tracexml (doc,{"Grid","Shell","layer","manual"})};
+        auto subptr = toolkit::tracexml (doc,{"Grid","Shell","layer","manual"});
         grid_int.total_shell = 0;
         for (auto e = subptr->FirstChildElement("nside");e!=nullptr;e=e->NextSiblingElement("nside")){
             grid_int.total_shell++;
@@ -120,23 +127,17 @@ void Param::grid_param (tinyxml2::XMLDocument *doc){
         for (auto e = subptr->FirstChildElement("cut");e!=nullptr;e=e->NextSiblingElement("cut")){
             grid_int.cut_shell.push_back (toolkit::fetchdouble(e,"value"));
         }
-        assert (grid_int.cut_shell.size() == grid_int.total_shell-1);
+		grid_int.cut_shell.push_back (1.);
+        assert (grid_int.cut_shell.size() == grid_int.total_shell);
         assert (grid_int.nside_shell.size() == grid_int.total_shell);
-        grid_int.radii_shell.push_back (0.);
-        for (std::size_t i=0;i<grid_int.total_shell-1;++i){
-            grid_int.radii_shell.push_back (grid_int.ec_r_max*grid_int.cut_shell[i]);
+		grid_int.radii_shell.push_back (0.);
+        for (auto& i : grid_int.cut_shell){
+            grid_int.radii_shell.push_back (grid_int.ec_r_max*i);
         }
     }
     else {
         assert (false);
     }
-    grid_int.nside_sim = toolkit::fetchunsigned (ptr,"value","nside_sim");
-    grid_int.npix_sim = 12*grid_int.nside_sim*grid_int.nside_sim;
-    grid_int.ec_r_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","ec_r_max");
-    grid_int.gc_r_max = toolkit::fetchdouble (ptr,"value","gc_r_max")*CGS_U_kpc;
-    grid_int.gc_z_max = toolkit::fetchdouble (ptr,"value","gc_z_max")*CGS_U_kpc;
-    grid_int.radial_res = toolkit::fetchdouble (ptr,"value","ec_r_res")*CGS_U_kpc;
-    grid_int.lat_lim = toolkit::fetchdouble (ptr,"value","lat_lim")*CGS_U_rad;
     // output file name
     ptr = toolkit::tracexml (doc,{"Obsout"});
     if (ptr->FirstChildElement("DM")!=nullptr){
@@ -154,12 +155,13 @@ void Param::grid_param (tinyxml2::XMLDocument *doc){
         grid_int.do_fd = false;
     }
     if (ptr->FirstChildElement("Sync")!=nullptr){
-        auto subptr = ptr->FirstChildElement("Sync");
+        auto subptr = toolkit::tracexml (doc,{"Obsout","Sync"});
         grid_int.do_sync.push_back (toolkit::fetchbool (subptr,"cue"));
+		grid_int.sim_sync_freq.push_back (toolkit::fetchdouble (subptr,"freq")*CGS_U_GHz);
         grid_int.sim_sync_name.push_back (toolkit::fetchstring (subptr,"filename"));
-        for (auto e = ptr->NextSiblingElement("Sync");e!=nullptr;e=e->NextSiblingElement("Sync")){
+        for (auto e = subptr->NextSiblingElement("Sync");e!=nullptr;e=e->NextSiblingElement("Sync")){
             grid_int.do_sync.push_back (toolkit::fetchbool (e,"cue"));
-            grid_int.sim_sync_freq.push_back (toolkit::fetchdouble (e,"freq","Sync")*CGS_U_GHz);
+            grid_int.sim_sync_freq.push_back (toolkit::fetchdouble (e,"freq")*CGS_U_GHz);
             grid_int.sim_sync_name.push_back (toolkit::fetchstring (e,"filename"));
         }
     }

@@ -4,6 +4,7 @@
 #include <cmath>
 #include <integrator.h>
 #include <grid.h>
+#include <cgs_units_file.h>
 
 TEST(integrator, boundary_check){
     Integrator test;
@@ -23,9 +24,9 @@ TEST(integrator, shell_info_assembling){
     //
     test_unsigned = 2;
     EXPECT_EQ (par->grid_int.sim_sync_freq.size(),test_unsigned);
-    test_double = 23.0;
+    test_double = 23.0*CGS_U_GHz;
     EXPECT_EQ (par->grid_int.sim_sync_freq[0],test_double);
-    test_double = 1.4;
+    test_double = 1.4*CGS_U_GHz;
     EXPECT_EQ (par->grid_int.sim_sync_freq[1],test_double);
     test_unsigned = 32;
     EXPECT_EQ (par->grid_int.nside_shell[0],test_unsigned);
@@ -39,17 +40,17 @@ TEST(integrator, shell_info_assembling){
     EXPECT_EQ (ref->step,test_unsigned);
     test_double = 0.;
     EXPECT_EQ (ref->d_start,test_double);
-    test_double = 10.;
+    test_double = 10.*CGS_U_kpc;
     EXPECT_EQ (ref->d_stop,test_double);
-    test_double = 0.03;
+    test_double = 0.03*CGS_U_kpc;
     EXPECT_EQ (ref->delta_d,test_double);
     //
     prop->assemble_shell_ref(ref.get(),par.get(),3);
-    test_unsinged = 1334;
+    test_unsigned = 1334;
     EXPECT_EQ (ref->step,test_unsigned);
-    test_double = 20.;
+    test_double = 20.*CGS_U_kpc;
     EXPECT_EQ (ref->d_start,test_double);
-    test_double = 40.;
+    test_double = 40.*CGS_U_kpc;
     EXPECT_EQ (ref->d_stop,test_double);
     //
     par = std::make_unique<Param> ("reference/int_tests_02.xml");
@@ -66,22 +67,22 @@ TEST(integrator, shell_info_assembling){
     EXPECT_EQ (ref->step,test_unsigned);
     test_double = 0.;
     EXPECT_EQ (ref->d_start,test_double);
-    test_double = 3.;
+    test_double = par->grid_int.ec_r_max*0.1;
     EXPECT_EQ (ref->d_stop,test_double);
     //
     prop->assemble_shell_ref(ref.get(),par.get(),2);
     test_unsigned = 1201;
     EXPECT_EQ (ref->step,test_unsigned);
-    test_double = 3.;
+    test_double = par->grid_int.ec_r_max*0.1;
     EXPECT_EQ (ref->d_start,test_double);
-    test_double = 21.;
+    test_double = par->grid_int.ec_r_max*0.7;
     EXPECT_EQ (ref->d_stop,test_double);
     //
     prop->assemble_shell_ref(ref.get(),par.get(),3);
     test_unsigned = 601;
     EXPECT_EQ (ref->step,test_unsigned);
-    test_double = 21.;
+    test_double = par->grid_int.ec_r_max*0.7;
     EXPECT_EQ (ref->d_start,test_double);
-    test_double = 30.;
+    test_double = par->grid_int.ec_r_max*1.0;
     EXPECT_EQ (ref->d_stop,test_double);
 }

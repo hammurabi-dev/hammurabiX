@@ -270,7 +270,8 @@ void Integrator::assemble_shell_ref (struct_shell *target,
     target->d_start = par->grid_int.radii_shell[shell_num-1];
     target->d_stop = par->grid_int.radii_shell[shell_num];
     target->delta_d = par->grid_int.radial_res;
-    target->step = floor((2.*target->d_stop - 2.*target->d_start)/(target->delta_d))+1;
+	// dragging target->delta_d outside will lose precision
+    target->step = floor(2.*(target->d_stop/target->delta_d - target->d_start/target->delta_d))+1;
     for (std::size_t i=0;i<target->step;++i){
         target->dist.push_back(target->d_start+i*0.5*target->delta_d);
     }
