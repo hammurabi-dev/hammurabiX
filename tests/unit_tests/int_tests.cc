@@ -8,25 +8,80 @@
 TEST(integrator, boundary_check){
     Integrator test;
     double R0 = 10.;
-    double R_lim = 1.0001*R0;
+    double R_lim = (1.0+1.0e-5)*R0;
     EXPECT_FALSE(test.check_simulation_upper_limit(R0,R_lim));
     EXPECT_TRUE(test.check_simulation_lower_limit(R0,R_lim));
 }
 
-TEST(integrator, shell_ref_assembling){
-    auto test = std::unique_ptr<Integrator> ();
-    auto gint = std::unique_ptr<Grid_int> ();
-    gint->init ("int_tests_01.xml");
-    
-    auto tmp = std::unique_ptr<Integrator::struct_shell> ();
-    test->assemble_shell_ref(tmp.get(),gint.get(),1);
-    unsigned int test_unsigned = 667;
-    EXPECT_EQ(tmp->step,test_unsigned);
-    gint->ec_r_max = 10.02;
-    test->assemble_shell_ref(tmp.get(),gint.get(),1);
-    test_unsigned += 2;
-    EXPECT_EQ(tmp->step,test_unsigned);
-    
-    gint->init ("int_tests_02.xml");
-    test
+TEST(integrator, shell_info_assembling){
+    unsigned int test_unsigned;
+    double test_double;
+    auto prop = std::make_unique<Integrator> ();
+    auto ref = std::make_unique<Integrator::struct_shell> ();
+    //
+    auto par = std::make_unique<Param> ("reference/int_tests_01.xml");
+    //
+    test_unsigned = 2;
+    EXPECT_EQ (par->grid_int.sim_sync_freq.size(),test_unsigned);
+    test_double = 23.0;
+    EXPECT_EQ (par->grid_int.sim_sync_freq[0],test_double);
+    test_double = 1.4;
+    EXPECT_EQ (par->grid_int.sim_sync_freq[1],test_double);
+    test_unsigned = 32;
+    EXPECT_EQ (par->grid_int.nside_shell[0],test_unsigned);
+    test_unsigned = 64;
+    EXPECT_EQ (par->grid_int.nside_shell[1],test_unsigned);
+    test_unsigned = 128;
+    EXPECT_EQ (par->grid_int.nside_shell[2],test_unsigned);
+    //
+    prop->assemble_shell_ref(ref.get(),par.get(),1);
+    test_unsigned = 667;
+    EXPECT_EQ (ref->step,test_unsigned);
+    test_double = 0.;
+    EXPECT_EQ (ref->d_start,test_double);
+    test_double = 10.;
+    EXPECT_EQ (ref->d_stop,test_double);
+    test_double = 0.03;
+    EXPECT_EQ (ref->delta_d,test_double);
+    //
+    prop->assemble_shell_ref(ref.get(),par.get(),3);
+    test_unsinged = 1334;
+    EXPECT_EQ (ref->step,test_unsigned);
+    test_double = 20.;
+    EXPECT_EQ (ref->d_start,test_double);
+    test_double = 40.;
+    EXPECT_EQ (ref->d_stop,test_double);
+    //
+    par = std::make_unique<Param> ("reference/int_tests_02.xml");
+    //
+    test_unsigned = 32;
+    EXPECT_EQ (par->grid_int.nside_shell[0],test_unsigned);
+    test_unsigned = 16;
+    EXPECT_EQ (par->grid_int.nside_shell[1],test_unsigned);
+    test_unsigned = 8;
+    EXPECT_EQ (par->grid_int.nside_shell[2],test_unsigned);
+    //
+    prop->assemble_shell_ref(ref.get(),par.get(),1);
+    test_unsigned = 201;
+    EXPECT_EQ (ref->step,test_unsigned);
+    test_double = 0.;
+    EXPECT_EQ (ref->d_start,test_double);
+    test_double = 3.;
+    EXPECT_EQ (ref->d_stop,test_double);
+    //
+    prop->assemble_shell_ref(ref.get(),par.get(),2);
+    test_unsigned = 1201;
+    EXPECT_EQ (ref->step,test_unsigned);
+    test_double = 3.;
+    EXPECT_EQ (ref->d_start,test_double);
+    test_double = 21.;
+    EXPECT_EQ (ref->d_stop,test_double);
+    //
+    prop->assemble_shell_ref(ref.get(),par.get(),3);
+    test_unsigned = 601;
+    EXPECT_EQ (ref->step,test_unsigned);
+    test_double = 21.;
+    EXPECT_EQ (ref->d_start,test_double);
+    test_double = 30.;
+    EXPECT_EQ (ref->d_stop,test_double);
 }

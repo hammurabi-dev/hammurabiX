@@ -84,22 +84,24 @@
         </Box_CRE>
         <!-- LOS integration setting -->
         <Shell>
-            <layer type="auto">
+            <layer type="manual">
                 <auto>
-                    <shell_num value="3"/> <!-- total shell number -->
+                    <shell_num value="1"/> <!-- total shell number -->
                     <nside_min value="32"/> <!-- inner most shell resolution -->
                 </auto>
                 <!-- set shell resolution from inside out -->
                 <!-- set shell cutting point from inside out -->
                 <manual> <!-- total shell number calculated automatically -->
-                    <cut value="0.5"/> <!-- cut at half of total shell radius -->
+                    <cut value="0.1"/> <!-- cut at half of total shell radius -->
+                    <cut value="0.7"/>
                     <nside value="32"/> <!-- inner most shell Nside -->
                     <nside value="16"/>
+                    <nside value="8"/>
                 </manual>
             </layer>
             <nside_sim value="32"/> <!-- output map resolution -->
             <!-- maximum radius in earth/Galactic centric frame -->
-            <ec_r_max value="40.0"/> <!-- kpc -->
+            <ec_r_max value="30.0"/> <!-- kpc -->
             <gc_r_max value="20.0"/> <!-- kpc -->
             <!-- maximum height in galactic centric frame -->
             <gc_z_max value="10.0"/> <!-- kpc -->

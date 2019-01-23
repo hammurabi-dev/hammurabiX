@@ -165,7 +165,7 @@ TEST(toolkit, complex_stripping){
 }
 
 TEST(toolkit, xml_parser){
-    auto doc = toolkit::loadxml("reference/example.xml");
+    auto doc = toolkit::loadxml("reference/tools_tests.xml");
     
     tinyxml2::XMLElement* el = toolkit::tracexml(doc.get(),{"double"});
     EXPECT_EQ(toolkit::fetchdouble(el,"value"),3.14);
