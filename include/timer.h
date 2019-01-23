@@ -21,12 +21,17 @@ public:
 #endif
     timecache record;
 public:
+    Timer () = default;
+    virtual ~Timer () = default;
+    Timer (const Timer &) = delete;
+    Timer (Timer &&) = delete;
+    Timer& operator= (const Timer &) = delete;
+    Timer& operator= (Timer &&) = delete;
     // record start point of timer
     // 1st argument: name of timing record
     inline void start (std::string flag){
         record[flag].first = std::chrono::high_resolution_clock::now();
     }
-    
     // record end point of timer
     // then calculate corresponding elapsed time
     // 1st argument: name of timing record
@@ -34,7 +39,6 @@ public:
         duration diff = (std::chrono::high_resolution_clock::now() - record[flag].first);
         record[flag].second = diff.count();
     }
-    
     // print to stdout the elapsed time in ms resolution
     // 1st argument: (optional) name of timing record
     // if no name provided, print all records

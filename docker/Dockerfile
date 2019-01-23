@@ -21,8 +21,8 @@ RUN ./configure --enable-threads --enable-openmp --enable-shared --prefix=/usr/l
 WORKDIR /home/lab
 
 # HEALPIX
-RUN wget http://downloads.sourceforge.net/project/healpix/Healpix_3.31/Healpix_3.31_2016Aug26.tar.gz && tar xzf Healpix_3.31_2016Aug26.tar.gz
-WORKDIR /home/lab/Healpix_3.31
+RUN wget http://downloads.sourceforge.net/project/healpix/Healpix_3.50/Healpix_3.50_2018Dec10.tar.gz && tar xzf Healpix_3.50_2018Dec10.tar.gz
+WORKDIR /home/lab/Healpix_3.50
 # write config file on fly
 RUN echo '4\n\
 	/sur/local/bin\n\
@@ -34,7 +34,7 @@ RUN echo '4\n\
 RUN ./configure -L < hlpx_config && make 
 WORKDIR /home/lab
 ENV HEALPIX_TARGET optimized_gcc 
-ENV HEALPIX /home/lab/Healpix_3.31
+ENV HEALPIX /home/lab/Healpix_3.50
 
 # GOOGLE TEST
 RUN git clone https://github.com/google/googletest.git googletest

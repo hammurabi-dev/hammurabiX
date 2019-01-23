@@ -30,36 +30,36 @@ void Brnd_mhd::write_grid (const Param *par,
     gsl_rng_set(r, toolkit::random_seed(par->brnd_seed));
 #endif
     // start Fourier space filling
-    const double lx {grid->x_max-grid->x_min};
-    const double ly {grid->y_max-grid->y_min};
-    const double lz {grid->z_max-grid->z_min};
+    const double lx {par->grid_brnd.x_max-par->grid_brnd.x_min};
+    const double ly {par->grid_brnd.y_max-par->grid_brnd.y_min};
+    const double lz {par->grid_brnd.z_max-par->grid_brnd.z_min};
     const vec3_t<double> B {breg->get_breg(par->SunPosition,par,gbreg)};
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) // DO NOT CHANGE SCHEDULE TYPE
 #endif
-    for (decltype(grid->nx) i=0;i<grid->nx;++i) {
+    for (decltype(par->grid_brnd.nx) i=0;i<par->grid_brnd.nx;++i) {
 #ifdef _OPENMP
         auto seed_id = threadvec[omp_get_thread_num()];
 #else
         auto seed_id = r;
 #endif
         vec3_t<double> k {CGS_U_kpc*i/lx,0,0};
-        if (i>=(grid->nx+1)/2) k.x -= CGS_U_kpc*grid->nx/lx;
+        if (i>=(par->grid_brnd.nx+1)/2) k.x -= CGS_U_kpc*par->grid_brnd.nx/lx;
         // it's better to calculate indeces manually
         // just for reference, how indeces are calculated
-        // const size_t idx {toolkit::index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-        const std::size_t idx_lv1 {i*grid->ny*grid->nz};
-        for (decltype(grid->ny) j=0;j<grid->ny;++j) {
+        // const size_t idx {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i,j,l)};
+        const std::size_t idx_lv1 {i*par->grid_brnd.ny*par->grid_brnd.nz};
+        for (decltype(par->grid_brnd.ny) j=0;j<par->grid_brnd.ny;++j) {
             k.y = CGS_U_kpc*j/ly;
-            if (j>=(grid->ny+1)/2) k.y -= CGS_U_kpc*grid->ny/ly;
-            const std::size_t idx_lv2 {idx_lv1+j*grid->nz};
-            for (decltype(grid->nz) l=0;l<grid->nz;++l) {
+            if (j>=(par->grid_brnd.ny+1)/2) k.y -= CGS_U_kpc*par->grid_brnd.ny/ly;
+            const std::size_t idx_lv2 {idx_lv1+j*par->grid_brnd.nz};
+            for (decltype(par->grid_brnd.nz) l=0;l<par->grid_brnd.nz;++l) {
                 // the very 0th term is fixed to zero in allocation
                 if (i==0 and j==0 and l==0) continue;
                 k.z = CGS_U_kpc*l/lz;
-                if (l>=(grid->nz+1)/2) k.z -= CGS_U_kpc*grid->nz/lz;
+                if (l>=(par->grid_brnd.nz+1)/2) k.z -= CGS_U_kpc*par->grid_brnd.nz/lz;
                 const double ks {k.Length()};
                 const std::size_t idx {idx_lv2+l};
                 vec3_t<double> ep {eplus(B,k)};
@@ -135,22 +135,22 @@ void Brnd_mhd::write_grid (const Param *par,
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-    for (decltype(grid->nx) i=0;i<grid->nx;++i) {
-        decltype(grid->nx) i_sym {grid->nx-i};// apply Hermitian symmetry
+    for (decltype(par->grid_brnd.nx) i=0;i<par->grid_brnd.nx;++i) {
+        decltype(par->grid_brnd.nx) i_sym {par->grid_brnd.nx-i};// apply Hermitian symmetry
         if (i==0) i_sym = i;
         // it's better to calculate indeces manually
         // just for reference, how indeces are calculated
-        // const std::size_t idx {toolkit::index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-        // const std::size_t idx_sym {toolkit::index3d(grid->nx,grid->ny,grid->nz,i_sym,j_sym,l_sym)};
-        const std::size_t idx_lv1 {i*grid->ny*grid->nz};
-        const std::size_t idx_sym_lv1 {i_sym*grid->ny*grid->nz};
-        for (decltype(grid->ny) j=0;j<grid->ny;++j) {
-            decltype(grid->ny) j_sym {grid->ny-j};// apply Hermitian symmetry
+        // const std::size_t idx {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i,j,l)};
+        // const std::size_t idx_sym {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i_sym,j_sym,l_sym)};
+        const std::size_t idx_lv1 {i*par->grid_brnd.ny*par->grid_brnd.nz};
+        const std::size_t idx_sym_lv1 {i_sym*par->grid_brnd.ny*par->grid_brnd.nz};
+        for (decltype(par->grid_brnd.ny) j=0;j<par->grid_brnd.ny;++j) {
+            decltype(par->grid_brnd.ny) j_sym {par->grid_brnd.ny-j};// apply Hermitian symmetry
             if (j==0) j_sym = j;
-            const std::size_t idx_lv2 {idx_lv1+j*grid->nz};
-            const std::size_t idx_sym_lv2 {idx_sym_lv1+j_sym*grid->nz};
-            for (decltype(grid->nz) l=0;l<grid->nz;++l) {
-                decltype(grid->nz) l_sym {grid->nz-l};// apply Hermitian symmetry
+            const std::size_t idx_lv2 {idx_lv1+j*par->grid_brnd.nz};
+            const std::size_t idx_sym_lv2 {idx_sym_lv1+j_sym*par->grid_brnd.nz};
+            for (decltype(par->grid_brnd.nz) l=0;l<par->grid_brnd.nz;++l) {
+                decltype(par->grid_brnd.nz) l_sym {par->grid_brnd.nz-l};// apply Hermitian symmetry
                 if (l==0) l_sym = l;
                 const std::size_t idx {idx_lv2+l}; //k
                 const std::size_t idx_sym {idx_sym_lv2+l_sym}; //-k

@@ -47,40 +47,40 @@ void FErnd_dft::write_grid (const Param *par,
     gsl_rng *r {gsl_rng_alloc(gsl_rng_taus)};
     gsl_rng_set (r, toolkit::random_seed(par->brnd_seed));
 #endif
-    const double lx {grid->x_max-grid->x_min};
-    const double ly {grid->y_max-grid->y_min};
-    const double lz {grid->z_max-grid->z_min};
+    const double lx {par->grid_fernd.x_max-par->grid_fernd.x_min};
+    const double ly {par->grid_fernd.y_max-par->grid_fernd.y_min};
+    const double lz {par->grid_fernd.z_max-par->grid_fernd.z_min};
     // physical k in 1/kpc dimension
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-    for (decltype(grid->nx) i=0;i<grid->nx;++i) {
+    for (decltype(par->grid_fernd.nx) i=0;i<par->grid_fernd.nx;++i) {
 #ifdef _OPENMP
         auto seed_id = threadvec[omp_get_thread_num()];
 #else
         auto seed_id = r;
 #endif
         double kx {CGS_U_kpc*i/lx};
-        if (i>=(grid->nx+1)/2) kx -= CGS_U_kpc*grid->nx/lx;
+        if (i>=(par->grid_fernd.nx+1)/2) kx -= CGS_U_kpc*par->grid_fernd.nx/lx;
         /**
          * it's better to calculate indeces manually
          * just for reference, how indeces are calculated
-         * const size_t idx {toolkit::index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+         * const size_t idx {toolkit::index3d(par->grid_fernd.nx,par->grid_fernd.ny,par->grid_fernd.nz,i,j,l)};
          */
-        const size_t idx_lv1 {i*grid->ny*grid->nz};
-        for (decltype(grid->ny) j=0;j<grid->ny;++j) {
+        const size_t idx_lv1 {i*par->grid_fernd.ny*par->grid_fernd.nz};
+        for (decltype(par->grid_fernd.ny) j=0;j<par->grid_fernd.ny;++j) {
             double ky {CGS_U_kpc*j/ly};
-            if (j>=(grid->ny+1)/2) ky -= CGS_U_kpc*grid->ny/ly;
-            const size_t idx_lv2 {idx_lv1+j*grid->nz};
-            for (decltype(grid->nz) l=0;l<grid->nz;++l) {
+            if (j>=(par->grid_fernd.ny+1)/2) ky -= CGS_U_kpc*par->grid_fernd.ny/ly;
+            const size_t idx_lv2 {idx_lv1+j*par->grid_fernd.nz};
+            for (decltype(par->grid_fernd.nz) l=0;l<par->grid_fernd.nz;++l) {
                 /**
                  * the very 0th term is fixed to zero in allocation
                  */
                 if (i==0 and j==0 and l==0) continue;
                 double kz {CGS_U_kpc*l/lz};
-                if (l>=(grid->nz+1)/2) kz -= CGS_U_kpc*grid->nz/lz;
+                if (l>=(par->grid_fernd.nz+1)/2) kz -= CGS_U_kpc*par->grid_fernd.nz/lz;
                 const double ks {std::sqrt(kx*kx + ky*ky + kz*kz)};
                 const size_t idx {idx_lv2+l};
                 /**
@@ -107,24 +107,24 @@ void FErnd_dft::write_grid (const Param *par,
     // PHASE II
     // RESCALING FIELD PROFILE IN REAL SPACE
     // 1/sqrt(fe_var)
-    const double fe_var_invsq {1./std::sqrt(toolkit::variance(grid->fe_k[0],grid->full_size))};
+    const double fe_var_invsq {1./std::sqrt(toolkit::variance(grid->fe_k[0],par->grid_fernd.full_size))};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-    for (decltype(grid->nx) i=0;i<grid->nx;++i) {
-        vec3_t<double> pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
+    for (decltype(par->grid_fernd.nx) i=0;i<par->grid_fernd.nx;++i) {
+        vec3_t<double> pos {i*lx/(par->grid_fernd.nx-1) + par->grid_fernd.x_min,0,0};
         /**
          * it's better to calculate indeces manually
          * just for reference, how indeces are calculated
-         * const size_t idx {toolkit::index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
+         * const size_t idx {toolkit::index3d(par->grid_fernd.nx,par->grid_fernd.ny,par->grid_fernd.nz,i,j,l)};
          */
-        const size_t idx_lv1 {i*grid->ny*grid->nz};
-        for (decltype(grid->ny) j=0;j<grid->ny;++j) {
-            pos.y = j*ly/(grid->ny-1) + grid->y_min;
-            const size_t idx_lv2 {idx_lv1+j*grid->nz};
-            for (decltype(grid->nz) l=0;l<grid->nz;++l) {
+        const size_t idx_lv1 {i*par->grid_fernd.ny*par->grid_fernd.nz};
+        for (decltype(par->grid_fernd.ny) j=0;j<par->grid_fernd.ny;++j) {
+            pos.y = j*ly/(par->grid_fernd.ny-1) + par->grid_fernd.y_min;
+            const size_t idx_lv2 {idx_lv1+j*par->grid_fernd.nz};
+            for (decltype(par->grid_fernd.nz) l=0;l<par->grid_fernd.nz;++l) {
                 // get physical position
-                pos.z = l*lz/(grid->nz-1) + grid->z_min;
+                pos.z = l*lz/(par->grid_fernd.nz-1) + par->grid_fernd.z_min;
                 // get rescaling factor
                 double ratio {std::sqrt(rescal(pos,par))*par->fernd_dft.rms*fe_var_invsq};
                 const size_t idx {idx_lv2+l};

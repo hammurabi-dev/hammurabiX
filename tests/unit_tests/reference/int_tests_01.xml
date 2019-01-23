@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<root>
+    <Obsout>
+        <DM cue="1" filename="dm.fits"/>
+        <Sync cue="1" freq="23" filename="iqu_sync_23.fits"/>
+        <Sync cue="1" freq="1.4" filename="iqu_sync_1.4.fits"/>
+        <Faraday cue="1" filename="fd.fits"/>
+    </Obsout>
+    
+    <Grid>
+        <Shell>
+            <layer type="auto">
+                <auto>
+                    <shell_num value="1"/>
+                    <nside_min value="32"/>
+                </auto>
+                <manual>
+                    <cut value="0.5"/>
+                    <nside value="32"/>
+                    <nside value="16"/>
+                </manual>
+            </layer>
+            <nside_sim value="32"/>
+            <ec_r_max value="30.0"/>
+            <gc_r_max value="20.0"/>
+            <gc_z_max value="10.0"/>
+            <ec_r_res value="0.03"/>
+            <lat_lim value="0."/>
+        </Shell>
+    </Grid>
+</root>

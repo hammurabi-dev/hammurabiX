@@ -10,22 +10,16 @@
 
 template<int dim,typename T>
 class hvec{
-    
 protected:
     std::vector<T> ele;
-    
 public:
-    
     hvec () = default;
-    
     virtual ~hvec () = default;
-    
     // 1D
     hvec<dim,T> (const T& x){
         assert (dim==1);
         this->ele.push_back (x);
     }
-    
     // 2D
     hvec<dim,T> (const T& x,
                  const T& y){
@@ -33,7 +27,6 @@ public:
         this->ele.push_back (x);
         this->ele.push_back (y);
     }
-    
     // 3D
     hvec<dim,T> (const T& x,
                  const T& y,
@@ -43,12 +36,10 @@ public:
         this->ele.push_back (y);
         this->ele.push_back (z);
     }
-    
     // push back
     void push_back (const T& s){
         this->ele.push_back (s);
     }
-    
     // copy ctor
     hvec<dim,T> (const hvec<dim,T>& v){
 #ifndef NDEBUG
@@ -56,7 +47,6 @@ public:
 #endif
         this->ele = v.content();
     }
-    
     // move ctor
     hvec<dim,T> (hvec<dim,T>&& v)
     : ele(std::move(v.content())){
@@ -64,16 +54,14 @@ public:
         std::cout<<"calling mv ctor"<<std::endl;
 #endif
     }
-    
     // copy assign
     hvec<dim,T>& operator= (const hvec<dim,T>& v) noexcept{
 #ifndef NDEBUG
         std::cout<<"calling cp assign"<<std::endl;
 #endif
-        this->ele = v.content();
+        this->ele = std::move(v.content());
         return *this;
     }
-    
     // move assign
     hvec<dim,T>& operator= (hvec<dim,T>&& v) noexcept{
 #ifndef NDEBUG
@@ -82,27 +70,22 @@ public:
         this->ele = std::move(v.content());
         return *this;
     }
-    
     // operator []
     T operator[] (const int& i) const{
         return this->ele[i];
     }
-    
     // operator []
     T& operator[] (const int& i){
         return this->ele[i];
     }
-    
     // get std::vector<T> ele
     const std::vector<T> content () const{
         return this->ele;
     }
-    
     // get std::vector<T> ele
     std::vector<T>& content (){
         return this->ele;
     }
-    
     // operator +
     template<typename R>
     hvec<dim,T> operator+ (const hvec<dim,R>& v) const{
@@ -112,7 +95,6 @@ public:
         }
         return tmp;
     }
-    
     // operator +=
     // works with different vector data types
     // play with caution
@@ -123,7 +105,6 @@ public:
         }
         return *this;
     }
-    
     // operator -
     // works with different vector data types
     // play with caution
@@ -135,7 +116,6 @@ public:
         }
         return tmp;
     }
-    
     // operator -=
     // works with different vector data types
     // play with caution
@@ -146,7 +126,6 @@ public:
         }
         return *this;
     }
-    
     // operator *
     // works with different vector data types
     // play with caution
@@ -158,7 +137,6 @@ public:
         }
         return tmp;
     }
-    
     // operaotr *=
     // works with different vector data types
     // play with caution
@@ -169,7 +147,6 @@ public:
         }
         return *this;
     }
-    
     // operator /
     // works with different vector data types
     // play with caution
@@ -181,7 +158,6 @@ public:
         }
         return tmp;
     }
-    
     // operator /=
     // works with different vector data types
     // play with caution
@@ -193,7 +169,6 @@ public:
         }
         return *this;
     }
-    
     // operator ==
     bool operator== (const hvec<dim,T>& v){
         for (unsigned int i=0;i<dim;++i){
@@ -203,7 +178,6 @@ public:
         }
         return true;
     }
-    
     // operator !=
     bool operator!= (const hvec<dim,T>& v){
         for (unsigned int i=0;i<dim;++i){
@@ -213,7 +187,6 @@ public:
         }
         return false;
     }
-    
     // vector length
     double length () const{
         double tmp {0};
@@ -223,7 +196,6 @@ public:
         }
         return std::sqrt(tmp);
     }
-    
     // vector squared length
     double lengthsq () const{
         double tmp {0};
@@ -233,14 +205,12 @@ public:
         }
         return tmp;
     }
-    
     // flip sign
     void flip (){
         for(unsigned int i=0;i<dim;++i){
             this->ele[i] *= static_cast<T>(-1.0);
         }
     }
-    
     // versor
     hvec<dim,double> versor () const{
         hvec<dim,double> tmp;
@@ -251,7 +221,6 @@ public:
         tmp /= this->length();
         return tmp;
     }
-    
     // inner product
     // works with different vector data type
     // play with caution
@@ -263,7 +232,6 @@ public:
         }
         return tmp;
     }
-    
     // cross product, works in 3D only
     // works with different vector data type
     // play with caution
@@ -277,7 +245,6 @@ public:
         }
         return tmp;
     }
-    
     // osteam function
     friend std::ostream& operator<< (std::ostream& os,
                                      const hvec<dim,T>& v){
@@ -287,7 +254,6 @@ public:
         os << std::endl;
         return os;
     }
-    
 };
 
 #endif

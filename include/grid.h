@@ -7,64 +7,56 @@
 #include <array>
 #include <vector>
 #include <memory>
+#include <cassert>
 
 #include <fftw3.h>
 #include <tinyxml2.h>
 #include <healpix_map.h>
+#include <param.h>
 
 class Grid{
-    
 public:
-    
     Grid () = default;
-    
+    Grid (const Grid&) = delete;
+    Grid (const Grid&&) = delete;
+    Grid& operator= (const Grid &) = delete;
+    Grid& operator= (Grid &&) = delete;
     virtual ~Grid () = default;
-    
     // build up grid and allocate memory
-    virtual void build_grid (tinyxml2::XMLDocument *);
-    
+    virtual void build_grid (const Param *);
     // export grid to file
-    virtual void export_grid ();
-    
+    virtual void export_grid (const Param *);
     // import file to grid
-    virtual void import_grid ();
+    virtual void import_grid (const Param *);
 };
 
 // regular GMF grid
 class Grid_breg final : public Grid{
-    
 public:
-    
-    Grid_breg (const std::string &);
-    
+    Grid_breg () = default;
+    Grid_breg (const Param *);
+    Grid_breg (const Grid_breg&) = delete;
+    Grid_breg (const Grid_breg&&) = delete;
+    Grid_breg& operator= (const Grid_breg &) = delete;
+    Grid_breg& operator= (Grid_breg &&) = delete;
     virtual ~Grid_breg () = default;
-    
-    void build_grid (tinyxml2::XMLDocument *) override;
-    
-    void export_grid () override;
-    
-    void import_grid () override;
-    
+    void build_grid (const Param *) override;
+    void export_grid (const Param *) override;
+    void import_grid (const Param *) override;
     std::unique_ptr<double[]> bx, by, bz;
-    
-    std::string filename;
-    
-    bool build_permission, read_permission, write_permission;
-    
-    double x_max, x_min, y_max, y_min, z_max, z_min;
-    
-    std::size_t nx, ny, nz, full_size;
 };
 
 // turbulent GMF grid
 class Grid_brnd final : public Grid{
-    
 public:
-    
-    Grid_brnd (const std::string &);
-    
+    Grid_brnd () = default;
+    Grid_brnd (const Param *);
+    Grid_brnd (const Grid_brnd&) = delete;
+    Grid_brnd (const Grid_brnd&&) = delete;
+    Grid_brnd& operator= (const Grid_brnd &) = delete;
+    Grid_brnd& operator= (Grid_brnd &&) = delete;
     virtual ~Grid_brnd (){
-        if (build_permission or read_permission){
+        if (clean_switch){
             fftw_destroy_plan (plan_c0_bw);
             fftw_destroy_plan (plan_c1_bw);
             fftw_destroy_plan (plan_c0_fw);
@@ -78,66 +70,46 @@ public:
 #endif
         }
     };
-    
-    void build_grid (tinyxml2::XMLDocument *) override;
-    
-    void export_grid () override;
-    
-    void import_grid () override;
-    
+    void build_grid (const Param *) override;
+    void export_grid (const Param *) override;
+    void import_grid (const Param *) override;
     // spatial space
     std::unique_ptr<double[]> bx, by, bz;
-    
     // Fourier space
     fftw_complex *c0, *c1;
-    
     // for/backward plans
     fftw_plan plan_c0_bw, plan_c1_bw, plan_c0_fw, plan_c1_fw;
-    
-    std::string filename;
-    
-    bool read_permission, write_permission, build_permission;
-    
-    double x_max, x_min, y_max, y_min, z_max, z_min;
-    
-    std::size_t nx, ny, nz, full_size;
+    // for destructor
+    bool clean_switch = false;
 };
 
 // regular free electron field grid
 class Grid_fereg final : public Grid{
-    
 public:
-    
-    Grid_fereg (const std::string &);
-    
+    Grid_fereg () = default;
+    Grid_fereg (const Param *);
+    Grid_fereg (const Grid_fereg&) = delete;
+    Grid_fereg (const Grid_fereg&&) = delete;
+    Grid_fereg& operator= (const Grid_fereg &) = delete;
+    Grid_fereg& operator= (Grid_fereg &&) = delete;
     virtual ~Grid_fereg () = default;
-    
-    void build_grid (tinyxml2::XMLDocument *) override;
-    
-    void export_grid () override;
-    
-    void import_grid () override;
-    
+    void build_grid (const Param *) override;
+    void export_grid (const Param *) override;
+    void import_grid (const Param *) override;
     std::unique_ptr<double[]> fe;
-    
-    std::string filename;
-    
-    bool build_permission, read_permission, write_permission;
-    
-    double x_max, x_min, y_max, y_min, z_max, z_min;
-    
-    std::size_t nx, ny, nz, full_size;
 };
 
 // turbulent free electron field grid
 class Grid_fernd final : public Grid{
-    
 public:
-    
-    Grid_fernd (const std::string &);
-    
+    Grid_fernd () = default;
+    Grid_fernd (const Param *);
+    Grid_fernd (const Grid_fernd&) = delete;
+    Grid_fernd (const Grid_fernd&&) = delete;
+    Grid_fernd& operator= (const Grid_fernd &) = delete;
+    Grid_fernd& operator= (Grid_fernd &&) = delete;
     virtual ~Grid_fernd (){
-        if (build_permission or read_permission){
+        if (clean_switch){
             fftw_destroy_plan (plan_fe_bw);
             fftw_free (fe_k);
 #ifdef _OPENMP
@@ -147,84 +119,44 @@ public:
 #endif
         }
     };
-    void build_grid (tinyxml2::XMLDocument *) override;
-    
-    void export_grid () override;
-    
-    void import_grid () override;
-    
+    void build_grid (const Param *) override;
+    void export_grid (const Param *) override;
+    void import_grid (const Param *) override;
     std::unique_ptr<double[]> fe;
-    
     fftw_complex *fe_k;
-    
     fftw_plan plan_fe_bw;
-    
-    std::string filename;
-    
-    bool read_permission, write_permission, build_permission;
-    
-    double x_max, x_min, y_max, y_min, z_max, z_min;
-    
-    std::size_t nx, ny, nz, full_size;
+    bool clean_switch;
 };
 
 // CRE grid
 class Grid_cre final : public Grid{
-    
 public:
-    
-    Grid_cre (const std::string &);
-    
+    Grid_cre () = default;
+    Grid_cre (const Param *);
+    Grid_cre (const Grid_cre&) = delete;
+    Grid_cre (const Grid_cre&&) = delete;
+    Grid_cre& operator= (const Grid_cre &) = delete;
+    Grid_cre& operator= (Grid_cre &&) = delete;
     virtual ~Grid_cre () = default;
-    
-    void build_grid (tinyxml2::XMLDocument *) override;
-    
-    void export_grid () override;
-    
-    void import_grid () override;
-    
+    void build_grid (const Param *) override;
+    void export_grid (const Param *) override;
+    void import_grid (const Param *) override;
     std::unique_ptr<double[]> cre_flux;
-    
-    std::string filename;
-    
-    bool read_permission, write_permission;
-    
-    std::size_t nE, nz, nx, ny, cre_size;
-    
-    double x_max, x_min, y_max, y_min, z_max, z_min;
-    
-    double E_min, E_max, E_fact;
 };
 
 // observable field grid
 class Grid_int final : public Grid{
-    
 public:
-    
-    Grid_int (const std::string &);
-    
     Grid_int () = default;
-    
+    Grid_int (const Param *);
+    Grid_int (const Grid_int&) = delete;
+    Grid_int (const Grid_int&&) = delete;
+    Grid_int& operator= (const Grid_int &) = delete;
+    Grid_int& operator= (Grid_int &&) = delete;
     virtual ~Grid_int () = default;
-    
-    void build_grid (tinyxml2::XMLDocument *) override;
-    
-    void export_grid () override;
-    
+    void build_grid (const Param *) override;
+    void export_grid (const Param *) override;
     Healpix_Map<double> dm_map, Is_map, Qs_map, Us_map, fd_map;
-    
-    // shell parameters
-    std::size_t nside_sim, npix_sim, total_shell;
-    
-    std::vector<std::size_t> nside_shell;
-    
-    // shell boundary
-    double gc_r_max, ec_r_max, gc_z_max, radial_res, lat_lim;
-    
-    // switches
-    bool do_dm, do_sync, do_fd;
-    
-    std::string sim_sync_name, sim_fd_name, sim_dm_name;
 };
 
 #endif

@@ -94,35 +94,35 @@ void Brnd_es::write_grid (const Param *par,
     gsl_rng_set (r, toolkit::random_seed(par->brnd_seed));
 #endif
     // start Fourier space filling, physical k in 1/kpc dimension
-    const double lx {grid->x_max-grid->x_min};
-    const double ly {grid->y_max-grid->y_min};
-    const double lz {grid->z_max-grid->z_min};
+    const double lx {par->grid_brnd.x_max-par->grid_brnd.x_min};
+    const double ly {par->grid_brnd.y_max-par->grid_brnd.y_min};
+    const double lz {par->grid_brnd.z_max-par->grid_brnd.z_min};
     // physical dk^3
     const double dk3 {CGS_U_kpc*CGS_U_kpc*CGS_U_kpc/(lx*ly*lz)};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-    for (decltype(grid->nx) i=0;i<grid->nx;++i){
+    for (decltype(par->grid_brnd.nx) i=0;i<par->grid_brnd.nx;++i){
 #ifdef _OPENMP
         auto seed_id = threadvec[omp_get_thread_num()];
 #else
         auto seed_id = r;
 #endif
         double kx {CGS_U_kpc*i/lx};
-        if (i>=(grid->nx+1)/2) kx -= CGS_U_kpc*grid->nx/lx;
+        if (i>=(par->grid_brnd.nx+1)/2) kx -= CGS_U_kpc*par->grid_brnd.nx/lx;
         // it's better to calculate indeces manually
         // just for reference, how indeces are calculated
-        // const size_t idx {toolkit::index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-        const std::size_t idx_lv1 {i*grid->ny*grid->nz};
-        for (decltype(grid->ny) j=0;j<grid->ny;++j){
+        // const size_t idx {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i,j,l)};
+        const std::size_t idx_lv1 {i*par->grid_brnd.ny*par->grid_brnd.nz};
+        for (decltype(par->grid_brnd.ny) j=0;j<par->grid_brnd.ny;++j){
             double ky {CGS_U_kpc*j/ly};
-            if (j>=(grid->ny+1)/2) ky -= CGS_U_kpc*grid->ny/ly;
-            const std::size_t idx_lv2 {idx_lv1+j*grid->nz};
-            for (decltype(grid->nz) l=0;l<grid->nz;++l){
+            if (j>=(par->grid_brnd.ny+1)/2) ky -= CGS_U_kpc*par->grid_brnd.ny/ly;
+            const std::size_t idx_lv2 {idx_lv1+j*par->grid_brnd.nz};
+            for (decltype(par->grid_brnd.nz) l=0;l<par->grid_brnd.nz;++l){
                 // 0th term is fixed to zero in allocation
                 if (i==0 and j==0 and l==0) continue;
                 double kz {CGS_U_kpc*l/lz};
-                if (l>=(grid->nz+1)/2) kz -= CGS_U_kpc*grid->nz/lz;
+                if (l>=(par->grid_brnd.nz+1)/2) kz -= CGS_U_kpc*par->grid_brnd.nz/lz;
                 const double ks {std::sqrt(kx*kx + ky*ky + kz*kz)};
                 const std::size_t idx {idx_lv2+l};
                 // turbulent power is shared in following pattern
@@ -155,19 +155,19 @@ void Brnd_es::write_grid (const Param *par,
     // RESCALING FIELD PROFILE IN REAL SPACE
     // 1./std::sqrt(3*bi_var)
     // after 1st Fourier transformation, c0_R = bx, c0_I = by, c1_I = bz
-    const double b_var_invsq {1./std::sqrt(3.*toolkit::variance(grid->c0[0],grid->full_size))};
+    const double b_var_invsq {1./std::sqrt(3.*toolkit::variance(grid->c0[0],par->grid_brnd.full_size))};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-    for (decltype(grid->nx) i=0;i<grid->nx;++i){
-        vec3_t<double> pos {i*lx/(grid->nx-1) + grid->x_min,0,0};
-        const std::size_t idx_lv1 {i*grid->ny*grid->nz};
-        for (decltype(grid->ny) j=0;j<grid->ny;++j){
-            pos.y = j*ly/(grid->ny-1) + grid->y_min;
-            const std::size_t idx_lv2 {idx_lv1+j*grid->nz};
-            for (decltype(grid->nz) l=0;l<grid->nz;++l){
+    for (decltype(par->grid_brnd.nx) i=0;i<par->grid_brnd.nx;++i){
+        vec3_t<double> pos {i*lx/(par->grid_brnd.nx-1) + par->grid_brnd.x_min,0,0};
+        const std::size_t idx_lv1 {i*par->grid_brnd.ny*par->grid_brnd.nz};
+        for (decltype(par->grid_brnd.ny) j=0;j<par->grid_brnd.ny;++j){
+            pos.y = j*ly/(par->grid_brnd.ny-1) + par->grid_brnd.y_min;
+            const std::size_t idx_lv2 {idx_lv1+j*par->grid_brnd.nz};
+            for (decltype(par->grid_brnd.nz) l=0;l<par->grid_brnd.nz;++l){
                 // get physical position
-                pos.z = l*lz/(grid->nz-1) + grid->z_min;
+                pos.z = l*lz/(par->grid_brnd.nz-1) + par->grid_brnd.z_min;
                 // get rescaling factor
                 double ratio {std::sqrt(rescal(pos,par))*par->brnd_es.rms*b_var_invsq};
                 const std::size_t idx {idx_lv2+l};
@@ -202,29 +202,29 @@ void Brnd_es::write_grid (const Param *par,
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-    for (decltype(grid->nx) i=0;i<grid->nx;++i){
-        decltype(grid->nx) i_sym {grid->nx-i};// apply Hermitian symmetry
+    for (decltype(par->grid_brnd.nx) i=0;i<par->grid_brnd.nx;++i){
+        decltype(par->grid_brnd.nx) i_sym {par->grid_brnd.nx-i};// apply Hermitian symmetry
         if (i==0) i_sym = i;
         vec3_t<double> tmp_k {CGS_U_kpc*i/lx,0,0};
         // it's better to calculate indeces manually
         // just for reference, how indeces are calculated
-        // const std::size_t idx {toolkit::index3d(grid->nx,grid->ny,grid->nz,i,j,l)};
-        // const std::size_t idx_sym {toolkit::index3d(grid->nx,grid->ny,grid->nz,i_sym,j_sym,l_sym)};
-        const std::size_t idx_lv1 {i*grid->ny*grid->nz};
-        const std::size_t idx_sym_lv1 {i_sym*grid->ny*grid->nz};
-        if (i>=(grid->nx+1)/2) tmp_k.x -= CGS_U_kpc*grid->nx/lx;
-        for (decltype(grid->ny) j=0;j<grid->ny;++j){
-            decltype(grid->ny) j_sym {grid->ny-j};// apply Hermitian symmetry
+        // const std::size_t idx {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i,j,l)};
+        // const std::size_t idx_sym {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i_sym,j_sym,l_sym)};
+        const std::size_t idx_lv1 {i*par->grid_brnd.ny*par->grid_brnd.nz};
+        const std::size_t idx_sym_lv1 {i_sym*par->grid_brnd.ny*par->grid_brnd.nz};
+        if (i>=(par->grid_brnd.nx+1)/2) tmp_k.x -= CGS_U_kpc*par->grid_brnd.nx/lx;
+        for (decltype(par->grid_brnd.ny) j=0;j<par->grid_brnd.ny;++j){
+            decltype(par->grid_brnd.ny) j_sym {par->grid_brnd.ny-j};// apply Hermitian symmetry
             if (j==0) j_sym = j;
             tmp_k.y = CGS_U_kpc*j/ly;
-            if (j>=(grid->ny+1)/2) tmp_k.y -= CGS_U_kpc*grid->ny/ly;
-            const std::size_t idx_lv2 {idx_lv1+j*grid->nz};
-            const std::size_t idx_sym_lv2 {idx_sym_lv1+j_sym*grid->nz};
-            for (decltype(grid->nz) l=0;l<grid->nz;++l){
-                decltype(grid->nz) l_sym {grid->nz-l};// apply Hermitian symmetry
+            if (j>=(par->grid_brnd.ny+1)/2) tmp_k.y -= CGS_U_kpc*par->grid_brnd.ny/ly;
+            const std::size_t idx_lv2 {idx_lv1+j*par->grid_brnd.nz};
+            const std::size_t idx_sym_lv2 {idx_sym_lv1+j_sym*par->grid_brnd.nz};
+            for (decltype(par->grid_brnd.nz) l=0;l<par->grid_brnd.nz;++l){
+                decltype(par->grid_brnd.nz) l_sym {par->grid_brnd.nz-l};// apply Hermitian symmetry
                 if (l==0) l_sym = l;
                 tmp_k.z = CGS_U_kpc*l/lz;
-                if (l>=(grid->nz+1)/2) tmp_k.z -= CGS_U_kpc*grid->nz/lz;
+                if (l>=(par->grid_brnd.nz+1)/2) tmp_k.z -= CGS_U_kpc*par->grid_brnd.nz/lz;
                 const std::size_t idx {idx_lv2+l}; //k
                 const std::size_t idx_sym {idx_sym_lv2+l_sym}; //-k
                 // reconstruct bx,by,bz from c0,c1,c*0,c*1
@@ -257,11 +257,11 @@ void Brnd_es::write_grid (const Param *par,
     fftw_execute_dft (grid->plan_c1_bw,grid->c1,grid->c1);
     // according to FFTW convention
     // transform forward followed by backword scale up array by nx*ny*nz
-    double inv_grid_size = 1.0/grid->full_size;
+    double inv_grid_size = 1.0/par->grid_brnd.full_size;
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-    for (std::size_t i=0;i<grid->full_size;++i){
+    for (std::size_t i=0;i<par->grid_brnd.full_size;++i){
         grid->bx[i] = grid->c0[i][0]*inv_grid_size;
         grid->by[i] = grid->c0[i][1]*inv_grid_size;
         grid->bz[i] = grid->c1[i][1]*inv_grid_size;

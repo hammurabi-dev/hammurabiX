@@ -90,7 +90,9 @@
                     <nside_min value="32"/> <!-- inner most shell resolution -->
                 </auto>
                 <!-- set shell resolution from inside out -->
+                <!-- set shell cutting point from inside out -->
                 <manual> <!-- total shell number calculated automatically -->
+                    <cut value="0.5"/> <!-- cut at half of total shell radius -->
                     <nside value="32"/> <!-- inner most shell Nside -->
                     <nside value="16"/>
                 </manual>

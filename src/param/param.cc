@@ -16,16 +16,180 @@ Param::Param (const std::string file_name){
     SunPosition = vec3_t<double> {CGS_U_kpc*toolkit::fetchdouble(ptr,"value","x"),
         CGS_U_kpc*toolkit::fetchdouble(ptr,"value","y"),
         CGS_U_pc*toolkit::fetchdouble(ptr,"value","z")};
-    
+    //
+    grid_param (doc.get());
     b_param (doc.get());
     fe_param (doc.get());
     cre_param (doc.get());
 }
 
+// grid
+void Param::grid_param (tinyxml2::XMLDocument *doc){
+    // breg box
+    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_GMF"})};
+    grid_breg.nx = toolkit::fetchunsigned (ptr,"value","nx");
+    grid_breg.ny = toolkit::fetchunsigned (ptr,"value","ny");
+    grid_breg.nz = toolkit::fetchunsigned (ptr,"value","nz");
+    grid_breg.full_size = grid_breg.nx*grid_breg.ny*grid_breg.nz;
+    grid_breg.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max");
+    grid_breg.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min");
+    grid_breg.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max");
+    grid_breg.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min");
+    grid_breg.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max");
+    grid_breg.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min");
+    // brnd box
+    ptr = toolkit::tracexml(doc,{"Grid","Box_GMF"});
+    grid_brnd.nx = toolkit::fetchunsigned (ptr,"value","nx");
+    grid_brnd.ny = toolkit::fetchunsigned (ptr,"value","ny");
+    grid_brnd.nz = toolkit::fetchunsigned (ptr,"value","nz");
+    grid_brnd.full_size = grid_brnd.nx*grid_brnd.ny*grid_brnd.nz;
+    grid_brnd.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max");
+    grid_brnd.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min");
+    grid_brnd.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max");
+    grid_brnd.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min");
+    grid_brnd.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max");
+    grid_brnd.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min");
+    // gmf permission
+    ptr = toolkit::tracexml (doc,{"MagneticField"});
+    grid_breg.build_permission = toolkit::fetchbool (ptr,"cue","Regular");
+    grid_brnd.build_permission = toolkit::fetchbool (ptr,"cue","Random");
+    // fereg box
+    ptr = toolkit::tracexml (doc,{"Grid","Box_FE"});
+    grid_fereg.nx = toolkit::fetchunsigned (ptr,"value","nx");
+    grid_fereg.ny = toolkit::fetchunsigned (ptr,"value","ny");
+    grid_fereg.nz = toolkit::fetchunsigned (ptr,"value","nz");
+    grid_fereg.full_size = grid_fereg.nx*grid_fereg.ny*grid_fereg.nz;
+    grid_fereg.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max");
+    grid_fereg.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min");
+    grid_fereg.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max");
+    grid_fereg.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min");
+    grid_fereg.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max");
+    grid_fereg.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min");
+    // fernd box
+    ptr = toolkit::tracexml (doc,{"Grid","Box_FE"});
+    grid_fernd.nx = toolkit::fetchunsigned (ptr,"value","nx");
+    grid_fernd.ny = toolkit::fetchunsigned (ptr,"value","ny");
+    grid_fernd.nz = toolkit::fetchunsigned (ptr,"value","nz");
+    grid_fernd.full_size = grid_fernd.nx*grid_fernd.ny*grid_fernd.nz;
+    grid_fernd.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max");
+    grid_fernd.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min");
+    grid_fernd.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max");
+    grid_fernd.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min");
+    grid_fernd.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max");
+    grid_fernd.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min");
+    // fe permission
+    ptr = toolkit::tracexml (doc,{"FreeElectron"});
+    grid_fereg.build_permission = toolkit::fetchbool (ptr,"cue","Regular");
+    grid_fernd.build_permission = toolkit::fetchbool (ptr,"cue","Random");
+    // cre box
+    ptr = toolkit::tracexml (doc,{"Grid","Box_CRE"});
+    grid_cre.E_min = CGS_U_GeV*toolkit::fetchdouble (ptr,"value","E_min");
+    grid_cre.E_max = CGS_U_GeV*toolkit::fetchdouble (ptr,"value","E_max");
+    grid_cre.nE = toolkit::fetchunsigned (ptr,"value","nE");
+    grid_cre.E_fact = std::log(grid_cre.E_max/grid_cre.E_min)/(grid_cre.nE-1);
+    grid_cre.nz = toolkit::fetchunsigned (ptr,"value","nz");
+    grid_cre.nx = toolkit::fetchunsigned (ptr,"value","nx");
+    grid_cre.ny = toolkit::fetchunsigned (ptr,"value","ny");
+    grid_cre.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max");
+    grid_cre.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min");
+    grid_cre.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max");
+    grid_cre.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min");
+    grid_cre.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max");
+    grid_cre.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min");
+    grid_cre.cre_size = grid_cre.nE*grid_cre.nx*grid_cre.ny*grid_cre.nz;
+    // int box
+    ptr = toolkit::tracexml (doc,{"Grid","Shell"});
+    if (toolkit::fetchstring (ptr,"type","layer")=="auto"){
+        tinyxml2::XMLElement *subptr {toolkit::tracexml (doc,{"Grid","Shell","layer","auto"})};
+        grid_int.total_shell = toolkit::fetchunsigned (subptr,"value","shell_num");
+        for (std::size_t i=0;i!=grid_int.total_shell;++i){
+            grid_int.nside_shell.push_back (pow(2,i)*toolkit::fetchunsigned (subptr,"value","nside_min"));
+        }
+        grid_int.radii_shell.push_back (0.);
+        for (std::size_t i=1;i<grid_int.total_shell;++i) {
+            grid_int.radii_shell.push_back (grid_int.ec_r_max*std::pow(0.5,grid_int.total_shell-i));
+        }
+    }
+    else if (toolkit::fetchstring (ptr,"type","layer")=="manual"){
+        tinyxml2::XMLElement *subptr {toolkit::tracexml (doc,{"Grid","Shell","layer","manual"})};
+        grid_int.total_shell = 0;
+        for (auto e = subptr->FirstChildElement("nside");e!=nullptr;e=e->NextSiblingElement("nside")){
+            grid_int.total_shell++;
+            grid_int.nside_shell.push_back (toolkit::fetchunsigned(e,"value"));
+        }
+        for (auto e = subptr->FirstChildElement("cut");e!=nullptr;e=e->NextSiblingElement("cut")){
+            grid_int.cut_shell.push_back (toolkit::fetchdouble(e,"value"));
+        }
+        assert (grid_int.cut_shell.size() == grid_int.total_shell-1);
+        assert (grid_int.nside_shell.size() == grid_int.total_shell);
+        grid_int.radii_shell.push_back (0.);
+        for (std::size_t i=0;i<grid_int.total_shell-1;++i){
+            grid_int.radii_shell.push_back (grid_int.ec_r_max*grid_int.cut_shell[i]);
+        }
+    }
+    else {
+        assert (false);
+    }
+    grid_int.nside_sim = toolkit::fetchunsigned (ptr,"value","nside_sim");
+    grid_int.npix_sim = 12*grid_int.nside_sim*grid_int.nside_sim;
+    grid_int.ec_r_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","ec_r_max");
+    grid_int.gc_r_max = toolkit::fetchdouble (ptr,"value","gc_r_max")*CGS_U_kpc;
+    grid_int.gc_z_max = toolkit::fetchdouble (ptr,"value","gc_z_max")*CGS_U_kpc;
+    grid_int.radial_res = toolkit::fetchdouble (ptr,"value","ec_r_res")*CGS_U_kpc;
+    grid_int.lat_lim = toolkit::fetchdouble (ptr,"value","lat_lim")*CGS_U_rad;
+    // output file name
+    ptr = toolkit::tracexml (doc,{"Obsout"});
+    if (ptr->FirstChildElement("DM")!=nullptr){
+        grid_int.do_dm = toolkit::fetchbool (ptr,"cue","DM");
+        grid_int.sim_dm_name = toolkit::fetchstring (ptr,"filename","DM");
+    }
+    else {
+        grid_int.do_dm = false;
+    }
+    if (ptr->FirstChildElement("Faraday")!=nullptr){
+        grid_int.do_fd = toolkit::fetchbool (ptr,"cue","Faraday");
+        grid_int.sim_fd_name = toolkit::fetchstring (ptr,"filename","Faraday");
+    }
+    else {
+        grid_int.do_fd = false;
+    }
+    if (ptr->FirstChildElement("Sync")!=nullptr){
+        auto subptr = ptr->FirstChildElement("Sync");
+        grid_int.do_sync.push_back (toolkit::fetchbool (subptr,"cue"));
+        grid_int.sim_sync_name.push_back (toolkit::fetchstring (subptr,"filename"));
+        for (auto e = ptr->NextSiblingElement("Sync");e!=nullptr;e=e->NextSiblingElement("Sync")){
+            grid_int.do_sync.push_back (toolkit::fetchbool (e,"cue"));
+            grid_int.sim_sync_freq.push_back (toolkit::fetchdouble (e,"freq","Sync")*CGS_U_GHz);
+            grid_int.sim_sync_name.push_back (toolkit::fetchstring (e,"filename"));
+        }
+    }
+    else {
+        grid_int.do_sync.push_back (false);
+    }
+    assert (grid_int.do_dm or grid_int.do_fd or grid_int.do_sync.back());
+    // output field params
+    ptr = toolkit::tracexml (doc,{"Fieldout"});
+    grid_breg.read_permission = toolkit::fetchbool (ptr,"read","breg_grid");
+    grid_breg.write_permission = toolkit::fetchbool (ptr,"write","breg_grid");
+    grid_breg.filename = toolkit::fetchstring(ptr,"filename","breg_grid");
+    grid_brnd.read_permission = toolkit::fetchbool (ptr,"read","brnd_grid");
+    grid_brnd.write_permission = toolkit::fetchbool (ptr,"write","brnd_grid");
+    grid_brnd.filename = toolkit::fetchstring (ptr,"filename","brnd_grid");
+    grid_fereg.read_permission = toolkit::fetchbool (ptr,"read","fereg_grid");
+    grid_fereg.write_permission = toolkit::fetchbool (ptr,"write","fereg_grid");
+    grid_fereg.filename = toolkit::fetchstring (ptr,"filename","fereg_grid");
+    grid_fernd.read_permission = toolkit::fetchbool (ptr,"read","fernd_grid");
+    grid_fernd.write_permission = toolkit::fetchbool (ptr,"write","fernd_grid");
+    grid_fernd.filename = toolkit::fetchstring (ptr,"filename","fernd_grid");
+    grid_cre.read_permission = toolkit::fetchbool (ptr,"read","cre_grid");
+    grid_cre.write_permission = toolkit::fetchbool (ptr,"write","cre_grid");
+    grid_cre.filename = toolkit::fetchstring (ptr,"filename","cre_grid");
+}
+
 // magnetic field
 void Param::b_param (tinyxml2::XMLDocument *doc){
     tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"MagneticField"})};
-    std::string breg_type {toolkit::fetchstring(ptr,"type","Regular")};
+    breg_type = toolkit::fetchstring(ptr,"type","Regular");
     // bwmap
     if(breg_type=="WMAP"){
         tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Regular","WMAP"})};
@@ -80,15 +244,14 @@ void Param::b_param (tinyxml2::XMLDocument *doc){
         breg_test.r = toolkit::fetchdouble(subptr,"value","r");
     }
 #endif
-    
     if(toolkit::fetchbool(ptr,"cue","Random")){
         // random seed
         brnd_seed = toolkit::fetchunsigned(ptr,"seed","Random");
-        std::string brnd_type {toolkit::fetchstring(ptr,"type","Random")};
+        brnd_type = toolkit::fetchstring(ptr,"type","Random");
         // brnd_global
         if(brnd_type=="Global"){
             tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Random","Global"})};
-            std::string brnd_method {toolkit::fetchstring(subptr,"type")};
+            brnd_method = toolkit::fetchstring(subptr,"type");
             if(brnd_method=="ES"){
                 subptr = toolkit::tracexml(doc,{"MagneticField","Random","Global","ES"});
                 brnd_es.rms = toolkit::fetchdouble(subptr,"value","rms")*CGS_U_muGauss;
@@ -106,7 +269,7 @@ void Param::b_param (tinyxml2::XMLDocument *doc){
         // brnd_local
         else if(brnd_type=="Local"){
             tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Random","Local"})};
-            std::string brnd_method {toolkit::fetchstring(subptr,"type")};
+            brnd_method = toolkit::fetchstring(subptr,"type");
             if(brnd_method=="MHD"){
                 subptr = toolkit::tracexml(doc,{"MagneticField","Random","Local","MHD"});
                 brnd_mhd.pa0 = toolkit::fetchdouble(subptr,"value","pa0")*CGS_U_muGauss*CGS_U_muGauss;
@@ -125,7 +288,7 @@ void Param::b_param (tinyxml2::XMLDocument *doc){
 
 void Param::fe_param (tinyxml2::XMLDocument *doc){
     tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"FreeElectron"})};
-    std::string fereg_type {toolkit::fetchstring(ptr,"type","Regular")};
+    fereg_type = toolkit::fetchstring(ptr,"type","Regular");
     // YMW16
     if(fereg_type=="YMW16"){
         // Warp_Sun
@@ -226,15 +389,14 @@ void Param::fe_param (tinyxml2::XMLDocument *doc){
         fereg_test.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
     }
 #endif
-    
     if(toolkit::fetchbool(ptr,"cue","Random")){
         // random seed
         fernd_seed = toolkit::fetchunsigned(ptr,"seed","Random");
-        std::string fernd_type {toolkit::fetchstring(ptr,"type","Random")};
+        fernd_type = toolkit::fetchstring(ptr,"type","Random");
         // global turbulent
         if(fernd_type=="Global"){
             tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"FreeElectron","Random","Global"})};
-            std::string fernd_method {toolkit::fetchstring(subptr,"type")};
+            fernd_method = toolkit::fetchstring(subptr,"type");
             if(fernd_method=="DFT"){
                 subptr = toolkit::tracexml(doc,{"FreeElectron","Random","Global","DFT"});
                 fernd_dft.rms = toolkit::fetchdouble(subptr,"value","rms");
@@ -249,14 +411,7 @@ void Param::fe_param (tinyxml2::XMLDocument *doc){
 
 void Param::cre_param (tinyxml2::XMLDocument *doc){
     tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"CRE"})};
-    if (toolkit::tracexml(doc,{"Obsout","Sync"})!=nullptr){
-        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"Obsout"})};
-        sim_freq = toolkit::fetchdouble(subptr,"freq","Sync")*CGS_U_GHz;
-    }
-    else{
-        sim_freq = 0.;
-    }
-    std::string cre_type {ptr->Attribute("type")};
+    cre_type = ptr->Attribute("type");
     // analytical
     if(cre_type=="Analytic"){
         tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"CRE","Analytic"})};

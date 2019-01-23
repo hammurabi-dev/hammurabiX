@@ -10,20 +10,73 @@
 #include <vec3.h>
 
 class Param {
-    
 public:
-    
     Param (const std::string);
-    
 	Param () = default;
-    
+    Param (const Param &) = delete;
+    Param (Param &&) = delete;
+    Param& operator= (const Param &) = delete;
+    Param& operator= (Param &&) = delete;
     virtual ~Param () = default;
-	
+//----------------------- GRID PARAMETERS --------------------------------------
     // observer
     vec3_t<double> SunPosition;
-    
-    // magnetic field
-    
+    // regular GMF grid
+    struct param_breg_grid{
+        std::string filename;
+        bool build_permission, read_permission, write_permission;
+        double x_max, x_min, y_max, y_min, z_max, z_min;
+        std::size_t nx, ny, nz, full_size;
+    }grid_breg;
+    // turbulent GMF grid
+    struct param_brnd_grid{
+        std::string filename;
+        bool read_permission, write_permission, build_permission;
+        double x_max, x_min, y_max, y_min, z_max, z_min;
+        std::size_t nx, ny, nz, full_size;
+    }grid_brnd;
+    // regular FE grid
+    struct param_fereg_grid{
+        std::string filename;
+        bool build_permission, read_permission, write_permission;
+        double x_max, x_min, y_max, y_min, z_max, z_min;
+        std::size_t nx, ny, nz, full_size;
+    }grid_fereg;
+    // turbulent FE grid
+    struct param_fernd_grid{
+        std::string filename;
+        bool read_permission, write_permission, build_permission;
+        double x_max, x_min, y_max, y_min, z_max, z_min;
+        std::size_t nx, ny, nz, full_size;
+    }grid_fernd;
+    // cre grid
+    struct param_cre_grid{
+        std::string filename;
+        bool read_permission, write_permission;
+        std::size_t nE, nz, nx, ny, cre_size;
+        double x_max, x_min, y_max, y_min, z_max, z_min;
+        double E_min, E_max, E_fact;
+    }grid_cre;
+    // observable grid
+    struct param_int_grid{
+        // shell parameters
+        std::size_t nside_sim, npix_sim, total_shell;
+        std::vector<std::size_t> nside_shell;
+        // storing upper limit of shell raidus ratio to max radius, except the last shell
+        std::vector<double> cut_shell;
+        std::vector<double> radii_shell;
+        // shell boundary
+        double gc_r_max, ec_r_max, gc_z_max, radial_res, lat_lim;
+        // switches
+        bool do_dm, do_fd;
+        std::vector<bool> do_sync;
+        std::string sim_fd_name, sim_dm_name;
+        std::vector<std::string> sim_sync_name;
+        std::vector<double> sim_sync_freq;
+    }grid_int;
+//----------------------- FIELD PARAMETERS -------------------------------------
+    // GMF
+    std::string breg_type, brnd_type, brnd_method;
     // wmap lsa
     struct param_breg_wmap{
         double b0;
@@ -31,7 +84,6 @@ public:
         double psi1;
         double chi0;
     }breg_wmap;
-    
     // test
 #ifndef NDEBUG
     struct param_breg_test{
@@ -40,7 +92,6 @@ public:
         double r;
     }breg_test;
 #endif
-    
     // jaffe
     struct param_breg_jaffe{
         bool quadruple,bss;
@@ -58,10 +109,8 @@ public:
         // arm compress
         double comp_r,comp_c,comp_d,comp_p;
     }breg_jaffe;
-    
     // random seed
     std::size_t brnd_seed;
-    
     // global
     struct param_brnd_global_es{
         double rms;
@@ -70,7 +119,6 @@ public:
         double rho;
         double r0,z0;
     }brnd_es;
-    
     // local
     struct param_brnd_local_mhd{
         double pa0,pf0,ps0;
@@ -78,9 +126,8 @@ public:
         double k0;
         double ma,beta;
     }brnd_mhd;
-    
     // FE
-    
+    std::string fereg_type, fernd_type, fernd_method;
     // ymw16
     struct param_fereg_ymw16{
         double R_warp, R0;
@@ -93,7 +140,6 @@ public:
         double t6_J_LB, t6_nlb1, t6_detlb1, t6_wlb1, t6_hlb1, t6_thetalb1, t6_nlb2, t6_detlb2, t6_wlb2, t6_hlb2, t6_thetalb2;
         double t7_nLI, t7_RLI, t7_WLI, t7_detthetaLI, t7_thetaLI;
     }fereg_ymw16;
-    
     // test
 #ifndef NDEBUG
     struct param_fereg_test{
@@ -101,10 +147,8 @@ public:
         double r0;
     }fereg_test;
 #endif
-    
     // random seed
     std::size_t fernd_seed;
-    
     // isotropic
     struct param_fernd_global_dft{
         double rms;
@@ -113,17 +157,14 @@ public:
         double r0;
         double z0;
     }fernd_dft;
-    
     // CRE
-    double sim_freq;
-    
+    std::string cre_type;
     // analytical
     struct param_cre_ana{
         double alpha,beta,theta;
         double r0,z0;
         double E0,j0;
     }cre_ana;
-    
     // test
 #ifndef NDEBUG
     struct param_cre_test{
@@ -132,14 +173,15 @@ public:
         double E0,j0;
     }cre_test;
 #endif
-    
 protected:
-    
-    void b_param(tinyxml2::XMLDocument *);
-    
-    void fe_param(tinyxml2::XMLDocument *);
-    
-    void cre_param(tinyxml2::XMLDocument *);
+    //
+    void b_param (tinyxml2::XMLDocument *);
+    //
+    void fe_param (tinyxml2::XMLDocument *);
+    //
+    void cre_param (tinyxml2::XMLDocument *);
+    //
+    void grid_param (tinyxml2::XMLDocument *);
 };
 
 #endif

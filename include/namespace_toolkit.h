@@ -17,7 +17,6 @@
 
 
 namespace toolkit {
-    
     // perpendicular component of a vector wrt LOS direction
     // 1st argument: vector in Cartesian frame
     // 2nd argument: polar angle (in rad)
@@ -25,7 +24,6 @@ namespace toolkit {
     double perp2los (const vec3_t<double> &,
                      const double &,
                      const double &);
-    
     // (signed) parallel component of a vector wrt LOS direction
     // 1st argument: vector in Cartesian frame
     // 2nd argument: polar angle (in rad)
@@ -33,7 +31,6 @@ namespace toolkit {
     double par2los (const vec3_t<double> &,
                     const double &,
                     const double &);
-    
     // intrinsic polarization angle (in rad)
     // 1st argument: magnetic field in Cartesian frame
     // 2nd argument: polar angle (in rad) of LOS direction
@@ -42,7 +39,6 @@ namespace toolkit {
     double intr_pol_ang (const vec3_t<double> &,
                          const double &,
                          const double &);
-    
     // Carteisan unit vector of given LOS direction
     // 1st argument: polar angle (in rad)
     // 2nd argument: azimuthal angle (in rad)
@@ -52,7 +48,6 @@ namespace toolkit {
             sin(phi_los)*sin(the_los),
             cos(the_los)};
     }
-    
     // convert coordinate from Cartesian to cylindrical frame
     // 1st argument: coordinate in Cartesian frame
     // 2nd argument: r in cylindrical frame
@@ -62,18 +57,15 @@ namespace toolkit {
                                double &,
                                double &,
                                double &);
-    
     // convert coordinate from Cartesian to cylindrical frame
     // 1st argument: coordinate in Cartesian frame
     // 2nd argument: vec3_t{r,phi,z} in cylindrical frame
     void cart_coord2cyl_coord (const vec3_t<double> &,
                                vec3_t<double> &);
-    
     // get versor of given vector
     // 1st argument: vector in an orthogonal frame
     // return: versor of given vector
     vec3_t<double> versor (const vec3_t<double> &);
-    
     // find index of 3D grid
     inline std::size_t index3d (const std::size_t &/* n1 */,
                                 const std::size_t &n2,
@@ -84,7 +76,6 @@ namespace toolkit {
         assert(j<=n2 and l<=n3);
         return (i*n2*n3 + j*n3 + l);
     }
-    
     // find index for 4D grid
     inline std::size_t index4d (const std::size_t &/* n1 */,
                                 const std::size_t &n2,
@@ -97,34 +88,31 @@ namespace toolkit {
         assert(i<=n2 and j<=n3 and l<=n4);
         return (e*n2*n3*n4 + i*n3*n4 + j*n4 + l);
     }
-    
+    //
     double mean (const double *,
                  const std::size_t &);
-    
+    //
     double mean (const std::vector<double> &);
-    
+    //
     double variance (const double *,
                      const std::size_t &);
-    
+    //
     double variance (const std::vector<double> &);
-    
+    //
     double covariance (const double *,
                        const double *,
                        const std::size_t &);
-    
+    //
     double covariance (const std::vector<double> &,
                        const std::vector<double> &);
-    
     // converting brightness temp into thermal temp with T_0 = 2.725K, Prog.Theor.Exp.Phys. (2014) 2014 (6): 06B109.
     inline double temp_convert (const double &temp_br,
                                 const double &freq){
         const double p {CGS_U_h_planck*freq/(CGS_U_kB*2.725)};
         return temp_br*(exp(p)-1.)*(exp(p)-1.)/(p*p*exp(p));;
     }
-    
     // use given seed number or generate random seed according to thread and clock
     std::size_t random_seed (const int &);
-    
     // substract real part of a fftw complex array
     // 1st argument: input fftw complex array
     // 2nd argument: output double array
@@ -132,7 +120,6 @@ namespace toolkit {
     void complex2real (const fftw_complex *,
                        double *,
                        const std::size_t &);
-    
     // substract imaginary part of a fftw complex array
     // 1st argument: input fftw complex array
     // 2nd argument: output double array
@@ -140,7 +127,6 @@ namespace toolkit {
     void complex2imag (const fftw_complex *,
                        double *,
                        const std::size_t &);
-    
     // substract real and imaginary part of a fftw complex array
     // 1st argument: input fftw complex array
     // 2nd argument: output double array (real part)
@@ -150,11 +136,9 @@ namespace toolkit {
                       double *,
                       double *,
                       const std::size_t &);
-    
     // load tinyxml2::XML file
     // 1st argument: tinyxml2::XML file name (with dir)
     std::unique_ptr<tinyxml2::XMLDocument> loadxml (const std::string&);
-    
     // trace down a key inside tinyxml2::XML "document"
     // 1st argument: pointer to tinyxml2::XMLDocument
     // 2nd argument: a vector of string, with key chain for tracing
@@ -162,7 +146,6 @@ namespace toolkit {
     // <root> is automatically included
     tinyxml2::XMLElement* tracexml (tinyxml2::XMLDocument *,
                                     const std::vector<std::string>&);
-    
     // get string attribute
     // 1st argument: ptr to tinyxml2::XMLElement (key)
     // 2nd argument: attribute name
@@ -170,13 +153,11 @@ namespace toolkit {
     std::string fetchstring (tinyxml2::XMLElement *,
                              const std::string&,
                              const std::string&);
-    
     // get string attribute
     // 1st argument: ptr to tinyxml2::XMLElement (key)
     // 2nd argument: attribute name
     std::string fetchstring (tinyxml2::XMLElement *,
                              const std::string&);
-    
     // get integer attribute
     // 1st argument: ptr to tinyxml2::XMLElement (key)
     // 2nd argument: attribute name
@@ -184,13 +165,11 @@ namespace toolkit {
     int fetchint (tinyxml2::XMLElement *,
                   const std::string&,
                   const std::string&);
-    
     // get integer attribute
     // 1st argument: ptr to tinyxml2::XMLElement (key)
     // 2nd argument: attribute name
     int fetchint (tinyxml2::XMLElement *,
                   const std::string&);
-    
     // get unsigned integer attribute
     // 1st argument: ptr to tinyxml2::XMLElement (key)
     // 2nd argument: attribute name
@@ -198,13 +177,11 @@ namespace toolkit {
     unsigned int fetchunsigned (tinyxml2::XMLElement *,
                                 const std::string&,
                                 const std::string&);
-    
     // get unsigned integer attribute
     // 1st argument: ptr to tinyxml2::XMLElement (key)
     // 2nd argument: attribute name
     unsigned int fetchunsigned (tinyxml2::XMLElement *,
                                 const std::string&);
-    
     // get bool attribute
     // 1st argument: ptr to tinyxml2::XMLElement (key)
     // 2nd argument: attribute name
@@ -212,13 +189,11 @@ namespace toolkit {
     bool fetchbool (tinyxml2::XMLElement *,
                     const std::string&,
                     const std::string&);
-    
     // get bool attribute
     // 1st argument: ptr to tinyxml2::XMLElement (key)
     // 2nd argument: attribute name
     bool fetchbool (tinyxml2::XMLElement *,
                     const std::string&);
-    
     // get double attribute
     // 1st argument: ptr to tinyxml2::XMLElement (key)
     // 2nd argument: attribute name
@@ -226,7 +201,6 @@ namespace toolkit {
     double fetchdouble (tinyxml2::XMLElement *,
                         const std::string&,
                         const std::string&);
-    
     // get double attribute
     // 1st argument: ptr to tinyxml2::XMLElement (key)
     // 2nd argument: attribute name

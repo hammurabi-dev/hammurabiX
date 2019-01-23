@@ -2,9 +2,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.2.3)
 
 #-------------- customized zone --------------#
 SET(CMAKE_CXX_COMPILER "g++")
-OPTION(ENABLE_TESTING "Enable testing for this project" ON)
+OPTION(ENABLE_TESTING "Enable testing for this project" OFF)
 OPTION(ENABLE_TIMING "Enable timing for this porect" ON)
-OPTION(ON_DOCKER "Build on docker image" ON)
+OPTION(ON_DOCKER "Build on docker image" OFF)
 OPTION(BUILD_SHARED_LIBS "Build shared library" ON)
 #-------------- instruction ------------------#
 #
@@ -92,43 +92,43 @@ SET(ALL_LIBRARIES)
 
 # find sources
 SET(SRC_FILES 
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/brnd_jaffe.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/breg_jaffe.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/breg_wmap.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/breg.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/brnd_es.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/brnd_mhd.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/brnd.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/brnd_jaffe.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg_jaffe.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg_wmap.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/brnd_es.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/brnd_mhd.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/brnd.cc
 
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/cre/cre.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/cre/cre_num.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/cre/cre_ana.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/cre/cre.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/cre/cre_num.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/cre/cre_ana.cc
 
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/fe/fereg.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/fe/fernd_dft.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/fe/fernd.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/fields/fe/fereg_ymw16.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fereg.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fernd_dft.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fernd.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fereg_ymw16.cc
 
-	${CMAKE_CURRENT_LIST_DIR}/src/params/param.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/param/param.cc
 
-	${CMAKE_CURRENT_LIST_DIR}/src/integrators/integrator.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/integrator/integrator.cc
 
-	${CMAKE_CURRENT_LIST_DIR}/src/grids/grid.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/grids/grid_int.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/grids/grid_fernd.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/grids/grid_brnd.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/grids/grid_cre.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/grids/grid_fereg.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/grids/grid_breg.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid_int.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid_fernd.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid_brnd.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid_cre.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid_fereg.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid_breg.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/src/tools/tinyxml2.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/tools/namespace_toolkit.cc
 )
 IF(ENABLE_TESTING)
 	LIST(APPEND SRC_FILES
-		${CMAKE_CURRENT_LIST_DIR}/src/fields/gmf/breg_test.cc
-		${CMAKE_CURRENT_LIST_DIR}/src/fields/cre/cre_test.cc
-		${CMAKE_CURRENT_LIST_DIR}/src/fields/fe/fereg_test.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg_test.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/field/cre/cre_test.cc
+		${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fereg_test.cc
 	)
 ENDIF()
 
@@ -328,7 +328,7 @@ IF(ENABLE_TESTING)
 ENDIF()
 
 # build executable
-ADD_EXECUTABLE(hamx src/mains/hammurabi.cc)
+ADD_EXECUTABLE(hamx src/main/hammurabi.cc)
 TARGET_LINK_LIBRARIES(hamx hammurabi)
 # copy template parameter file into build directory
 FILE(COPY
