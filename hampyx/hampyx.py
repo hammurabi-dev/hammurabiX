@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 '''
-Developed by Joe Taylor, based on the initial work by Theo Steininger and Jiaxin Wang
+Developed by Joe Taylor, based on the initial work by Theo Steininger
 Reviewed by Jiaxin Wang
 
 temporary/testing version of hammurabiX python wrapper
 
 warning:
-
 working directory is set as the same directory as this file
-hammurabiX executable path is by default /usr/local/hammurabi/bin/hamx
-it relies on subprocess to fork c++ routine
+it relies on subprocess to fork c++ routine and passing data through disk
+so, it is not fast
 
 methods:
 
@@ -17,39 +16,51 @@ methods:
 In []: import hampyx as hpx
 
 # Initialize object
-# exe_name: the name of executable, 'hampyx' by default
-In []: object = hampyx.Hampy(exe_name='')
+In []: object = hpx.hampyx (exe_path, xml_path)
+
+hammurabiX executable path is by default '/usr/local/hammurabi/bin/hamx'
+while xml file path is by default './'
 
 # Modify parameter value from base xml file to temp xml file
-In []: object.mod_par(keychain=['key1','key2',...],tag='',attrib='')
-The strings 'key1', 'key2', etc represent the path to the desired
-parameter, going through the xml.
+In []: object.mod_par (keychain=['key1','key2',...], attrib={'tag':'content'})
 
-The "tag" is the label for the parameter: eg. "Value" or "cue" or "type".
-The "attrib" is the content under the tag: eg. the string for the tag "filename"
+# Add new parameter with or without attributes
+In []: object.add_par (keychain=['key1','key2',...], subkey='keyfinal', attrib={'tag':'content'})
 
-# Run the executable
-In []: object.call()
+the new parameter subkey, will be added at the path defined by keychain
+
+# Delete parameter
+In []: object.del_par (keychain=['key1','key2',...])
+
+if additional argument opt='all', then all matching parameters will be deleted
+
+the strings 'key1', 'key2', etc represent the path to the desired parameter, going through the xml
+the "tag" is the label for the parameter: eg. "Value" or "cue" or "type"
+the "content" is the content under the tag: eg. the string for the tag "filename"
 
 # Look through the parameter tree in python
 In []: object.print_par(keychain=['key1','key2',...])
 
-This will return the current value of the parameter in the XML associated with the path
-"key1/key2/.../keyfinal/". If you use an additional input "opt='all'", then get_ele will
-return all parameters along that path, giving a broader view of the XML tree.
+this will return the current value of the parameter in the XML associated with the path "key1/key2/.../keyfinal/"
 
-In []: object.get_obs()
-Returns a dict containing the arrays for DM, RM, and Sync (I,Q,U,PI,PA).
-If multiple sync frequencies are used, separate arrays will be contained in a nested dict:
+# Run the executable
+In []: object.call()
 
-Ex:
-array = object.get_obs()
-array['sync']['1.4']['I'] --> this will return the I array for the 1.4 GHz run.
+if additional verbose=True (by default is False) hampyx_run.log and hampyx_err.log will be dumped to disk
+notice that dumping logs is not thread safe, use quiet mode in threading
 
-In []: object.cleanup()
-Removes entire working directory as specified in 'working_directory' at init.
+after this main routine, object.sim_map will be filled with simulation outputs from hammurabiX
+the structure of object.sim_map contains arrays under entries:
 
-****** warning: no checks are made to avoid removing the cwd or other files not related to hammurabi
+object.sim_map['sync']['frequency']['I'] # synchrotron intensity map at 'frequency' 
+object.sim_map['sync']['frequency']['Q'] # synchrotron Q map at 'frequency' 
+object.sim_map['sync']['frequency']['U'] # synchrotron U map at 'frequency' 
+object.sim_map['sync']['frequency']['PI'] # synchrotron pol. intensity at 'frequency' 
+object.sim_map['sync']['frequency']['PA'] # synchrotron pol. angle at 'frequency' (IAU convention)
+object.sim_map['fd'] # Faraday depth map
+object.sim_map['dm'] # dispersion measure map
+
+detailed caption of each function can be found with their implementation
 '''
 
 import os
@@ -71,46 +82,57 @@ class hampyx(object):
                 self.wk_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 		# find the executable
 		# by default hammurabiX executable "hamx" is in the same directory as this file
-		if exe_path is None:
+		if exe_path is None:#{
 			self.executable = os.path.abspath('/usr/local/hammurabi/bin/hamx')
-		else:
-			self.executable = os.path.abspath(exe_path)#scopend
-		if xml_path is None:
+		#}
+		else:#{
+			self.executable = os.path.abspath(exe_path)
+		#}
+		if xml_path is None:#{
                         self.base_file = os.path.join(self.wk_dir,'params.xml')
-                else:
-                        self.base_file = os.path.abspath(xml_path)#scopend
+                #}
+                else:#{
+                        self.base_file = os.path.abspath(xml_path)
+                #}
                 # assign tmp file name by base file name
                 self.temp_file = self.base_file
 		# read from base parameter file
 		self.tree = et.parse(self.base_file)
 		# simulation output
 		self.sim_map_name = {}
-		self.sim_map = {}	
-                #
-		self.last_call_log = ""
-		self.last_call_err = ""
-		
-	def call(self,verbose=False):
+		self.sim_map = {}
+		# 'sync' is nested dict
+		self.sim_map_name['sync'] = {}
+		self.sim_map['sync'] = {}
+
+	# the main routine for running hammurabiX executable
+	def call(self,
+                 verbose=False):
 		import sys
 		import time
 		# create new temp parameter file
-		if self.temp_file is self.base_file:
+		if self.temp_file is self.base_file:#{
                         self._new_xml_copy()
-		
-		temp_process = subprocess.Popen([self.executable,self.temp_file],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-		temp_process.wait()
+                #}
                 # if need verbose output
-		if verbose is True:
-                        self.last_call_log,self.last_call_err = temp_process.communicate()
-                        self.last_call_log = self.last_call_log.decode("utf-8")
-                        self.last_call_err = self.last_call_err.decode("utf-8")
-                        self.write_log(filename='hampy.log')
+		if verbose is True:#{
+                        logfile = open('hampyx_run.log', 'w')
+                        errfile = open('hampyx_err.log','w')
+                        temp_process = subprocess.Popen([self.executable,self.temp_file],stdout=logfile,stderr=errfile)
+                        temp_process.wait()
+                        logfile.close()
+                        errfile.close()
+                #}
                 # if quiet, only print upon error
-                else:
-                        if temp_process.returncode != 0:
+                else:#{
+                        temp_process = subprocess.Popen([self.executable,self.temp_file],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+                        temp_process.wait()
+                        if temp_process.returncode != 0:#{
                                 last_call_log,last_call_err = temp_process.communicate()
                                 print last_call_log
                                 print last_call_err
+                        #}
+                #}
 		# grab output maps and delete temp files
 		self._get_sims()
 		self._del_xml_copy()
@@ -122,62 +144,66 @@ class hampyx(object):
         	fd_path = self.sim_map_name['fd']
         	sync_paths = {}
                 # sync_path has multiple contents
-                for i in self.sim_map_name['sync']:
+                for i in self.sim_map_name['sync']:#{
                         sync_paths[i] = self.sim_map_name['sync'].get(i)
+                #}
                 # read dispersion measure and delete file
-		if(os.path.isfile(dm_path)):
+		if(os.path.isfile(dm_path)):#{
 			[DM] = self._read_fits_file(dm_path)
 			self.sim_map['DM'] = DM
 			os.remove(dm_path)
-		else:
+		#}
+		else:#{
                         print 'ERR: missing file'
                         exit(1)
+                #}
                 # read faraday depth and delete file
-		if(os.path.isfile(fd_path)):
+		if(os.path.isfile(fd_path)):#{
 			[Fd] = self._read_fits_file(fd_path)
 			self.sim_map['F'] = Fd
           		os.remove(fd_path)
-          	else:
+          	#}
+          	else:#{
                         print 'ERR: missing file'
                         exit(1)
+                #}
 		# read synchrotron pol. and delete file
-                for i in sync_paths:
+                for i in sync_paths:#{
                         # if file exists
-                        if(os.path.isfile(sync_paths.get(i))):
-                                [Is,Qs,Us] = self._read_fits_file(sync_paths(i))
+                        if(os.path.isfile(sync_paths.get(i))):#{
+                                [Is,Qs,Us] = self._read_fits_file(sync_paths.get(i))
                                 # build top level map for nesting
-                                self.sync_map['sync'][i] = {}
-                                self.sync_map['sync'][i]['I'] = Is
-                                self.sync_map['sync'][i]['Q'] = Qs
-                                self.sync_map['sync'][i]['U'] = Us
+                                self.sim_map['sync'][i] = {}
+                                self.sim_map['sync'][i]['I'] = Is
+                                self.sim_map['sync'][i]['Q'] = Qs
+                                self.sim_map['sync'][i]['U'] = Us
                                 # polarisation intensity
-                                self.sync_map['Sync'][items]['PI'] = np.sqrt(np.square(Qs) + np.square(Us))
+                                self.sim_map['sync'][i]['PI'] = np.sqrt(np.square(Qs) + np.square(Us))
                                 # polarisatioin angle, IAU convention
-                                self.sync_map['Sync'][items]['PA'] = np.arctan2(Us,Qs)/2.0
-                                os.remove(sync_paths(i))
-                        else:
+                                self.sim_map['sync'][i]['PA'] = np.arctan2(Us,Qs)/2.0
+                                os.remove(sync_paths.get(i))
+                        #}
+                        else:#{
                                 print 'ERR: missing file'
                                 exit(1)
-		if(os.path.isfile(iqu_path)):
-			[Is,Qs,Us] = self._read_fits_file(iqu_path)
-            		self.sim_map['I'] = Is
-			self.sim_map['Q'] = Qs
-			self.sim_map['U'] = Us
-			os.remove(iqu_path)
+                        #}
+                #}
 	
 	# read a single fits file with healpy
-	def _read_fits_file(self,path):
+	def _read_fits_file(self,
+                            path):
 		rslt = []
 		i = 0
-		while True:
-			try:
+		while True:#{
+			try:#{
 				loaded_map = hp.read_map(path,verbose=False,field=i)
 				rslt += [loaded_map]
 				i += 1
-			
-			except IndexError:
+			#}
+			except IndexError:#{
 				break
-		
+                        #}
+		#}
            	return rslt
 
         # make a temporary parameter file copy and rename output file with random mark
@@ -192,101 +218,167 @@ class hampyx(object):
 		# count number of sync output files
 		syncnum = len(root.findall("./Obsout/Sync[@cue='1']"))
 		# for each sync output
-		for sync in root.findall("./Obsout/Sync[@cue='1']"):
+		for sync in root.findall("./Obsout/Sync[@cue='1']"):#{
                         freq = str(sync.get('freq'))
                         self.sim_map_name['sync'][freq] = os.path.join(self.wk_dir,'iqu_sync_'+freq+'_'+rnd_idx+'.fits')
-                        sync.set('filename',self.sim_map_name['sync'][freq])#scopend
+                        sync.set('filename',self.sim_map_name['sync'][freq])
+                #}
 		self.sim_map_name['fd'] = os.path.join(self.wk_dir,'fd_'+rnd_idx+'.fits')
 		self.sim_map_name['dm'] = os.path.join(self.wk_dir,'dm_'+rnd_idx+'.fits')
 		root.find('./Obsout/Faraday').set('filename',self.sim_map_name['fd'])
 		root.find('./Obsout/DM').set('filename',self.sim_map_name['dm'])
 		# automatically create a new file
-		tree.write(self.temp_file)
+		self.tree.write(self.temp_file)
 	
         # delete temporary parameter file copy
 	def _del_xml_copy(self):
-		if self.temp_file is self.base_file:
+		if self.temp_file is self.base_file:#{
 			print 'ERR: _del_xml_copy failed'
 			exit(1)
-		else:
+		#}
+		else:#{
 			os.remove(self.temp_file)
 			self.temp_file = self.base_file
+                #}
 
-        # print log file, append to existed file instead of rewriting
-        def write_log(self,filename=None):
-                f = open(os.path.join(self.wk_dir,filename),'a')
-                f.write('CALL_LOG:\n')   
-                f.write(self.last_call_log)
-                f.write('ERR_LOG:\n')
-                f.write(self.last_call_err)
+        # THE FOLLOWING FUNCTIONS ARE RELATED TO XML FILE MANIPULATION
 
         # modify parameter in self.tree
-	def mod_par(self,tanent=None):
-                if len(tanent) is 2:
-                        keys = tanent[0]
-                        tag = 'value'
-                        attrib = tanent[1]#scopend
-                elif len(tanent) is 3:
-                        keys = tanent[0]
-                        tag = tanent[1]
-                        attrib = tanent[2]#scopend
-                else:
-			print 'ERR: missing input'
-			exit(1)#scopend
-		root = self.tree.getroot()
-		path_str = '.'
-		for key in keys:
-			path_str += '/' + key#scoped
-		target = root.find(path_str)
-		if target is None:
-			print 'ERR: wrong element path:'
-			print path_str
-			exit(1)#scopend
-		target.set(tag,attrib)
+        # argument of type ['path','to','target'], {attrib}
+        # attrib of type {'tag': 'content'}
+        # if attribute 'tag' already exists, then new attrib will be assigned
+        # if attribute 'tag' is not found, then new 'tag' will be inserted
+	def mod_par(self,
+                    keychain=None,
+                    attrib=None):
+                # input type check
+                if type(attrib) is not dict or type(keychain) is not list:#{
+                        print ('ERR: wrong input')
+			exit(1)
+                #}
+                root = self.tree.getroot()
+                path_str = '.'
+                for key in keychain:#{
+                        path_str += '/' + key
+                #}
+                target = root.find(path_str)
+                if target is None:#{
+                        print ('ERR: wrong path: ')
+                        print path_str
+                        exit(1)
+                #}
+                for i in attrib:#{
+                        target.set(i,attrib.get(i))
+                #}
+
+	# add new subkey under keychain in the tree
+        # argument of type ['path','to','target'], 'subkey', {attrib}
+        # or of type ['path','to','target'], 'subkey'
+	def add_par(self,
+                    keychain=None,
+                    subkey=None,
+                    attrib=None):
+                # input type check
+                if type(keychain) is not list or type(subkey) is not str:#{
+                        print ('ERR: wrong input')
+                        exit(1)
+                #}
+                if attrib is not None and type(attrib) is dict:#{
+                        root = self.tree.getroot()
+                        path_str = '.'
+                        for key in keychain:#{
+                                path_str += '/' + key
+                        #}
+                        target = root.find(path_str)
+                        et.SubElement(target,subkey,attrib)
+                #}
+		elif attrib is None:#{
+                        root = self.tree.getroot()
+                        path_str = '.'
+                        for key in keychain:#{
+                                path_str += '/' + key
+                        #}
+                        target = root.find(path_str)
+			et.SubElement(target,subkey)
+		#}
+		else:#{
+			print ('ERR: wrong input')
+			exit(1)
+		#}
 		
         # print a certain parameter
-        # argument of type ['path','to','key']
-	def print_par(self,keychain=None,opt=None):
+        # argument of type ['path','to','key'] (e.g. ['Grid','SunPosition','x'])
+        # print all parameters down to the keychain children level
+	def print_par(self,
+                      keychain=None):
+                # input type check
+                if type(keychain) is not list:#{
+                        print ('ERR: wrong input')
+                        exit(1)
+                #}
                 root = self.tree.getroot()
                 # print top parameter level if no input is given
-                if keychain is None:
-                        for child in root:
+                if keychain is None:#{
+                        for child in root:#{
                                 print child.tag, child.attrib
-                else:
-                    if opt is None: # print the selected level
+                        #}
+                #}
+                else:#{
                         path_str = '.' 
-    		        for key in keychain:
-		        	path_str += '/' + key#scopend
-		        target = root.find(path_str)
-                        print target.tag, target.attrib
-                        for child in target:
-                            print '|-->', child.tag, child.attrib
-                    elif opt is 'all': # print all levels down to the selected level
-                        path_str = '.' 
-    		        for key in keychain:
-			    path_str += '/' + key
-                            target = root.find(path_str)
-                            print target.tag
-                            for child in target:
-                                print ('|-->', child.tag, child.attrib)
-                    else:
-                        print ('ERR: unsupported option')
+                        for key in keychain:#{
+                                path_str += '/' + key
+                        #}
+                        #target = root.find(path_str)
+                        for target in root.findall(path_str):#{
+                                print target.tag, target.attrib
+                                for child in target:#{
+                                        print ('|-->', child.tag, child.attrib)
+                                #}
+                        #}
+                #}
         
         # deletes an parameter and all of its children
-        # USE WITH CAUTION
-	# argument is the path to the element (e.g. ['Grid','SunPosition','x'])
-	def del_par(self, keychain=None):
+	# argument of type ['keys','to','target'] (e.g. ['Grid','SunPosition','x'])
+	# if opt='all', delete all parameters that match given keychain
+	def del_par(self,
+                    keychain=None,
+                    opt=None):
+                # input type check
+                if type(keychain) is not list:#{
+                        print ('ERR: wrong input')
+                        exit(1)
+                #}
 		root = self.tree.getroot()
-		if keys is not None:
+		if keychain is not None:#{
 			path_str = '.'
 			n = 1
-			for key in keychain:
-				if n is len(keychain):
-                                        par_path_str = path_str#scopend
-				path_str += '/' + key
-				n += 1#scopend
+			for key in keychain:#{
+                                path_str += '/' + key
+                                n += 1
+                                if n is len(keychain):#{
+                                        par_path_str = path_str
+                                #}
+			#}
 			target = root.find(path_str)
 			parent = root.find(par_path_str)
-			parent.remove(target)
-		else:
-			print ('ERR: missing input')
+			if target is None or parent is None:#{
+                                print ('WAR: wrong path')
+                                exit(1)
+                        #}
+			if opt is None:#{
+                                parent.remove(target)
+                        #}
+                        elif opt is 'all':#{
+                                for i in root.findall(path_str):#{
+                                        parent.remove(i)
+                                #}
+                        #}
+                        else:#{
+                                print ('ERR: unsupported option')
+                                exit(1)
+                        #}
+		#}
+		else:#{
+			print ('ERR: wrong input')
+			exit(1)
+                #}
