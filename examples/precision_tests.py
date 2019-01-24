@@ -131,16 +131,16 @@ def precision(_res):
 	# call hammurabiX wrapper
 	obj = ham.hampyx()
 	# assuming the xml file is not prepared
-	obj.del_par(['Output','Sync'],'all')
-	obj.add_par(['Output'],'Sync',{'cue':str(1),'freq':str(freq),'filename':'dumy'})
-        obj.mod_par(['Output','DM'],{'cue':str(1)})
-        obj.mod_par(['Output','Faraday'],{'cue':str(1)})
+	obj.del_par(['Obsout','Sync'],'all')
+	obj.add_par(['Obsout'],'Sync',{'cue':str(1),'freq':str(freq),'filename':'dumy'})
+        obj.mod_par(['Obsout','DM'],{'cue':str(1)})
+        obj.mod_par(['Obsout','Faraday'],{'cue':str(1)})
         # mute all field output/input
-        obj.mod_par(['Fieldout','breg_grid'],{'read':str(0),'write',str(0)})
-        obj.mod_par(['Fieldout','brnd_grid'],{'read':str(0),'write',str(0)})
-        obj.mod_par(['Fieldout','fereg_grid'],{'read':str(0),'write',str(0)})
-        obj.mod_par(['Fieldout','fernd_grid'],{'read':str(0),'write',str(0)})
-        obj.mod_par(['Fieldout','cre_grid'],{'read':str(0),'write',str(0)})
+        obj.mod_par(['Fieldout','breg_grid'],{'read':str(0),'write':str(0)})
+        obj.mod_par(['Fieldout','brnd_grid'],{'read':str(0),'write':str(0)})
+        obj.mod_par(['Fieldout','fereg_grid'],{'read':str(0),'write':str(0)})
+        obj.mod_par(['Fieldout','fernd_grid'],{'read':str(0),'write':str(0)})
+        obj.mod_par(['Fieldout','cre_grid'],{'read':str(0),'write':str(0)})
 	# calibrate simulation box
 	obj.mod_par(['Grid','Shell','layer'],{'type':'auto'})
 	obj.mod_par(['Grid','Shell','layer','auto','shell_num'],{'value':str(Shell)})

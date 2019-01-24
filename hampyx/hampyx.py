@@ -104,6 +104,10 @@ class hampyx(object):
 		# 'sync' is nested dict
 		self.sim_map_name['sync'] = {}
 		self.sim_map['sync'] = {}
+		# switches
+		self.do_sync = False
+		self.do_dm = False
+		self.do_fd = False
 
 	# the main routine for running hammurabiX executable
 	def call(self,
@@ -148,47 +152,53 @@ class hampyx(object):
                         sync_paths[i] = self.sim_map_name['sync'].get(i)
                 #}
                 # read dispersion measure and delete file
-		if(os.path.isfile(dm_path)):#{
-			[DM] = self._read_fits_file(dm_path)
-			self.sim_map['dm'] = DM
-			os.remove(dm_path)
-		#}
-		else:#{
-                        print 'ERR: missing file'
-                        exit(1)
-                #}
-                # read faraday depth and delete file
-		if(os.path.isfile(fd_path)):#{
-			[Fd] = self._read_fits_file(fd_path)
-			self.sim_map['fd'] = Fd
-          		os.remove(fd_path)
-          	#}
-          	else:#{
-                        print 'ERR: missing file'
-                        exit(1)
-                #}
-		# read synchrotron pol. and delete file
-                for i in sync_paths:#{
-                        # if file exists
-                        if(os.path.isfile(sync_paths.get(i))):#{
-                                [Is,Qs,Us] = self._read_fits_file(sync_paths.get(i))
-                                # build top level map for nesting
-                                self.sim_map['sync'][i] = {}
-                                self.sim_map['sync'][i]['I'] = Is
-                                self.sim_map['sync'][i]['Q'] = Qs
-                                self.sim_map['sync'][i]['U'] = Us
-                                # polarisation intensity
-                                self.sim_map['sync'][i]['PI'] = np.sqrt(np.square(Qs) + np.square(Us))
-                                # polarisatioin angle, IAU convention
-                                self.sim_map['sync'][i]['PA'] = np.arctan2(Us,Qs)/2.0
-                                os.remove(sync_paths.get(i))
+                if self.do_dm is True:#{
+                        if(os.path.isfile(dm_path)):#{
+                                [DM] = self._read_fits_file(dm_path)
+                                self.sim_map['dm'] = DM
+                                os.remove(dm_path)
                         #}
                         else:#{
-                                print 'ERR: missing file'
+                                print ('_get_sims ERR: missing file',dm_path)
                                 exit(1)
                         #}
                 #}
-	
+                # read faraday depth and delete file
+                if self.do_fd is True:#{
+                        if(os.path.isfile(fd_path)):#{
+                                [Fd] = self._read_fits_file(fd_path)
+                                self.sim_map['fd'] = Fd
+                                os.remove(fd_path)
+                        #}
+                        else:#{
+                                print ('_get_sims ERR: missing file \n',fd_path)
+                                exit(1)
+                        #}
+                #}
+		# read synchrotron pol. and delete file
+		if self.do_sync is True:#{
+                        for i in sync_paths:#{
+                                # if file exists
+                                if(os.path.isfile(sync_paths.get(i))):#{
+                                        [Is,Qs,Us] = self._read_fits_file(sync_paths.get(i))
+                                        # build top level map for nesting
+                                        self.sim_map['sync'][i] = {}
+                                        self.sim_map['sync'][i]['I'] = Is
+                                        self.sim_map['sync'][i]['Q'] = Qs
+                                        self.sim_map['sync'][i]['U'] = Us
+                                        # polarisation intensity
+                                        self.sim_map['sync'][i]['PI'] = np.sqrt(np.square(Qs) + np.square(Us))
+                                        # polarisatioin angle, IAU convention
+                                        self.sim_map['sync'][i]['PA'] = np.arctan2(Us,Qs)/2.0
+                                        os.remove(sync_paths.get(i))
+                                #}
+                                else:#{
+                                        print ('_get_sims ERR: missing file \n',sync_paths.get(i))
+                                        exit(1)
+                                #}
+                        #}
+                #}
+
 	# read a single fits file with healpy
 	def _read_fits_file(self,
                             path):
@@ -216,17 +226,27 @@ class hampyx(object):
 		# copy base_file to temp_file
 		root = self.tree.getroot()
 		# count number of sync output files
-		syncnum = len(root.findall("./Obsout/Sync[@cue='1']"))
-		# for each sync output
-		for sync in root.findall("./Obsout/Sync[@cue='1']"):#{
-                        freq = str(sync.get('freq'))
-                        self.sim_map_name['sync'][freq] = os.path.join(self.wk_dir,'iqu_sync_'+freq+'_'+rnd_idx+'.fits')
-                        sync.set('filename',self.sim_map_name['sync'][freq])
+		if root.find("./Obsout/Sync[@cue='1']") is not None:#{
+                        self.do_sync = True
+                        # for each sync output
+                        for sync in root.findall("./Obsout/Sync[@cue='1']"):#{
+                                freq = str(sync.get('freq'))
+                                self.sim_map_name['sync'][freq] = os.path.join(self.wk_dir,'iqu_sync_'+freq+'_'+rnd_idx+'.fits')
+                                sync.set('filename',self.sim_map_name['sync'][freq])
+                        #}
                 #}
 		self.sim_map_name['fd'] = os.path.join(self.wk_dir,'fd_'+rnd_idx+'.fits')
-		self.sim_map_name['dm'] = os.path.join(self.wk_dir,'dm_'+rnd_idx+'.fits')
-		root.find('./Obsout/Faraday').set('filename',self.sim_map_name['fd'])
-		root.find('./Obsout/DM').set('filename',self.sim_map_name['dm'])
+		# in case no fd map is required
+		if root.find("./Obsout/Faraday[@cue='1']") is not None:#{
+                        self.do_fd = True
+                        root.find("./Obsout/Faraday[@cue='1']").set('filename',self.sim_map_name['fd'])
+                #}
+                self.sim_map_name['dm'] = os.path.join(self.wk_dir,'dm_'+rnd_idx+'.fits')
+                # in case no dm map is required
+                if root.find("./Obsout/DM[@cue='1']") is not None:#{
+                        self.do_dm = True
+                        root.find('./Obsout/DM').set('filename',self.sim_map_name['dm'])
+                #}
 		# automatically create a new file
 		self.tree.write(self.temp_file)
 	
@@ -253,7 +273,7 @@ class hampyx(object):
                     attrib=None):
                 # input type check
                 if type(attrib) is not dict or type(keychain) is not list:#{
-                        print ('ERR: wrong input')
+                        print ('mod_par ERR: wrong input \n',keychain,attrib)
 			exit(1)
                 #}
                 root = self.tree.getroot()
@@ -263,8 +283,7 @@ class hampyx(object):
                 #}
                 target = root.find(path_str)
                 if target is None:#{
-                        print ('ERR: wrong path: ')
-                        print path_str
+                        print ('mod_par ERR: wrong path \n',path_str)
                         exit(1)
                 #}
                 for i in attrib:#{
@@ -280,7 +299,7 @@ class hampyx(object):
                     attrib=None):
                 # input type check
                 if type(keychain) is not list or type(subkey) is not str:#{
-                        print ('ERR: wrong input')
+                        print ('add_par ERR: wrong input',keychain,subkey,attrib)
                         exit(1)
                 #}
                 if attrib is not None and type(attrib) is dict:#{
@@ -302,7 +321,7 @@ class hampyx(object):
 			et.SubElement(target,subkey)
 		#}
 		else:#{
-			print ('ERR: wrong input')
+			print ('add_par ERR: wrong input \n',keychain,subkey,attrib)
 			exit(1)
 		#}
 		
@@ -313,7 +332,7 @@ class hampyx(object):
                       keychain=None):
                 # input type check
                 if type(keychain) is not list:#{
-                        print ('ERR: wrong input')
+                        print ('print_par ERR: wrong input \n',keychain)
                         exit(1)
                 #}
                 root = self.tree.getroot()
@@ -345,7 +364,7 @@ class hampyx(object):
                     opt=None):
                 # input type check
                 if type(keychain) is not list:#{
-                        print ('ERR: wrong input')
+                        print ('del_par ERR: wrong input \n',keychain,opt)
                         exit(1)
                 #}
 		root = self.tree.getroot()
@@ -362,7 +381,7 @@ class hampyx(object):
 			target = root.find(path_str)
 			parent = root.find(par_path_str)
 			if target is None or parent is None:#{
-                                print ('WAR: wrong path')
+                                print ('del_par WAR: wrong path \n',path_str)
                                 exit(1)
                         #}
 			if opt is None:#{
@@ -374,11 +393,11 @@ class hampyx(object):
                                 #}
                         #}
                         else:#{
-                                print ('ERR: unsupported option')
+                                print ('del_par ERR: unsupported option \n',keychain,opt)
                                 exit(1)
                         #}
 		#}
 		else:#{
-			print ('ERR: wrong input')
+			print ('del_par ERR: empty keychain \n')
 			exit(1)
                 #}
