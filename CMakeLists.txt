@@ -40,7 +40,7 @@ IF(ON_DOCKER)
 	SET(GSL_HINTS /usr) 
 	SET(FFTW_HINTS /usr/local)
 	SET(CFITSIO_HINTS /usr/local)
-	SET(HEALPIX_HINTS /home/lab/Healpix_3.31/src/cxx/optimized_gcc)
+	SET(HEALPIX_HINTS /home/lab/Healpix_3.35/src/cxx/optimized_gcc)
 	SET(GTEST_HINTS /usr/local)
 	SET(INSTALL_ROOT_DIR /usr/local/hammurabi)
 ELSE()
@@ -48,7 +48,7 @@ ELSE()
 	SET(GSL_HINTS /u/shared/programs/x86_64/gsl/2.2/gnu/4.9.2)
 	SET(FFTW_HINTS /home/jiwang/package/fftw)
 	SET(CFITSIO_HINTS /home/jiwang/package/cfitsio)
-	SET(HEALPIX_HINTS /home/jiwang/package/Healpix_3.31/src/cxx/optimized_gcc)
+	SET(HEALPIX_HINTS /home/jiwang/package/Healpix_3.35/src/cxx/optimized_gcc)
 	SET(GTEST_HINTS /home/jiwang/package/googletest)
 	SET(INSTALL_ROOT_DIR /home/jiwang/package/hammurabi)
 	SET(CMAKE_EXE_LINKER_FLAGS -lcurl)
@@ -154,7 +154,7 @@ FIND_LIBRARY(HEALPIX_UTI_LIBRARY
 	${HEALPIX_HINTS}/lib
 )
 FIND_LIBRARY(HEALPIX_FFT_LIBRARY
-	NAMES fftpack
+	NAMES pocketfft
 	HINTS 
 	${HEALPIX_HINTS}/lib
 )
