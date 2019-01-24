@@ -3,7 +3,8 @@ FROM ubuntu:latest
 MAINTAINER jiaxin.wang@sissa.it
 
 RUN apt-get update
-RUN apt-get install -y build-essential git gfortran autoconf gsl-bin libgsl-dev wget cmake vim
+RUN apt-get install -y build-essential git gfortran autoconf gsl-bin libgsl-dev wget cmake vim unzip python python-pip python-dev
+RUN pip install numpy scipy matplotlib cython astropy healpy jupyter
 
 RUN mkdir /home/lab
 WORKDIR /home/lab
