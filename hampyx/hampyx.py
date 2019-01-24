@@ -150,7 +150,7 @@ class hampyx(object):
                 # read dispersion measure and delete file
 		if(os.path.isfile(dm_path)):#{
 			[DM] = self._read_fits_file(dm_path)
-			self.sim_map['DM'] = DM
+			self.sim_map['dm'] = DM
 			os.remove(dm_path)
 		#}
 		else:#{
@@ -160,7 +160,7 @@ class hampyx(object):
                 # read faraday depth and delete file
 		if(os.path.isfile(fd_path)):#{
 			[Fd] = self._read_fits_file(fd_path)
-			self.sim_map['F'] = Fd
+			self.sim_map['fd'] = Fd
           		os.remove(fd_path)
           	#}
           	else:#{

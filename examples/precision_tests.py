@@ -1,9 +1,17 @@
+# -*- coding: utf-8 -*-
+'''
+this snippet serves as a simple precision test of hammurabiX
+assuming simplest field modles:
+
+
+contributed by Jiaxin Wang
+'''
 import healpy as hp
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import FormatStrFormatter
-import wrapper as wp
+import hampyx as ham
 import scipy.special as sp
 
 # CGS units
@@ -29,7 +37,7 @@ def t_conv(t,freq):
 def J_tot(theta):
 	b,r,l0,alpha,je,freq = theta
 	# CRE normalization
-	gamma10 = 10.*GeV/mc2
+	gamma10 = 10.*GeV/mc2+1.0
 	beta10 = np.sqrt(1.-1./gamma10)
 	rslt = je*4.*pi*mc*(gamma10**alpha)/((1.e+4)*GeV*beta10)
 	# following Ribiki-Lightman eq(6.36)
@@ -56,7 +64,7 @@ def i_th(theta,lon,lat):
 def J_pol(theta):
 	b,r,l0,alpha,je,freq = theta
 	# CRE normalization
-	gamma10 = 10.*GeV/mc2
+	gamma10 = 10.*GeV/mc2+1.0
 	beta10 = np.sqrt(1.-1./gamma10)
 	rslt = je*4.*pi*mc*(gamma10**alpha)/((1.e+4)*GeV*beta10)
 	# following Ribiki-Lightman eq(6.36)
@@ -106,10 +114,10 @@ def fd_th(theta,lon,lat):
 # precision
 def precision(_res):
 	# observable controllers
-	Nside = 8
-	Shell = 1
-	Res = _res #0.001 #kpc
-	radius = 4.0 #kpc
+	Nside = 8 # shouldn't affect precision
+	Shell = 1 # shouldn't affect precision
+	Res = _res # affecting precision
+	radius = 4.0 # shouldn't affect precision
 	
 	# field controllers
 	b0 = 6.0 #muG
@@ -117,41 +125,55 @@ def precision(_res):
 	l0 = 0.0
 	alpha = 3
 	je = 0.25
-	freq = 23 #GHz
+	freq = 23 # affecting precision??
 	ne = 0.01 #pccm
 	
-	# call hamX wrapper
-	obj = wp.Wrapper()
-	obj.mod_par(keys=['Output','Sync'],tag='freq',attrib=str(freq))
-	obj.mod_par(keys=['Grid','Integration','shell','auto','nside_min'],tag='value',attrib=str(Nside))
-	obj.mod_par(keys=['Grid','Integration','nside_sim'],tag='value',attrib=str(Nside))
-	obj.mod_par(keys=['Grid','Integration','ec_r_max'],tag='value',attrib=str(radius))
-	obj.mod_par(keys=['Grid','Integration','gc_r_max'],tag='value',attrib=str(radius+9.))
-	obj.mod_par(keys=['Grid','Integration','gc_z_max'],tag='value',attrib=str(radius+1.))
-	obj.mod_par(keys=['Grid','Integration','ec_r_res'],tag='value',attrib=str(Res))
-
-	obj.mod_par(keys=['Galaxy','MagneticField','Regular'],tag='type',attrib='Verify')
-	obj.mod_par(keys=['Galaxy','MagneticField','Regular','Verify','b0'],tag='value',attrib=str(b0))
-	obj.mod_par(keys=['Galaxy','MagneticField','Regular','Verify','l0'],tag='value',attrib=str(l0))
-	obj.mod_par(keys=['Galaxy','MagneticField','Regular','Verify','r'],tag='value',attrib=str(r))
-	obj.mod_par(keys=['Galaxy','MagneticField','Random'],tag='cue',attrib=str(0))
-	
-	obj.mod_par(keys=['Galaxy','FreeElectron','Regular'],tag='type',attrib='Verify')
-	obj.mod_par(keys=['Galaxy','FreeElectron','Regular','Verify','n0'],tag='value',attrib=str(ne))
-	obj.mod_par(keys=['Galaxy','FreeElectron','Regular','Verify','r0'],tag='value',attrib=str(radius))
-	obj.mod_par(keys=['Galaxy','FreeElectron','Random'],tag='cue',attrib=str(0))
-	
-	obj.mod_par(keys=['CRE'],tag='type',attrib='Verify')
-	obj.mod_par(keys=['CRE','Verify','alpha'],tag='value',attrib=str(alpha))
-	obj.mod_par(keys=['CRE','Verify','je'],tag='value',attrib=str(je))
-	obj.mod_par(keys=['CRE','Verify','r0'],tag='value',attrib=str(radius))	
-	
+	# call hammurabiX wrapper
+	obj = ham.hampyx()
+	# assuming the xml file is not prepared
+	obj.del_par(['Output','Sync'],'all')
+	obj.add_par(['Output'],'Sync',{'cue':str(1),'freq':str(freq),'filename':'dumy'})
+        obj.mod_par(['Output','DM'],{'cue':str(1)})
+        obj.mod_par(['Output','Faraday'],{'cue':str(1)})
+        # mute all field output/input
+        obj.mod_par(['Fieldout','breg_grid'],{'read':str(0),'write',str(0)})
+        obj.mod_par(['Fieldout','brnd_grid'],{'read':str(0),'write',str(0)})
+        obj.mod_par(['Fieldout','fereg_grid'],{'read':str(0),'write',str(0)})
+        obj.mod_par(['Fieldout','fernd_grid'],{'read':str(0),'write',str(0)})
+        obj.mod_par(['Fieldout','cre_grid'],{'read':str(0),'write',str(0)})
+	# calibrate simulation box
+	obj.mod_par(['Grid','Shell','layer'],{'type':'auto'})
+	obj.mod_par(['Grid','Shell','layer','auto','shell_num'],{'value':str(Shell)})
+	obj.mod_par(['Grid','Shell','layer','auto','nside_min'],{'value':str(Nside)})
+	obj.mod_par(['Grid','Shell','nside_sim'],{'value':str(Nside)})
+	obj.mod_par(['Grid','Shell','ec_r_max'],{'value':str(radius)})
+	obj.mod_par(['Grid','Shell','gc_r_max'],{'value':str(radius+9.)})
+	obj.mod_par(['Grid','Shell','gc_z_max'],{'value':str(radius+1.)})
+	obj.mod_par(['Grid','Shell','ec_r_res'],{'value':str(Res)})
+        # fix GMF
+        obj.mod_par(['MagneticField','Regular'],{'cue':str(1),'type':'Test'})
+	obj.mod_par(['MagneticField','Regular','Test','b0'],{'value':str(b0)})
+	obj.mod_par(['MagneticField','Regular','Test','l0'],{'value':str(l0)})
+	obj.mod_par(['MagneticField','Regular','Test','r'],{'value':str(r)})
+	obj.mod_par(['MagneticField','Random'],{'cue':str(0)})
+	# fix FE
+	obj.mod_par(['FreeElectron','Regular'],{'cue':str(1),'type':'Test'})
+	obj.mod_par(['FreeElectron','Regular','Test','n0'],{'value':str(ne)})
+	obj.mod_par(['FreeElectron','Regular','Test','r0'],{'value':str(radius)})
+	obj.mod_par(['FreeElectron','Random'],{'cue':str(0)})
+	# fix CRE
+	obj.mod_par(['CRE'],{'type':'Test'})
+	obj.mod_par(['CRE','Test','alpha'],{'value':str(alpha)})
+	obj.mod_par(['CRE','Test','E0'],{'value':str(10.0)})
+	obj.mod_par(['CRE','Test','j0'],{'value':str(je)})
+	obj.mod_par(['CRE','Test','r0'],{'value':str(radius)})
+	# call hammurabi executable
 	obj.call()
 	# (in mK_cmb)
-	qsim = obj.sim_map['Q']*1.e+3
-    	usim = obj.sim_map['U']*1.e+3
-    	isim = obj.sim_map['I']*1.e+3
-    	fsim = obj.sim_map['F']
+	qsim = obj.sim_map['sync'][str(freq)]['Q']*1.e+3
+    	usim = obj.sim_map['sync'][str(freq)]['U']*1.e+3
+    	isim = obj.sim_map['sync'][str(freq)]['I']*1.e+3
+    	fsim = obj.sim_map['fd']
 	
 	# get wmap 
     	#iwmap = hp.read_map('wmap_band_iqumap_r9_9yr_K_v5.fits',field=0,hdu=1)
