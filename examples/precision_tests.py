@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 '''
 this snippet serves as a simple precision test of hammurabiX
-assuming simplest field modles:
+assuming simplest field modles
 
+python-tk is required
 
 contributed by Jiaxin Wang
 '''
+import matplotlib
+matplotlib.use('Agg')
+# above cmd is for turnning off Xwindows backend of Matplotlib
+# important in docker or remote ssh
 import healpy as hp
 import numpy as np
 import matplotlib.pyplot as plt
@@ -168,7 +173,7 @@ def precision(_res):
 	obj.mod_par(['CRE','Test','j0'],{'value':str(je)})
 	obj.mod_par(['CRE','Test','r0'],{'value':str(radius)})
 	# call hammurabi executable
-	obj.call()
+	obj.call(True)
 	# (in mK_cmb)
 	qsim = obj.sim_map['sync'][str(freq)]['Q']*1.e+3
     	usim = obj.sim_map['sync'][str(freq)]['U']*1.e+3
