@@ -168,7 +168,6 @@ void Param::grid_param (tinyxml2::XMLDocument *doc){
     else {
         grid_int.do_sync.push_back (false);
     }
-    assert (grid_int.do_dm or grid_int.do_fd or grid_int.do_sync.back());
     // output field params
     ptr = toolkit::tracexml (doc,{"Fieldout"});
     grid_breg.read_permission = toolkit::fetchbool (ptr,"read","breg_grid");
