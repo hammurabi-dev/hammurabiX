@@ -1,5 +1,6 @@
 #include <cmath>
 #include <cassert>
+#include <stdexcept>
 
 #include <vec3.h>
 
@@ -11,24 +12,21 @@
 double CRE::flux (const vec3_t<double> &,
                   const Param *,
                   const double &) const{
-    assert(false);
-    return 0;
+    throw std::runtime_error("wrong inheritance");
 }
 
 double CRE::get_emissivity_t (const vec3_t<double> &,
                               const Param *,
                               const Grid_cre *,
                               const double &) const{
-    assert(false);
-    return 0;
+    throw std::runtime_error("wrong inheritance");
 }
 
 double CRE::get_emissivity_p (const vec3_t<double> &,
                               const Param *,
                               const Grid_cre *,
                               const double &) const{
-    assert(false);
-    return 0;
+    throw std::runtime_error("wrong inheritance");
 }
 
 // use bilinear/trilinear interpolationi according to the dimension of CRE flux grid

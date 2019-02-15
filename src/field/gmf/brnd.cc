@@ -1,4 +1,5 @@
 #include <cmath>
+#include <stdexcept>
 
 #include <vec3.h>
 
@@ -88,7 +89,7 @@ void Brnd::write_grid (const Param *,
                        const Breg *,
                        const Grid_breg *,
                        Grid_brnd *) const{
-    assert (false);
+    throw std::runtime_error("wrong inheritance");
 }
 
 // END

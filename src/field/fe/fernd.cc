@@ -1,5 +1,6 @@
 #include <cmath>
 #include <cassert>
+#include <stdexcept>
 
 #include <vec3.h>
 
@@ -77,7 +78,7 @@ double FErnd::read_grid (const vec3_t<double> &pos,
 
 void FErnd::write_grid (const Param *,
                         Grid_fernd *) const{
-    assert(false);
+    throw std::runtime_error("wrong inheritance");
 }
 
 // END

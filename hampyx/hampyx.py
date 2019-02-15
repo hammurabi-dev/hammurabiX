@@ -79,7 +79,9 @@ class hampyx(object):
     default executable path is '/usr/local/hammurabi/bin/hamx'
     default executable path is './params.xml'
     '''
-    def __init__(self, exe_path=None, xml_path=None):
+    def __init__(self,
+                 exe_path='/usr/local/hammurabi/bin/hamx',
+                 xml_path='./params.xml'):
         # current working directory
         self.wk_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
         # encapsulated below
@@ -113,24 +115,16 @@ class hampyx(object):
     '''
     @exe_path.setter
     def exe_path(self,exe_path):
-        if exe_path is None:#{
-            self._exe_path = os.path.abspath('/usr/local/hammurabi/bin/hamx')
+        if isinstance(exe_path, basestring):#{
+            self._exe_path = os.path.abspath(exe_path)
             self.executable = self.exe_path
-        #}
-        elif isinstance(exe_path, basestring):#{
-            self._exe_path = exe_path
-            self.executable = os.path.abspath(self.exe_path)
         #}
         else:
             raise TypeError (exe_path + ' is expected to be of basestring type')
 
     @xml_path.setter
     def xml_path(self,xml_path):
-        if xml_path is None:#{
-            self._xml_path = os.path.join(self.wk_dir,'params.xml')
-            self.base_file = self.xml_path
-        #}
-        elif isinstance(xml_path, basestring):#{
+        if isinstance(xml_path, basestring):#{
             self._xml_path = os.path.abspath(xml_path)
             self.base_file = self.xml_path
         #}
