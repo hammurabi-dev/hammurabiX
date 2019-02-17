@@ -2,7 +2,7 @@
 #include <omp.h>
 #include <cmath>
 
-#include <vec3.h>
+#include <hvec.h>
 #include <fftw3.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
@@ -16,15 +16,15 @@
 #include <namespace_toolkit.h>
 
 // global anisotropic turbulent field
-vec3_t<double> Brnd_es::anisotropy_direction (const vec3_t<double> &pos,
+hvec<3,double> Brnd_es::anisotropy_direction (const hvec<3,double> &pos,
                                               const Param *par,
                                               const Breg *breg,
                                               const Grid_breg *gbreg) const{
-    return toolkit::versor (breg->get_breg (pos,par,gbreg));
+    return (breg->get_breg (pos,par,gbreg)).versor();
 }
 
 // global anisotropic turbulent field
-double Brnd_es::anisotropy_ratio (const vec3_t<double> &,
+double Brnd_es::anisotropy_ratio (const hvec<3,double> &,
                                   const Param *par,
                                   const Breg *,
                                   const Grid_breg *) const{
@@ -51,10 +51,10 @@ double Brnd_es::spec(const double &k,
 
 // galactic scaling of random field energy density
 // set to 1 at observer's place
-double Brnd_es::rescal (const vec3_t<double> &pos,
+double Brnd_es::rescal (const hvec<3,double> &pos,
                         const Param *par) const{
-    const double r_cyl {std::sqrt(pos.x*pos.x+pos.y*pos.y) - std::fabs(par->SunPosition.x)};
-    const double z {std::fabs(pos.z) - std::fabs(par->SunPosition.z)};
+    const double r_cyl {std::sqrt(pos[0]*pos[0]+pos[1]*pos[1]) - std::fabs(par->SunPosition[0])};
+    const double z {std::fabs(pos[2]) - std::fabs(par->SunPosition[2])};
     const double r0 {par->brnd_es.r0};
     const double z0 {par->brnd_es.z0};
     return std::exp(-r_cyl/r0)*std::exp(-z/z0);
@@ -62,17 +62,17 @@ double Brnd_es::rescal (const vec3_t<double> &pos,
 
 // Gram-Schimdt, rewritten using Healpix vec3 library
 // tiny error caused by machine is inevitable
-vec3_t<double> Brnd_es::gramschmidt (const vec3_t<double> &k,
-                                     const vec3_t<double> &b) const{
-    if (k.SquaredLength()==0 or b.SquaredLength()==0){
-        return vec3_t<double> {0,0,0};
+hvec<3,double> Brnd_es::gramschmidt (const hvec<3,double> &k,
+                                     const hvec<3,double> &b) const{
+    if (k.lengthsq()==0 or b.lengthsq()==0){
+        return hvec<3,double> {0,0,0};
     }
-    const double inv_k_mod = 1./k.SquaredLength();
-    vec3_t<double> b_free {b.x - k.x*dotprod(k,b)*inv_k_mod,
-        b.y - k.y*dotprod(k,b)*inv_k_mod,
-        b.z - k.z*dotprod(k,b)*inv_k_mod};
+    const double inv_k_mod = 1./k.lengthsq();
+    hvec<3,double> b_free {b[0] - k[0]*k.dotprod(b)*inv_k_mod,
+        b[1] - k[1]*k.dotprod(b)*inv_k_mod,
+        b[2] - k[2]*k.dotprod(b)*inv_k_mod};
     
-    b_free = toolkit::versor(b_free)*b.Length();
+    b_free = b_free.versor()*b.length();
     return b_free;
 }
 
@@ -160,36 +160,36 @@ void Brnd_es::write_grid (const Param *par,
 #pragma omp parallel for schedule(static)
 #endif
     for (decltype(par->grid_brnd.nx) i=0;i<par->grid_brnd.nx;++i){
-        vec3_t<double> pos {i*lx/(par->grid_brnd.nx-1) + par->grid_brnd.x_min,0,0};
+        hvec<3,double> pos {i*lx/(par->grid_brnd.nx-1) + par->grid_brnd.x_min,0,0};
         const std::size_t idx_lv1 {i*par->grid_brnd.ny*par->grid_brnd.nz};
         for (decltype(par->grid_brnd.ny) j=0;j<par->grid_brnd.ny;++j){
-            pos.y = j*ly/(par->grid_brnd.ny-1) + par->grid_brnd.y_min;
+            pos[1] = j*ly/(par->grid_brnd.ny-1) + par->grid_brnd.y_min;
             const std::size_t idx_lv2 {idx_lv1+j*par->grid_brnd.nz};
             for (decltype(par->grid_brnd.nz) l=0;l<par->grid_brnd.nz;++l){
                 // get physical position
-                pos.z = l*lz/(par->grid_brnd.nz-1) + par->grid_brnd.z_min;
+                pos[2] = l*lz/(par->grid_brnd.nz-1) + par->grid_brnd.z_min;
                 // get rescaling factor
                 double ratio {std::sqrt(rescal(pos,par))*par->brnd_es.rms*b_var_invsq};
                 const std::size_t idx {idx_lv2+l};
                 // assemble b_Re
                 // after 1st Fourier transformation, c0_R = bx, c0_I = by, c1_I = bz
-                vec3_t<double> b_re {grid->c0[idx][0]*ratio,
+                hvec<3,double> b_re {grid->c0[idx][0]*ratio,
                     grid->c0[idx][1]*ratio,
                     grid->c1[idx][1]*ratio};
                 // impose anisotropy
-                vec3_t<double> H_versor = anisotropy_direction (pos,par,breg,gbreg);
+                hvec<3,double> H_versor = anisotropy_direction (pos,par,breg,gbreg);
                 double rho {anisotropy_ratio (pos,par,breg,gbreg)};
                 assert (rho>=0. and rho<=1.);
-                if (H_versor.SquaredLength()<1e-10)// zero regular field, no prefered anisotropy
+                if (H_versor.lengthsq()<1e-10)// zero regular field, no prefered anisotropy
                     continue;
-                vec3_t<double> b_re_par {H_versor*dotprod(H_versor,b_re)};
-                vec3_t<double> b_re_perp {b_re - b_re_par};
-                b_re = toolkit::versor(b_re_par*rho + b_re_perp*(1-rho))*b_re.Length();
+                hvec<3,double> b_re_par {H_versor*H_versor.dotprod(b_re)};
+                hvec<3,double> b_re_perp {b_re - b_re_par};
+                b_re = (b_re_par*rho + b_re_perp*(1-rho)).versor()*b_re.length();
                 // push b_re back to c0 and c1
-                grid->c0[idx][0] = b_re.x;
-                grid->c0[idx][1] = b_re.y;
-                grid->c1[idx][0] = b_re.y;
-                grid->c1[idx][1] = b_re.z;
+                grid->c0[idx][0] = b_re[0];
+                grid->c0[idx][1] = b_re[1];
+                grid->c1[idx][0] = b_re[1];
+                grid->c1[idx][1] = b_re[2];
             } //l
         } //j
     } //i
@@ -205,26 +205,26 @@ void Brnd_es::write_grid (const Param *par,
     for (decltype(par->grid_brnd.nx) i=0;i<par->grid_brnd.nx;++i){
         decltype(par->grid_brnd.nx) i_sym {par->grid_brnd.nx-i};// apply Hermitian symmetry
         if (i==0) i_sym = i;
-        vec3_t<double> tmp_k {CGS_U_kpc*i/lx,0,0};
+        hvec<3,double> tmp_k {CGS_U_kpc*i/lx,0,0};
         // it's better to calculate indeces manually
         // just for reference, how indeces are calculated
         // const std::size_t idx {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i,j,l)};
         // const std::size_t idx_sym {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i_sym,j_sym,l_sym)};
         const std::size_t idx_lv1 {i*par->grid_brnd.ny*par->grid_brnd.nz};
         const std::size_t idx_sym_lv1 {i_sym*par->grid_brnd.ny*par->grid_brnd.nz};
-        if (i>=(par->grid_brnd.nx+1)/2) tmp_k.x -= CGS_U_kpc*par->grid_brnd.nx/lx;
+        if (i>=(par->grid_brnd.nx+1)/2) tmp_k[0] -= CGS_U_kpc*par->grid_brnd.nx/lx;
         for (decltype(par->grid_brnd.ny) j=0;j<par->grid_brnd.ny;++j){
             decltype(par->grid_brnd.ny) j_sym {par->grid_brnd.ny-j};// apply Hermitian symmetry
             if (j==0) j_sym = j;
-            tmp_k.y = CGS_U_kpc*j/ly;
-            if (j>=(par->grid_brnd.ny+1)/2) tmp_k.y -= CGS_U_kpc*par->grid_brnd.ny/ly;
+            tmp_k[1] = CGS_U_kpc*j/ly;
+            if (j>=(par->grid_brnd.ny+1)/2) tmp_k[1] -= CGS_U_kpc*par->grid_brnd.ny/ly;
             const std::size_t idx_lv2 {idx_lv1+j*par->grid_brnd.nz};
             const std::size_t idx_sym_lv2 {idx_sym_lv1+j_sym*par->grid_brnd.nz};
             for (decltype(par->grid_brnd.nz) l=0;l<par->grid_brnd.nz;++l){
                 decltype(par->grid_brnd.nz) l_sym {par->grid_brnd.nz-l};// apply Hermitian symmetry
                 if (l==0) l_sym = l;
-                tmp_k.z = CGS_U_kpc*l/lz;
-                if (l>=(par->grid_brnd.nz+1)/2) tmp_k.z -= CGS_U_kpc*par->grid_brnd.nz/lz;
+                tmp_k[2] = CGS_U_kpc*l/lz;
+                if (l>=(par->grid_brnd.nz+1)/2) tmp_k[2] -= CGS_U_kpc*par->grid_brnd.nz/lz;
                 const std::size_t idx {idx_lv2+l}; //k
                 const std::size_t idx_sym {idx_sym_lv2+l_sym}; //-k
                 // reconstruct bx,by,bz from c0,c1,c*0,c*1
@@ -232,23 +232,23 @@ void Brnd_es::write_grid (const Param *par,
                 // c*0(-k) = bx(k) - i by(k)
                 // c1(k) = by(k) + i bz(k)
                 // c1*1(-k) = by(k) - i bz(k)
-                const vec3_t<double> tmp_b_re {0.5*(grid->c0[idx][0]+grid->c0[idx_sym][0]),
+                const hvec<3,double> tmp_b_re {0.5*(grid->c0[idx][0]+grid->c0[idx_sym][0]),
                     0.5*(grid->c1[idx][0]+grid->c1[idx_sym][0]),
                     0.5*(grid->c1[idx_sym][1]+grid->c1[idx][1])};
                 
-                const vec3_t<double> tmp_b_im {0.5*(grid->c0[idx][1]-grid->c0[idx_sym][1]),
+                const hvec<3,double> tmp_b_im {0.5*(grid->c0[idx][1]-grid->c0[idx_sym][1]),
                     0.5*(grid->c1[idx][1]-grid->c1[idx_sym][1]),
                     0.5*(grid->c1[idx_sym][0]-grid->c1[idx][0])};
                 
-                const vec3_t<double> free_b_re {gramschmidt(tmp_k,tmp_b_re)};
-                const vec3_t<double> free_b_im {gramschmidt(tmp_k,tmp_b_im)};
+                const hvec<3,double> free_b_re {gramschmidt(tmp_k,tmp_b_re)};
+                const hvec<3,double> free_b_im {gramschmidt(tmp_k,tmp_b_im)};
                 // reassemble c0,c1 from bx,by,bz
                 // c0(k) = bx(k) + i by(k)
                 // c1(k) = by(k) + i bz(k)
-                grid->c0[idx][0] = free_b_re.x-free_b_im.y;
-                grid->c0[idx][1] = free_b_im.x+free_b_re.y;
-                grid->c1[idx][0] = free_b_re.y-free_b_im.z;
-                grid->c1[idx][1] = free_b_im.y+free_b_re.z;
+                grid->c0[idx][0] = free_b_re[0]-free_b_im[1];
+                grid->c0[idx][1] = free_b_im[0]+free_b_re[1];
+                grid->c1[idx][0] = free_b_re[1]-free_b_im[2];
+                grid->c1[idx][1] = free_b_im[1]+free_b_re[2];
             }// l
         }// j
     }// i

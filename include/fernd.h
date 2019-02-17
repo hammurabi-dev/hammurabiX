@@ -3,7 +3,7 @@
 #ifndef HAMMURABI_FERND_H
 #define HAMMURABI_FERND_H
 
-#include <vec3.h>
+#include <hvec.h>
 
 #include <param.h>
 #include <grid.h>
@@ -19,10 +19,10 @@ public:
     FErnd& operator= (FErnd &&) = delete;
     virtual ~FErnd () = default;
     // return 0 if no derived class is instantiated
-    virtual double get_fernd (const vec3_t<double> &,
+    virtual double get_fernd (const hvec<3,double> &,
                               const Param *,
                               const Grid_fernd *) const;
-    virtual double read_grid (const vec3_t<double> &,
+    virtual double read_grid (const hvec<3,double> &,
                               const Param *,
                               const Grid_fernd *) const;
     virtual void write_grid (const Param *,
@@ -58,7 +58,7 @@ protected:
     virtual double spec (const double &,
                          const Param *) const;
     // density variance rescaling factor
-    virtual double rescal (const vec3_t<double> &,
+    virtual double rescal (const hvec<3,double> &,
                            const Param *) const;
 };
 

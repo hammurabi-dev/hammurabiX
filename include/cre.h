@@ -3,7 +3,7 @@
 #ifndef HAMMURABI_CRE_H
 #define HAMMURABI_CRE_H
 
-#include <vec3.h>
+#include <hvec.h>
 
 #include <param.h>
 #include <grid.h>
@@ -17,11 +17,11 @@ public:
     CRE& operator= (const CRE &) = delete;
     CRE& operator= (CRE &&) = delete;
     virtual ~CRE () = default;
-    virtual double get_emissivity_t (const vec3_t<double> &,
+    virtual double get_emissivity_t (const hvec<3,double> &,
                                      const Param *,
                                      const Grid_cre *,
                                      const double &) const;
-    virtual double get_emissivity_p (const vec3_t<double> &,
+    virtual double get_emissivity_p (const hvec<3,double> &,
                                      const Param *,
                                      const Grid_cre *,
                                      const double &) const;
@@ -31,7 +31,7 @@ public:
     // in get_emissivity automatically select bi/trilinear interpolation
     // according to 2+1/3+1 spatial-spectral CRE flux grid
     virtual double read_grid (const std::size_t &,
-                              const vec3_t<double> &,
+                              const hvec<3,double> &,
                               const Param *,
                               const Grid_cre *) const;
     virtual void write_grid (const Param *,
@@ -39,7 +39,7 @@ public:
     // CRE flux at given CRE energy,
     // input CRE energy at CGS units,
     // output at [GeV m^2 s sr]^-1 units
-    virtual double flux (const vec3_t<double> &,
+    virtual double flux (const hvec<3,double> &,
                          const Param *,
                          const double &) const;
 };
@@ -54,25 +54,25 @@ public:
     CRE_test& operator= (const CRE_test &) = delete;
     CRE_test& operator= (CRE_test &&) = delete;
     virtual ~CRE_test () = default;
-    double get_emissivity_t (const vec3_t<double> &,
+    double get_emissivity_t (const hvec<3,double> &,
                              const Param *,
                              const Grid_cre *,
                              const double &) const override;
-    double get_emissivity_p (const vec3_t<double> &,
+    double get_emissivity_p (const hvec<3,double> &,
                              const Param *,
                              const Grid_cre *,
                              const double &) const override;
-    double flux (const vec3_t<double> &,
+    double flux (const hvec<3,double> &,
                  const Param *,
                  const double &) const override;
     // flux normalization at given position
-    double flux_norm (const vec3_t<double> &,
+    double flux_norm (const hvec<3,double> &,
                       const Param *) const;
     // flux index at given position
-    double flux_idx (const vec3_t<double> &,
+    double flux_idx (const hvec<3,double> &,
                      const Param *) const;
     // spatial CRE flux rescaling
-    double rescal (const vec3_t<double> &,
+    double rescal (const hvec<3,double> &,
                    const Param *) const;
 };
 #endif
@@ -86,28 +86,28 @@ public:
     CRE_ana& operator= (const CRE_ana &) = delete;
     CRE_ana& operator= (CRE_ana &&) = delete;
     virtual ~CRE_ana () = default;
-    double get_emissivity_t (const vec3_t<double> &,
+    double get_emissivity_t (const hvec<3,double> &,
                              const Param *,
                              const Grid_cre *,
                              const double &) const override;
-    double get_emissivity_p (const vec3_t<double> &,
+    double get_emissivity_p (const hvec<3,double> &,
                              const Param *,
                              const Grid_cre *,
                              const double &) const override;
-    double flux (const vec3_t<double> &,
+    double flux (const hvec<3,double> &,
                  const Param *,
                  const double &) const override;
 #ifdef NDEBUG
 protected:
 #endif
     // flux normalization at given position
-    double flux_norm (const vec3_t<double> &,
+    double flux_norm (const hvec<3,double> &,
                       const Param *) const;
     // flux index at given position
-    double flux_idx (const vec3_t<double> &,
+    double flux_idx (const hvec<3,double> &,
                      const Param *) const;
     // spatial CRE flux rescaling
-    double rescal (const vec3_t<double> &,
+    double rescal (const hvec<3,double> &,
                    const Param *) const;
 };
 
@@ -120,11 +120,11 @@ public:
     CRE_num& operator= (const CRE_num &) = delete;
     CRE_num& operator= (CRE_num &&) = delete;
     virtual ~CRE_num () = default;
-    double get_emissivity_t (const vec3_t<double> &,
+    double get_emissivity_t (const hvec<3,double> &,
                              const Param *,
                              const Grid_cre *,
                              const double &) const override;
-    double get_emissivity_p (const vec3_t<double> &,
+    double get_emissivity_p (const hvec<3,double> &,
                              const Param *,
                              const Grid_cre *,
                              const double &) const override;

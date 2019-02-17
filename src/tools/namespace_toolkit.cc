@@ -7,7 +7,7 @@
 #include <string>
 #include <cmath>
 
-#include <vec3.h>
+#include <hvec.h>
 #include <fftw3.h>
 #include <tinyxml2.h>
 
@@ -17,65 +17,58 @@
 namespace toolkit {
     
     // calculate the perpendicular to LOS component of a vector
-    double perp2los (const vec3_t<double> &input,
+    double perp2los (const hvec<3,double> &input,
                      const double &the_los,
                      const double &phi_los){
-        const vec3_t<double> unit_vec {los_versor(the_los, phi_los)};
-        const vec3_t<double> perp_vec {crossprod(unit_vec,input)};
-        return perp_vec.Length();
+        const hvec<3,double> unit_vec {los_versor(the_los, phi_los)};
+        const hvec<3,double> perp_vec {unit_vec.crossprod(input)};
+        return perp_vec.length();
     }
     
     // calculate the parallel to LOS component of a vector
-    double par2los (const vec3_t<double> &input,
+    double par2los (const hvec<3,double> &input,
                     const double &the_los,
                     const double &phi_los){
-        const vec3_t<double> unit_vec {los_versor(the_los, phi_los)};
-        return dotprod (unit_vec,input);
+        const hvec<3,double> unit_vec {los_versor(the_los, phi_los)};
+        return unit_vec.dotprod (input);
     }
     
     // calculate intrinsic polarization angle
-    double intr_pol_ang (const vec3_t<double> &input,
+    double intr_pol_ang (const hvec<3,double> &input,
                          const double &the_ec,
                          const double &phi_ec){
-        vec3_t<double> sph_unit_v_the;
-        vec3_t<double> sph_unit_v_phi;
-        sph_unit_v_the = vec3_t<double> {cos(the_ec)*cos(phi_ec),
+        hvec<3,double> sph_unit_v_the;
+        hvec<3,double> sph_unit_v_phi;
+        sph_unit_v_the = hvec<3,double> {cos(the_ec)*cos(phi_ec),
             cos(the_ec)*sin(phi_ec),
             -sin(the_ec)};
-        sph_unit_v_phi = vec3_t<double> {-sin(phi_ec),
+        sph_unit_v_phi = hvec<3,double> {-sin(phi_ec),
             cos(phi_ec),
             0.};
         // IAU convention
-        const double y_component {-dotprod(sph_unit_v_the, input)};
-        const double x_component {-dotprod(sph_unit_v_phi, input)};
+        const double y_component {-sph_unit_v_the.dotprod (input)};
+        const double x_component {-sph_unit_v_phi.dotprod (input)};
         return atan2(y_component, x_component);
     }
     
     // from Cartesian coordiante to cylindrical coordinate
-    void cart_coord2cyl_coord (const vec3_t<double> &input,
+    void cart_coord2cyl_coord (const hvec<3,double> &input,
                                double &r,
                                double &phi,
                                double &z){
-        r = sqrt(input.x*input.x+input.y*input.y);
-        phi = atan2(input.y,input.x);
+        r = sqrt(input[0]*input[0]+input[1]*input[1]);
+        phi = atan2(input[1],input[0]);
         //if(phi<0.) {phi+=2.*CGS_U_pi;} // may not be necessary
-        z = input.z;
+        z = input[2];
     }
     
     // overload for vec3 to vec3
-    void cart_coord2cyl_coord (const vec3_t<double> &input,
-                               vec3_t<double> &cyl_vec){
-        cyl_vec.x = sqrt(input.x*input.x+input.y*input.y);
-        cyl_vec.y = atan2(input.y,input.x);
-        //if(cyl_vec.y<0.) {cyl_vec.y+=2.*CGS_U_pi;} // may not be necessary
-        cyl_vec.z = input.z;
-    }
-    
-    // get versor of a vector
-    vec3_t<double> versor (const vec3_t<double> &b){
-        if(b.Length()==0.) {return vec3_t<double> {0.,0.,0.};}
-        const double L = 1./sqrt(b.x*b.x+b.y*b.y+b.z*b.z);
-        return vec3_t<double> {b.x*L,b.y*L,b.z*L};
+    void cart_coord2cyl_coord (const hvec<3,double> &input,
+                               hvec<3,double> &cyl_vec){
+        cyl_vec[0] = sqrt(input[0]*input[0]+input[1]*input[1]);
+        cyl_vec[1] = atan2(input[1],input[0]);
+        //if(cyl_vec[1]<0.) {cyl_vec[1]+=2.*CGS_U_pi;} // may not be necessary
+        cyl_vec[2] = input[2];
     }
     
     // mean for array

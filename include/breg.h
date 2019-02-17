@@ -3,7 +3,7 @@
 #ifndef HAMMURABI_BREG_H
 #define HAMMURABI_BREG_H
 
-#include <vec3.h>
+#include <hvec.h>
 #include <vector>
 #include <param.h>
 #include <grid.h>
@@ -23,18 +23,18 @@ public:
     //2nd argument: parameter class object
     //3rd argument: regular GMF grid class object
     //inovke read_grid regardless of field type if permitted, otherwise invoke breg
-    virtual vec3_t<double> get_breg (const vec3_t<double> &,
+    virtual hvec<3,double> get_breg (const hvec<3,double> &,
                                      const Param *,
                                      const Grid_breg *) const;
     //GMF assembler, specified only in derived class
     //1st argument: Galactic centric Cartesian frame position
     //2nd argument: parameter class object
-    virtual vec3_t<double> breg (const vec3_t<double> &,
+    virtual hvec<3,double> breg (const hvec<3,double> &,
                                  const Param *) const;
     //read from field grid with trilinear interpolation
     //1st argument: Galactic centric Cartesian frame position
     //2nd argument: regular GMF grid class object
-    virtual vec3_t<double> read_grid (const vec3_t<double> &,
+    virtual hvec<3,double> read_grid (const hvec<3,double> &,
                                       const Param *,
                                       const Grid_breg *) const;
     //write to field grid
@@ -54,7 +54,7 @@ public:
     Breg_test& operator= (const Breg_test &) = delete;
     Breg_test& operator= (Breg_test &&) = delete;
     virtual ~Breg_test () = default;
-    vec3_t<double> breg (const vec3_t<double> &,
+    hvec<3,double> breg (const hvec<3,double> &,
                          const Param *) const override;
 };
 #endif
@@ -71,7 +71,7 @@ public:
     Breg_wmap& operator= (const Breg_wmap &) = delete;
     Breg_wmap& operator= (Breg_wmap &&) = delete;
     virtual ~Breg_wmap () = default;
-    vec3_t<double> breg (const vec3_t<double> &,
+    hvec<3,double> breg (const hvec<3,double> &,
                          const Param *) const override;
 };
 
@@ -86,7 +86,7 @@ public:
     Breg_jaffe& operator= (const Breg_jaffe &) = delete;
     Breg_jaffe& operator= (Breg_jaffe &&) = delete;
     virtual ~Breg_jaffe  () = default;
-    vec3_t<double> breg (const vec3_t<double> &,
+    hvec<3,double> breg (const hvec<3,double> &,
                          const Param *) const override;
 #ifndef NDEBUG
 protected:
@@ -94,51 +94,51 @@ protected:
     //field orientation
     //1st argument: Galactic centric Cartesian frame position
     //2nd argument: parameter class object
-    vec3_t<double> orientation (const vec3_t<double> &,
+    hvec<3,double> orientation (const hvec<3,double> &,
                                 const Param *) const;
     //field amplitude radial scaling
     //1st argument: Galactic centric Cartesian frame position
     //2nd argument: parameter class object
-    double radial_scaling (const vec3_t<double> &,
+    double radial_scaling (const hvec<3,double> &,
                            const Param *) const;
     //spiral arm height scaling
     //1st argument: Galactic centric Cartesian frame position
     //2nd argument: parameter class object
     //remark: inlined function
-    inline double arm_scaling (const vec3_t<double> &pos,
+    inline double arm_scaling (const hvec<3,double> &pos,
                                const Param *par) const{
-        return 1./(cosh(pos.z/par->breg_jaffe.arm_z0)*cosh(pos.z/par->breg_jaffe.arm_z0));
+        return 1./(cosh(pos[2]/par->breg_jaffe.arm_z0)*cosh(pos[2]/par->breg_jaffe.arm_z0));
     }
     //disk height scaling
     //1st argument: Galactic centric Cartesian frame position
     //2nd argument: parameter class object
     //remark: inlined function
-    inline double disk_scaling (const vec3_t<double> &pos,
+    inline double disk_scaling (const hvec<3,double> &pos,
                                 const Param *par) const{
-        return 1./(cosh(pos.z/par->breg_jaffe.disk_z0)*cosh(pos.z/par->breg_jaffe.disk_z0));
+        return 1./(cosh(pos[2]/par->breg_jaffe.disk_z0)*cosh(pos[2]/par->breg_jaffe.disk_z0));
     }
     //halo height scaling
     //1st argument: Galactic centric Cartesian frame position
     //2nd argument: parameter class object
     //remark: inlined function
-    inline double halo_scaling (const vec3_t<double> &pos,
+    inline double halo_scaling (const hvec<3,double> &pos,
                                 const Param *par) const{
-        return 1./(cosh(pos.z/par->breg_jaffe.halo_z0)*cosh(pos.z/par->breg_jaffe.halo_z0));
+        return 1./(cosh(pos[2]/par->breg_jaffe.halo_z0)*cosh(pos[2]/par->breg_jaffe.halo_z0));
     }
     //spiral arm compression factor, for each arm
     //1st argument: Galactic centric Cartesian frame position
     //2nd argument: parameter class object
-    std::vector<double> arm_compress (const vec3_t<double> &,
+    std::vector<double> arm_compress (const hvec<3,double> &,
                                       const Param *) const;
     //spiral arm compression factor for dust, for each arm
     //1st argument: Galactic centric Cartesian frame position
     //2nd argument: parameter class object
-    std::vector<double> arm_compress_dust (const vec3_t<double> &,
+    std::vector<double> arm_compress_dust (const hvec<3,double> &,
                                            const Param *) const;
     //distance to each spiral arm
     //1st argument: Galactic centric Cartesian frame position
     //2nd argument: parameter class object
-    std::vector<double> dist2arm (const vec3_t<double> &,
+    std::vector<double> dist2arm (const hvec<3,double> &,
                                   const Param *) const;
 };
 

@@ -2,7 +2,7 @@
 #include <cmath>
 #include <memory>
 
-#include <vec3.h>
+#include <hvec.h>
 #include <tinyxml2.h>
 
 #include <param.h>
@@ -13,7 +13,7 @@ Param::Param (const std::string file_name){
     std::unique_ptr<tinyxml2::XMLDocument> doc = toolkit::loadxml(file_name);
     // gc sun position
     tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{"Grid","SunPosition"})};
-    SunPosition = vec3_t<double> {CGS_U_kpc*toolkit::fetchdouble(ptr,"value","x"),
+    SunPosition = hvec<3,double> {CGS_U_kpc*toolkit::fetchdouble(ptr,"value","x"),
         CGS_U_kpc*toolkit::fetchdouble(ptr,"value","y"),
         CGS_U_pc*toolkit::fetchdouble(ptr,"value","z")};
     //

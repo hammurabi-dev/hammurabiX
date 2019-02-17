@@ -3,7 +3,7 @@
 #define HAMMURABI_FE_H
 
 #include <iostream>
-#include <vec3.h>
+#include <hvec.h>
 #include <param.h>
 #include <grid.h>
 
@@ -18,22 +18,22 @@ public:
     // get free electron density,
     // read from grid if granted, otherwise,
     // calculate directly from density function
-    virtual double get_density (const vec3_t<double> &,
+    virtual double get_density (const hvec<3,double> &,
                                 const Param *,
                                 const Grid_fereg *) const;
     // read from grid with trilinear interpolation
-    virtual double read_grid (const vec3_t<double> &,
+    virtual double read_grid (const hvec<3,double> &,
                               const Param *,
                               const Grid_fereg *) const;
     // write to grid
     virtual void write_grid (const Param *,
                              Grid_fereg *) const;
     // assemble free electron density at given position
-    virtual double density (const vec3_t<double> &,
+    virtual double density (const hvec<3,double> &,
                             const Param *) const;
     // gaussian blur free electron density (grid elemental scale as FWHM),
     // computing time consuming function based on \p density
-    virtual double density_blur (const vec3_t<double> &,
+    virtual double density_blur (const hvec<3,double> &,
                                  const Param *) const;
 };
 
@@ -47,7 +47,7 @@ public:
     FEreg_test& operator= (const FEreg_test &) = delete;
     FEreg_test& operator= (FEreg_test &&) = delete;
     virtual ~FEreg_test () = default;
-    double density (const vec3_t<double> &,
+    double density (const hvec<3,double> &,
                     const Param *) const override;
 };
 #endif
@@ -61,7 +61,7 @@ public:
     FEreg_ymw16& operator= (const FEreg_ymw16 &) = delete;
     FEreg_ymw16& operator= (FEreg_ymw16 &&) = delete;
     virtual ~FEreg_ymw16 () = default;
-    double density (const vec3_t<double> &,
+    double density (const hvec<3,double> &,
                     const Param *) const override;
 #ifdef NDEBUG
 private:

@@ -10,7 +10,7 @@
 #include <cassert>
 
 #include <fftw3.h>
-#include <vec3.h>
+#include <hvec.h>
 #include <tinyxml2.h>
 
 #include <cgs_units_file.h>
@@ -21,14 +21,14 @@ namespace toolkit {
     // 1st argument: vector in Cartesian frame
     // 2nd argument: polar angle (in rad)
     // 3rd argument: azimuthal angle (in rad)
-    double perp2los (const vec3_t<double> &,
+    double perp2los (const hvec<3,double> &,
                      const double &,
                      const double &);
     // (signed) parallel component of a vector wrt LOS direction
     // 1st argument: vector in Cartesian frame
     // 2nd argument: polar angle (in rad)
     // 3rd argument: azimuthal angle (in rad)
-    double par2los (const vec3_t<double> &,
+    double par2los (const hvec<3,double> &,
                     const double &,
                     const double &);
     // intrinsic polarization angle (in rad)
@@ -36,15 +36,15 @@ namespace toolkit {
     // 2nd argument: polar angle (in rad) of LOS direction
     // 3rd argument: azimuthal angle (in rad) of LOS direction
     // use with caution, since vector can be parallel to LOS direction
-    double intr_pol_ang (const vec3_t<double> &,
+    double intr_pol_ang (const hvec<3,double> &,
                          const double &,
                          const double &);
     // Carteisan unit vector of given LOS direction
     // 1st argument: polar angle (in rad)
     // 2nd argument: azimuthal angle (in rad)
-    inline vec3_t<double> los_versor (const double &the_los,
+    inline hvec<3,double> los_versor (const double &the_los,
                                       const double &phi_los){
-        return vec3_t<double> {cos(phi_los)*sin(the_los),
+        return hvec<3,double> {cos(phi_los)*sin(the_los),
             sin(phi_los)*sin(the_los),
             cos(the_los)};
     }
@@ -53,19 +53,15 @@ namespace toolkit {
     // 2nd argument: r in cylindrical frame
     // 3rd argument: phi in cylindrical frame
     // 4th argument: z in cylindrical frame
-    void cart_coord2cyl_coord (const vec3_t<double> &,
+    void cart_coord2cyl_coord (const hvec<3,double> &,
                                double &,
                                double &,
                                double &);
     // convert coordinate from Cartesian to cylindrical frame
     // 1st argument: coordinate in Cartesian frame
     // 2nd argument: vec3_t{r,phi,z} in cylindrical frame
-    void cart_coord2cyl_coord (const vec3_t<double> &,
-                               vec3_t<double> &);
-    // get versor of given vector
-    // 1st argument: vector in an orthogonal frame
-    // return: versor of given vector
-    vec3_t<double> versor (const vec3_t<double> &);
+    void cart_coord2cyl_coord (const hvec<3,double> &,
+                               hvec<3,double> &);
     // find index of 3D grid
     inline std::size_t index3d (const std::size_t &/* n1 */,
                                 const std::size_t &n2,

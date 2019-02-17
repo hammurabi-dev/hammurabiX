@@ -173,7 +173,7 @@ def precision(_res):
 	obj.mod_par(['CRE','Test','j0'],{'value':str(je)})
 	obj.mod_par(['CRE','Test','r0'],{'value':str(radius)})
 	# call hammurabi executable
-	obj.call(True)
+	obj(True)
 	# (in mK_cmb)
 	qsim = obj.sim_map['sync'][str(freq)]['Q']*1.e+3
     	usim = obj.sim_map['sync'][str(freq)]['U']*1.e+3

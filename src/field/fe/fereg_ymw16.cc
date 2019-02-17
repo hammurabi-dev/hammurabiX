@@ -1,7 +1,7 @@
 #include <cmath>
 #include <omp.h>
 
-#include <vec3.h>
+#include <hvec.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
@@ -11,18 +11,18 @@
 #include <cgs_units_file.h>
 
 // YMW16
-double FEreg_ymw16::density (const vec3_t<double> &pos,
+double FEreg_ymw16::density (const hvec<3,double> &pos,
                              const Param *par) const{
     // YMW16 using a different Cartesian frame from our default one
-    vec3_t<double> gc_pos {pos.y,-pos.x,pos.z};
+    hvec<3,double> gc_pos {pos[1],-pos[0],pos[2]};
     // sylindrical r
-    double r_cyl {std::sqrt(gc_pos.x*gc_pos.x+gc_pos.y*gc_pos.y)};
+    double r_cyl {std::sqrt(gc_pos[0]*gc_pos[0]+gc_pos[1]*gc_pos[1])};
     // warp
     if (r_cyl>=par->fereg_ymw16.R_warp){
-        double theta_warp {std::atan2(gc_pos.y,gc_pos.x)};
-        gc_pos.z -= par->fereg_ymw16.t0_Gamma_w*(r_cyl-par->fereg_ymw16.R_warp)*std::cos(theta_warp);
+        double theta_warp {std::atan2(gc_pos[1],gc_pos[0])};
+        gc_pos[2] -= par->fereg_ymw16.t0_Gamma_w*(r_cyl-par->fereg_ymw16.R_warp)*std::cos(theta_warp);
     }
-    if (gc_pos.Length()>25*CGS_U_kpc){
+    if (gc_pos.length()>25*CGS_U_kpc){
         return 0.;
     }
     else {
@@ -32,44 +32,44 @@ double FEreg_ymw16::density (const vec3_t<double> &pos,
         double WGN {0.};
         double WLI {0.};
         // longitude, in deg
-        const double ec_l {std::atan2(gc_pos.x,par->fereg_ymw16.R0-gc_pos.y)/CGS_U_rad};
+        const double ec_l {std::atan2(gc_pos[0],par->fereg_ymw16.R0-gc_pos[1])/CGS_U_rad};
         //call structure functions
         //since in YMW16, Fermi Bubble is not actually contributing, we ignore FB for thick disk
-        NE[1] = thick (gc_pos.z,
+        NE[1] = thick (gc_pos[2],
                        r_cyl,
                        par);
-        NE[2] = thin (gc_pos.z,
+        NE[2] = thin (gc_pos[2],
                       r_cyl,
                       par);
-        NE[3] = spiral (gc_pos.x,
-                        gc_pos.y,
-                        gc_pos.z,
+        NE[3] = spiral (gc_pos[0],
+                        gc_pos[1],
+                        gc_pos[2],
                         r_cyl,
                         par);
-        NE[4] = galcen (gc_pos.x,
-                        gc_pos.y,
-                        gc_pos.z,
+        NE[4] = galcen (gc_pos[0],
+                        gc_pos[1],
+                        gc_pos[2],
                         par);
-        NE[5] = gum (gc_pos.x,
-                     gc_pos.y,
-                     gc_pos.z,
+        NE[5] = gum (gc_pos[0],
+                     gc_pos[1],
+                     gc_pos[2],
                      par);
         // localbubble boundary
         const double RLB {110.*CGS_U_pc};
-        NE[6] = localbubble (gc_pos.x,
-                             gc_pos.y,
-                             gc_pos.z,
+        NE[6] = localbubble (gc_pos[0],
+                             gc_pos[1],
+                             gc_pos[2],
                              ec_l,
                              RLB,
                              par);
-        NE[7] = nps (gc_pos.x,
-                     gc_pos.y,
-                     gc_pos.z,
+        NE[7] = nps (gc_pos[0],
+                     gc_pos[1],
+                     gc_pos[2],
                      par);
         //adding up rules
         NE[0] = NE[1]+std::max(NE[2],NE[3]);
         // distance to local bubble
-        const double rlb {std::sqrt( std::pow(((gc_pos.y-8.34*CGS_U_kpc)*0.94-0.34*gc_pos.z),2) + std::pow(gc_pos.x,2) )};
+        const double rlb {std::sqrt( std::pow(((gc_pos[1]-8.34*CGS_U_kpc)*0.94-0.34*gc_pos[2]),2) + std::pow(gc_pos[0],2) )};
         if (rlb<RLB){ //inside local bubble
             NE[0]=par->fereg_ymw16.t6_J_LB*NE[1]+std::max(NE[2],NE[3]);
             if (NE[6]>NE[0]) {WLB=1;}

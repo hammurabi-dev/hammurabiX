@@ -4,7 +4,7 @@
 #include <cmath>
 #include <cassert>
 
-#include <vec3.h>
+#include <hvec.h>
 #include <gsl/gsl_sf_synchrotron.h>
 #include <gsl/gsl_sf_gamma.h>
 
@@ -15,7 +15,7 @@
 
 // numerical CRE flux
 // J_tot(\nu)
-double CRE_num::get_emissivity_t (const vec3_t<double> &pos,
+double CRE_num::get_emissivity_t (const hvec<3,double> &pos,
                                   const Param *par,
                                   const Grid_cre *grid,
                                   const double &Bper) const{
@@ -53,7 +53,7 @@ double CRE_num::get_emissivity_t (const vec3_t<double> &pos,
 }
 
 // J_pol(\nu)
-double CRE_num::get_emissivity_p (const vec3_t<double> &pos,
+double CRE_num::get_emissivity_p (const hvec<3,double> &pos,
                                   const Param *par,
                                   const Grid_cre *grid,
                                   const double &Bper) const{

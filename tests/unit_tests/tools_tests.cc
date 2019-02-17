@@ -8,7 +8,7 @@
 #include <vector>
 #include <fftw3.h>
 #include <namespace_toolkit.h>
-#include <vec3.h>
+#include <hvec.h>
 #include <cgs_units_file.h>
 #include <tinyxml2.h>
 
@@ -16,26 +16,21 @@ TEST(toolkit, los_versor){
     const double theta[3] = {0.,90.*CGS_U_rad,90.*CGS_U_rad};
     const double phi[3] = {0.,180.*CGS_U_rad,270.*CGS_U_rad};
     
-    EXPECT_LT(std::fabs(toolkit::los_versor(theta[0],phi[0]).x - 0.),1e-10);
-    EXPECT_LT(std::fabs(toolkit::los_versor(theta[0],phi[0]).y - 0.),1e-10);
-    EXPECT_LT(std::fabs(toolkit::los_versor(theta[0],phi[0]).z - 1.),1e-10);
-    EXPECT_LT(std::fabs(toolkit::los_versor(theta[1],phi[1]).x + 1.),1e-10);
-    EXPECT_LT(std::fabs(toolkit::los_versor(theta[1],phi[1]).y - 0.),1e-10);
-    EXPECT_LT(std::fabs(toolkit::los_versor(theta[1],phi[1]).z - 0.),1e-10);
-    EXPECT_LT(std::fabs(toolkit::los_versor(theta[2],phi[2]).x - 0.),1e-10);
-    EXPECT_LT(std::fabs(toolkit::los_versor(theta[2],phi[2]).y + 1.),1e-10);
-    EXPECT_LT(std::fabs(toolkit::los_versor(theta[2],phi[2]).z - 0.),1e-10);
-}
-
-TEST(toolkit, versor){
-    const vec3_t<double> tmp {0.1,0.0000001,0.0000001};
-    EXPECT_LT(std::fabs(crossprod(tmp,toolkit::versor(tmp)).Length() - 0.),1e-10);
+    EXPECT_LT(std::fabs(toolkit::los_versor(theta[0],phi[0])[0] - 0.),1e-10);
+    EXPECT_LT(std::fabs(toolkit::los_versor(theta[0],phi[0])[1] - 0.),1e-10);
+    EXPECT_LT(std::fabs(toolkit::los_versor(theta[0],phi[0])[2] - 1.),1e-10);
+    EXPECT_LT(std::fabs(toolkit::los_versor(theta[1],phi[1])[0] + 1.),1e-10);
+    EXPECT_LT(std::fabs(toolkit::los_versor(theta[1],phi[1])[1] - 0.),1e-10);
+    EXPECT_LT(std::fabs(toolkit::los_versor(theta[1],phi[1])[2] - 0.),1e-10);
+    EXPECT_LT(std::fabs(toolkit::los_versor(theta[2],phi[2])[0] - 0.),1e-10);
+    EXPECT_LT(std::fabs(toolkit::los_versor(theta[2],phi[2])[1] + 1.),1e-10);
+    EXPECT_LT(std::fabs(toolkit::los_versor(theta[2],phi[2])[2] - 0.),1e-10);
 }
 
 TEST(toolkit, par2los){
     const double theta[3] = {0.,90.*CGS_U_rad,90.*CGS_U_rad};
     const double phi[3] = {0.,180.*CGS_U_rad,270.*CGS_U_rad};
-    const vec3_t<double> A {1.,0.,0.};
+    const hvec<3,double> A {1.,0.,0.};
     
     EXPECT_LT(std::fabs(toolkit::par2los(A,theta[0],phi[0]) - 0.),1e-10);
     EXPECT_LT(std::fabs(toolkit::par2los(A,theta[1],phi[1]) + 1.),1e-10);
@@ -45,7 +40,7 @@ TEST(toolkit, par2los){
 TEST(toolkit, perp2los){
     const double theta[3] = {0.,90.*CGS_U_rad,90.*CGS_U_rad};
     const double phi[3] = {0.,180.*CGS_U_rad,270.*CGS_U_rad};
-    const vec3_t<double> A {1.,0.,0.};
+    const hvec<3,double> A {1.,0.,0.};
     
     EXPECT_LT(std::fabs(toolkit::perp2los(A,theta[0],phi[0]) - 1.),1e-10);
     EXPECT_LT(std::fabs(toolkit::perp2los(A,theta[1],phi[1]) + 0.),1e-10);
@@ -55,34 +50,34 @@ TEST(toolkit, perp2los){
 TEST(toolkit, intr_pol_ang){
     const double theta[3] = {0.,90.*CGS_U_rad,90.*CGS_U_rad};
     const double phi[3] = {0.,180.*CGS_U_rad,270.*CGS_U_rad};
-    const vec3_t<double> A {1.,0.,0.};
+    const hvec<3,double> A {1.,0.,0.};
     
     EXPECT_LT(std::fabs(toolkit::intr_pol_ang(A,theta[0],phi[0]) + 90.*CGS_U_rad),1e-10);
     EXPECT_LT(std::fabs(toolkit::intr_pol_ang(A,theta[2],phi[2]) - 180.*CGS_U_rad),1e-10);
 }
 
 TEST(toolkit, cart_coord2cyl_coord){
-    const vec3_t<double> A {1.,0.,0.};
-    const vec3_t<double> B {0.,0.,1.};
-    const vec3_t<double> C {0.,1.,0.};
-    vec3_t<double> tmp;
+    const hvec<3,double> A {1.,0.,0.};
+    const hvec<3,double> B {0.,0.,1.};
+    const hvec<3,double> C {0.,1.,0.};
+    hvec<3,double> tmp;
     
     toolkit::cart_coord2cyl_coord(A,tmp);
     
-    EXPECT_LT(std::fabs(tmp.x - 1.),1e-10);
-    EXPECT_LT(std::fabs(tmp.y - 0.),1e-10);
-    EXPECT_LT(std::fabs(tmp.z - 0.),1e-10);
+    EXPECT_LT(std::fabs(tmp[0] - 1.),1e-10);
+    EXPECT_LT(std::fabs(tmp[1] - 0.),1e-10);
+    EXPECT_LT(std::fabs(tmp[2] - 0.),1e-10);
     
     toolkit::cart_coord2cyl_coord(B,tmp);
     
-    EXPECT_LT(std::fabs(tmp.x - 0.),1e-10);
-    EXPECT_LT(std::fabs(tmp.z - 1.),1e-10);
+    EXPECT_LT(std::fabs(tmp[0] - 0.),1e-10);
+    EXPECT_LT(std::fabs(tmp[2] - 1.),1e-10);
     
     toolkit::cart_coord2cyl_coord(C,tmp);
     
-    EXPECT_LT(std::fabs(tmp.x - 1.),1e-10);
-    EXPECT_LT(std::fabs(tmp.y - 90.*CGS_U_rad),1e-10);
-    EXPECT_LT(std::fabs(tmp.z - 0.),1e-10);
+    EXPECT_LT(std::fabs(tmp[0] - 1.),1e-10);
+    EXPECT_LT(std::fabs(tmp[1] - 90.*CGS_U_rad),1e-10);
+    EXPECT_LT(std::fabs(tmp[2] - 0.),1e-10);
     
     double tmp_r, tmp_phi, tmp_z;
     

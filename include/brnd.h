@@ -3,7 +3,7 @@
 #ifndef HAMMURABI_BRND_H
 #define HAMMURABI_BRND_H
 
-#include <vec3.h>
+#include <hvec.h>
 #include <gsl/gsl_integration.h>
 
 #include <param.h>
@@ -25,14 +25,14 @@ public:
     // return zero field when read_grid is not invoked
     // 1st argument: Galactic centric Cartesian frame position
     // 2nd argument: random GMF grid object
-    virtual vec3_t<double> get_brnd (const vec3_t<double> &,
+    virtual hvec<3,double> get_brnd (const hvec<3,double> &,
                                      const Param *,
                                      const Grid_brnd *) const;
     // read field from grid with trilinear interpolation
     // user has to call write_grid ahead in main routine
     // 1st argument: Galactic centric Cartesian frame position
     // 2nd argument: random GMF grid object
-    virtual vec3_t<double> read_grid (const vec3_t<double> &,
+    virtual hvec<3,double> read_grid (const hvec<3,double> &,
                                       const Param *,
                                       const Grid_brnd *) const;
     // write field to grid (model dependent)
@@ -98,7 +98,7 @@ protected:
     // field energy density rescaling factor
     // 1st argument: Galactic centric Cartesian frame position
     // 2nd argument: parameter class object
-    virtual double rescal (const vec3_t<double> &,
+    virtual double rescal (const hvec<3,double> &,
                            const Param *) const;
     // anisotropy factor
     // check technical report for details
@@ -106,7 +106,7 @@ protected:
     // 2rd argument: parameter class object
     // 3th argument: regular GMF class object
     // 4th argument: regular GMF grid class object
-    vec3_t<double> anisotropy_direction (const vec3_t<double> &,
+    hvec<3,double> anisotropy_direction (const hvec<3,double> &,
                                          const Param *,
                                          const Breg *,
                                          const Grid_breg *) const;
@@ -115,7 +115,7 @@ protected:
     // 2rd argument: parameter class object
     // 3th argument: regular GMF class object
     // 4th argument: regular GMF grid class object
-    double anisotropy_ratio (const vec3_t<double> &,
+    double anisotropy_ratio (const hvec<3,double> &,
                              const Param *,
                              const Breg *,
                              const Grid_breg *) const;
@@ -123,8 +123,8 @@ protected:
     // 1st argument: wave-vector
     // 2nd arugment: input GMF vector (in Fourier space)
     // remark: real and imagine parts of complex GMF vector in Fourier space handled separately
-    vec3_t<double> gramschmidt (const vec3_t<double> &,
-                                const vec3_t<double> &) const;
+    hvec<3,double> gramschmidt (const hvec<3,double> &,
+                                const hvec<3,double> &) const;
 };
 
 
@@ -185,21 +185,21 @@ protected:
     // cosine of pitch angle between wavevector and regular GMF
     // 1st argument: field vector
     // 2nd argument: wave vector
-    inline double cosa (const vec3_t<double> &b,
-                        const vec3_t<double> &k) const{
+    inline double cosa (const hvec<3,double> &b,
+                        const hvec<3,double> &k) const{
         // dotprod is function from vec3.h
-        return dotprod(toolkit::versor(b),toolkit::versor(k));
+        return (b.versor()).dotprod(k.versor());
     }
     // direction of Alfven mode
     // 1st argument: regualr GMF vector
     // 2nd argument: wave vector
-    vec3_t<double> eplus (const vec3_t<double> &,
-                          const vec3_t<double> &) const;
+    hvec<3,double> eplus (const hvec<3,double> &,
+                          const hvec<3,double> &) const;
     // direction of slow and fast modes
     // 1st argument: regualr GMF vector
     // 2nd argument: wave vector
-    vec3_t<double> eminus (const vec3_t<double> &,
-                           const vec3_t<double> &) const;
+    hvec<3,double> eminus (const hvec<3,double> &,
+                           const hvec<3,double> &) const;
     // isotropic part of power spectrum of Alfvenic mode
     // 1st argument: wave vector magnitude
     // 2nd argument: parameter class object

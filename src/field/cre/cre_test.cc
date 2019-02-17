@@ -1,7 +1,7 @@
 #include <cmath>
 #include <cassert>
 
-#include <vec3.h>
+#include <hvec.h>
 #include <gsl/gsl_sf_gamma.h>
 
 #include <cre.h>
@@ -10,9 +10,9 @@
 #include <cgs_units_file.h>
 
 // CRE flux spatial rescaling
-double CRE_test::rescal (const vec3_t<double> &pos,
+double CRE_test::rescal (const hvec<3,double> &pos,
                            const Param *par) const{
-    if ((pos-par->SunPosition).Length() > par->cre_test.r0){
+    if ((pos-par->SunPosition).length() > par->cre_test.r0){
         return 0;
     }
     else
@@ -20,7 +20,7 @@ double CRE_test::rescal (const vec3_t<double> &pos,
 }
 
 // CRE spectral index
-double CRE_test::flux_idx (const vec3_t<double> &/*pos*/,
+double CRE_test::flux_idx (const hvec<3,double> &/*pos*/,
                              const Param *par) const{
     return -(par->cre_test.alpha);
 }
@@ -28,7 +28,7 @@ double CRE_test::flux_idx (const vec3_t<double> &/*pos*/,
 // analytical CRE flux
 // give values to spectral index and norm factor, in cgs units
 // analytical CRE integration use N(\gamma)
-double CRE_test::flux_norm (const vec3_t<double> &pos,
+double CRE_test::flux_norm (const hvec<3,double> &pos,
                               const Param *par) const{
     // j0 is in [GeV m^2 s sr]^-1 units
     const double gamma0 {par->cre_test.E0/CGS_U_MEC2+1};
@@ -42,7 +42,7 @@ double CRE_test::flux_norm (const vec3_t<double> &pos,
 
 // analytical modeling use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
-double CRE_test::flux (const vec3_t<double> &pos,
+double CRE_test::flux (const hvec<3,double> &pos,
                          const Param *par,
                          const double &En) const{
     // j0 is in [GeV m^2 s sr]^-1 units
@@ -56,7 +56,7 @@ double CRE_test::flux (const vec3_t<double> &pos,
 }
 
 // J_tot(\nu)
-double CRE_test::get_emissivity_t (const vec3_t<double> &pos,
+double CRE_test::get_emissivity_t (const hvec<3,double> &pos,
                                      const Param *par,
                                      const Grid_cre */*grid*/,
                                      const double &Bper) const{
@@ -76,7 +76,7 @@ double CRE_test::get_emissivity_t (const vec3_t<double> &pos,
 }
 
 // J_pol(\nu)
-double CRE_test::get_emissivity_p (const vec3_t<double> &pos,
+double CRE_test::get_emissivity_p (const hvec<3,double> &pos,
                                      const Param *par,
                                      const Grid_cre */*grid*/,
                                      const double &Bper) const{

@@ -9,6 +9,18 @@
 #include <hvec.h>
 
 TEST (vector, basic){
+    // default ctor
+    hvec<1,float> vec_dft1;
+    EXPECT_EQ (vec_dft1[0],float(0));
+    
+    hvec<2,int> vec_dft2;
+    EXPECT_EQ (vec_dft2[0],int(0));
+    EXPECT_EQ (vec_dft2[1],int(0));
+    
+    hvec<3,double> vec_dft3;
+    EXPECT_EQ (vec_dft3[0],double(0));
+    EXPECT_EQ (vec_dft3[1],double(0));
+    EXPECT_EQ (vec_dft3[2],double(0));
     
     // argument ctor
     hvec<1,float> vec1 (0.0);

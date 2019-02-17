@@ -158,7 +158,7 @@ def simulator(_fieldtype,_anisotropy,_nx,_ny,_nz,_n2l):
 	obj.mod_par(['MagneticField','Random','Local','beta'],{'value':str(0.1)})
 	obj.mod_par(['MagneticField','Random','Local','ma'],{'value':str(0.5)})
 	#sys.exit(1)
-	obj.call(True)
+	obj(True)
 
 # auxiliray function
 # calculate grid global index according to i,j,k position

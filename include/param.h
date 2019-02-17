@@ -7,7 +7,7 @@
 #include <vector>
 
 #include <tinyxml2.h>
-#include <vec3.h>
+#include <hvec.h>
 
 class Param {
 public:
@@ -20,7 +20,7 @@ public:
     virtual ~Param () = default;
 //----------------------- GRID PARAMETERS --------------------------------------
     // observer
-    vec3_t<double> SunPosition;
+    hvec<3,double> SunPosition;
     // regular GMF grid
     struct param_breg_grid{
         std::string filename;

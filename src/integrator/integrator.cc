@@ -9,7 +9,7 @@
 #include <healpix_base.h>
 #include <healpix_map.h>
 #include <pointing.h>
-#include <vec3.h>
+#include <hvec.h>
 #include <breg.h>
 #include <brnd.h>
 #include <cre.h>
@@ -193,13 +193,13 @@ void Integrator::radial_integration (struct_shell *shell_ref,
     decltype(shell_ref->step) looper;
     for(looper=0;looper<shell_ref->step;++looper){
         // ec and gc position
-        vec3_t<double> ec_pos {toolkit::los_versor(THE,PHI)*shell_ref->dist[looper]};
-        vec3_t<double> pos {ec_pos + par->SunPosition};
+        hvec<3,double> ec_pos {toolkit::los_versor(THE,PHI)*shell_ref->dist[looper]};
+        hvec<3,double> pos {ec_pos + par->SunPosition};
         // check LOS depth limit
-        if (check_simulation_upper_limit (pos.Length(),par->grid_int.gc_r_max)) {break;}
-        if (check_simulation_upper_limit (std::fabs(pos.z),par->grid_int.gc_z_max)) {break;}
+        if (check_simulation_upper_limit (pos.length(),par->grid_int.gc_r_max)) {break;}
+        if (check_simulation_upper_limit (std::fabs(pos[2]),par->grid_int.gc_z_max)) {break;}
         // B field
-        vec3_t<double> B_vec {breg->get_breg(pos,par,gbreg)};
+        hvec<3,double> B_vec {breg->get_breg(pos,par,gbreg)};
         // add random field
         B_vec += brnd->get_brnd (pos,par,gbrnd);
         const double B_par {toolkit::par2los(B_vec,THE,PHI)};

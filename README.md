@@ -1,12 +1,12 @@
 # hammurabi README
-##### (version X.01)
+##### (version X.02)
 
 hammurabi is an open-source (GNU General Public License v3) HEALPix-based tool 
 for simulating full-sky Galactic foreground observables.
 Outputs of hammurabi include:
 
 * **polarized synchrotron emission**
-* **thermal dust emission**
+* **thermal dust emission** [in progress]
 * **dispersion measure** 
 * **Faraday depth**
 
@@ -34,13 +34,14 @@ Please cite the original [Waelkens et al. (2009)](https://www.aanda.org/articles
 
 ## version info:
 
-### update X.01.01
-
+### update X.02
+* in EARLY release
+* thermal dust emission not implemented yet
+* free-free absorption removed
 * independent vector module: [hvec.h](./include/hvec.h)
-* python wrapper: [hampyx](./hampyx)
+* (crude) python wrapper: [hampyx](./hampyx)
 
 ### version X.01
 *Currently we are in [TESTING](./tests) release,
 with limited amount of features available.
-Not all modelings have been thoroughly cross-checked with original hammurabi!
-A full release of version X.02 is scheduled in 2018-2019.*
+Not all modelings have been thoroughly cross-checked with original hammurabi!*

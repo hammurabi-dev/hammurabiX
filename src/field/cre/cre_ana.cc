@@ -1,7 +1,7 @@
 #include <cassert>
 #include <cmath>
 
-#include <vec3.h>
+#include <hvec.h>
 #include <gsl/gsl_sf_synchrotron.h>
 #include <gsl/gsl_sf_gamma.h>
 
@@ -11,24 +11,24 @@
 #include <cgs_units_file.h>
 
 // CRE flux spatial rescaling
-double CRE_ana::rescal (const vec3_t<double> &pos,
+double CRE_ana::rescal (const hvec<3,double> &pos,
                         const Param *par) const{
-    const double R0 {std::sqrt(par->SunPosition.x*par->SunPosition.x+par->SunPosition.y*par->SunPosition.y)};
-    const double r {std::sqrt(pos.x*pos.x+pos.y*pos.y)};
-    return std::exp((R0-r)/par->cre_ana.r0)*(1./(cosh(pos.z/par->cre_ana.z0)*cosh(pos.z/par->cre_ana.z0)));
+    const double R0 {std::sqrt(par->SunPosition[0]*par->SunPosition[0]+par->SunPosition[1]*par->SunPosition[1])};
+    const double r {std::sqrt(pos[0]*pos[0]+pos[1]*pos[1])};
+    return std::exp((R0-r)/par->cre_ana.r0)*(1./(cosh(pos[2]/par->cre_ana.z0)*cosh(pos[2]/par->cre_ana.z0)));
 }
 
 // CRE spectral index
-double CRE_ana::flux_idx (const vec3_t<double> &pos,
+double CRE_ana::flux_idx (const hvec<3,double> &pos,
                           const Param *par) const{
-    const double r {std::sqrt(pos.x*pos.x+pos.y*pos.y)};
-    const double z {std::fabs(pos.z)};
+    const double r {std::sqrt(pos[0]*pos[0]+pos[1]*pos[1])};
+    const double z {std::fabs(pos[2])};
     return -par->cre_ana.alpha+par->cre_ana.beta*r+par->cre_ana.theta*z;
 }
 
 // analytical CRE flux normalization factor at E0
 // analytical CRE spectral integrations use N(\gamma)
-double CRE_ana::flux_norm (const vec3_t<double> &pos,
+double CRE_ana::flux_norm (const hvec<3,double> &pos,
                            const Param *par) const{
     // j0 is in [GeV m^2 s sr]^-1 units
     const double gamma0 {par->cre_ana.E0/CGS_U_MEC2+1};
@@ -42,7 +42,7 @@ double CRE_ana::flux_norm (const vec3_t<double> &pos,
 
 // analytical modelings use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
-double CRE_ana::flux (const vec3_t<double> &pos,
+double CRE_ana::flux (const hvec<3,double> &pos,
                       const Param *par,
                       const double &En) const{
     // units
@@ -57,7 +57,7 @@ double CRE_ana::flux (const vec3_t<double> &pos,
 }
 
 // J_tot(\nu)
-double CRE_ana::get_emissivity_t (const vec3_t<double> &pos,
+double CRE_ana::get_emissivity_t (const hvec<3,double> &pos,
                                   const Param *par,
                                   const Grid_cre */*grid*/,
                                   const double &Bper) const{
@@ -77,7 +77,7 @@ double CRE_ana::get_emissivity_t (const vec3_t<double> &pos,
 }
 
 // J_pol(\nu)
-double CRE_ana::get_emissivity_p (const vec3_t<double> &pos,
+double CRE_ana::get_emissivity_p (const hvec<3,double> &pos,
                                   const Param *par,
                                   const Grid_cre */*grid*/,
                                   const double &Bper) const{

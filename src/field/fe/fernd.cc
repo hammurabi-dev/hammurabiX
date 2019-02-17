@@ -10,7 +10,7 @@
 #include <fereg.h>
 #include <namespace_toolkit.h>
 
-double FErnd::get_fernd (const vec3_t<double> &pos,
+double FErnd::get_fernd (const hvec<3,double> &pos,
                          const Param *par,
                          const Grid_fernd *grid) const{
     if (par->grid_fernd.read_permission or par->grid_fernd.build_permission){
@@ -25,20 +25,20 @@ double FErnd::get_fernd (const vec3_t<double> &pos,
     }
 }
 
-double FErnd::read_grid (const vec3_t<double> &pos,
+double FErnd::read_grid (const hvec<3,double> &pos,
                          const Param *par,
                          const Grid_fernd *grid) const{
-    double tmp {(par->grid_fernd.nx-1)*(pos.x-par->grid_fernd.x_min)/(par->grid_fernd.x_max-par->grid_fernd.x_min)};
+    double tmp {(par->grid_fernd.nx-1)*(pos[0]-par->grid_fernd.x_min)/(par->grid_fernd.x_max-par->grid_fernd.x_min)};
     if (tmp<0 or tmp>par->grid_fernd.nx-1) { return 0.;}
     decltype(par->grid_fernd.nx) xl {(std::size_t)std::floor(tmp)};
     const double xd {tmp - xl};
     
-    tmp = (par->grid_fernd.ny-1)*(pos.y-par->grid_fernd.y_min)/(par->grid_fernd.y_max-par->grid_fernd.y_min);
+    tmp = (par->grid_fernd.ny-1)*(pos[1]-par->grid_fernd.y_min)/(par->grid_fernd.y_max-par->grid_fernd.y_min);
     if (tmp<0 or tmp>par->grid_fernd.ny-1) { return 0.;}
     decltype(par->grid_fernd.nx) yl {(std::size_t)std::floor(tmp)};
     const double yd {tmp - yl};
     
-    tmp = (par->grid_fernd.nz-1)*(pos.z-par->grid_fernd.z_min)/(par->grid_fernd.z_max-par->grid_fernd.z_min);
+    tmp = (par->grid_fernd.nz-1)*(pos[2]-par->grid_fernd.z_min)/(par->grid_fernd.z_max-par->grid_fernd.z_min);
     if (tmp<0 or tmp>par->grid_fernd.nz-1) { return 0.;}
     decltype(par->grid_fernd.nx) zl {(std::size_t)std::floor(tmp)};
     const double zd {tmp - zl};

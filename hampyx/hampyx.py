@@ -115,21 +115,15 @@ class hampyx(object):
     '''
     @exe_path.setter
     def exe_path(self,exe_path):
-        if isinstance(exe_path, basestring):#{
-            self._exe_path = os.path.abspath(exe_path)
-            self.executable = self.exe_path
-        #}
-        else:
-            raise TypeError (exe_path + ' is expected to be of basestring type')
+        assert isinstance(exe_path, str)
+        self._exe_path = os.path.abspath(exe_path)
+        self.executable = self.exe_path
 
     @xml_path.setter
     def xml_path(self,xml_path):
-        if isinstance(xml_path, basestring):#{
-            self._xml_path = os.path.abspath(xml_path)
-            self.base_file = self.xml_path
-        #}
-        else:
-            raise TypeError (xml_path + ' is expected to be of basestring type')
+        assert isinstance(xml_path, str)
+        self._xml_path = os.path.abspath(xml_path)
+        self.base_file = self.xml_path
 
     '''
     the main routine for running hammurabiX executable

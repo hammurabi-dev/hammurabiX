@@ -13,7 +13,15 @@ class hvec{
 protected:
     std::vector<T> ele;
 public:
-    hvec () = default;
+    // default ctor
+    hvec () {
+        switch(dim){
+            case 1: this->ele = {T(0)}; break;
+            case 2: this->ele = {T(0),T(0)}; break;
+            case 3: this->ele = {T(0),T(0),T(0)}; break;
+            default: std::cerr<<"unsupported dimension"; break;
+        }
+    }
     virtual ~hvec () = default;
     // 1D
     hvec<dim,T> (const T& x){
@@ -215,7 +223,7 @@ public:
     hvec<dim,double> versor () const{
         hvec<dim,double> tmp;
         for (unsigned int i=0;i<dim;++i)
-            tmp.push_back (static_cast<double>(this->ele[i]));
+            tmp[i] = static_cast<double>(this->ele[i]);
         if (tmp.lengthsq() == 0)
             return tmp;
         tmp /= this->length();
@@ -240,8 +248,8 @@ public:
         assert (dim==3);
         hvec<dim,double> tmp;
         for (unsigned int i=0;i<dim;++i){
-            tmp.push_back (static_cast<double>(this->ele[(i+1)%3])*static_cast<double>(v[(i+2)%3])
-                           - static_cast<double>(this->ele[(i+2)%3])*static_cast<double>(v[(i+1)%3]));
+            tmp[i] = (static_cast<double>(this->ele[(i+1)%3])*static_cast<double>(v[(i+2)%3])
+                      - static_cast<double>(this->ele[(i+2)%3])*static_cast<double>(v[(i+1)%3]));
         }
         return tmp;
     }

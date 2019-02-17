@@ -1,7 +1,7 @@
 #include <vector>
 #include <cmath>
 
-#include <vec3.h>
+#include <hvec.h>
 
 #include <param.h>
 #include <grid.h>
@@ -9,7 +9,7 @@
 #include <cgs_units_file.h>
 #include <namespace_toolkit.h>
 
-vec3_t<double> Breg_jaffe::breg (const vec3_t<double> &pos,
+hvec<3,double> Breg_jaffe::breg (const hvec<3,double> &pos,
                                  const Param *par) const{
     double inner_b {0};
     if (par->breg_jaffe.ring)
@@ -17,8 +17,8 @@ vec3_t<double> Breg_jaffe::breg (const vec3_t<double> &pos,
     else if (par->breg_jaffe.bar)
         inner_b = par->breg_jaffe.bar_amp;
     
-    vec3_t<double> bhat {orientation(pos,par)};
-    vec3_t<double> btot {0,0,0};
+    hvec<3,double> bhat {orientation(pos,par)};
+    hvec<3,double> btot;
     btot = bhat*radial_scaling(pos,par)*(par->breg_jaffe.disk_amp*disk_scaling(pos,par) + par->breg_jaffe.halo_amp*halo_scaling(pos,par));
     // compress factor for each arm or for ring/bar
     std::vector<double> arm {arm_compress(pos,par)};
@@ -35,62 +35,62 @@ vec3_t<double> Breg_jaffe::breg (const vec3_t<double> &pos,
     return btot;
 }
 
-vec3_t<double> Breg_jaffe::orientation (const vec3_t<double> &pos,
+hvec<3,double> Breg_jaffe::orientation (const hvec<3,double> &pos,
                                         const Param *par) const{
-    const double r {sqrt(pos.x*pos.x+pos.y*pos.y)}; // cylindrical frame
+    const double r {sqrt(pos[0]*pos[0]+pos[1]*pos[1])}; // cylindrical frame
     const double r_lim {par->breg_jaffe.ring_r};
     const double bar_lim {par->breg_jaffe.bar_a + 0.5*par->breg_jaffe.comp_d};
     const double cos_p {std::cos(par->breg_jaffe.arm_pitch)}; const double sin_p {std::sin(par->breg_jaffe.arm_pitch)}; // pitch angle
-    vec3_t<double> tmp {0,0,0}; double quadruple {1};
+    hvec<3,double> tmp; double quadruple {1};
     if (r<0.5*CGS_U_kpc) // forbiden region
         return tmp;
-    if (pos.z>par->breg_jaffe.disk_z0)
+    if (pos[2]>par->breg_jaffe.disk_z0)
         quadruple = (1-2*par->breg_jaffe.quadruple);
     // molecular ring
     if (par->breg_jaffe.ring){
         // inside spiral arm
         if (r>r_lim){
-            tmp.x = (cos_p*(pos.y/r)-sin_p*(pos.x/r))*quadruple; //sin(t-p)
-            tmp.y = (-cos_p*(pos.x/r)-sin_p*(pos.y/r))*quadruple; //-cos(t-p)
+            tmp[0] = (cos_p*(pos[1]/r)-sin_p*(pos[0]/r))*quadruple; //sin(t-p)
+            tmp[1] = (-cos_p*(pos[0]/r)-sin_p*(pos[1]/r))*quadruple; //-cos(t-p)
         }
         // inside molecular ring
         else {
-            tmp.x = (1-2*par->breg_jaffe.bss)*pos.y/r; //sin(phi)
-            tmp.y = (2*par->breg_jaffe.bss-1)*pos.x/r; //-cos(phi)
+            tmp[0] = (1-2*par->breg_jaffe.bss)*pos[1]/r; //sin(phi)
+            tmp[1] = (2*par->breg_jaffe.bss-1)*pos[0]/r; //-cos(phi)
         }
     }
     // elliptical bar (replace molecular ring)
     else if (par->breg_jaffe.bar){
         const double cos_phi {std::cos(par->breg_jaffe.bar_phi0)};
         const double sin_phi {std::sin(par->breg_jaffe.bar_phi0)};
-        const double x {cos_phi*pos.x-sin_phi*pos.y};
-        const double y {sin_phi*pos.x+cos_phi*pos.y};
+        const double x {cos_phi*pos[0]-sin_phi*pos[1]};
+        const double y {sin_phi*pos[0]+cos_phi*pos[1]};
         // inside spiral arm
         if (r>bar_lim){
-            tmp.x = (cos_p*(pos.y/r)-sin_p*(pos.x/r))*quadruple; //sin(t-p)
-            tmp.y = (-cos_p*(pos.x/r)-sin_p*(pos.y/r))*quadruple; //-cos(t-p)
+            tmp[0] = (cos_p*(pos[1]/r)-sin_p*(pos[0]/r))*quadruple; //sin(t-p)
+            tmp[1] = (-cos_p*(pos[0]/r)-sin_p*(pos[1]/r))*quadruple; //-cos(t-p)
         }
         // inside elliptical bar
         else {
             if (y!=0){
                 const double new_x {copysign(1,y)};
                 const double new_y {-copysign(1,y)*(x/y)*par->breg_jaffe.bar_b*par->breg_jaffe.bar_b/(par->breg_jaffe.bar_a*par->breg_jaffe.bar_a)};
-                tmp.x = (cos_phi*new_x+sin_phi*new_y)*(1-2*par->breg_jaffe.bss);
-                tmp.y = (-sin_phi*new_x+cos_phi*new_y)*(1-2*par->breg_jaffe.bss);
-                tmp.Normalize();
+                tmp[0] = (cos_phi*new_x+sin_phi*new_y)*(1-2*par->breg_jaffe.bss);
+                tmp[1] = (-sin_phi*new_x+cos_phi*new_y)*(1-2*par->breg_jaffe.bss);
+                tmp = tmp.versor();
             }
             else {
-                tmp.x = (2*par->breg_jaffe.bss-1)*copysign(1,x)*sin_phi;
-                tmp.y = (2*par->breg_jaffe.bss-1)*copysign(1,x)*cos_phi;
+                tmp[0] = (2*par->breg_jaffe.bss-1)*copysign(1,x)*sin_phi;
+                tmp[1] = (2*par->breg_jaffe.bss-1)*copysign(1,x)*cos_phi;
             }
         }
     }
     return tmp;
 }
 
-double Breg_jaffe::radial_scaling (const vec3_t<double> &pos,
+double Breg_jaffe::radial_scaling (const hvec<3,double> &pos,
                                    const Param *par) const{
-    const double r2 {pos.x*pos.x+pos.y*pos.y};
+    const double r2 {pos[0]*pos[0]+pos[1]*pos[1]};
     // separate into 3 parts for better view
     const double s1 {1.-std::exp(-r2/(par->breg_jaffe.r_inner*par->breg_jaffe.r_inner))};
     const double s2 {std::exp(-r2/(par->breg_jaffe.r_scale*par->breg_jaffe.r_scale))};
@@ -98,9 +98,9 @@ double Breg_jaffe::radial_scaling (const vec3_t<double> &pos,
     return s1*( s2 + s3 );
 }
 
-std::vector<double> Breg_jaffe::arm_compress (const vec3_t<double> &pos,
+std::vector<double> Breg_jaffe::arm_compress (const hvec<3,double> &pos,
                                               const Param *par) const{
-    const double r {sqrt(pos.x*pos.x+pos.y*pos.y)/par->breg_jaffe.comp_r};
+    const double r {sqrt(pos[0]*pos[0]+pos[1]*pos[1])/par->breg_jaffe.comp_r};
     const double c0 {1./par->breg_jaffe.comp_c -1.};
     std::vector<double> a0 = dist2arm(pos,par);
     const double r_scaling {radial_scaling(pos,par)};
@@ -122,9 +122,9 @@ std::vector<double> Breg_jaffe::arm_compress (const vec3_t<double> &pos,
     return a0;
 }
 
-std::vector<double> Breg_jaffe::arm_compress_dust (const vec3_t<double> &pos,
+std::vector<double> Breg_jaffe::arm_compress_dust (const hvec<3,double> &pos,
                                                    const Param *par) const{
-    const double r {sqrt(pos.x*pos.x+pos.y*pos.y)/par->breg_jaffe.comp_r};
+    const double r {sqrt(pos[0]*pos[0]+pos[1]*pos[1])/par->breg_jaffe.comp_r};
     const double c0 {1./par->breg_jaffe.comp_c -1.};
     std::vector<double> a0 = dist2arm(pos,par);
     const double r_scaling {radial_scaling(pos,par)};
@@ -146,15 +146,15 @@ std::vector<double> Breg_jaffe::arm_compress_dust (const vec3_t<double> &pos,
     return a0;
 }
 
-std::vector<double> Breg_jaffe::dist2arm (const vec3_t<double> &pos,
+std::vector<double> Breg_jaffe::dist2arm (const hvec<3,double> &pos,
                                           const Param *par) const{
     std::vector<double> d;
-    const double r {sqrt(pos.x*pos.x+pos.y*pos.y)};
+    const double r {sqrt(pos[0]*pos[0]+pos[1]*pos[1])};
     const double r_lim {par->breg_jaffe.ring_r};
     const double bar_lim {par->breg_jaffe.bar_a + 0.5*par->breg_jaffe.comp_d};
     const double cos_p {std::cos(par->breg_jaffe.arm_pitch)}; const double sin_p {std::sin(par->breg_jaffe.arm_pitch)}; // pitch angle
     const double beta_inv {-sin_p/cos_p};
-    double theta {atan2(pos.y,pos.x)};
+    double theta {atan2(pos[1],pos[0])};
     if (theta<0) theta += 2*CGS_U_pi;
     // if molecular ring
     if (par->breg_jaffe.ring){
@@ -176,8 +176,8 @@ std::vector<double> Breg_jaffe::dist2arm (const vec3_t<double> &pos,
     }
     // if elliptical bar
     else if (par->breg_jaffe.bar){
-        const double cos_tmp {std::cos(par->breg_jaffe.bar_phi0)*pos.x/r - std::sin(par->breg_jaffe.bar_phi0)*pos.y/r}; // cos(phi)cos(phi0) - sin(phi)sin(phi0)
-        const double sin_tmp {std::cos(par->breg_jaffe.bar_phi0)*pos.y/r + std::sin(par->breg_jaffe.bar_phi0)*pos.x/r}; // sin(phi)cos(phi0) + cos(phi)sin(phi0)
+        const double cos_tmp {std::cos(par->breg_jaffe.bar_phi0)*pos[0]/r - std::sin(par->breg_jaffe.bar_phi0)*pos[1]/r}; // cos(phi)cos(phi0) - sin(phi)sin(phi0)
+        const double sin_tmp {std::cos(par->breg_jaffe.bar_phi0)*pos[1]/r + std::sin(par->breg_jaffe.bar_phi0)*pos[0]/r}; // sin(phi)cos(phi0) + cos(phi)sin(phi0)
         // in bar, return single element vector
         if (r<bar_lim){
             d.push_back(std::fabs(par->breg_jaffe.bar_a*par->breg_jaffe.bar_b/sqrt(par->breg_jaffe.bar_a*par->breg_jaffe.bar_a*sin_tmp*sin_tmp+par->breg_jaffe.bar_b*par->breg_jaffe.bar_b*cos_tmp*cos_tmp)-r));
