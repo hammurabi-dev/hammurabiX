@@ -148,8 +148,8 @@ class hampyx(object):
             temp_process.wait()
             if temp_process.returncode != 0:#{
                 last_call_log,last_call_err = temp_process.communicate()
-                print last_call_log
-                print last_call_err
+                print (last_call_log)
+                print (last_call_err)
             #}
         #}
         # grab output maps and delete temp files
@@ -352,7 +352,7 @@ class hampyx(object):
         # print top parameter level if no input is given
         if keychain is None:#{
             for child in root:#{
-                print child.tag, child.attrib
+                print (child.tag, child.attrib)
             #}
         #}
         else:#{
@@ -362,7 +362,7 @@ class hampyx(object):
             #}
             #target = root.find(path_str)
             for target in root.findall(path_str):#{
-                print target.tag, target.attrib
+                print (target.tag, target.attrib)
                 for child in target:#{
                     print ('|--> ', child.tag, child.attrib)
             #}
