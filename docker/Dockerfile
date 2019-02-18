@@ -5,8 +5,8 @@ MAINTAINER jiaxin.wang@sissa.it
 # users may need python-tk, please install it manually: # apt-get install python-tk
 
 RUN apt-get update
-RUN apt-get install -y build-essential git gfortran autoconf gsl-bin libgsl-dev wget cmake vim unzip python python-pip python-dev
-RUN pip install numpy scipy matplotlib cython astropy healpy jupyter
+RUN apt-get install -y build-essential git gfortran autoconf gsl-bin libgsl-dev wget cmake vim unzip python3 python3-pip python3-dev
+RUN pip3 install numpy scipy matplotlib cython astropy healpy jupyter
 
 RUN mkdir /home/lab
 WORKDIR /home/lab
@@ -55,7 +55,7 @@ ENV LD_LIBRARY_PATH /usr/local/lib:${LD_LIBRARY_PATH}
 # HAMMURABI X
 RUN git clone https://bitbucket.org/hammurabicode/hamx hamx
 WORKDIR /home/lab/hamx
-RUN git fetch origin unitest && git checkout unitest
+RUN git fetch origin fix && git checkout fix
 RUN mkdir /home/lab/hamx/build
 WORKDIR /home/lab/hamx/build
 RUN cmake .. && make && make install

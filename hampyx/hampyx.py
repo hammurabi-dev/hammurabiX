@@ -51,12 +51,12 @@ notice that dumping logs is not thread safe, use quiet mode in threading
 
 after this main routine, object.sim_map will be filled with simulation outputs from hammurabiX
 the structure of object.sim_map contains arrays under entries:
-
-object.sim_map['sync']['frequency']['I'] # synchrotron intensity map at 'frequency' 
-object.sim_map['sync']['frequency']['Q'] # synchrotron Q map at 'frequency' 
-object.sim_map['sync']['frequency']['U'] # synchrotron U map at 'frequency' 
-object.sim_map['sync']['frequency']['PI'] # synchrotron pol. intensity at 'frequency' 
-object.sim_map['sync']['frequency']['PA'] # synchrotron pol. angle at 'frequency' (IAU convention)
+(we give up nested dict structure for the convenience of Bayesian analysis)
+object.sim_map['sync'+'frequency'+'I'] # synchrotron intensity map at 'frequency' 
+object.sim_map['sync'+'frequency'+'Q'] # synchrotron Q map at 'frequency' 
+object.sim_map['sync'+'frequency'+'U'] # synchrotron U map at 'frequency' 
+object.sim_map['sync'+'frequency'+'PI'] # synchrotron pol. intensity at 'frequency' 
+object.sim_map['sync'+'frequency'+'PA'] # synchrotron pol. angle at 'frequency' (IAU convention)
 object.sim_map['fd'] # Faraday depth map
 object.sim_map['dm'] # dispersion measure map
 
@@ -196,15 +196,13 @@ class hampyx(object):
                 # if file exists
                 if(os.path.isfile(sync_paths.get(i))):#{
                     [Is,Qs,Us] = self._read_fits_file(sync_paths.get(i))
-                    # build top level map for nesting
-                    self.sim_map['sync'][i] = {}
-                    self.sim_map['sync'][i]['I'] = Is
-                    self.sim_map['sync'][i]['Q'] = Qs
-                    self.sim_map['sync'][i]['U'] = Us
+                    self.sim_map['sync'+str(i)+'I'] = Is
+                    self.sim_map['sync'+str(i)+'Q'] = Qs
+                    self.sim_map['sync'+str(i)+'U'] = Us
                     # polarisation intensity
-                    self.sim_map['sync'][i]['PI'] = np.sqrt(np.square(Qs) + np.square(Us))
+                    self.sim_map['sync'+str(i)+'PI'] = np.sqrt(np.square(Qs) + np.square(Us))
                     # polarisatioin angle, IAU convention
-                    self.sim_map['sync'][i]['PA'] = np.arctan2(Us,Qs)/2.0
+                    self.sim_map['sync'+str(i)+'PA'] = np.arctan2(Us,Qs)/2.0
                     os.remove(sync_paths.get(i))
                 #}
                 else:#{
