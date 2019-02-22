@@ -215,6 +215,8 @@ void Pipeline::assemble_obs (){
         if (i>0) {
             par->grid_int.do_dm = false;
             par->grid_int.do_fd = false;
+            // need to rebuild integration grid
+            grid_int->build_grid (par.get());
         }
         intobj->write_grid (breg.get(),
                             brnd.get(),
@@ -229,6 +231,9 @@ void Pipeline::assemble_obs (){
                             grid_int.get(),
                             par.get());
         grid_int->export_grid (par.get());
+        // delete obsolete parameters
+        par->grid_int.nside_sync.pop_back ();
+        par->grid_int.npix_sync.pop_back ();
         par->grid_int.do_sync.pop_back ();
         par->grid_int.sim_sync_freq.pop_back ();
         par->grid_int.sim_sync_name.pop_back ();

@@ -34,46 +34,46 @@ void Integrator::write_grid (Breg *breg,
                              Grid_int *gint,
                              const Param *par) const{
     if (par->grid_int.do_dm) {
-        gint->dm_map.fill (0.);
+        gint->dm_map->fill (0.);
     }
     if (par->grid_int.do_sync.back()) {
-        gint->Is_map.fill (0.);
-        gint->Qs_map.fill (0.);
-        gint->Us_map.fill (0.);
+        gint->Is_map->fill (0.);
+        gint->Qs_map->fill (0.);
+        gint->Us_map->fill (0.);
     }
     if (par->grid_int.do_fd or par->grid_int.do_sync.back()) {
-        gint->fd_map.fill (0.);
+        gint->fd_map->fill (0.);
     }
     auto shell_ref = std::make_unique<struct_shell>();
     for (decltype(par->grid_int.total_shell) current_shell=1;current_shell!=(par->grid_int.total_shell+1);++current_shell) {
-        Healpix_Map<double> current_Is_map;
-        Healpix_Map<double> current_Qs_map;
-        Healpix_Map<double> current_Us_map;
-        Healpix_Map<double> current_fd_map;
-        Healpix_Map<double> current_dm_map;
+        auto current_Is_map = std::make_unique<Healpix_Map<double>> ();
+        auto current_Qs_map = std::make_unique<Healpix_Map<double>> ();
+        auto current_Us_map = std::make_unique<Healpix_Map<double>> ();
+        auto current_fd_map = std::make_unique<Healpix_Map<double>> ();
+        auto current_dm_map = std::make_unique<Healpix_Map<double>> ();
         
         const std::size_t current_nside {par->grid_int.nside_shell[current_shell-1]};
         const std::size_t current_npix {12*current_nside*current_nside};
         if (par->grid_int.do_dm) {
-            current_dm_map.SetNside (current_nside,
+            current_dm_map->SetNside (current_nside,
                                      RING);
-            current_dm_map.fill (0.);
+            current_dm_map->fill (0.);
         }
         if (par->grid_int.do_sync.back()) {
-            current_Is_map.SetNside (current_nside,
+            current_Is_map->SetNside (current_nside,
                                      RING);
-            current_Qs_map.SetNside (current_nside,
+            current_Qs_map->SetNside (current_nside,
                                      RING);
-            current_Us_map.SetNside (current_nside,
+            current_Us_map->SetNside (current_nside,
                                      RING);
-            current_Is_map.fill (0.);
-            current_Qs_map.fill (0.);
-            current_Us_map.fill (0.);
+            current_Is_map->fill (0.);
+            current_Qs_map->fill (0.);
+            current_Us_map->fill (0.);
         }
         if (par->grid_int.do_fd or par->grid_int.do_sync.back()) {
-            current_fd_map.SetNside (current_nside,
+            current_fd_map->SetNside (current_nside,
                                      RING);
-            current_fd_map.fill (0.);
+            current_fd_map->fill (0.);
         }
         // setting for radial_integration
         // call auxiliary function assemble_shell_ref
@@ -95,12 +95,12 @@ void Integrator::write_grid (Breg *breg,
             // if include dust emission, remember to complete logic for ptg assignment!
             pointing ptg;
             if (par->grid_int.do_dm) {
-                ptg = current_dm_map.pix2ang (ipix);
+                ptg = current_dm_map->pix2ang (ipix);
             }
             // get fd out from inner shells
             if (par->grid_int.do_fd or par->grid_int.do_sync.back()) {
-                ptg = current_fd_map.pix2ang (ipix);
-                observables.fd = gint->fd_map.interpolated_value (ptg);
+                ptg = current_fd_map->pix2ang (ipix);
+                observables.fd = gint->fd_map->interpolated_value (ptg);
             }
             // core function!
             radial_integration (shell_ref.get(),
@@ -120,36 +120,45 @@ void Integrator::write_grid (Breg *breg,
             
             // assembling new shell
             if (par->grid_int.do_dm) {
-                current_dm_map[ipix] = observables.dm;
+                (*current_dm_map)[ipix] = observables.dm;
             }
             if (par->grid_int.do_sync.back()) {
-                current_Is_map[ipix] = toolkit::temp_convert (observables.Is,par->grid_int.sim_sync_freq.back());
-                current_Qs_map[ipix] = toolkit::temp_convert (observables.Qs,par->grid_int.sim_sync_freq.back());
-                current_Us_map[ipix] = toolkit::temp_convert (observables.Us,par->grid_int.sim_sync_freq.back());
+                (*current_Is_map)[ipix] = toolkit::temp_convert (observables.Is,par->grid_int.sim_sync_freq.back());
+                (*current_Qs_map)[ipix] = toolkit::temp_convert (observables.Qs,par->grid_int.sim_sync_freq.back());
+                (*current_Us_map)[ipix] = toolkit::temp_convert (observables.Us,par->grid_int.sim_sync_freq.back());
             }
             if (par->grid_int.do_fd or par->grid_int.do_sync.back()) {
-                current_fd_map[ipix] = observables.fd;
+                (*current_fd_map)[ipix] = observables.fd;
             }
         }
         //adding up new shell map to sim map
+        if (par->grid_int.do_dm) {
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-        for (std::size_t ipix=0;ipix<par->grid_int.npix_sim;++ipix) {
-            pointing ptg;
-            if (par->grid_int.do_dm) {
-                ptg = gint->dm_map.pix2ang (ipix);
-                gint->dm_map[ipix] += current_dm_map.interpolated_value (ptg);
+            for (std::size_t ipix=0;ipix<par->grid_int.npix_dm;++ipix) {
+                pointing ptg {gint->dm_map->pix2ang (ipix)};
+                (*gint->dm_map)[ipix] += current_dm_map->interpolated_value (ptg);
             }
-            if (par->grid_int.do_sync.back()) {
-                ptg = gint->Is_map.pix2ang (ipix);
-                gint->Is_map[ipix] += current_Is_map.interpolated_value (ptg);
-                gint->Qs_map[ipix] += current_Qs_map.interpolated_value (ptg);
-                gint->Us_map[ipix] += current_Us_map.interpolated_value (ptg);
+        }
+        if (par->grid_int.do_sync.back()) {
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+            for (std::size_t ipix=0;ipix<par->grid_int.npix_sync.back();++ipix) {
+                pointing ptg = {gint->Is_map->pix2ang (ipix)};
+                (*gint->Is_map)[ipix] += current_Is_map->interpolated_value (ptg);
+                (*gint->Qs_map)[ipix] += current_Qs_map->interpolated_value (ptg);
+                (*gint->Us_map)[ipix] += current_Us_map->interpolated_value (ptg);
             }
-            if (par->grid_int.do_fd or par->grid_int.do_sync.back()) {
-                ptg = gint->fd_map.pix2ang (ipix);
-                gint->fd_map[ipix] += current_fd_map.interpolated_value (ptg);
+        }
+        if (par->grid_int.do_fd or par->grid_int.do_sync.back()) {
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+            for (std::size_t ipix=0;ipix<par->grid_int.npix_fd;++ipix) {
+                pointing ptg = {gint->fd_map->pix2ang (ipix)};
+                (*gint->fd_map)[ipix] += current_fd_map->interpolated_value (ptg);
             }
         }
     }//end shell iteration

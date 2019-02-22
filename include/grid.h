@@ -125,7 +125,7 @@ public:
     std::unique_ptr<double[]> fe;
     fftw_complex *fe_k;
     fftw_plan plan_fe_bw;
-    bool clean_switch;
+    bool clean_switch = false;
 };
 
 // CRE grid
@@ -156,7 +156,7 @@ public:
     virtual ~Grid_int () = default;
     void build_grid (const Param *) override;
     void export_grid (const Param *) override;
-    Healpix_Map<double> dm_map, Is_map, Qs_map, Us_map, fd_map;
+    std::unique_ptr<Healpix_Map<double>> dm_map, Is_map, Qs_map, Us_map, fd_map;
 };
 
 #endif

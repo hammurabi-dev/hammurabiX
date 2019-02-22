@@ -175,7 +175,7 @@ namespace toolkit {
         tinyxml2::XMLElement* el {doc->FirstChildElement("root")};
         if (!keychain.empty()){
             for(auto key: keychain){
-#ifndef NDEBUG
+#ifdef VERBOSE
                 std::cout<<"key: "<<key<<std::endl;
 #endif
                 el = el->FirstChildElement(key.c_str());
@@ -187,7 +187,7 @@ namespace toolkit {
     std::string fetchstring (tinyxml2::XMLElement* el,
                              const std::string& att_type,
                              const std::string& key){
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->Attribute(att_type.c_str());
@@ -195,7 +195,7 @@ namespace toolkit {
     
     std::string fetchstring (tinyxml2::XMLElement* el,
                              const std::string& att_type){
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->Attribute(att_type.c_str());
@@ -204,7 +204,7 @@ namespace toolkit {
     int fetchint (tinyxml2::XMLElement* el,
                   const std::string& att_type,
                   const std::string& key){
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str());
@@ -212,7 +212,7 @@ namespace toolkit {
     
     int fetchint (tinyxml2::XMLElement* el,
                   const std::string& att_type){
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->IntAttribute(att_type.c_str());
@@ -221,7 +221,7 @@ namespace toolkit {
     unsigned int fetchunsigned (tinyxml2::XMLElement* el,
                                 const std::string& att_type,
                                 const std::string& key){
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->UnsignedAttribute(att_type.c_str());
@@ -229,7 +229,7 @@ namespace toolkit {
     
     unsigned int fetchunsigned (tinyxml2::XMLElement* el,
                                 const std::string& att_type){
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->UnsignedAttribute(att_type.c_str());
@@ -238,7 +238,7 @@ namespace toolkit {
     bool fetchbool (tinyxml2::XMLElement* el,
                     const std::string& att_type,
                     const std::string& key){
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->BoolAttribute(att_type.c_str());
@@ -246,7 +246,7 @@ namespace toolkit {
     
     bool fetchbool (tinyxml2::XMLElement* el,
                     const std::string& att_type){
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->BoolAttribute(att_type.c_str());
@@ -255,7 +255,7 @@ namespace toolkit {
     double fetchdouble (tinyxml2::XMLElement* el,
                         const std::string& att_type,
                         const std::string& key){
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
         return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str());
@@ -263,7 +263,7 @@ namespace toolkit {
     
     double fetchdouble (tinyxml2::XMLElement* el,
                         const std::string& att_type){
-#ifndef NDEBUG
+#ifdef VERBOSE
         std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
         return el->DoubleAttribute(att_type.c_str());

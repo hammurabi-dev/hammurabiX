@@ -136,9 +136,9 @@ def precision(_res):
     obj = ham.hampyx()
     # assuming the xml file is not prepared
     obj.del_par(['Obsout','Sync'],'all')
-    obj.add_par(['Obsout'],'Sync',{'cue':str(1),'freq':str(freq),'filename':'dumy'})
-    obj.mod_par(['Obsout','DM'],{'cue':str(1)})
-    obj.mod_par(['Obsout','Faraday'],{'cue':str(1)})
+    obj.add_par(['Obsout'],'Sync',{'cue':str(1),'freq':str(freq),'filename':'dumy','nside':str(Nside)})
+    obj.mod_par(['Obsout','DM'],{'cue':str(1),'nside':str(Nside)})
+    obj.mod_par(['Obsout','Faraday'],{'cue':str(1),'nside':str(Nside)})
     # mute all field output/input
     obj.mod_par(['Fieldout','breg_grid'],{'read':str(0),'write':str(0)})
     obj.mod_par(['Fieldout','brnd_grid'],{'read':str(0),'write':str(0)})
@@ -149,7 +149,6 @@ def precision(_res):
     obj.mod_par(['Grid','Shell','layer'],{'type':'auto'})
     obj.mod_par(['Grid','Shell','layer','auto','shell_num'],{'value':str(Shell)})
     obj.mod_par(['Grid','Shell','layer','auto','nside_min'],{'value':str(Nside)})
-    obj.mod_par(['Grid','Shell','nside_sim'],{'value':str(Nside)})
     obj.mod_par(['Grid','Shell','ec_r_max'],{'value':str(radius)})
     obj.mod_par(['Grid','Shell','gc_r_max'],{'value':str(radius+9.)})
     obj.mod_par(['Grid','Shell','gc_z_max'],{'value':str(radius+1.)})
@@ -174,10 +173,10 @@ def precision(_res):
     # call hammurabi executable
     obj(True)
     # (in mK_cmb)
-    qsim = obj.sim_map['sync'+str(freq)+'Q']*1.e+3
-    usim = obj.sim_map['sync'+str(freq)+'U']*1.e+3
-    isim = obj.sim_map['sync'+str(freq)+'I']*1.e+3
-    fsim = obj.sim_map['fd']
+    qsim = obj.sim_map[('sync',str(freq),str(Nside),'Q')]*1.e+3
+    usim = obj.sim_map[('sync',str(freq),str(Nside),'U')]*1.e+3
+    isim = obj.sim_map[('sync',str(freq),str(Nside),'I')]*1.e+3
+    fsim = obj.sim_map[('fd','nan',str(Nside),'nan')]
     
     # get wmap 
     #iwmap = hp.read_map('wmap_band_iqumap_r9_9yr_K_v5.fits',field=0,hdu=1)

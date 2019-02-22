@@ -7,13 +7,13 @@
     <!-- observable output -->
     <Obsout>
         <!-- Dispersion Measure -->
-        <DM cue="1" filename="dm.fits"/>
+        <DM cue="1" filename="dm.fits" nside="8"/>
         <!-- synchrotron dmission -->
         <!-- frequency @ GHz -->
-        <Sync cue="1" freq="23" filename="iqu_sync_23.fits"/>
-        <Sync cue="1" freq="1.4" filename="iqu_sync_1.4.fits"/>
+        <Sync cue="1" freq="23" filename="iqu_sync_23.fits" nside="16"/>
+        <Sync cue="1" freq="1.4" filename="iqu_sync_1.4.fits" nside="32"/>
         <!-- Faraday depth -->
-        <Faraday cue="1" filename="fd.fits"/>
+        <Faraday cue="1" filename="fd.fits" nside="64"/>
     </Obsout>
     <!-- physical field grid in/out -->
     <!-- resolution defined in './Grid/Box' -->
@@ -97,7 +97,6 @@
                     <nside value="16"/>
                 </manual>
             </layer>
-            <nside_sim value="32"/> <!-- output map resolution -->
             <!-- maximum radius in earth/Galactic centric frame -->
             <ec_r_max value="30.0"/> <!-- kpc -->
             <gc_r_max value="20.0"/> <!-- kpc -->

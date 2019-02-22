@@ -60,8 +60,8 @@ public:
     // observable grid
     struct param_int_grid{
         // shell parameters
-        std::size_t nside_sim, npix_sim, total_shell;
-        std::vector<std::size_t> nside_shell;
+        std::size_t nside_dm, nside_fd, npix_dm, npix_fd, total_shell;
+        std::vector<std::size_t> nside_sync, npix_sync, nside_shell;
         // storing upper limit of shell raidus ratio to max radius, except the last shell
         std::vector<double> cut_shell;
         std::vector<double> radii_shell;

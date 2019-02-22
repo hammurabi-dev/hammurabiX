@@ -50,31 +50,19 @@ public:
     }
     // copy ctor
     hvec<dim,T> (const hvec<dim,T>& v){
-#ifndef NDEBUG
-        std::cout<<"calling cp ctor"<<std::endl;
-#endif
         this->ele = v.content();
     }
     // move ctor
     hvec<dim,T> (hvec<dim,T>&& v)
     : ele(std::move(v.content())){
-#ifndef NDEBUG
-        std::cout<<"calling mv ctor"<<std::endl;
-#endif
     }
     // copy assign
     hvec<dim,T>& operator= (const hvec<dim,T>& v) noexcept{
-#ifndef NDEBUG
-        std::cout<<"calling cp assign"<<std::endl;
-#endif
         this->ele = std::move(v.content());
         return *this;
     }
     // move assign
     hvec<dim,T>& operator= (hvec<dim,T>&& v) noexcept{
-#ifndef NDEBUG
-        std::cout<<"calling mv assign"<<std::endl;
-#endif
         this->ele = std::move(v.content());
         return *this;
     }
