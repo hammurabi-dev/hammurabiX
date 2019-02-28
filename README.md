@@ -52,3 +52,13 @@ Original hammurabi source code can be found [**here**](https://sourceforge.net/p
 - free-free absorption removed
 - independent vector module: [hvec.h](./include/hvec.h)
 - (crude) python wrapper: [hampyx](./hampyx)
+
+### notice with hampyx
+
+- If you encounter "MKL FATAL ERROR: Cannot load neither libmkl_avx.so nor libmkl_def.so", try:
+
+```
+export LD_PRELOAD="/path/to/libmkl_core.so:/path/to/libmkl_sequential.so"
+```
+
+this problem may happen in python-C++ routine

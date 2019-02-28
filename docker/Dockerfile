@@ -7,7 +7,7 @@ MAINTAINER jiaxin.wang@sissa.it
 RUN apt-get update
 RUN apt-get install -y build-essential git gfortran autoconf gsl-bin libgsl-dev wget cmake vim unzip
 RUN apt-get install -y python3 python3-dev python3-pip
-RUN pip3 install numpy scipy matplotlib cython astropy healpy jupyter
+RUN pip3 install numpy scipy matplotlib astropy healpy jupyter
 
 RUN mkdir /home/lab
 WORKDIR /home/lab
