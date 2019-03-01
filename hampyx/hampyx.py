@@ -267,7 +267,7 @@ class Hampyx(object):
                 self.sim_map[(dm_key[0], dm_key[1], dm_key[2], 'nan')] = DM
                 os.remove(self.sim_map_name[dm_key])
             else:
-                raise ValueError(str(self.sim_map_name[dm_key]), ' not found')
+                raise ValueError('missing %s' % str(self.sim_map_name[dm_key]))
         # read faraday depth and delete file
         if self._do_fd is True:
             if os.path.isfile(self.sim_map_name[fd_key]):
@@ -275,7 +275,7 @@ class Hampyx(object):
                 self.sim_map[(fd_key[0], fd_key[1], fd_key[2], 'nan')] = Fd
                 os.remove(self.sim_map_name[fd_key])
             else:
-                raise ValueError(str(self.sim_map_name[fd_key]) + ' not found')
+                raise ValueError('missing %s' % str(self.sim_map_name[fd_key]))
         # read synchrotron pol. and delete file
         if self._do_sync is True:
             for i in sync_key:
@@ -312,7 +312,7 @@ class Hampyx(object):
     """
     def _del_xml_copy(self):
         if self.temp_file is self._base_file:
-            raise ValueError(self.temp_file + ' read only')
+            raise ValueError('read only')
         else:
             os.remove(self._temp_file)
             self._temp_file = self._base_file
@@ -331,14 +331,14 @@ class Hampyx(object):
     def mod_par(self, keychain=None, attrib=None):
         # input type check
         if type(attrib) is not dict or type(keychain) is not list:
-            raise ValueError('wrong input ', keychain, attrib)
+            raise ValueError('wrong input %s %s' % (keychain, attrib))
         root = self.tree.getroot()
         path_str = '.'
         for key in keychain:
             path_str += '/' + key
         target = root.find(path_str)
         if target is None:
-            raise ValueError('wrong path ', path_str)
+            raise ValueError('wrong path %s' % path_str)
         for i in attrib:
             target.set(i, attrib.get(i))
 
@@ -350,7 +350,7 @@ class Hampyx(object):
     def add_par(self, keychain=None, subkey=None, attrib=None):
         # input type check
         if type(keychain) is not list or type(subkey) is not str:
-            raise ValueError('wrong input ', keychain, subkey, attrib)
+            raise ValueError('wrong input %s %s %s' % (keychain, subkey, attrib))
         if attrib is not None and type(attrib) is dict:
             root = self.tree.getroot()
             path_str = '.'
@@ -366,7 +366,7 @@ class Hampyx(object):
             target = root.find(path_str)
             et.SubElement(target, subkey)
         else:
-            raise ValueError('wrong input ', keychain, subkey, attrib)
+            raise ValueError('wrong input %s %s %s' % (keychain, subkey, attrib))
 
     """        
     print a certain parameter
@@ -376,7 +376,7 @@ class Hampyx(object):
     def print_par(self, keychain=None):
         # input type check
         if type(keychain) is not list:
-            raise ValueError('wrong input ', keychain)
+            raise ValueError('wrong input %s' % keychain)
         root = self.tree.getroot()
         # print top parameter level if no input is given
         if keychain is None:
@@ -399,7 +399,7 @@ class Hampyx(object):
     def del_par(self, keychain=None, opt=None):
         # input type check
         if type(keychain) is not list:
-            raise ValueError('wrong input ', keychain, opt)
+            raise ValueError('wrong input %s' % keychain)
         root = self.tree.getroot()
         if keychain is not None:
             path_str = '.'
