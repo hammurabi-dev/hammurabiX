@@ -38,9 +38,9 @@ TEST(integrator, shell_info_assembling){
     prop->assemble_shell_ref(ref.get(),par.get(),1);
     test_unsigned = 667;
     EXPECT_EQ (ref->step,test_unsigned);
-    test_double = 0.;
+    test_double = 5*CGS_U_kpc;
     EXPECT_EQ (ref->d_start,test_double);
-    test_double = 10.*CGS_U_kpc;
+    test_double = 40*CGS_U_kpc/4+5*CGS_U_kpc;
     EXPECT_EQ (ref->d_stop,test_double);
     test_double = 0.03*CGS_U_kpc;
     EXPECT_EQ (ref->delta_d,test_double);
@@ -48,9 +48,9 @@ TEST(integrator, shell_info_assembling){
     prop->assemble_shell_ref(ref.get(),par.get(),3);
     test_unsigned = 1334;
     EXPECT_EQ (ref->step,test_unsigned);
-    test_double = 20.*CGS_U_kpc;
+    test_double = 40*CGS_U_kpc/2+5*CGS_U_kpc;
     EXPECT_EQ (ref->d_start,test_double);
-    test_double = 40.*CGS_U_kpc;
+    test_double = 45*CGS_U_kpc;
     EXPECT_EQ (ref->d_stop,test_double);
     //
     par = std::make_unique<Param> ("reference/int_tests_02.xml");

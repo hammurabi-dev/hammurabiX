@@ -12,7 +12,7 @@
 // CRE flux spatial rescaling
 double CRE_test::rescal (const hvec<3,double> &pos,
                            const Param *par) const{
-    if ((pos-par->SunPosition).length() > par->cre_test.r0){
+    if ((pos-par->observer).length() > par->cre_test.r0){
         return 0;
     }
     else
@@ -35,7 +35,7 @@ double CRE_test::flux_norm (const hvec<3,double> &pos,
     const double beta0 {std::sqrt(1.-1./gamma0)};
     // from PHI(E) to N(\gamma) convertion
     const double unit {(4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*beta0)};
-    const double norm {par->cre_test.j0*std::pow(gamma0,-flux_idx(par->SunPosition,par))};
+    const double norm {par->cre_test.j0*std::pow(gamma0,-flux_idx(par->observer,par))};
     
     return norm*unit*rescal(pos,par);
 }
@@ -50,7 +50,7 @@ double CRE_test::flux (const hvec<3,double> &pos,
     const double gamma0 {par->cre_test.E0/CGS_U_MEC2+1};
     // converting from N to PHI
     const double unit {std::sqrt((1.-1./gamma)/(1.-1./gamma0))};
-    const double norm {par->cre_test.j0*std::pow(gamma0,-flux_idx(par->SunPosition,par))};
+    const double norm {par->cre_test.j0*std::pow(gamma0,-flux_idx(par->observer,par))};
     
     return norm*unit*std::pow(gamma,flux_idx(pos,par))*rescal(pos,par);
 }

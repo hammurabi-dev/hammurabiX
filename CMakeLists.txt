@@ -6,6 +6,7 @@ OPTION(ENABLE_TESTING "Enable testing for this project" ON)
 OPTION(ENABLE_TIMING "Enable timing for this porect" ON)
 OPTION(ON_DOCKER "Build on docker image" ON)
 OPTION(BUILD_SHARED_LIBS "Build shared library" ON)
+OPTION(ENABLE_REPORT "Enable verbose report" ON)
 #-------------- instruction ------------------#
 #
 # make sure your compiler is GNU/INTEL, no CLANG, no way
@@ -70,6 +71,10 @@ ELSEIF(ENABLE_TESTING)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -DNTIMING")
 ELSE()
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -DNTIMING -DNDEBUG")
+ENDIF()
+
+IF (ENABLE_REPORT)
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DVERBOSE")
 ENDIF()
 
 # openmp and thread support

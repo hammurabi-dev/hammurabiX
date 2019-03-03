@@ -18,9 +18,9 @@ double FEreg_ymw16::density (const hvec<3,double> &pos,
     // sylindrical r
     double r_cyl {std::sqrt(gc_pos[0]*gc_pos[0]+gc_pos[1]*gc_pos[1])};
     // warp
-    if (r_cyl>=par->fereg_ymw16.R_warp){
+    if (r_cyl>=par->fereg_ymw16.r_warp){
         double theta_warp {std::atan2(gc_pos[1],gc_pos[0])};
-        gc_pos[2] -= par->fereg_ymw16.t0_Gamma_w*(r_cyl-par->fereg_ymw16.R_warp)*std::cos(theta_warp);
+        gc_pos[2] -= par->fereg_ymw16.t0_gamma_w*(r_cyl-par->fereg_ymw16.r_warp)*std::cos(theta_warp);
     }
     if (gc_pos.length()>25*CGS_U_kpc){
         return 0.;
@@ -32,7 +32,7 @@ double FEreg_ymw16::density (const hvec<3,double> &pos,
         double WGN {0.};
         double WLI {0.};
         // longitude, in deg
-        const double ec_l {std::atan2(gc_pos[0],par->fereg_ymw16.R0-gc_pos[1])/CGS_U_rad};
+        const double ec_l {std::atan2(gc_pos[0],par->fereg_ymw16.r0-gc_pos[1])/CGS_U_rad};
         //call structure functions
         //since in YMW16, Fermi Bubble is not actually contributing, we ignore FB for thick disk
         NE[1] = thick (gc_pos[2],
@@ -71,7 +71,7 @@ double FEreg_ymw16::density (const hvec<3,double> &pos,
         // distance to local bubble
         const double rlb {std::sqrt( std::pow(((gc_pos[1]-8.34*CGS_U_kpc)*0.94-0.34*gc_pos[2]),2) + std::pow(gc_pos[0],2) )};
         if (rlb<RLB){ //inside local bubble
-            NE[0]=par->fereg_ymw16.t6_J_LB*NE[1]+std::max(NE[2],NE[3]);
+            NE[0]=par->fereg_ymw16.t6_j_lb*NE[1]+std::max(NE[2],NE[3]);
             if (NE[6]>NE[0]) {WLB=1;}
         }
         else { //outside local bubble
@@ -90,11 +90,11 @@ double FEreg_ymw16::density (const hvec<3,double> &pos,
 double FEreg_ymw16::thick (const double &zz,
                            const double &rr,
                            const Param *par) const{
-    if (zz>10.*par->fereg_ymw16.t1_H1) return 0.; // timesaving
+    if (zz>10.*par->fereg_ymw16.t1_h1) return 0.; // timesaving
     double gd {1.};
-    if (rr>par->fereg_ymw16.t1_Bd)
-        gd = std::pow(1./std::cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2);
-    return par->fereg_ymw16.t1_n1*gd*std::pow(1./std::cosh(zz/par->fereg_ymw16.t1_H1),2);;
+    if (rr>par->fereg_ymw16.t1_bd)
+        gd = std::pow(1./std::cosh((rr-par->fereg_ymw16.t1_bd)/par->fereg_ymw16.t1_ad),2);
+    return par->fereg_ymw16.t1_n1*gd*std::pow(1./std::cosh(zz/par->fereg_ymw16.t1_h1),2);;
 }
 
 // thin disk
@@ -102,13 +102,13 @@ double FEreg_ymw16::thin (const double &zz,
                           const double &rr,
                           const Param *par) const{
     // z scaling, K_2*H in ref
-    double H {par->fereg_ymw16.t2_K2*(32*CGS_U_pc+1.6e-3*rr+(4.e-7/CGS_U_pc)*std::pow(rr,2))};
+    double H {par->fereg_ymw16.t2_k2*(32*CGS_U_pc+1.6e-3*rr+(4.e-7/CGS_U_pc)*std::pow(rr,2))};
     if (zz>10.*H) return 0.; // timesaving
     double gd {1.};
-    if (rr>par->fereg_ymw16.t1_Bd){
-        gd = std::pow(1./std::cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2);
+    if (rr>par->fereg_ymw16.t1_bd){
+        gd = std::pow(1./std::cosh((rr-par->fereg_ymw16.t1_bd)/par->fereg_ymw16.t1_ad),2);
     }
-    return par->fereg_ymw16.t2_n2*gd*std::pow(1./std::cosh((rr-par->fereg_ymw16.t2_B2)/par->fereg_ymw16.t2_A2),2)*std::pow(1./std::cosh(zz/H),2);
+    return par->fereg_ymw16.t2_n2*gd*std::pow(1./std::cosh((rr-par->fereg_ymw16.t2_b2)/par->fereg_ymw16.t2_a2),2)*std::pow(1./std::cosh(zz/H),2);
 }
 
 // spiral arms
@@ -119,17 +119,17 @@ double FEreg_ymw16::spiral (const double &xx,
                             const Param *par) const{
     // structure scaling
     double scaling {1.};
-    if (rr>par->fereg_ymw16.t1_Bd){
-        if ((rr-par->fereg_ymw16.t1_Bd)>10.*par->fereg_ymw16.t1_Ad) return 0.;
-        scaling = std::pow(1./std::cosh((rr-par->fereg_ymw16.t1_Bd)/par->fereg_ymw16.t1_Ad),2);
+    if (rr>par->fereg_ymw16.t1_bd){
+        if ((rr-par->fereg_ymw16.t1_bd)>10.*par->fereg_ymw16.t1_ad) return 0.;
+        scaling = std::pow(1./std::cosh((rr-par->fereg_ymw16.t1_bd)/par->fereg_ymw16.t1_ad),2);
     }
     // z scaling, K_a*H in ref
-    const double H {par->fereg_ymw16.t3_Ka*(32*CGS_U_pc+1.6e-3*rr+(4.e-7/CGS_U_pc)*pow(rr,2))};
+    const double H {par->fereg_ymw16.t3_ka*(32*CGS_U_pc+1.6e-3*rr+(4.e-7/CGS_U_pc)*pow(rr,2))};
     if (zz>10.*H) return 0.; // timesaving
     scaling *= std::pow(1./std::cosh(zz/H),2);
-    if ((rr-par->fereg_ymw16.t3_B2s)>10.*par->fereg_ymw16.t3_Aa) return 0.; // timesaving
+    if ((rr-par->fereg_ymw16.t3_b2s)>10.*par->fereg_ymw16.t3_aa) return 0.; // timesaving
     // 2nd raidus scaling
-    scaling *= std::pow(1./std::cosh((rr-par->fereg_ymw16.t3_B2s)/par->fereg_ymw16.t3_Aa),2);
+    scaling *= std::pow(1./std::cosh((rr-par->fereg_ymw16.t3_b2s)/par->fereg_ymw16.t3_aa),2);
     double smin;
     double theta {std::atan2(yy,xx)};
     if (theta<0) theta += 2*CGS_U_pi;
@@ -177,10 +177,10 @@ double FEreg_ymw16::galcen (const double &xx,
     const double Ygc {0.};
     const double Zgc {-7.*CGS_U_pc};
     const double Rgc {std::sqrt((xx-Xgc)*(xx-Xgc)+(yy-Ygc)*(yy-Ygc))};
-    if (Rgc>10.*par->fereg_ymw16.t4_Agc) return 0.; // timesaving
-    const double Ar {std::exp(-std::pow(Rgc/par->fereg_ymw16.t4_Agc,2))};
-    if ((zz-Zgc)>10.*par->fereg_ymw16.t4_Hgc) return 0.; // timesaving
-    const double Az {std::pow(1./std::cosh((zz-Zgc)/par->fereg_ymw16.t4_Hgc),2)};
+    if (Rgc>10.*par->fereg_ymw16.t4_agc) return 0.; // timesaving
+    const double Ar {std::exp(-std::pow(Rgc/par->fereg_ymw16.t4_agc,2))};
+    if ((zz-Zgc)>10.*par->fereg_ymw16.t4_hgc) return 0.; // timesaving
+    const double Az {std::pow(1./std::cosh((zz-Zgc)/par->fereg_ymw16.t4_hgc),2)};
     return par->fereg_ymw16.t4_ngc*Ar*Az;
 }
 
@@ -196,18 +196,18 @@ double FEreg_ymw16::gum (const double &xx,
     const double dc {450.*CGS_U_pc};
     
     const double xc {dc*std::cos(bc)*std::sin(lc)};
-    const double yc {par->fereg_ymw16.R0-dc*std::cos(bc)*std::cos(lc)};
+    const double yc {par->fereg_ymw16.r0-dc*std::cos(bc)*std::cos(lc)};
     const double zc {dc*std::sin(bc)};
     
     const double theta {std::fabs(std::atan((zz-zc)/std::sqrt((xx-xc)*(xx-xc)+(yy-yc)*(yy-yc))))};
-    double zp {((par->fereg_ymw16.t5_Agn)*(par->fereg_ymw16.t5_Agn)*(par->fereg_ymw16.t5_Kgn))/std::sqrt(((par->fereg_ymw16.t5_Agn)*(par->fereg_ymw16.t5_Agn))+((par->fereg_ymw16.t5_Agn)*(par->fereg_ymw16.t5_Agn)*(par->fereg_ymw16.t5_Kgn)*(par->fereg_ymw16.t5_Kgn))/(std::tan(theta)*std::tan(theta)))};
+    double zp {((par->fereg_ymw16.t5_agn)*(par->fereg_ymw16.t5_agn)*(par->fereg_ymw16.t5_kgn))/std::sqrt(((par->fereg_ymw16.t5_agn)*(par->fereg_ymw16.t5_agn))+((par->fereg_ymw16.t5_agn)*(par->fereg_ymw16.t5_agn)*(par->fereg_ymw16.t5_kgn)*(par->fereg_ymw16.t5_kgn))/(std::tan(theta)*std::tan(theta)))};
     const double xyp {zp/std::tan(theta)};
-    const double alpha {-std::atan((-(par->fereg_ymw16.t5_Agn)*(par->fereg_ymw16.t5_Kgn)*xyp)/((par->fereg_ymw16.t5_Agn)*std::sqrt((par->fereg_ymw16.t5_Agn)*(par->fereg_ymw16.t5_Agn)-xyp*xyp)))};
+    const double alpha {-std::atan((-(par->fereg_ymw16.t5_agn)*(par->fereg_ymw16.t5_kgn)*xyp)/((par->fereg_ymw16.t5_agn)*std::sqrt((par->fereg_ymw16.t5_agn)*(par->fereg_ymw16.t5_agn)-xyp*xyp)))};
     const double RR {std::sqrt((xx-xc)*(xx-xc)+(yy-yc)*(yy-yc)+(zz-zc)*(zz-zc))};
     const double rp {std::sqrt((zp)*(zp)+(xyp)*(xyp))};
     const double Dmin {std::fabs((RR-rp)*std::sin(theta+alpha))};
-    if (Dmin>10.*par->fereg_ymw16.t5_Wgn) return 0.;
-    return par->fereg_ymw16.t5_ngn*std::exp(-std::pow(Dmin/par->fereg_ymw16.t5_Wgn,2));
+    if (Dmin>10.*par->fereg_ymw16.t5_wgn) return 0.;
+    return par->fereg_ymw16.t5_ngn*std::exp(-std::pow(Dmin/par->fereg_ymw16.t5_wgn,2));
 }
 
 // local bubble
@@ -238,13 +238,13 @@ double FEreg_ymw16::nps (const double &xx,
                          const double &zz,
                          const Param *par) const{
     if (yy<0) return 0.; // timesaving
-    const double theta_LI {(par->fereg_ymw16.t7_thetaLI)*CGS_U_rad};
+    const double theta_LI {(par->fereg_ymw16.t7_thetali)*CGS_U_rad};
     const double x_c {-10.156*CGS_U_pc};
     const double y_c {8106.207*CGS_U_pc};
     const double z_c {10.467*CGS_U_pc};
     // r_LI in ref
     const double rLI {std::sqrt((xx-x_c)*(xx-x_c)+(yy-y_c)*(yy-y_c)+(zz-z_c)*(zz-z_c))};
     const double theta {std::acos(((xx-x_c)*(std::cos(theta_LI))+(zz-z_c)*(std::sin(theta_LI)))/rLI)/CGS_U_rad};
-    if (theta>10.*par->fereg_ymw16.t7_detthetaLI or (rLI-par->fereg_ymw16.t7_RLI)>10.*par->fereg_ymw16.t7_WLI) return 0.; // timesaving
-    return (par->fereg_ymw16.t7_nLI)*std::exp(-std::pow((rLI-par->fereg_ymw16.t7_RLI)/par->fereg_ymw16.t7_WLI,2))*std::exp(-std::pow(theta/par->fereg_ymw16.t7_detthetaLI,2));
+    if (theta>10.*par->fereg_ymw16.t7_detthetali or (rLI-par->fereg_ymw16.t7_rli)>10.*par->fereg_ymw16.t7_wli) return 0.; // timesaving
+    return (par->fereg_ymw16.t7_nli)*std::exp(-std::pow((rLI-par->fereg_ymw16.t7_rli)/par->fereg_ymw16.t7_wli,2))*std::exp(-std::pow(theta/par->fereg_ymw16.t7_detthetali,2));
 }

@@ -55,7 +55,6 @@ void Grid_fernd::export_grid (const Param *par){
                       sizeof(double));
     }
     output.close();
-    exit (0);
 }
 
 void Grid_fernd::import_grid (const Param *par){

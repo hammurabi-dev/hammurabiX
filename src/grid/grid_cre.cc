@@ -35,7 +35,6 @@ void Grid_cre::export_grid (const Param *par){
                       sizeof(double));
     }
     output.close();
-    exit (0);
 }
 
 void Grid_cre::import_grid (const Param *par){

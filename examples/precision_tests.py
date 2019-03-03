@@ -180,44 +180,44 @@ def precision(_res):
     # call hammurabiX wrapper
     obj = ham.Hampyx()
     # assuming the xml file is not prepared
-    obj.del_par(['Obsout', 'Sync'], 'all')
-    obj.add_par(['Obsout'], 'Sync', {'cue': str(1),
-                                     'freq': str(freq),
-                                     'filename': 'dumy',
-                                     'nside': str(nside)})
-    obj.mod_par(['Obsout', 'DM'], {'cue': str(1), 'nside': str(nside)})
-    obj.mod_par(['Obsout', 'Faraday'], {'cue': str(1), 'nside': str(nside)})
+    obj.del_par(['observable', 'sync'], 'all')
+    obj.add_par(['observable'], 'sync', {'cue': str(1),
+                                         'freq': str(freq),
+                                         'filename': 'dumy',
+                                         'nside': str(nside)})
+    obj.mod_par(['observable', 'dm'], {'cue': str(1), 'nside': str(nside)})
+    obj.mod_par(['observable', 'faraday'], {'cue': str(1), 'nside': str(nside)})
     # mute all field output/input
-    obj.mod_par(['Fieldout', 'breg_grid'], {'read': str(0), 'write': str(0)})
-    obj.mod_par(['Fieldout', 'brnd_grid'], {'read': str(0), 'write': str(0)})
-    obj.mod_par(['Fieldout', 'fereg_grid'], {'read': str(0), 'write': str(0)})
-    obj.mod_par(['Fieldout', 'fernd_grid'], {'read': str(0), 'write': str(0)})
-    obj.mod_par(['Fieldout', 'cre_grid'], {'read': str(0), 'write': str(0)})
+    obj.del_par(['fieldio', 'breg'], 'all')
+    obj.del_par(['fieldio', 'brnd'], 'all')
+    obj.del_par(['fieldio', 'fereg'], 'all')
+    obj.del_par(['fieldio', 'fernd'], 'all')
+    obj.del_par(['fieldio', 'cre'], 'all')
     # calibrate simulation box
-    obj.mod_par(['Grid', 'Shell', 'layer'], {'type': 'auto'})
-    obj.mod_par(['Grid', 'Shell', 'layer', 'auto', 'shell_num'], {'value': str(shell)})
-    obj.mod_par(['Grid', 'Shell', 'layer', 'auto', 'nside_min'], {'value': str(nside)})
-    obj.mod_par(['Grid', 'Shell', 'ec_r_max'], {'value': str(radius)})
-    obj.mod_par(['Grid', 'Shell', 'gc_r_max'], {'value': str(radius+9.)})
-    obj.mod_par(['Grid', 'Shell', 'gc_z_max'], {'value': str(radius+1.)})
-    obj.mod_par(['Grid', 'Shell', 'ec_r_res'], {'value': str(res)})
+    obj.mod_par(['grid', 'shell', 'layer'], {'type': 'auto'})
+    obj.mod_par(['grid', 'shell', 'layer', 'auto', 'shell_num'], {'value': str(shell)})
+    obj.mod_par(['grid', 'shell', 'layer', 'auto', 'nside_min'], {'value': str(nside)})
+    obj.mod_par(['grid', 'shell', 'ec_r_max'], {'value': str(radius)})
+    obj.mod_par(['grid', 'shell', 'gc_r_max'], {'value': str(radius+9.)})
+    obj.mod_par(['grid', 'shell', 'gc_z_max'], {'value': str(radius+1.)})
+    obj.mod_par(['grid', 'shell', 'ec_r_res'], {'value': str(res)})
     # fix GMF
-    obj.mod_par(['MagneticField', 'Regular'], {'cue': str(1), 'type': 'Test'})
-    obj.mod_par(['MagneticField', 'Regular', 'Test', 'b0'], {'value': str(b0)})
-    obj.mod_par(['MagneticField', 'Regular', 'Test', 'l0'], {'value': str(l0)})
-    obj.mod_par(['MagneticField', 'Regular', 'Test', 'r'], {'value': str(r)})
-    obj.mod_par(['MagneticField', 'Random'], {'cue': str(0)})
+    obj.mod_par(['magneticfield', 'regular'], {'cue': str(1), 'type': 'test'})
+    obj.mod_par(['magneticfield', 'regular', 'test', 'b0'], {'value': str(b0)})
+    obj.mod_par(['magneticfield', 'regular', 'test', 'l0'], {'value': str(l0)})
+    obj.mod_par(['magneticfield', 'regular', 'test', 'r'], {'value': str(r)})
+    obj.mod_par(['magneticfield', 'random'], {'cue': str(0)})
     # fix FE
-    obj.mod_par(['FreeElectron', 'Regular'], {'cue': str(1), 'type': 'Test'})
-    obj.mod_par(['FreeElectron', 'Regular', 'Test', 'n0'], {'value': str(ne)})
-    obj.mod_par(['FreeElectron', 'Regular', 'Test', 'r0'], {'value': str(radius)})
-    obj.mod_par(['FreeElectron', 'Random'], {'cue': str(0)})
+    obj.mod_par(['freeelectron', 'regular'], {'cue': str(1), 'type': 'test'})
+    obj.mod_par(['freeelectron', 'regular', 'test', 'n0'], {'value': str(ne)})
+    obj.mod_par(['freeelectron', 'regular', 'test', 'r0'], {'value': str(radius)})
+    obj.mod_par(['freeelectron', 'random'], {'cue': str(0)})
     # fix CRE
-    obj.mod_par(['CRE'], {'type': 'Test'})
-    obj.mod_par(['CRE', 'Test', 'alpha'], {'value': str(alpha)})
-    obj.mod_par(['CRE', 'Test', 'E0'], {'value': str(10.0)})
-    obj.mod_par(['CRE', 'Test', 'j0'], {'value': str(je)})
-    obj.mod_par(['CRE', 'Test', 'r0'], {'value': str(radius)})
+    obj.mod_par(['cre'], {'type': 'test'})
+    obj.mod_par(['cre', 'test', 'alpha'], {'value': str(alpha)})
+    obj.mod_par(['cre', 'test', 'E0'], {'value': str(10.0)})
+    obj.mod_par(['cre', 'test', 'j0'], {'value': str(je)})
+    obj.mod_par(['cre', 'test', 'r0'], {'value': str(radius)})
     # call hammurabi executable
     obj(True)
     # (in mK_cmb)

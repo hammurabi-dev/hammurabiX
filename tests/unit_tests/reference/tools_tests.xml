@@ -3,5 +3,6 @@
     <integer value="23"/>
     <double value="3.14"/>
     <string value="string"/>
-    <bool value="1"/>
+    <true value="1"/>
+    <false value="0"/>
 </root>

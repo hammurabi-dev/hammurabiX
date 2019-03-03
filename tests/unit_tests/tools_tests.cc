@@ -163,17 +163,34 @@ TEST(toolkit, xml_parser){
     auto doc = toolkit::loadxml("reference/tools_tests.xml");
     
     tinyxml2::XMLElement* el = toolkit::tracexml(doc.get(),{"double"});
-    EXPECT_EQ(toolkit::fetchdouble(el,"value"),3.14);
+    
+    EXPECT_EQ(toolkit::fetchdouble(el,"value"),double(3.14));
+    
+    EXPECT_EQ(toolkit::fetchdouble(el,"value",2.0),double(3.14));
+    
+    EXPECT_EQ(toolkit::fetchdouble(el,"dft_value",2.0),double(2.0));
+    
+    EXPECT_EQ(toolkit::fetchdouble(el,"dft_value"),double(0));
     
     el = toolkit::tracexml(doc.get(),{"integer"});
-    unsigned int test_unsigned = 23;
-    EXPECT_EQ(toolkit::fetchunsigned(el,"value"),test_unsigned);
+    
+    EXPECT_EQ(toolkit::fetchunsigned(el,"value"),unsigned(23));
+    
+    EXPECT_EQ(toolkit::fetchunsigned(el,"value",30),unsigned(23));
+    
+    EXPECT_EQ(toolkit::fetchunsigned(el,"dft_value",30),unsigned(30));
+    
+    EXPECT_EQ(toolkit::fetchunsigned(el,"dft_value"),unsigned(0));
     
     el = toolkit::tracexml(doc.get(),{});
-    std::string test_string = "string";
-    EXPECT_EQ(toolkit::fetchstring(el,"value","string"),test_string);
+    
+    EXPECT_EQ(toolkit::fetchstring(el,"value","string"),std::string("string"));
     
     el = toolkit::tracexml(doc.get(),{});
-    bool test_bool = true;
-    EXPECT_EQ(toolkit::fetchbool(el,"value","bool"),test_bool);
+    
+    EXPECT_EQ(toolkit::fetchbool(el,"value","false"),false);
+    
+    EXPECT_EQ(toolkit::fetchbool(el,"value","true"),true);
+    
+    EXPECT_EQ(toolkit::fetchbool(el,"dft_value","true"),false);
 }

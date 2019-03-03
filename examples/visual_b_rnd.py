@@ -147,48 +147,48 @@ def simulator(_fieldtype, _anisotropy, _nx, _ny, _nz, _n2l):
     obj = ham.Hampyx()
     # assuming the xml file is not prepared
     # mute map outputs
-    obj.del_par(['Obsout', 'Sync'], 'all')
-    obj.del_par(['Obsout', 'DM'], 'all')
-    obj.del_par(['Obsout', 'Faraday'], 'all')
+    obj.del_par(['observable', 'sync'], 'all')
+    obj.del_par(['observable', 'dm'], 'all')
+    obj.del_par(['observable', 'faraday'], 'all')
     
-    obj.mod_par(['Grid', 'Box_GMF', 'nx'], {'value': str(_nx)})
-    obj.mod_par(['Grid', 'Box_GMF', 'ny'], {'value': str(_ny)})
-    obj.mod_par(['Grid', 'Box_GMF', 'nz'], {'value': str(_nz)})
-    obj.mod_par(['Grid', 'Box_GMF', 'x_min'], {'value': str(-_nx/(_n2l*0.5))})
-    obj.mod_par(['Grid', 'Box_GMF', 'x_max'], {'value': str(_nx/(_n2l*0.5))})
-    obj.mod_par(['Grid', 'Box_GMF', 'y_min'], {'value': str(-_ny/(_n2l*0.5))})
-    obj.mod_par(['Grid', 'Box_GMF', 'y_max'], {'value': str(_ny/(_n2l*0.5))})
-    obj.mod_par(['Grid', 'Box_GMF', 'z_min'], {'value': str(-_nz/(_n2l*0.5))})
-    obj.mod_par(['Grid', 'Box_GMF', 'z_max'], {'value': str(_nz/(_n2l*0.5))})
+    obj.mod_par(['grid', 'box_brnd', 'nx'], {'value': str(_nx)})
+    obj.mod_par(['grid', 'box_brnd', 'ny'], {'value': str(_ny)})
+    obj.mod_par(['grid', 'box_brnd', 'nz'], {'value': str(_nz)})
+    obj.mod_par(['grid', 'box_brnd', 'x_min'], {'value': str(-_nx/(_n2l*0.5))})
+    obj.mod_par(['grid', 'box_brnd', 'x_max'], {'value': str(_nx/(_n2l*0.5))})
+    obj.mod_par(['grid', 'box_brnd', 'y_min'], {'value': str(-_ny/(_n2l*0.5))})
+    obj.mod_par(['grid', 'box_brnd', 'y_max'], {'value': str(_ny/(_n2l*0.5))})
+    obj.mod_par(['grid', 'box_brnd', 'z_min'], {'value': str(-_nz/(_n2l*0.5))})
+    obj.mod_par(['grid', 'box_brnd', 'z_max'], {'value': str(_nz/(_n2l*0.5))})
     
-    obj.mod_par(['Fieldout', 'brnd_grid'], {'read': str(0), 'write': str(1), 'filename': 'brnd.bin'})
-    # use 'Test' regular B field setting
-    obj.mod_par(['MagneticField', 'Regular'], {'cue': str(1), 'type': 'Test'})
-    obj.mod_par(['MagneticField', 'Regular', 'Test', 'b0'], {'value': str(2.0)})
+    obj.mod_par(['fieldio', 'brnd'], {'read': str(0), 'write': str(1), 'filename': 'brnd.bin'})
+    # use 'test' regular B field setting
+    obj.mod_par(['magneticfield', 'regular'], {'cue': str(1), 'type': 'test'})
+    obj.mod_par(['magneticfield', 'regular', 'test', 'b0'], {'value': str(2.0)})
     # set field along x direction
-    obj.mod_par(['MagneticField', 'Regular', 'Test', 'l0'], {'value': str(0.)})
-    obj.mod_par(['MagneticField', 'Regular', 'Test', 'r'], {'value': str(0.)})
+    obj.mod_par(['magneticfield', 'regular', 'test', 'l0'], {'value': str(0.)})
+    obj.mod_par(['magneticfield', 'regular', 'test', 'r'], {'value': str(0.)})
     # choose turublent/random field type
-    obj.mod_par(['MagneticField', 'Random'], {'cue': str(1), 'type': _fieldtype, 'seed': str(0)})
+    obj.mod_par(['magneticfield', 'random'], {'cue': str(1), 'type': _fieldtype, 'seed': str(0)})
 
-    obj.mod_par(['MagneticField', 'Random', 'Global'], {'type': 'ES'})
-    obj.mod_par(['MagneticField', 'Random', 'Global', 'ES', 'rms'], {'value': str(1.)})
-    obj.mod_par(['MagneticField', 'Random', 'Global', 'ES', 'k0'], {'value': str(0.5)})
-    obj.mod_par(['MagneticField', 'Random', 'Global', 'ES', 'a0'], {'value': str(1.7)})
-    obj.mod_par(['MagneticField', 'Random', 'Global', 'ES', 'rho'], {'value': str(_anisotropy)})
-    obj.mod_par(['MagneticField', 'Random', 'Global', 'ES', 'r0'], {'value': str(1000)})  # no scaling
-    obj.mod_par(['MagneticField', 'Random', 'Global', 'ES', 'z0'], {'value': str(1000)})  # no scaling
+    obj.mod_par(['magneticfield', 'random', 'global'], {'type': 'es'})
+    obj.mod_par(['magneticfield', 'random', 'global', 'es', 'rms'], {'value': str(1.)})
+    obj.mod_par(['magneticfield', 'random', 'global', 'es', 'k0'], {'value': str(0.5)})
+    obj.mod_par(['magneticfield', 'random', 'global', 'es', 'a0'], {'value': str(1.7)})
+    obj.mod_par(['magneticfield', 'random', 'global', 'es', 'rho'], {'value': str(_anisotropy)})
+    obj.mod_par(['magneticfield', 'random', 'global', 'es', 'r0'], {'value': str(1000)})  # no scaling
+    obj.mod_par(['magneticfield', 'random', 'global', 'es', 'z0'], {'value': str(1000)})  # no scaling
 
-    obj.mod_par(['MagneticField', 'Random', 'Local'], {'type': 'MHD'})
-    obj.mod_par(['MagneticField', 'Random', 'Local', 'MHD', 'pa0'], {'value': str(1.)})
-    obj.mod_par(['MagneticField', 'Random', 'Local', 'MHD', 'pf0'], {'value': str(_anisotropy)})
-    obj.mod_par(['MagneticField', 'Random', 'Local', 'MHD', 'ps0'], {'value': str(_anisotropy)})
-    obj.mod_par(['MagneticField', 'Random', 'Local', 'MHD', 'aa0'], {'value': str(1.7)})
-    obj.mod_par(['MagneticField', 'Random', 'Local', 'MHD', 'af0'], {'value': str(1.5)})
-    obj.mod_par(['MagneticField', 'Random', 'Local', 'MHD', 'as0'], {'value': str(1.7)})
-    obj.mod_par(['MagneticField', 'Random', 'Local', 'MHD', 'k0'], {'value': str(0.5)})
-    obj.mod_par(['MagneticField', 'Random', 'Local', 'MHD', 'beta'], {'value': str(0.1)})
-    obj.mod_par(['MagneticField', 'Random', 'Local', 'MHD', 'ma'], {'value': str(0.5)})
+    obj.mod_par(['magneticfield', 'random', 'local'], {'type': 'mhd'})
+    obj.mod_par(['magneticfield', 'random', 'local', 'mhd', 'pa0'], {'value': str(1.)})
+    obj.mod_par(['magneticfield', 'random', 'local', 'mhd', 'pf0'], {'value': str(_anisotropy)})
+    obj.mod_par(['magneticfield', 'random', 'local', 'mhd', 'ps0'], {'value': str(_anisotropy)})
+    obj.mod_par(['magneticfield', 'random', 'local', 'mhd', 'aa0'], {'value': str(1.7)})
+    obj.mod_par(['magneticfield', 'random', 'local', 'mhd', 'af0'], {'value': str(1.5)})
+    obj.mod_par(['magneticfield', 'random', 'local', 'mhd', 'as0'], {'value': str(1.7)})
+    obj.mod_par(['magneticfield', 'random', 'local', 'mhd', 'k0'], {'value': str(0.5)})
+    obj.mod_par(['magneticfield', 'random', 'local', 'mhd', 'beta'], {'value': str(0.1)})
+    obj.mod_par(['magneticfield', 'random', 'local', 'mhd', 'ma'], {'value': str(0.5)})
 
     obj(True)
 
@@ -355,10 +355,10 @@ def multi_run_plot():
     we also provide a rough approximation on the shape of precision curves
     :return:
     """
-    multi_run_print('Global')
-    multi_run_print('Local')
-    d1 = np.loadtxt('Local_div.txt')
-    d2 = np.loadtxt('Global_div.txt')
+    multi_run_print('global')
+    multi_run_print('local')
+    d1 = np.loadtxt('local_div.txt')
+    d2 = np.loadtxt('global_div.txt')
     from scipy.optimize import curve_fit
     
     # fit curve
@@ -389,11 +389,11 @@ def multi_run_plot():
 # check captions above for the meaning of each function
 if __name__ == '__main__':
     # do a single run and print info
-    # single_run_print('Local', 0.5, 200, 200, 200, 50)
-    # single_run_print('Global', 0.5, 200, 200, 200, 50)
-    single_run_plot('Global', 0.2, 200, 200, 200, 50, '$\\rho=0.2$')
-    # single_run_plot('Local', 0.9, 200, 200, 200, 50, '$\\rho=0.9$')
-    single_run_plot('Local', 0.2, 200, 200, 200, 50, '$P_{s,f}/P_A=0.2$')
+    # single_run_print('local', 0.5, 200, 200, 200, 50)
+    # single_run_print('global', 0.5, 200, 200, 200, 50)
+    single_run_plot('global', 0.2, 200, 200, 200, 50, '$\\rho=0.2$')
+    # single_run_plot('local', 0.9, 200, 200, 200, 50, '$\\rho=0.9$')
+    single_run_plot('local', 0.2, 200, 200, 200, 50, '$P_{s,f}/P_A=0.2$')
     
     # do multiple runs and plot results may take 1hr
     # multi_run_plot()

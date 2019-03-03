@@ -44,7 +44,6 @@ void Grid_breg::export_grid (const Param *par){
                       sizeof(double));
     }
     output.close();
-    exit (0);
 }
 
 void Grid_breg::import_grid (const Param *par){

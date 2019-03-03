@@ -186,7 +186,10 @@ void Integrator::radial_integration (struct_shell *shell_ref,
     // angular position
     const double THE {ptg_in.theta};
     const double PHI {ptg_in.phi};
-    if (check_simulation_lower_limit (std::fabs(0.5*CGS_U_pi-THE),par->grid_int.lat_lim)) {return;}
+    if (check_simulation_lower_limit (std::fabs(0.5*CGS_U_pi-THE),par->grid_int.lat_min)) {return;}
+    if (check_simulation_upper_limit (std::fabs(0.5*CGS_U_pi-THE),par->grid_int.lat_max)) {return;}
+    if (check_simulation_lower_limit (PHI,par->grid_int.lon_min)) {return;}
+    if (check_simulation_upper_limit (PHI,par->grid_int.lon_max)) {return;}
     double lambda_square=0.,i2bt_sync=0.,fd_forefactor=0.;
     if (par->grid_int.do_sync.back()){
         // for calculating synchrotron emission
@@ -203,9 +206,11 @@ void Integrator::radial_integration (struct_shell *shell_ref,
     for(looper=0;looper<shell_ref->step;++looper){
         // ec and gc position
         hvec<3,double> ec_pos {toolkit::los_versor(THE,PHI)*shell_ref->dist[looper]};
-        hvec<3,double> pos {ec_pos + par->SunPosition};
+        hvec<3,double> pos {ec_pos + par->observer};
         // check LOS depth limit
+        if (check_simulation_lower_limit (pos.length(),par->grid_int.gc_r_min)) {break;}
         if (check_simulation_upper_limit (pos.length(),par->grid_int.gc_r_max)) {break;}
+        if (check_simulation_lower_limit (std::fabs(pos[2]),par->grid_int.gc_z_min)) {break;}
         if (check_simulation_upper_limit (std::fabs(pos[2]),par->grid_int.gc_z_max)) {break;}
         // B field
         hvec<3,double> B_vec {breg->get_breg(pos,par,gbreg)};

@@ -53,8 +53,8 @@ double Brnd_es::spec(const double &k,
 // set to 1 at observer's place
 double Brnd_es::rescal (const hvec<3,double> &pos,
                         const Param *par) const{
-    const double r_cyl {std::sqrt(pos[0]*pos[0]+pos[1]*pos[1]) - std::fabs(par->SunPosition[0])};
-    const double z {std::fabs(pos[2]) - std::fabs(par->SunPosition[2])};
+    const double r_cyl {std::sqrt(pos[0]*pos[0]+pos[1]*pos[1]) - std::fabs(par->observer[0])};
+    const double z {std::fabs(pos[2]) - std::fabs(par->observer[2])};
     const double r0 {par->brnd_es.r0};
     const double z0 {par->brnd_es.z0};
     return std::exp(-r_cyl/r0)*std::exp(-z/z0);

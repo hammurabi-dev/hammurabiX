@@ -10,160 +10,59 @@
 #include <namespace_toolkit.h>
 
 Param::Param (const std::string file_name){
-    std::unique_ptr<tinyxml2::XMLDocument> doc = toolkit::loadxml(file_name);
-    // gc sun position
-    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc.get(),{"Grid","SunPosition"})};
-    SunPosition = hvec<3,double> {CGS_U_kpc*toolkit::fetchdouble(ptr,"value","x"),
-        CGS_U_kpc*toolkit::fetchdouble(ptr,"value","y"),
-        CGS_U_pc*toolkit::fetchdouble(ptr,"value","z")};
-    //
-    grid_param (doc.get());
-    b_param (doc.get());
-    fe_param (doc.get());
+    // load xml file
+    std::unique_ptr<tinyxml2::XMLDocument> doc {toolkit::loadxml(file_name)};
+    // observer position
+    tinyxml2::XMLElement* ptr {toolkit::tracexml(doc.get(),{"grid","observer"})};
+    observer = hvec<3,double> {CGS_U_kpc*toolkit::fetchdouble(ptr,"value","x",-8.3),
+        CGS_U_kpc*toolkit::fetchdouble(ptr,"value","y",0),
+        CGS_U_pc*toolkit::fetchdouble(ptr,"value","z",6)};
+    // collect parameters
+    obs_param (doc.get());
+    breg_param (doc.get());
+    brnd_param (doc.get());
+    fereg_param (doc.get());
+    fernd_param (doc.get());
     cre_param (doc.get());
 }
 
-// grid
-void Param::grid_param (tinyxml2::XMLDocument *doc){
-    // breg box
-    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"Grid","Box_GMF"})};
-    grid_breg.nx = toolkit::fetchunsigned (ptr,"value","nx");
-    grid_breg.ny = toolkit::fetchunsigned (ptr,"value","ny");
-    grid_breg.nz = toolkit::fetchunsigned (ptr,"value","nz");
-    grid_breg.full_size = grid_breg.nx*grid_breg.ny*grid_breg.nz;
-    grid_breg.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max");
-    grid_breg.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min");
-    grid_breg.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max");
-    grid_breg.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min");
-    grid_breg.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max");
-    grid_breg.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min");
-    // brnd box
-    ptr = toolkit::tracexml(doc,{"Grid","Box_GMF"});
-    grid_brnd.nx = toolkit::fetchunsigned (ptr,"value","nx");
-    grid_brnd.ny = toolkit::fetchunsigned (ptr,"value","ny");
-    grid_brnd.nz = toolkit::fetchunsigned (ptr,"value","nz");
-    grid_brnd.full_size = grid_brnd.nx*grid_brnd.ny*grid_brnd.nz;
-    grid_brnd.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max");
-    grid_brnd.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min");
-    grid_brnd.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max");
-    grid_brnd.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min");
-    grid_brnd.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max");
-    grid_brnd.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min");
-    // gmf permission
-    ptr = toolkit::tracexml (doc,{"MagneticField"});
-    grid_breg.build_permission = toolkit::fetchbool (ptr,"cue","Regular");
-    grid_brnd.build_permission = toolkit::fetchbool (ptr,"cue","Random");
-    // fereg box
-    ptr = toolkit::tracexml (doc,{"Grid","Box_FE"});
-    grid_fereg.nx = toolkit::fetchunsigned (ptr,"value","nx");
-    grid_fereg.ny = toolkit::fetchunsigned (ptr,"value","ny");
-    grid_fereg.nz = toolkit::fetchunsigned (ptr,"value","nz");
-    grid_fereg.full_size = grid_fereg.nx*grid_fereg.ny*grid_fereg.nz;
-    grid_fereg.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max");
-    grid_fereg.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min");
-    grid_fereg.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max");
-    grid_fereg.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min");
-    grid_fereg.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max");
-    grid_fereg.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min");
-    // fernd box
-    ptr = toolkit::tracexml (doc,{"Grid","Box_FE"});
-    grid_fernd.nx = toolkit::fetchunsigned (ptr,"value","nx");
-    grid_fernd.ny = toolkit::fetchunsigned (ptr,"value","ny");
-    grid_fernd.nz = toolkit::fetchunsigned (ptr,"value","nz");
-    grid_fernd.full_size = grid_fernd.nx*grid_fernd.ny*grid_fernd.nz;
-    grid_fernd.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max");
-    grid_fernd.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min");
-    grid_fernd.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max");
-    grid_fernd.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min");
-    grid_fernd.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max");
-    grid_fernd.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min");
-    // fe permission
-    ptr = toolkit::tracexml (doc,{"FreeElectron"});
-    grid_fereg.build_permission = toolkit::fetchbool (ptr,"cue","Regular");
-    grid_fernd.build_permission = toolkit::fetchbool (ptr,"cue","Random");
-    // cre box
-    ptr = toolkit::tracexml (doc,{"Grid","Box_CRE"});
-    grid_cre.E_min = CGS_U_GeV*toolkit::fetchdouble (ptr,"value","E_min");
-    grid_cre.E_max = CGS_U_GeV*toolkit::fetchdouble (ptr,"value","E_max");
-    grid_cre.nE = toolkit::fetchunsigned (ptr,"value","nE");
-    grid_cre.E_fact = std::log(grid_cre.E_max/grid_cre.E_min)/(grid_cre.nE-1);
-    grid_cre.nz = toolkit::fetchunsigned (ptr,"value","nz");
-    grid_cre.nx = toolkit::fetchunsigned (ptr,"value","nx");
-    grid_cre.ny = toolkit::fetchunsigned (ptr,"value","ny");
-    grid_cre.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max");
-    grid_cre.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min");
-    grid_cre.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max");
-    grid_cre.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min");
-    grid_cre.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max");
-    grid_cre.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min");
-    grid_cre.cre_size = grid_cre.nE*grid_cre.nx*grid_cre.ny*grid_cre.nz;
-    // int box
-    ptr = toolkit::tracexml (doc,{"Grid","Shell"});
-    grid_int.ec_r_max = toolkit::fetchdouble (ptr,"value","ec_r_max")*CGS_U_kpc;
-    grid_int.gc_r_max = toolkit::fetchdouble (ptr,"value","gc_r_max")*CGS_U_kpc;
-    grid_int.gc_z_max = toolkit::fetchdouble (ptr,"value","gc_z_max")*CGS_U_kpc;
-    grid_int.radial_res = toolkit::fetchdouble (ptr,"value","ec_r_res")*CGS_U_kpc;
-    grid_int.lat_lim = toolkit::fetchdouble (ptr,"value","lat_lim")*CGS_U_rad;
-	if (toolkit::fetchstring (ptr,"type","layer")=="auto"){
-        auto subptr = toolkit::tracexml (doc,{"Grid","Shell","layer","auto"});
-        grid_int.total_shell = toolkit::fetchunsigned (subptr,"value","shell_num");
-        for (std::size_t i=0;i!=grid_int.total_shell;++i){
-            grid_int.nside_shell.push_back (pow(2,i)*toolkit::fetchunsigned (subptr,"value","nside_min"));
-        }
-        grid_int.radii_shell.push_back (0.);
-        for (std::size_t i=0;i<grid_int.total_shell;++i) {
-            grid_int.radii_shell.push_back (grid_int.ec_r_max*std::pow(0.5,grid_int.total_shell-i-1));
-        }
-    }
-    else if (toolkit::fetchstring (ptr,"type","layer")=="manual"){
-        auto subptr = toolkit::tracexml (doc,{"Grid","Shell","layer","manual"});
-        grid_int.total_shell = 0;
-        for (auto e = subptr->FirstChildElement("nside");e!=nullptr;e=e->NextSiblingElement("nside")){
-            grid_int.total_shell++;
-            grid_int.nside_shell.push_back (toolkit::fetchunsigned(e,"value"));
-        }
-        for (auto e = subptr->FirstChildElement("cut");e!=nullptr;e=e->NextSiblingElement("cut")){
-            grid_int.cut_shell.push_back (toolkit::fetchdouble(e,"value"));
-        }
-		grid_int.cut_shell.push_back (1.);
-        assert (grid_int.cut_shell.size() == grid_int.total_shell);
-        assert (grid_int.nside_shell.size() == grid_int.total_shell);
-		grid_int.radii_shell.push_back (0.);
-        for (auto& i : grid_int.cut_shell){
-            grid_int.radii_shell.push_back (grid_int.ec_r_max*i);
-        }
-    }
-    else {
-        assert (false);
-    }
-    // output file name and Nside
-    ptr = toolkit::tracexml (doc,{"Obsout"});
-    if (ptr->FirstChildElement("DM")!=nullptr){
-        grid_int.do_dm = toolkit::fetchbool (ptr,"cue","DM");
-        grid_int.sim_dm_name = toolkit::fetchstring (ptr,"filename","DM");
-        grid_int.nside_dm = toolkit::fetchunsigned (ptr,"nside","DM");
+void Param::obs_param (tinyxml2::XMLDocument* doc){
+    // observable base path
+    tinyxml2::XMLElement* ptr {toolkit::tracexml (doc,{"observable"})};
+    // controller for reading shell parameters
+    grid_int.write_permission = false;
+    // if dispersion measure is required
+    if (ptr->FirstChildElement("dm")!=nullptr){
+        grid_int.write_permission = true;
+        grid_int.do_dm = toolkit::fetchbool (ptr,"cue","dm");
+        grid_int.sim_dm_name = toolkit::fetchstring (ptr,"filename","dm");
+        grid_int.nside_dm = toolkit::fetchunsigned (ptr,"nside","dm");
         grid_int.npix_dm = 12*grid_int.nside_dm*grid_int.nside_dm;
     }
     else {
         grid_int.do_dm = false;
     }
-    if (ptr->FirstChildElement("Faraday")!=nullptr){
-        grid_int.do_fd = toolkit::fetchbool (ptr,"cue","Faraday");
-        grid_int.sim_fd_name = toolkit::fetchstring (ptr,"filename","Faraday");
-        grid_int.nside_fd = toolkit::fetchunsigned (ptr,"nside","Faraday");
+    // if faraday depth is required
+    if (ptr->FirstChildElement("faraday")!=nullptr){
+        grid_int.write_permission = true;
+        grid_int.do_fd = toolkit::fetchbool (ptr,"cue","faraday");
+        grid_int.sim_fd_name = toolkit::fetchstring (ptr,"filename","faraday");
+        grid_int.nside_fd = toolkit::fetchunsigned (ptr,"nside","faraday");
         grid_int.npix_fd = 12*grid_int.nside_fd*grid_int.nside_fd;
     }
     else {
         grid_int.do_fd = false;
     }
-    if (ptr->FirstChildElement("Sync")!=nullptr){
-        auto subptr = toolkit::tracexml (doc,{"Obsout","Sync"});
+    // if synchrotron emission is required
+    if (ptr->FirstChildElement("sync")!=nullptr){
+        grid_int.write_permission = true;
+        tinyxml2::XMLElement* subptr {toolkit::tracexml (doc,{"observable","sync"})};
         grid_int.do_sync.push_back (toolkit::fetchbool (subptr,"cue"));
-		grid_int.sim_sync_freq.push_back (toolkit::fetchdouble (subptr,"freq")*CGS_U_GHz);
+        grid_int.sim_sync_freq.push_back (toolkit::fetchdouble (subptr,"freq")*CGS_U_GHz);
         grid_int.sim_sync_name.push_back (toolkit::fetchstring (subptr,"filename"));
         grid_int.nside_sync.push_back (toolkit::fetchunsigned (subptr,"nside"));
         grid_int.npix_sync.push_back (12*grid_int.nside_sync.back()*grid_int.nside_sync.back());
-        for (auto e = subptr->NextSiblingElement("Sync");e!=nullptr;e=e->NextSiblingElement("Sync")){
+        for (auto e = subptr->NextSiblingElement("sync");e!=nullptr;e=e->NextSiblingElement("sync")){
             grid_int.do_sync.push_back (toolkit::fetchbool (e,"cue"));
             grid_int.sim_sync_freq.push_back (toolkit::fetchdouble (e,"freq")*CGS_U_GHz);
             grid_int.sim_sync_name.push_back (toolkit::fetchstring (e,"filename"));
@@ -174,93 +73,167 @@ void Param::grid_param (tinyxml2::XMLDocument *doc){
     else {
         grid_int.do_sync.push_back (false);
     }
-    // output field params
-    ptr = toolkit::tracexml (doc,{"Fieldout"});
-    grid_breg.read_permission = toolkit::fetchbool (ptr,"read","breg_grid");
-    grid_breg.write_permission = toolkit::fetchbool (ptr,"write","breg_grid");
-    grid_breg.filename = toolkit::fetchstring(ptr,"filename","breg_grid");
-    grid_brnd.read_permission = toolkit::fetchbool (ptr,"read","brnd_grid");
-    grid_brnd.write_permission = toolkit::fetchbool (ptr,"write","brnd_grid");
-    grid_brnd.filename = toolkit::fetchstring (ptr,"filename","brnd_grid");
-    grid_fereg.read_permission = toolkit::fetchbool (ptr,"read","fereg_grid");
-    grid_fereg.write_permission = toolkit::fetchbool (ptr,"write","fereg_grid");
-    grid_fereg.filename = toolkit::fetchstring (ptr,"filename","fereg_grid");
-    grid_fernd.read_permission = toolkit::fetchbool (ptr,"read","fernd_grid");
-    grid_fernd.write_permission = toolkit::fetchbool (ptr,"write","fernd_grid");
-    grid_fernd.filename = toolkit::fetchstring (ptr,"filename","fernd_grid");
-    grid_cre.read_permission = toolkit::fetchbool (ptr,"read","cre_grid");
-    grid_cre.write_permission = toolkit::fetchbool (ptr,"write","cre_grid");
-    grid_cre.filename = toolkit::fetchstring (ptr,"filename","cre_grid");
+    // if any observable is requried
+    if (grid_int.write_permission){
+        ptr = toolkit::tracexml (doc,{"grid","shell"});
+        grid_int.ec_r_min = toolkit::fetchdouble (ptr,"value","ec_r_min",0)*CGS_U_kpc;
+        grid_int.ec_r_max = toolkit::fetchdouble (ptr,"value","ec_r_max",10)*CGS_U_kpc;
+        grid_int.gc_r_min = toolkit::fetchdouble (ptr,"value","gc_r_min",0)*CGS_U_kpc;
+        grid_int.gc_r_max = toolkit::fetchdouble (ptr,"value","gc_r_max",20)*CGS_U_kpc;
+        grid_int.gc_z_min = toolkit::fetchdouble (ptr,"value","gc_z_min",0)*CGS_U_kpc;
+        grid_int.gc_z_max = toolkit::fetchdouble (ptr,"value","gc_z_max",10)*CGS_U_kpc;
+        grid_int.radial_res = toolkit::fetchdouble (ptr,"value","ec_r_res",0.01)*CGS_U_kpc;
+        grid_int.lat_min = toolkit::fetchdouble (ptr,"value","lat_min",0)*CGS_U_rad;
+        grid_int.lat_max = toolkit::fetchdouble (ptr,"value","lat_max",90)*CGS_U_rad;
+        grid_int.lon_min = toolkit::fetchdouble (ptr,"value","lon_min",0)*CGS_U_rad;
+        grid_int.lon_max = toolkit::fetchdouble (ptr,"value","lon_max",360)*CGS_U_rad;
+        // auto shell cutting
+        if (toolkit::fetchstring (ptr,"type","layer")=="auto"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml (doc,{"grid","shell","layer","auto"})};
+            grid_int.total_shell = toolkit::fetchunsigned (subptr,"value","shell_num",1);
+            for (std::size_t i=0;i!=grid_int.total_shell;++i){
+                grid_int.nside_shell.push_back (pow(2,i)*toolkit::fetchunsigned (subptr,"value","nside_min",32));
+            }
+            std::cout<<"auto shell nside size "<<grid_int.nside_shell.size()<<std::endl;
+            grid_int.radii_shell.push_back (grid_int.ec_r_min);
+            for (std::size_t i=0;i<grid_int.total_shell;++i) {
+                grid_int.radii_shell.push_back ((grid_int.ec_r_max-grid_int.ec_r_min)*std::pow(0.5,grid_int.total_shell-i-1) + grid_int.ec_r_min);
+            }
+        }
+        // manual shell cutting
+        else if (toolkit::fetchstring (ptr,"type","layer")=="manual"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml (doc,{"grid","shell","layer","manual"})};
+            grid_int.total_shell = 0;
+            for (auto e = subptr->FirstChildElement("nside");e!=nullptr;e=e->NextSiblingElement("nside")){
+                grid_int.total_shell++;
+                grid_int.nside_shell.push_back (toolkit::fetchunsigned(e,"value"));
+            }
+            std::cout<<"manual shell nside size "<<grid_int.nside_shell.size()<<std::endl;
+            for (auto e = subptr->FirstChildElement("cut");e!=nullptr;e=e->NextSiblingElement("cut")){
+                grid_int.cut_shell.push_back (toolkit::fetchdouble(e,"value"));
+            }
+            grid_int.cut_shell.push_back (1.);
+            assert (grid_int.cut_shell.size() == grid_int.total_shell);
+            assert (grid_int.nside_shell.size() == grid_int.total_shell);
+            grid_int.radii_shell.push_back (grid_int.ec_r_min);
+            for (auto& i : grid_int.cut_shell){
+                grid_int.radii_shell.push_back ((grid_int.ec_r_max-grid_int.ec_r_min)*i+grid_int.ec_r_min);
+            }
+        }
+        else {
+            throw std::runtime_error("unsupported layer option");
+        }
+    }
 }
 
-// magnetic field
-void Param::b_param (tinyxml2::XMLDocument *doc){
-    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"MagneticField"})};
-    breg_type = toolkit::fetchstring(ptr,"type","Regular");
-    // bwmap
-    if(breg_type=="WMAP"){
-        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Regular","WMAP"})};
-        breg_wmap.b0 = toolkit::fetchdouble(subptr,"value","b0")*CGS_U_muGauss; //microGauss
-        breg_wmap.psi0 = toolkit::fetchdouble(subptr,"value","psi0")*CGS_U_rad; //rad
-        breg_wmap.psi1 = toolkit::fetchdouble(subptr,"value","psi1")*CGS_U_rad; //rad
-        breg_wmap.chi0 = toolkit::fetchdouble(subptr,"value","chi0")*CGS_U_rad; //rad
+void Param::breg_param (tinyxml2::XMLDocument* doc){
+    // breg io
+    tinyxml2::XMLElement* ptr {toolkit::tracexml (doc,{"fieldio"})};
+    if (ptr->FirstChildElement("breg")!=nullptr){
+        grid_breg.read_permission = toolkit::fetchbool (ptr,"read","breg");
+        grid_breg.write_permission = toolkit::fetchbool (ptr,"write","breg");
+        grid_breg.filename = toolkit::fetchstring(ptr,"filename","breg");
     }
-    // bjaffe
-    else if(breg_type=="Jaffe"){
-        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Regular","Jaffe"})};
-        breg_jaffe.quadruple = toolkit::fetchbool(subptr,"cue","quadruple");
-        breg_jaffe.bss = toolkit::fetchbool(subptr,"cue","bss");
-        breg_jaffe.disk_amp = toolkit::fetchdouble(subptr,"value","disk_amp")*CGS_U_muGauss; //microG
-        breg_jaffe.disk_z0 = toolkit::fetchdouble(subptr,"value","disk_z0")*CGS_U_kpc; //kpc
-        breg_jaffe.halo_amp = toolkit::fetchdouble(subptr,"value","halo_amp")*CGS_U_muGauss; //microG
-        breg_jaffe.halo_z0 = toolkit::fetchdouble(subptr,"value","halo_z0")*CGS_U_kpc; //kpc
-        breg_jaffe.r_inner = toolkit::fetchdouble(subptr,"value","r_inner")*CGS_U_kpc; //kpc
-        breg_jaffe.r_scale = toolkit::fetchdouble(subptr,"value","r_scale")*CGS_U_kpc; //kpc
-        breg_jaffe.r_peak = toolkit::fetchdouble(subptr,"value","r_peak")*CGS_U_kpc; //kpc
-        breg_jaffe.ring = toolkit::fetchbool(subptr,"cue","ring");
-        breg_jaffe.ring_amp = toolkit::fetchdouble(subptr,"value","ring_amp")*CGS_U_muGauss; //microG
-        breg_jaffe.ring_r = toolkit::fetchdouble(subptr,"value","ring_r")*CGS_U_kpc; //kpc
-        breg_jaffe.bar = toolkit::fetchbool(subptr,"cue","bar");
-        breg_jaffe.bar_amp = toolkit::fetchdouble(subptr,"value","bar_amp")*CGS_U_muGauss; //microG
-        breg_jaffe.bar_a = toolkit::fetchdouble(subptr,"value","bar_a")*CGS_U_kpc; //kpc
-        breg_jaffe.bar_b = toolkit::fetchdouble(subptr,"value","bar_b")*CGS_U_kpc; //kpc
-        breg_jaffe.bar_phi0 = toolkit::fetchdouble(subptr,"value","bar_phi0")*CGS_U_rad; //rad
-        breg_jaffe.arm_num = toolkit::fetchunsigned(subptr,"value","arm_num");
-        breg_jaffe.arm_r0 = toolkit::fetchdouble(subptr,"value","arm_r0")*CGS_U_kpc; //kpc
-        breg_jaffe.arm_z0 = toolkit::fetchdouble(subptr,"value","arm_z0")*CGS_U_kpc; //kpc
-        breg_jaffe.arm_phi0.push_back(toolkit::fetchdouble(subptr,"value","arm_phi1")*CGS_U_rad); //rad
-        breg_jaffe.arm_phi0.push_back(toolkit::fetchdouble(subptr,"value","arm_phi2")*CGS_U_rad); //rad
-        breg_jaffe.arm_phi0.push_back(toolkit::fetchdouble(subptr,"value","arm_phi3")*CGS_U_rad); //rad
-        breg_jaffe.arm_phi0.push_back(toolkit::fetchdouble(subptr,"value","arm_phi4")*CGS_U_rad); //rad
-        breg_jaffe.arm_amp.push_back(toolkit::fetchdouble(subptr,"value","arm_amp1")*CGS_U_muGauss); //microG
-        breg_jaffe.arm_amp.push_back(toolkit::fetchdouble(subptr,"value","arm_amp2")*CGS_U_muGauss); //microG
-        breg_jaffe.arm_amp.push_back(toolkit::fetchdouble(subptr,"value","arm_amp3")*CGS_U_muGauss); //microG
-        breg_jaffe.arm_amp.push_back(toolkit::fetchdouble(subptr,"value","arm_amp4")*CGS_U_muGauss); //microG
-        breg_jaffe.arm_pitch = toolkit::fetchdouble(subptr,"value","arm_pitch")*CGS_U_rad; //rad
-        breg_jaffe.comp_c = toolkit::fetchdouble(subptr,"value","comp_c");
-        breg_jaffe.comp_d = toolkit::fetchdouble(subptr,"value","comp_d")*CGS_U_kpc; //kpc
-        breg_jaffe.comp_r = toolkit::fetchdouble(subptr,"value","comp_r")*CGS_U_kpc; //kpc
-        breg_jaffe.comp_p = toolkit::fetchdouble(subptr,"value","comp_p");
+    // breg internal
+    ptr = toolkit::tracexml(doc,{"magneticfield"});
+    grid_breg.build_permission = toolkit::fetchbool (ptr,"cue","regular");
+    // if no external read and internal model is active
+    if (grid_breg.build_permission and not grid_breg.read_permission){
+        breg_type = toolkit::fetchstring(ptr,"type","regular");
+        // bwmap
+        if (breg_type=="wmap"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"magneticfield","regular","wmap"})};
+            breg_wmap.b0 = toolkit::fetchdouble(subptr,"value","b0")*CGS_U_muGauss; //microGauss
+            breg_wmap.psi0 = toolkit::fetchdouble(subptr,"value","psi0")*CGS_U_rad; //rad
+            breg_wmap.psi1 = toolkit::fetchdouble(subptr,"value","psi1")*CGS_U_rad; //rad
+            breg_wmap.chi0 = toolkit::fetchdouble(subptr,"value","chi0")*CGS_U_rad; //rad
+        }
+        // bjaffe
+        else if (breg_type=="jaffe"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"magneticfield","regular","jaffe"})};
+            breg_jaffe.quadruple = toolkit::fetchbool(subptr,"cue","quadruple");
+            breg_jaffe.bss = toolkit::fetchbool(subptr,"cue","bss");
+            breg_jaffe.disk_amp = toolkit::fetchdouble(subptr,"value","disk_amp")*CGS_U_muGauss; //microG
+            breg_jaffe.disk_z0 = toolkit::fetchdouble(subptr,"value","disk_z0")*CGS_U_kpc; //kpc
+            breg_jaffe.halo_amp = toolkit::fetchdouble(subptr,"value","halo_amp")*CGS_U_muGauss; //microG
+            breg_jaffe.halo_z0 = toolkit::fetchdouble(subptr,"value","halo_z0")*CGS_U_kpc; //kpc
+            breg_jaffe.r_inner = toolkit::fetchdouble(subptr,"value","r_inner")*CGS_U_kpc; //kpc
+            breg_jaffe.r_scale = toolkit::fetchdouble(subptr,"value","r_scale")*CGS_U_kpc; //kpc
+            breg_jaffe.r_peak = toolkit::fetchdouble(subptr,"value","r_peak")*CGS_U_kpc; //kpc
+            breg_jaffe.ring = toolkit::fetchbool(subptr,"cue","ring");
+            breg_jaffe.ring_amp = toolkit::fetchdouble(subptr,"value","ring_amp")*CGS_U_muGauss; //microG
+            breg_jaffe.ring_r = toolkit::fetchdouble(subptr,"value","ring_r")*CGS_U_kpc; //kpc
+            breg_jaffe.bar = toolkit::fetchbool(subptr,"cue","bar");
+            breg_jaffe.bar_amp = toolkit::fetchdouble(subptr,"value","bar_amp")*CGS_U_muGauss; //microG
+            breg_jaffe.bar_a = toolkit::fetchdouble(subptr,"value","bar_a")*CGS_U_kpc; //kpc
+            breg_jaffe.bar_b = toolkit::fetchdouble(subptr,"value","bar_b")*CGS_U_kpc; //kpc
+            breg_jaffe.bar_phi0 = toolkit::fetchdouble(subptr,"value","bar_phi0")*CGS_U_rad; //rad
+            breg_jaffe.arm_num = toolkit::fetchunsigned(subptr,"value","arm_num");
+            breg_jaffe.arm_r0 = toolkit::fetchdouble(subptr,"value","arm_r0")*CGS_U_kpc; //kpc
+            breg_jaffe.arm_z0 = toolkit::fetchdouble(subptr,"value","arm_z0")*CGS_U_kpc; //kpc
+            breg_jaffe.arm_phi0.push_back(toolkit::fetchdouble(subptr,"value","arm_phi1")*CGS_U_rad); //rad
+            breg_jaffe.arm_phi0.push_back(toolkit::fetchdouble(subptr,"value","arm_phi2")*CGS_U_rad); //rad
+            breg_jaffe.arm_phi0.push_back(toolkit::fetchdouble(subptr,"value","arm_phi3")*CGS_U_rad); //rad
+            breg_jaffe.arm_phi0.push_back(toolkit::fetchdouble(subptr,"value","arm_phi4")*CGS_U_rad); //rad
+            breg_jaffe.arm_amp.push_back(toolkit::fetchdouble(subptr,"value","arm_amp1")*CGS_U_muGauss); //microG
+            breg_jaffe.arm_amp.push_back(toolkit::fetchdouble(subptr,"value","arm_amp2")*CGS_U_muGauss); //microG
+            breg_jaffe.arm_amp.push_back(toolkit::fetchdouble(subptr,"value","arm_amp3")*CGS_U_muGauss); //microG
+            breg_jaffe.arm_amp.push_back(toolkit::fetchdouble(subptr,"value","arm_amp4")*CGS_U_muGauss); //microG
+            breg_jaffe.arm_pitch = toolkit::fetchdouble(subptr,"value","arm_pitch")*CGS_U_rad; //rad
+            breg_jaffe.comp_c = toolkit::fetchdouble(subptr,"value","comp_c");
+            breg_jaffe.comp_d = toolkit::fetchdouble(subptr,"value","comp_d")*CGS_U_kpc; //kpc
+            breg_jaffe.comp_r = toolkit::fetchdouble(subptr,"value","comp_r")*CGS_U_kpc; //kpc
+            breg_jaffe.comp_p = toolkit::fetchdouble(subptr,"value","comp_p");
+        }
+        else if (breg_type=="test"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"magneticfield","regular","test"})};
+            breg_test.b0 = toolkit::fetchdouble(subptr,"value","b0")*CGS_U_muGauss; //microGauss
+            breg_test.l0 = toolkit::fetchdouble(subptr,"value","l0")*CGS_U_rad; //rad
+            breg_test.r = toolkit::fetchdouble(subptr,"value","r");
+        }
+        else{
+            throw std::runtime_error("unsupported breg model");
+        }
     }
-#ifndef NDEBUG
-    // testing
-    else if(breg_type=="Test"){
-        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Regular","Test"})};
-        breg_test.b0 = toolkit::fetchdouble(subptr,"value","b0")*CGS_U_muGauss; //microGauss
-        breg_test.l0 = toolkit::fetchdouble(subptr,"value","l0")*CGS_U_rad; //rad
-        breg_test.r = toolkit::fetchdouble(subptr,"value","r");
+    // breg io box
+    if (grid_breg.read_permission or grid_breg.write_permission){
+        // breg box
+        tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"grid","box_breg"})};
+        grid_breg.nx = toolkit::fetchunsigned (subptr,"value","nx",800);
+        grid_breg.ny = toolkit::fetchunsigned (subptr,"value","ny",800);
+        grid_breg.nz = toolkit::fetchunsigned (subptr,"value","nz",160);
+        grid_breg.full_size = grid_breg.nx*grid_breg.ny*grid_breg.nz;
+        grid_breg.x_max = CGS_U_kpc*toolkit::fetchdouble (subptr,"value","x_max",20);
+        grid_breg.x_min = CGS_U_kpc*toolkit::fetchdouble (subptr,"value","x_min",-20);
+        grid_breg.y_max = CGS_U_kpc*toolkit::fetchdouble (subptr,"value","y_max",20);
+        grid_breg.y_min = CGS_U_kpc*toolkit::fetchdouble (subptr,"value","y_min",-20);
+        grid_breg.z_max = CGS_U_kpc*toolkit::fetchdouble (subptr,"value","z_max",4);
+        grid_breg.z_min = CGS_U_kpc*toolkit::fetchdouble (subptr,"value","z_min",-4);
     }
-#endif
-    if(toolkit::fetchbool(ptr,"cue","Random")){
+}
+
+void Param::brnd_param (tinyxml2::XMLDocument* doc){
+    // brnd io
+    tinyxml2::XMLElement* ptr {toolkit::tracexml (doc,{"fieldio"})};
+    if (ptr->FirstChildElement("brnd")!=nullptr){
+        grid_brnd.read_permission = toolkit::fetchbool (ptr,"read","brnd");
+        grid_brnd.write_permission = toolkit::fetchbool (ptr,"write","brnd");
+        grid_brnd.filename = toolkit::fetchstring (ptr,"filename","brnd");
+    }
+    // brnd internal
+    ptr = toolkit::tracexml(doc,{"magneticfield"});
+    grid_brnd.build_permission = toolkit::fetchbool (ptr,"cue","random");
+    // if no external read and internal model is active
+    if (grid_brnd.build_permission and not grid_brnd.read_permission){
         // random seed
-        brnd_seed = toolkit::fetchunsigned(ptr,"seed","Random");
-        brnd_type = toolkit::fetchstring(ptr,"type","Random");
+        brnd_seed = toolkit::fetchunsigned(ptr,"seed","random");
+        brnd_type = toolkit::fetchstring(ptr,"type","random");
         // brnd_global
-        if(brnd_type=="Global"){
-            tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Random","Global"})};
+        if (brnd_type=="global"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"magneticfield","random","global"})};
             brnd_method = toolkit::fetchstring(subptr,"type");
-            if(brnd_method=="ES"){
-                subptr = toolkit::tracexml(doc,{"MagneticField","Random","Global","ES"});
+            if (brnd_method=="es"){
+                subptr = toolkit::tracexml(doc,{"magneticfield","random","global","es"});
                 brnd_es.rms = toolkit::fetchdouble(subptr,"value","rms")*CGS_U_muGauss;
                 brnd_es.k0 = toolkit::fetchdouble(subptr,"value","k0");
                 brnd_es.a0 = toolkit::fetchdouble(subptr,"value","a0");
@@ -268,17 +241,20 @@ void Param::b_param (tinyxml2::XMLDocument *doc){
                 brnd_es.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc;
                 brnd_es.z0 = toolkit::fetchdouble(subptr,"value","z0")*CGS_U_kpc;
             }
-            else if(brnd_method=="Jaffe"){
-                subptr = toolkit::tracexml(doc,{"MagneticField","Random","Global","Jaffe"});
+            else if (brnd_method=="jaffe"){
+                subptr = toolkit::tracexml(doc,{"magneticfield","random","global","jaffe"});
                 // to be implemented
+            }
+            else{
+                throw std::runtime_error("unsupported brnd model");
             }
         }
         // brnd_local
-        else if(brnd_type=="Local"){
-            tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"MagneticField","Random","Local"})};
+        else if (brnd_type=="local"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"magneticfield","random","local"})};
             brnd_method = toolkit::fetchstring(subptr,"type");
-            if(brnd_method=="MHD"){
-                subptr = toolkit::tracexml(doc,{"MagneticField","Random","Local","MHD"});
+            if (brnd_method=="mhd"){
+                subptr = toolkit::tracexml(doc,{"magneticfield","random","local","mhd"});
                 brnd_mhd.pa0 = toolkit::fetchdouble(subptr,"value","pa0")*CGS_U_muGauss*CGS_U_muGauss;
                 brnd_mhd.pf0 = toolkit::fetchdouble(subptr,"value","pf0")*CGS_U_muGauss*CGS_U_muGauss;
                 brnd_mhd.ps0 = toolkit::fetchdouble(subptr,"value","ps0")*CGS_U_muGauss*CGS_U_muGauss;
@@ -289,157 +265,267 @@ void Param::b_param (tinyxml2::XMLDocument *doc){
                 brnd_mhd.beta = toolkit::fetchdouble(subptr,"value","beta");
                 brnd_mhd.ma = toolkit::fetchdouble(subptr,"value","ma");
             }
+            else{
+                throw std::runtime_error("unsupported brnd model");
+            }
         }
+        else{
+            throw std::runtime_error("unsupported brnd type");
+        }
+    }
+    // brnd io box
+    if (grid_brnd.read_permission or grid_brnd.write_permission or grid_brnd.build_permission){
+        // brnd box
+        ptr = toolkit::tracexml(doc,{"grid","box_brnd"});
+        grid_brnd.nx = toolkit::fetchunsigned (ptr,"value","nx",800);
+        grid_brnd.ny = toolkit::fetchunsigned (ptr,"value","ny",800);
+        grid_brnd.nz = toolkit::fetchunsigned (ptr,"value","nz",160);
+        grid_brnd.full_size = grid_brnd.nx*grid_brnd.ny*grid_brnd.nz;
+        grid_brnd.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max",20);
+        grid_brnd.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min",-20);
+        grid_brnd.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max",20);
+        grid_brnd.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min",-20);
+        grid_brnd.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max",4);
+        grid_brnd.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min",-4);
     }
 }
 
-void Param::fe_param (tinyxml2::XMLDocument *doc){
-    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"FreeElectron"})};
-    fereg_type = toolkit::fetchstring(ptr,"type","Regular");
-    // YMW16
-    if(fereg_type=="YMW16"){
-        // Warp_Sun
-        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"FreeElectron","Regular","YMW16","Warp"})};
-        fereg_ymw16.R_warp = toolkit::fetchdouble(subptr,"value","R_warp")*CGS_U_kpc; //kpc
-        fereg_ymw16.R0 = toolkit::fetchdouble(subptr,"value","R0")*CGS_U_kpc; //kpc
-        fereg_ymw16.t0_Gamma_w = toolkit::fetchdouble(subptr,"value","Gamma_w");
-        // thick disk
-        subptr = toolkit::tracexml(doc,{"FreeElectron","Regular","YMW16","ThickDisk"});
-        fereg_ymw16.t1_Ad = toolkit::fetchdouble(subptr,"value","Ad")*CGS_U_pc;//pc
-        fereg_ymw16.t1_Bd = toolkit::fetchdouble(subptr,"value","Bd")*CGS_U_pc;//pc
-        fereg_ymw16.t1_n1 = toolkit::fetchdouble(subptr,"value","n1");//pccm
-        fereg_ymw16.t1_H1 = toolkit::fetchdouble(subptr,"value","H1")*CGS_U_pc;//pc
-        // thin disk
-        subptr = toolkit::tracexml(doc,{"FreeElectron","Regular","YMW16","ThinDisk"});
-        fereg_ymw16.t2_A2 = toolkit::fetchdouble(subptr,"value","A2")*CGS_U_pc;//pc
-        fereg_ymw16.t2_B2 = toolkit::fetchdouble(subptr,"value","B2")*CGS_U_pc;//pc
-        fereg_ymw16.t2_n2 = toolkit::fetchdouble(subptr,"value","n2");//pccm
-        fereg_ymw16.t2_K2 = toolkit::fetchdouble(subptr,"value","K2");
-        // spiral arm
-        subptr = toolkit::tracexml(doc,{"FreeElectron","Regular","YMW16","SpiralArm"});
-        fereg_ymw16.t3_B2s = toolkit::fetchdouble(subptr,"value","B2s")*CGS_U_pc; //pc
-        fereg_ymw16.t3_narm[0] = toolkit::fetchdouble(subptr,"value","Ele_arm_0");//pccm
-        fereg_ymw16.t3_narm[1] = toolkit::fetchdouble(subptr,"value","Ele_arm_1");
-        fereg_ymw16.t3_narm[2] = toolkit::fetchdouble(subptr,"value","Ele_arm_2");
-        fereg_ymw16.t3_narm[3] = toolkit::fetchdouble(subptr,"value","Ele_arm_3");
-        fereg_ymw16.t3_narm[4] = toolkit::fetchdouble(subptr,"value","Ele_arm_4");
-        fereg_ymw16.t3_warm[0] = toolkit::fetchdouble(subptr,"value","Wid_arm_0")*CGS_U_pc;//pc
-        fereg_ymw16.t3_warm[1] = toolkit::fetchdouble(subptr,"value","Wid_arm_1")*CGS_U_pc;
-        fereg_ymw16.t3_warm[2] = toolkit::fetchdouble(subptr,"value","Wid_arm_2")*CGS_U_pc;
-        fereg_ymw16.t3_warm[3] = toolkit::fetchdouble(subptr,"value","Wid_arm_3")*CGS_U_pc;
-        fereg_ymw16.t3_warm[4] = toolkit::fetchdouble(subptr,"value","Wid_arm_4")*CGS_U_pc;
-        fereg_ymw16.t3_rmin[0] = toolkit::fetchdouble(subptr,"value","Rref_arm_0")*CGS_U_kpc;//kpc
-        fereg_ymw16.t3_rmin[1] = toolkit::fetchdouble(subptr,"value","Rref_arm_1")*CGS_U_kpc;
-        fereg_ymw16.t3_rmin[2] = toolkit::fetchdouble(subptr,"value","Rref_arm_2")*CGS_U_kpc;
-        fereg_ymw16.t3_rmin[3] = toolkit::fetchdouble(subptr,"value","Rref_arm_3")*CGS_U_kpc;
-        fereg_ymw16.t3_rmin[4] = toolkit::fetchdouble(subptr,"value","Rref_arm_4")*CGS_U_kpc;
-        fereg_ymw16.t3_phimin[0] = toolkit::fetchdouble(subptr,"value","Phiref_arm_0")*CGS_U_rad;//rad
-        fereg_ymw16.t3_phimin[1] = toolkit::fetchdouble(subptr,"value","Phiref_arm_1")*CGS_U_rad;//rad
-        fereg_ymw16.t3_phimin[2] = toolkit::fetchdouble(subptr,"value","Phiref_arm_2")*CGS_U_rad;//rad
-        fereg_ymw16.t3_phimin[3] = toolkit::fetchdouble(subptr,"value","Phiref_arm_3")*CGS_U_rad;//rad
-        fereg_ymw16.t3_phimin[4] = toolkit::fetchdouble(subptr,"value","Phiref_arm_4")*CGS_U_rad;//rad
-        fereg_ymw16.t3_tpitch[0] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_0")*CGS_U_rad);
-        fereg_ymw16.t3_tpitch[1] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_1")*CGS_U_rad);
-        fereg_ymw16.t3_tpitch[2] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_2")*CGS_U_rad);
-        fereg_ymw16.t3_tpitch[3] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_3")*CGS_U_rad);
-        fereg_ymw16.t3_tpitch[4] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_4")*CGS_U_rad);
-        fereg_ymw16.t3_cpitch[0] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_0")*CGS_U_rad);
-        fereg_ymw16.t3_cpitch[1] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_1")*CGS_U_rad);
-        fereg_ymw16.t3_cpitch[2] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_2")*CGS_U_rad);
-        fereg_ymw16.t3_cpitch[3] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_3")*CGS_U_rad);
-        fereg_ymw16.t3_cpitch[4] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_4")*CGS_U_rad);
-        fereg_ymw16.t3_Aa = toolkit::fetchdouble(subptr,"value","Aa")*CGS_U_pc;//pc
-        fereg_ymw16.t3_Ka = toolkit::fetchdouble(subptr,"value","Ka");
-        fereg_ymw16.t3_ncn = toolkit::fetchdouble(subptr,"value","ncn");
-        fereg_ymw16.t3_thetacn = toolkit::fetchdouble(subptr,"value","thetacn");//deg
-        fereg_ymw16.t3_wcn = toolkit::fetchdouble(subptr,"value","wcn");//deg
-        fereg_ymw16.t3_nsg = toolkit::fetchdouble(subptr,"value","nsg");
-        fereg_ymw16.t3_thetasg = toolkit::fetchdouble(subptr,"value","thetasg");//deg
-        fereg_ymw16.t3_wsg = toolkit::fetchdouble(subptr,"value","wsg");//deg
-        // gc
-        subptr = toolkit::tracexml(doc,{"FreeElectron","Regular","YMW16","GalCenter"});
-        fereg_ymw16.t4_ngc = toolkit::fetchdouble(subptr,"value","ngc");//pccm
-        fereg_ymw16.t4_Agc = toolkit::fetchdouble(subptr,"value","Agc")*CGS_U_pc;//pc
-        fereg_ymw16.t4_Hgc = toolkit::fetchdouble(subptr,"value","Hgc")*CGS_U_pc;//pc
-        // Gum
-        subptr = toolkit::tracexml(doc,{"FreeElectron","Regular","YMW16","GumNebula"});
-        fereg_ymw16.t5_ngn = toolkit::fetchdouble(subptr,"value","ngn");//pccm
-        fereg_ymw16.t5_Wgn = toolkit::fetchdouble(subptr,"value","Wgn")*CGS_U_pc;//pc
-        fereg_ymw16.t5_Agn = toolkit::fetchdouble(subptr,"value","Agn")*CGS_U_pc;//pc
-        fereg_ymw16.t5_Kgn = toolkit::fetchdouble(subptr,"value","Kgn");
-        // Local Bubble
-        subptr = toolkit::tracexml(doc,{"FreeElectron","Regular","YMW16","LocalBubble"});
-        fereg_ymw16.t6_J_LB = toolkit::fetchdouble(subptr,"value","J_LB");
-        fereg_ymw16.t6_nlb1 = toolkit::fetchdouble(subptr,"value","nlb1");//pccm
-        fereg_ymw16.t6_thetalb1 = toolkit::fetchdouble(subptr,"value","thetalb1");//deg
-        fereg_ymw16.t6_detlb1 = toolkit::fetchdouble(subptr,"value","detlb1");//deg
-        fereg_ymw16.t6_wlb1 = toolkit::fetchdouble(subptr,"value","wlb1")*CGS_U_pc;//pc
-        fereg_ymw16.t6_hlb1 = toolkit::fetchdouble(subptr,"value","hlb1")*CGS_U_pc;//pc
-        fereg_ymw16.t6_nlb2 = toolkit::fetchdouble(subptr,"value","nlb2");//pccm
-        fereg_ymw16.t6_thetalb2 = toolkit::fetchdouble(subptr,"value","thetalb2");//deg
-        fereg_ymw16.t6_detlb2 = toolkit::fetchdouble(subptr,"value","detlb2");//deg
-        fereg_ymw16.t6_wlb2 = toolkit::fetchdouble(subptr,"value","wlb2")*CGS_U_pc;//pc
-        fereg_ymw16.t6_hlb2 = toolkit::fetchdouble(subptr,"value","hlb2")*CGS_U_pc;//pc
-        // Loop I
-        subptr = toolkit::tracexml(doc,{"FreeElectron","Regular","YMW16","LoopI"});
-        fereg_ymw16.t7_nLI = toolkit::fetchdouble(subptr,"value","nLI");//pccm
-        fereg_ymw16.t7_RLI = toolkit::fetchdouble(subptr,"value","RLI")*CGS_U_pc;//pc
-        fereg_ymw16.t7_WLI = toolkit::fetchdouble(subptr,"value","WLI")*CGS_U_pc;//pc
-        fereg_ymw16.t7_detthetaLI = toolkit::fetchdouble(subptr,"value","detthetaLI");//deg
-        fereg_ymw16.t7_thetaLI = toolkit::fetchdouble(subptr,"value","thetaLI");//deg
+void Param::fereg_param (tinyxml2::XMLDocument* doc){
+    // fereg io
+    tinyxml2::XMLElement* ptr {toolkit::tracexml (doc,{"fieldio"})};
+    if (ptr->FirstChildElement("fereg")!=nullptr){
+        grid_fereg.read_permission = toolkit::fetchbool (ptr,"read","fereg");
+        grid_fereg.write_permission = toolkit::fetchbool (ptr,"write","fereg");
+        grid_fereg.filename = toolkit::fetchstring (ptr,"filename","fereg");
     }
-#ifndef NDEBUG
-    // testing
-    else if(fereg_type=="Test"){
-        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"FreeElectron","Regular","Test"})};
-        fereg_test.n0 = toolkit::fetchdouble(subptr,"value","n0");
-        fereg_test.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
+    // fereg internal
+    ptr = toolkit::tracexml(doc,{"freeelectron"});
+    grid_fereg.build_permission = toolkit::fetchbool (ptr,"cue","regular");
+    if (grid_fereg.build_permission){
+        fereg_type = toolkit::fetchstring(ptr,"type","regular");
+        // YMW16
+        if (fereg_type=="ymw16"){
+            // Warp_Sun
+            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"freeelectron","regular","ymw16","warp"})};
+            fereg_ymw16.r_warp = toolkit::fetchdouble(subptr,"value","r_warp")*CGS_U_kpc; //kpc
+            fereg_ymw16.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
+            fereg_ymw16.t0_gamma_w = toolkit::fetchdouble(subptr,"value","gamma_w");
+            // thick disk
+            subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","thickdisk"});
+            fereg_ymw16.t1_ad = toolkit::fetchdouble(subptr,"value","ad")*CGS_U_pc;//pc
+            fereg_ymw16.t1_bd = toolkit::fetchdouble(subptr,"value","bd")*CGS_U_pc;//pc
+            fereg_ymw16.t1_n1 = toolkit::fetchdouble(subptr,"value","n1");//pccm
+            fereg_ymw16.t1_h1 = toolkit::fetchdouble(subptr,"value","h1")*CGS_U_pc;//pc
+            // thin disk
+            subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","thindisk"});
+            fereg_ymw16.t2_a2 = toolkit::fetchdouble(subptr,"value","a2")*CGS_U_pc;//pc
+            fereg_ymw16.t2_b2 = toolkit::fetchdouble(subptr,"value","b2")*CGS_U_pc;//pc
+            fereg_ymw16.t2_n2 = toolkit::fetchdouble(subptr,"value","n2");//pccm
+            fereg_ymw16.t2_k2 = toolkit::fetchdouble(subptr,"value","k2");
+            // spiral arm
+            subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","spiralarm"});
+            fereg_ymw16.t3_b2s = toolkit::fetchdouble(subptr,"value","b2s")*CGS_U_pc; //pc
+            fereg_ymw16.t3_narm[0] = toolkit::fetchdouble(subptr,"value","ele_arm_0");//pccm
+            fereg_ymw16.t3_narm[1] = toolkit::fetchdouble(subptr,"value","ele_arm_1");
+            fereg_ymw16.t3_narm[2] = toolkit::fetchdouble(subptr,"value","ele_arm_2");
+            fereg_ymw16.t3_narm[3] = toolkit::fetchdouble(subptr,"value","ele_arm_3");
+            fereg_ymw16.t3_narm[4] = toolkit::fetchdouble(subptr,"value","ele_arm_4");
+            fereg_ymw16.t3_warm[0] = toolkit::fetchdouble(subptr,"value","wid_arm_0")*CGS_U_pc;//pc
+            fereg_ymw16.t3_warm[1] = toolkit::fetchdouble(subptr,"value","wid_arm_1")*CGS_U_pc;
+            fereg_ymw16.t3_warm[2] = toolkit::fetchdouble(subptr,"value","wid_arm_2")*CGS_U_pc;
+            fereg_ymw16.t3_warm[3] = toolkit::fetchdouble(subptr,"value","wid_arm_3")*CGS_U_pc;
+            fereg_ymw16.t3_warm[4] = toolkit::fetchdouble(subptr,"value","wid_arm_4")*CGS_U_pc;
+            fereg_ymw16.t3_rmin[0] = toolkit::fetchdouble(subptr,"value","rref_arm_0")*CGS_U_kpc;//kpc
+            fereg_ymw16.t3_rmin[1] = toolkit::fetchdouble(subptr,"value","rref_arm_1")*CGS_U_kpc;
+            fereg_ymw16.t3_rmin[2] = toolkit::fetchdouble(subptr,"value","rref_arm_2")*CGS_U_kpc;
+            fereg_ymw16.t3_rmin[3] = toolkit::fetchdouble(subptr,"value","rref_arm_3")*CGS_U_kpc;
+            fereg_ymw16.t3_rmin[4] = toolkit::fetchdouble(subptr,"value","rref_arm_4")*CGS_U_kpc;
+            fereg_ymw16.t3_phimin[0] = toolkit::fetchdouble(subptr,"value","phiref_arm_0")*CGS_U_rad;//rad
+            fereg_ymw16.t3_phimin[1] = toolkit::fetchdouble(subptr,"value","phiref_arm_1")*CGS_U_rad;//rad
+            fereg_ymw16.t3_phimin[2] = toolkit::fetchdouble(subptr,"value","phiref_arm_2")*CGS_U_rad;//rad
+            fereg_ymw16.t3_phimin[3] = toolkit::fetchdouble(subptr,"value","phiref_arm_3")*CGS_U_rad;//rad
+            fereg_ymw16.t3_phimin[4] = toolkit::fetchdouble(subptr,"value","phiref_arm_4")*CGS_U_rad;//rad
+            fereg_ymw16.t3_tpitch[0] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_0")*CGS_U_rad);
+            fereg_ymw16.t3_tpitch[1] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_1")*CGS_U_rad);
+            fereg_ymw16.t3_tpitch[2] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_2")*CGS_U_rad);
+            fereg_ymw16.t3_tpitch[3] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_3")*CGS_U_rad);
+            fereg_ymw16.t3_tpitch[4] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_4")*CGS_U_rad);
+            fereg_ymw16.t3_cpitch[0] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_0")*CGS_U_rad);
+            fereg_ymw16.t3_cpitch[1] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_1")*CGS_U_rad);
+            fereg_ymw16.t3_cpitch[2] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_2")*CGS_U_rad);
+            fereg_ymw16.t3_cpitch[3] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_3")*CGS_U_rad);
+            fereg_ymw16.t3_cpitch[4] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_4")*CGS_U_rad);
+            fereg_ymw16.t3_aa = toolkit::fetchdouble(subptr,"value","aa")*CGS_U_pc;//pc
+            fereg_ymw16.t3_ka = toolkit::fetchdouble(subptr,"value","ka");
+            fereg_ymw16.t3_ncn = toolkit::fetchdouble(subptr,"value","ncn");
+            fereg_ymw16.t3_thetacn = toolkit::fetchdouble(subptr,"value","thetacn");//deg
+            fereg_ymw16.t3_wcn = toolkit::fetchdouble(subptr,"value","wcn");//deg
+            fereg_ymw16.t3_nsg = toolkit::fetchdouble(subptr,"value","nsg");
+            fereg_ymw16.t3_thetasg = toolkit::fetchdouble(subptr,"value","thetasg");//deg
+            fereg_ymw16.t3_wsg = toolkit::fetchdouble(subptr,"value","wsg");//deg
+            // gc
+            subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","galcenter"});
+            fereg_ymw16.t4_ngc = toolkit::fetchdouble(subptr,"value","ngc");//pccm
+            fereg_ymw16.t4_agc = toolkit::fetchdouble(subptr,"value","agc")*CGS_U_pc;//pc
+            fereg_ymw16.t4_hgc = toolkit::fetchdouble(subptr,"value","hgc")*CGS_U_pc;//pc
+            // Gum
+            subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","gumnebula"});
+            fereg_ymw16.t5_ngn = toolkit::fetchdouble(subptr,"value","ngn");//pccm
+            fereg_ymw16.t5_wgn = toolkit::fetchdouble(subptr,"value","wgn")*CGS_U_pc;//pc
+            fereg_ymw16.t5_agn = toolkit::fetchdouble(subptr,"value","agn")*CGS_U_pc;//pc
+            fereg_ymw16.t5_kgn = toolkit::fetchdouble(subptr,"value","kgn");
+            // Local Bubble
+            subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","localbubble"});
+            fereg_ymw16.t6_j_lb = toolkit::fetchdouble(subptr,"value","j_lb");
+            fereg_ymw16.t6_nlb1 = toolkit::fetchdouble(subptr,"value","nlb1");//pccm
+            fereg_ymw16.t6_thetalb1 = toolkit::fetchdouble(subptr,"value","thetalb1");//deg
+            fereg_ymw16.t6_detlb1 = toolkit::fetchdouble(subptr,"value","detlb1");//deg
+            fereg_ymw16.t6_wlb1 = toolkit::fetchdouble(subptr,"value","wlb1")*CGS_U_pc;//pc
+            fereg_ymw16.t6_hlb1 = toolkit::fetchdouble(subptr,"value","hlb1")*CGS_U_pc;//pc
+            fereg_ymw16.t6_nlb2 = toolkit::fetchdouble(subptr,"value","nlb2");//pccm
+            fereg_ymw16.t6_thetalb2 = toolkit::fetchdouble(subptr,"value","thetalb2");//deg
+            fereg_ymw16.t6_detlb2 = toolkit::fetchdouble(subptr,"value","detlb2");//deg
+            fereg_ymw16.t6_wlb2 = toolkit::fetchdouble(subptr,"value","wlb2")*CGS_U_pc;//pc
+            fereg_ymw16.t6_hlb2 = toolkit::fetchdouble(subptr,"value","hlb2")*CGS_U_pc;//pc
+            // Loop I
+            subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","loopi"});
+            fereg_ymw16.t7_nli = toolkit::fetchdouble(subptr,"value","nli");//pccm
+            fereg_ymw16.t7_rli = toolkit::fetchdouble(subptr,"value","rli")*CGS_U_pc;//pc
+            fereg_ymw16.t7_wli = toolkit::fetchdouble(subptr,"value","wli")*CGS_U_pc;//pc
+            fereg_ymw16.t7_detthetali = toolkit::fetchdouble(subptr,"value","detthetali");//deg
+            fereg_ymw16.t7_thetali = toolkit::fetchdouble(subptr,"value","thetali");//deg
+        }
+        // testing
+        else if (fereg_type=="test"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"freeelectron","regular","test"})};
+            fereg_test.n0 = toolkit::fetchdouble(subptr,"value","n0");
+            fereg_test.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
+        }
+        else{
+            throw std::runtime_error("unsupported fereg model");
+        }
     }
-#endif
-    if(toolkit::fetchbool(ptr,"cue","Random")){
+    // breg io box
+    if (grid_fereg.read_permission or grid_fereg.write_permission){
+        ptr = toolkit::tracexml (doc,{"grid","box_fereg"});
+        grid_fereg.nx = toolkit::fetchunsigned (ptr,"value","nx",800);
+        grid_fereg.ny = toolkit::fetchunsigned (ptr,"value","ny",800);
+        grid_fereg.nz = toolkit::fetchunsigned (ptr,"value","nz",800);
+        grid_fereg.full_size = grid_fereg.nx*grid_fereg.ny*grid_fereg.nz;
+        grid_fereg.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max",20);
+        grid_fereg.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min",-20);
+        grid_fereg.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max",20);
+        grid_fereg.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min",-20);
+        grid_fereg.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max",4);
+        grid_fereg.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min",-4);
+    }
+}
+
+void Param::fernd_param (tinyxml2::XMLDocument* doc){
+    // fernd io
+    tinyxml2::XMLElement* ptr {toolkit::tracexml (doc,{"fieldio"})};
+    if (ptr->FirstChildElement("fernd")!=nullptr){
+        grid_fernd.read_permission = toolkit::fetchbool (ptr,"read","fernd");
+        grid_fernd.write_permission = toolkit::fetchbool (ptr,"write","fernd");
+        grid_fernd.filename = toolkit::fetchstring (ptr,"filename","fernd");
+    }
+    // fernd internal
+    ptr = toolkit::tracexml(doc,{"freeelectron"});
+    grid_fernd.build_permission = toolkit::fetchbool (ptr,"cue","random");
+    if (grid_fernd.build_permission){
         // random seed
-        fernd_seed = toolkit::fetchunsigned(ptr,"seed","Random");
-        fernd_type = toolkit::fetchstring(ptr,"type","Random");
+        fernd_seed = toolkit::fetchunsigned(ptr,"seed","random");
+        fernd_type = toolkit::fetchstring(ptr,"type","random");
         // global turbulent
-        if(fernd_type=="Global"){
-            tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"FreeElectron","Random","Global"})};
+        if (fernd_type=="global"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"freeelectron","random","global"})};
             fernd_method = toolkit::fetchstring(subptr,"type");
-            if(fernd_method=="DFT"){
-                subptr = toolkit::tracexml(doc,{"FreeElectron","Random","Global","DFT"});
+            if (fernd_method=="dft"){
+                subptr = toolkit::tracexml(doc,{"freeelectron","random","global","dft"});
                 fernd_dft.rms = toolkit::fetchdouble(subptr,"value","rms");
                 fernd_dft.k0 = toolkit::fetchdouble(subptr,"value","k0");
                 fernd_dft.a0 = toolkit::fetchdouble(subptr,"value","a0");
                 fernd_dft.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc;
                 fernd_dft.z0 = toolkit::fetchdouble(subptr,"value","z0")*CGS_U_kpc;
             }
+            else{
+                throw std::runtime_error("unsupported fernd model");
+            }
         }
+        else{
+            throw std::runtime_error("unsupported fernd type");
+        }
+    }
+    // fernd io grid
+    if (grid_fernd.read_permission or grid_fernd.write_permission or grid_fernd.build_permission){
+        ptr = toolkit::tracexml (doc,{"grid","box_fernd"});
+        grid_fernd.nx = toolkit::fetchunsigned (ptr,"value","nx",800);
+        grid_fernd.ny = toolkit::fetchunsigned (ptr,"value","ny",800);
+        grid_fernd.nz = toolkit::fetchunsigned (ptr,"value","nz",160);
+        grid_fernd.full_size = grid_fernd.nx*grid_fernd.ny*grid_fernd.nz;
+        grid_fernd.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max",20);
+        grid_fernd.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min",-20);
+        grid_fernd.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max",20);
+        grid_fernd.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min",-20);
+        grid_fernd.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max",4);
+        grid_fernd.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min",-4);
     }
 }
 
-void Param::cre_param (tinyxml2::XMLDocument *doc){
-    tinyxml2::XMLElement *ptr {toolkit::tracexml(doc,{"CRE"})};
-    cre_type = ptr->Attribute("type");
-    // analytical
-    if(cre_type=="Analytic"){
-        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"CRE","Analytic"})};
-        cre_ana.alpha = toolkit::fetchdouble(subptr,"value","alpha");
-        cre_ana.beta = toolkit::fetchdouble(subptr,"value","beta");
-        cre_ana.theta = toolkit::fetchdouble(subptr,"value","theta");
-        cre_ana.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
-        cre_ana.z0 = toolkit::fetchdouble(subptr,"value","z0")*CGS_U_kpc; //kpc
-        cre_ana.E0 = toolkit::fetchdouble(subptr,"value","E0")*CGS_U_GeV; //GeV
-        cre_ana.j0 = toolkit::fetchdouble(subptr,"value","j0");
+void Param::cre_param (tinyxml2::XMLDocument* doc){
+    // cre io
+    tinyxml2::XMLElement* ptr {toolkit::tracexml (doc,{"fieldio"})};
+    if (ptr->FirstChildElement("cre")!=nullptr){
+        grid_cre.read_permission = toolkit::fetchbool (ptr,"read","cre");
+        grid_cre.write_permission = toolkit::fetchbool (ptr,"write","cre");
+        grid_cre.filename = toolkit::fetchstring (ptr,"filename","cre");
     }
-#ifndef NDEBUG
-    // testing
-    else if(cre_type=="Test"){
-        tinyxml2::XMLElement *subptr {toolkit::tracexml(doc,{"CRE","Test"})};
-        cre_test.alpha = toolkit::fetchdouble(subptr,"value","alpha");
-        cre_test.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
-        cre_test.E0 = toolkit::fetchdouble(subptr,"value","E0")*CGS_U_GeV; //GeV
-        cre_test.j0 = toolkit::fetchdouble(subptr,"value","j0");
+    // cre internal
+    ptr = toolkit::tracexml(doc,{"cre"});
+    grid_cre.build_permission = toolkit::fetchbool (ptr,"cue");
+    if (grid_cre.build_permission){
+        cre_type = ptr->Attribute("type");
+        // analytical
+        if (cre_type=="analytic"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"cre","analytic"})};
+            cre_ana.alpha = toolkit::fetchdouble(subptr,"value","alpha");
+            cre_ana.beta = toolkit::fetchdouble(subptr,"value","beta");
+            cre_ana.theta = toolkit::fetchdouble(subptr,"value","theta");
+            cre_ana.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
+            cre_ana.z0 = toolkit::fetchdouble(subptr,"value","z0")*CGS_U_kpc; //kpc
+            cre_ana.E0 = toolkit::fetchdouble(subptr,"value","E0")*CGS_U_GeV; //GeV
+            cre_ana.j0 = toolkit::fetchdouble(subptr,"value","j0");
+        }
+        // testing
+        else if (cre_type=="test"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"cre","test"})};
+            cre_test.alpha = toolkit::fetchdouble(subptr,"value","alpha");
+            cre_test.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
+            cre_test.E0 = toolkit::fetchdouble(subptr,"value","E0")*CGS_U_GeV; //GeV
+            cre_test.j0 = toolkit::fetchdouble(subptr,"value","j0");
+        }
+        else{
+            throw std::runtime_error("unsupported cre model");
+        }
     }
-#endif
+    // cre io grid
+    if (grid_cre.read_permission or grid_cre.write_permission){
+        ptr = toolkit::tracexml (doc,{"grid","box_cre"});
+        grid_cre.E_min = CGS_U_GeV*toolkit::fetchdouble (ptr,"value","E_min",0.1);
+        grid_cre.E_max = CGS_U_GeV*toolkit::fetchdouble (ptr,"value","E_max",100.0);
+        grid_cre.nE = toolkit::fetchunsigned (ptr,"value","nE",80);
+        grid_cre.E_fact = std::log(grid_cre.E_max/grid_cre.E_min)/(grid_cre.nE-1);
+        grid_cre.nz = toolkit::fetchunsigned (ptr,"value","nz",80);
+        grid_cre.nx = toolkit::fetchunsigned (ptr,"value","nx",80);
+        grid_cre.ny = toolkit::fetchunsigned (ptr,"value","ny",80);
+        grid_cre.x_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_max",0);
+        grid_cre.x_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","x_min",0);
+        grid_cre.y_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_max",0);
+        grid_cre.y_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","y_min",0);
+        grid_cre.z_max = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_max",4);
+        grid_cre.z_min = CGS_U_kpc*toolkit::fetchdouble (ptr,"value","z_min",-4);
+        grid_cre.cre_size = grid_cre.nE*grid_cre.nx*grid_cre.ny*grid_cre.nz;
+    }
 }
 
 // END

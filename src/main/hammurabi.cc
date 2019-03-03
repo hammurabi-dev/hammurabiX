@@ -3,7 +3,6 @@
 #include <vector>
 #include <cstdlib>
 #include <memory>
-#include <cassert>
 #include <param.h>
 #include <grid.h>
 #include <integrator.h>
@@ -69,15 +68,13 @@ void Pipeline::assemble_fereg (){
         grid_fereg->import_grid (par.get());
         fereg = std::make_unique<FEreg> ();
     }
-    else if (par->fereg_type=="YMW16"){
+    else if (par->fereg_type=="ymw16"){
         fereg = std::make_unique<FEreg_ymw16> ();
     }
-#ifndef NDEBUG
-    else if (par->fereg_type=="Test"){
+    else if (par->fereg_type=="test"){
         fereg = std::make_unique<FEreg_test> ();
     }
-#endif
-    else assert (false);
+    else throw std::runtime_error("unsupported fereg model");
     // if export to file
     if (par->grid_fereg.write_permission){
         // write out binary file and exit
@@ -96,18 +93,16 @@ void Pipeline::assemble_breg (){
         grid_breg->import_grid (par.get());
         breg = std::make_unique<Breg> ();
     }
-    else if (par->breg_type=="WMAP"){
+    else if (par->breg_type=="wmap"){
         breg = std::make_unique<Breg_wmap> ();
     }
-    else if (par->breg_type=="Jaffe"){
+    else if (par->breg_type=="jaffe"){
         breg = std::make_unique<Breg_jaffe> ();
     }
-#ifndef NDEBUG
-    else if (par->breg_type=="Test"){
+    else if (par->breg_type=="test"){
         breg = std::make_unique<Breg_test> ();
     }
-#endif
-    else assert (false);
+    else throw std::runtime_error("unsupported breg model");
     // if export to file
     if (par->grid_breg.write_permission){
         breg->write_grid (par.get(),grid_breg.get());
@@ -123,14 +118,14 @@ void Pipeline::assemble_fernd (){
         fernd = std::make_unique<FErnd> ();
     }
     else if (par->grid_fernd.build_permission){
-        if (par->fernd_type=="Global"){
-            if (par->fernd_method=="DFT"){
+        if (par->fernd_type=="global"){
+            if (par->fernd_method=="dft"){
                 fernd = std::make_unique<FErnd_dft> ();
             }
             // fill grid with random fields
             fernd->write_grid (par.get(),grid_fernd.get());
         }
-        else assert (false);
+        else throw std::runtime_error("unsupported brnd model");
     }
     else {
         fernd = std::make_unique<FErnd> ();
@@ -148,12 +143,12 @@ void Pipeline::assemble_brnd (){
         brnd = std::make_unique<Brnd> ();
     }
     else if (par->grid_brnd.build_permission){
-        if (par->brnd_type=="Global"){
-            if (par->brnd_method=="ES"){
+        if (par->brnd_type=="global"){
+            if (par->brnd_method=="es"){
                 brnd = std::make_unique<Brnd_es> ();
             }
             /*
-            else if (par->brnd_method=="Jaffe"){
+            else if (par->brnd_method=="jaffe"){
                 brnd = std::make_unique<Brnd_jaffe> ();
             }
              */
@@ -163,8 +158,8 @@ void Pipeline::assemble_brnd (){
                               grid_breg.get(),
                               grid_brnd.get());
         }
-        else if (par->brnd_type=="Local"){
-            if (par->brnd_method=="MHD"){
+        else if (par->brnd_type=="local"){
+            if (par->brnd_method=="mhd"){
                 brnd = std::make_unique<Brnd_mhd> ();
             }
             // fill grid with random fields
@@ -173,7 +168,7 @@ void Pipeline::assemble_brnd (){
                               grid_breg.get(),
                               grid_brnd.get());
         }
-        else assert (false);
+        else throw std::runtime_error("unsupported brnd model");
     }
     else {
         //without read permission, return zeros
@@ -187,19 +182,19 @@ void Pipeline::assemble_brnd (){
 
 // cre
 void Pipeline::assemble_cre (){
-    if (par->cre_type=="Analytic"){
-        cre = std::make_unique<CRE_ana> ();
-    }
-#ifndef NDEBUG
-    else if (par->cre_type=="Test"){
-        cre = std::make_unique<CRE_test>();
-    }
-#endif
-    else if (par->cre_type=="Numeric"){
+    if (par->grid_cre.read_permission){
         grid_cre->import_grid (par.get());
         cre = std::make_unique<CRE_num> ();
     }
-    else assert (false);
+    else if (par->grid_cre.build_permission){
+        if (par->cre_type=="analytic"){
+            cre = std::make_unique<CRE_ana> ();
+        }
+        else if (par->cre_type=="test"){
+            cre = std::make_unique<CRE_test>();
+        }
+        else throw std::runtime_error("unsupported cre model");
+    }
     // if export to file
     if (par->grid_cre.write_permission){
         cre->write_grid (par.get(),
@@ -207,36 +202,39 @@ void Pipeline::assemble_cre (){
         grid_cre->export_grid (par.get());
     }
 }
-// LOS integration for observables
+
+// LoS integration for observables
 void Pipeline::assemble_obs (){
     intobj = std::make_unique<Integrator> ();
-    const auto repeat = par->grid_int.do_sync.size();
-    for (unsigned int i=0;i<repeat;++i){
-        if (i>0) {
-            par->grid_int.do_dm = false;
-            par->grid_int.do_fd = false;
-            // need to rebuild integration grid
-            grid_int->build_grid (par.get());
+    if (par->grid_int.write_permission){
+        const auto repeat = par->grid_int.do_sync.size();
+        for (unsigned int i=0;i<repeat;++i){
+            if (i>0) {
+                par->grid_int.do_dm = false;
+                par->grid_int.do_fd = false;
+                // need to rebuild integration grid
+                grid_int->build_grid (par.get());
+            }
+            intobj->write_grid (breg.get(),
+                                brnd.get(),
+                                fereg.get(),
+                                fernd.get(),
+                                cre.get(),
+                                grid_breg.get(),
+                                grid_brnd.get(),
+                                grid_fereg.get(),
+                                grid_fernd.get(),
+                                grid_cre.get(),
+                                grid_int.get(),
+                                par.get());
+            grid_int->export_grid (par.get());
+            // delete obsolete parameters
+            par->grid_int.nside_sync.pop_back ();
+            par->grid_int.npix_sync.pop_back ();
+            par->grid_int.do_sync.pop_back ();
+            par->grid_int.sim_sync_freq.pop_back ();
+            par->grid_int.sim_sync_name.pop_back ();
         }
-        intobj->write_grid (breg.get(),
-                            brnd.get(),
-                            fereg.get(),
-                            fernd.get(),
-                            cre.get(),
-                            grid_breg.get(),
-                            grid_brnd.get(),
-                            grid_fereg.get(),
-                            grid_fernd.get(),
-                            grid_cre.get(),
-                            grid_int.get(),
-                            par.get());
-        grid_int->export_grid (par.get());
-        // delete obsolete parameters
-        par->grid_int.nside_sync.pop_back ();
-        par->grid_int.npix_sync.pop_back ();
-        par->grid_int.do_sync.pop_back ();
-        par->grid_int.sim_sync_freq.pop_back ();
-        par->grid_int.sim_sync_name.pop_back ();
     }
 }
 

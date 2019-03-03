@@ -87,7 +87,6 @@ void Grid_brnd::export_grid (const Param *par){
                       sizeof(double));
     }
     output.close();
-    exit (0);
 }
 
 void Grid_brnd::import_grid (const Param *par){

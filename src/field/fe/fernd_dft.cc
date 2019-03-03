@@ -27,8 +27,8 @@ double FErnd_dft::spec (const double &k,
 // set to 1 at observer's place
 double FErnd_dft::rescal (const hvec<3,double> &pos,
                           const Param *par) const{
-    const double r_cyl {std::sqrt(pos[0]*pos[0]+pos[1]*pos[1]) - std::fabs(par->SunPosition[0])};
-    const double z {std::fabs(pos[2]) - std::fabs(par->SunPosition[2])};
+    const double r_cyl {std::sqrt(pos[0]*pos[0]+pos[1]*pos[1]) - std::fabs(par->observer[0])};
+    const double z {std::fabs(pos[2]) - std::fabs(par->observer[2])};
     return std::exp(-r_cyl/par->fernd_dft.r0)*std::exp(-z/par->fernd_dft.z0);
 }
 

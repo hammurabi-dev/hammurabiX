@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <iostream>
 
 #include <hvec.h>
 #include <fftw3.h>
@@ -17,26 +18,26 @@
 namespace toolkit {
     
     // calculate the perpendicular to LOS component of a vector
-    double perp2los (const hvec<3,double> &input,
-                     const double &the_los,
-                     const double &phi_los){
+    double perp2los (const hvec<3,double>& input,
+                     const double& the_los,
+                     const double& phi_los){
         const hvec<3,double> unit_vec {los_versor(the_los, phi_los)};
         const hvec<3,double> perp_vec {unit_vec.crossprod(input)};
         return perp_vec.length();
     }
     
     // calculate the parallel to LOS component of a vector
-    double par2los (const hvec<3,double> &input,
-                    const double &the_los,
-                    const double &phi_los){
+    double par2los (const hvec<3,double>& input,
+                    const double& the_los,
+                    const double& phi_los){
         const hvec<3,double> unit_vec {los_versor(the_los, phi_los)};
         return unit_vec.dotprod (input);
     }
     
     // calculate intrinsic polarization angle
-    double intr_pol_ang (const hvec<3,double> &input,
-                         const double &the_ec,
-                         const double &phi_ec){
+    double intr_pol_ang (const hvec<3,double>& input,
+                         const double& the_ec,
+                         const double& phi_ec){
         hvec<3,double> sph_unit_v_the;
         hvec<3,double> sph_unit_v_phi;
         sph_unit_v_the = hvec<3,double> {cos(the_ec)*cos(phi_ec),
@@ -52,10 +53,10 @@ namespace toolkit {
     }
     
     // from Cartesian coordiante to cylindrical coordinate
-    void cart_coord2cyl_coord (const hvec<3,double> &input,
-                               double &r,
-                               double &phi,
-                               double &z){
+    void cart_coord2cyl_coord (const hvec<3,double>& input,
+                               double& r,
+                               double& phi,
+                               double& z){
         r = sqrt(input[0]*input[0]+input[1]*input[1]);
         phi = atan2(input[1],input[0]);
         //if(phi<0.) {phi+=2.*CGS_U_pi;} // may not be necessary
@@ -63,8 +64,8 @@ namespace toolkit {
     }
     
     // overload for vec3 to vec3
-    void cart_coord2cyl_coord (const hvec<3,double> &input,
-                               hvec<3,double> &cyl_vec){
+    void cart_coord2cyl_coord (const hvec<3,double>& input,
+                               hvec<3,double>& cyl_vec){
         cyl_vec[0] = sqrt(input[0]*input[0]+input[1]*input[1]);
         cyl_vec[1] = atan2(input[1],input[0]);
         //if(cyl_vec[1]<0.) {cyl_vec[1]+=2.*CGS_U_pi;} // may not be necessary
@@ -72,8 +73,8 @@ namespace toolkit {
     }
     
     // mean for array
-    double mean (const double *arr,
-                 const std::size_t &size){
+    double mean (const double* arr,
+                 const std::size_t& size){
         double avg {0};
         for(std::size_t i=0;i!=size;++i) {
             avg += arr[i];
@@ -83,10 +84,10 @@ namespace toolkit {
     }
     
     // mean for vector
-    double mean (const std::vector<double> &vect){
+    double mean (const std::vector<double>& vect){
         assert(!vect.empty());
         double avg {0};
-        for(auto &i : vect) {
+        for(auto& i : vect) {
             avg += i;
         }
         avg/=vect.size();
@@ -94,8 +95,8 @@ namespace toolkit {
     }
     
     // variance for array
-    double variance (const double *arr,
-                     const std::size_t &size){
+    double variance (const double* arr,
+                     const std::size_t& size){
         const double avg {mean(arr,size)};
         double var {0.};
         for(std::size_t i=0;i!=size;++i){
@@ -106,11 +107,11 @@ namespace toolkit {
     }
     
     // variance for vector
-    double variance (const std::vector<double> &vect){
+    double variance (const std::vector<double>& vect){
         assert(!vect.empty());
         const double avg {mean(vect)};
         double var {0.};
-        for(auto &i : vect){
+        for(auto& i : vect){
             var += (i-avg)*(i-avg);
         }
         var/=vect.size();
@@ -118,9 +119,9 @@ namespace toolkit {
     }
     
     // cov for array
-    double covariance (const double *arr1,
-                       const double *arr2,
-                       const std::size_t &size){
+    double covariance (const double* arr1,
+                       const double* arr2,
+                       const std::size_t& size){
         double avg1 {mean(arr1,size)};
         double avg2 {mean(arr2,size)};
         double covar {0.};
@@ -132,8 +133,8 @@ namespace toolkit {
     }
     
     // cov for vector
-    double covariance (const std::vector<double> &vect1,
-                       const std::vector<double> &vect2){
+    double covariance (const std::vector<double>& vect1,
+                       const std::vector<double>& vect2){
         assert(vect1.size()==vect2.size());
         double avg1 {mean(vect1)};
         double avg2 {mean(vect2)};
@@ -146,7 +147,7 @@ namespace toolkit {
     }
     
     // offer random seed
-    std::size_t random_seed (const int &s){
+    std::size_t random_seed (const int& s){
         assert(s>=0);
         if(s==0){
             auto p = std::chrono::system_clock::now();
@@ -170,7 +171,7 @@ namespace toolkit {
         return std::move (doc);
     }
     
-    tinyxml2::XMLElement* tracexml (tinyxml2::XMLDocument *doc,
+    tinyxml2::XMLElement* tracexml (tinyxml2::XMLDocument* doc,
                                     const std::vector<std::string>& keychain){
         tinyxml2::XMLElement* el {doc->FirstChildElement("root")};
         if (!keychain.empty()){
@@ -203,76 +204,84 @@ namespace toolkit {
     
     int fetchint (tinyxml2::XMLElement* el,
                   const std::string& att_type,
-                  const std::string& key){
+                  const std::string& key,
+                  const int& dft){
 #ifdef VERBOSE
         std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
-        return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str());
+        return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str(),dft);
     }
     
     int fetchint (tinyxml2::XMLElement* el,
-                  const std::string& att_type){
+                  const std::string& att_type,
+                  const int& dft){
 #ifdef VERBOSE
         std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
-        return el->IntAttribute(att_type.c_str());
+        return el->IntAttribute(att_type.c_str(),dft);
     }
     
     unsigned int fetchunsigned (tinyxml2::XMLElement* el,
                                 const std::string& att_type,
-                                const std::string& key){
+                                const std::string& key,
+                                const unsigned& dft){
 #ifdef VERBOSE
         std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
-        return el->FirstChildElement(key.c_str())->UnsignedAttribute(att_type.c_str());
+        return el->FirstChildElement(key.c_str())->UnsignedAttribute(att_type.c_str(),dft);
     }
     
     unsigned int fetchunsigned (tinyxml2::XMLElement* el,
-                                const std::string& att_type){
+                                const std::string& att_type,
+                                const unsigned& dft){
 #ifdef VERBOSE
         std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
-        return el->UnsignedAttribute(att_type.c_str());
+        return el->UnsignedAttribute(att_type.c_str(),dft);
     }
     
     bool fetchbool (tinyxml2::XMLElement* el,
                     const std::string& att_type,
-                    const std::string& key){
+                    const std::string& key,
+                    const int& dft){
 #ifdef VERBOSE
         std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
-        return el->FirstChildElement(key.c_str())->BoolAttribute(att_type.c_str());
+        return el->FirstChildElement(key.c_str())->BoolAttribute(att_type.c_str(),dft);
     }
     
     bool fetchbool (tinyxml2::XMLElement* el,
-                    const std::string& att_type){
+                    const std::string& att_type,
+                    const int& dft){
 #ifdef VERBOSE
         std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
-        return el->BoolAttribute(att_type.c_str());
+        return el->BoolAttribute(att_type.c_str(),dft);
     }
     
     double fetchdouble (tinyxml2::XMLElement* el,
                         const std::string& att_type,
-                        const std::string& key){
+                        const std::string& key,
+                        const double& dft){
 #ifdef VERBOSE
         std::cout<<"key: "<<key<<" attrib: "<<att_type<<std::endl;
 #endif
-        return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str());
+        return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str(),dft);
     }
     
     double fetchdouble (tinyxml2::XMLElement* el,
-                        const std::string& att_type){
+                        const std::string& att_type,
+                        const double& dft){
 #ifdef VERBOSE
         std::cout<<"attrib: "<<att_type<<std::endl;
 #endif
-        return el->DoubleAttribute(att_type.c_str());
+        return el->DoubleAttribute(att_type.c_str(),dft);
     }
     
     // get real components from fftw_complex arrays
-    void complex2real (const fftw_complex *input,
-                       double *output,
-                       const std::size_t &size){
+    void complex2real (const fftw_complex* input,
+                       double* output,
+                       const std::size_t& size){
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
@@ -282,9 +291,9 @@ namespace toolkit {
         }
     }
     
-    void complex2imag (const fftw_complex *input,
-                       double *output,
-                       const std::size_t &size){
+    void complex2imag (const fftw_complex* input,
+                       double* output,
+                       const std::size_t& size){
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) // DO NOT CHANGE SCHEDULE TYPE
 #endif
@@ -293,10 +302,10 @@ namespace toolkit {
         }
     }
     
-    void complex2rni (const fftw_complex *input,
-                      double *realout,
-                      double *imagout,
-                      const std::size_t &size){
+    void complex2rni (const fftw_complex* input,
+                      double* realout,
+                      double* imagout,
+                      const std::size_t& size){
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) // DO NOT CHANGE SCHEDULE TYPE
 #endif

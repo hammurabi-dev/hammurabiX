@@ -20,45 +20,46 @@ public:
     virtual ~Param () = default;
 //----------------------- GRID PARAMETERS --------------------------------------
     // observer
-    hvec<3,double> SunPosition;
+    hvec<3,double> observer;
     // regular GMF grid
     struct param_breg_grid{
         std::string filename;
-        bool build_permission, read_permission, write_permission;
+        bool build_permission=false, read_permission=false, write_permission=false;
         double x_max, x_min, y_max, y_min, z_max, z_min;
         std::size_t nx, ny, nz, full_size;
     }grid_breg;
     // turbulent GMF grid
     struct param_brnd_grid{
         std::string filename;
-        bool read_permission, write_permission, build_permission;
+        bool read_permission=false, write_permission=false, build_permission=false;
         double x_max, x_min, y_max, y_min, z_max, z_min;
         std::size_t nx, ny, nz, full_size;
     }grid_brnd;
     // regular FE grid
     struct param_fereg_grid{
         std::string filename;
-        bool build_permission, read_permission, write_permission;
+        bool build_permission=false, read_permission=false, write_permission=false;
         double x_max, x_min, y_max, y_min, z_max, z_min;
         std::size_t nx, ny, nz, full_size;
     }grid_fereg;
     // turbulent FE grid
     struct param_fernd_grid{
         std::string filename;
-        bool read_permission, write_permission, build_permission;
+        bool read_permission=false, write_permission=false, build_permission=false;
         double x_max, x_min, y_max, y_min, z_max, z_min;
         std::size_t nx, ny, nz, full_size;
     }grid_fernd;
     // cre grid
     struct param_cre_grid{
         std::string filename;
-        bool read_permission, write_permission;
+        bool build_permission=false, read_permission=false, write_permission=false;
         std::size_t nE, nz, nx, ny, cre_size;
         double x_max, x_min, y_max, y_min, z_max, z_min;
         double E_min, E_max, E_fact;
     }grid_cre;
     // observable grid
     struct param_int_grid{
+        bool write_permission=false;
         // shell parameters
         std::size_t nside_dm, nside_fd, npix_dm, npix_fd, total_shell;
         std::vector<std::size_t> nside_sync, npix_sync, nside_shell;
@@ -66,9 +67,11 @@ public:
         std::vector<double> cut_shell;
         std::vector<double> radii_shell;
         // shell boundary
-        double gc_r_max, ec_r_max, gc_z_max, radial_res, lat_lim;
+        double gc_r_min, gc_r_max, ec_r_min, ec_r_max, gc_z_min, gc_z_max;
+        double radial_res;
+        double lat_min, lat_max, lon_min, lon_max;
         // switches
-        bool do_dm, do_fd;
+        bool do_dm=false, do_fd=false;
         std::vector<bool> do_sync;
         std::string sim_fd_name, sim_dm_name;
         std::vector<std::string> sim_sync_name;
@@ -130,15 +133,18 @@ public:
     std::string fereg_type, fernd_type, fernd_method;
     // ymw16
     struct param_fereg_ymw16{
-        double R_warp, R0;
-        double t0_Gamma_w;
-        double t1_Ad, t1_Bd, t1_n1, t1_H1;
-        double t2_A2, t2_B2, t2_n2, t2_K2;
-        double t3_B2s, t3_Ka, t3_narm[5], t3_warm[5], t3_Aa, t3_ncn, t3_wcn, t3_thetacn, t3_nsg, t3_wsg, t3_thetasg, t3_rmin[5], t3_phimin[5], t3_tpitch[5], t3_cpitch[5];
-        double t4_ngc, t4_Agc, t4_Hgc;
-        double t5_Kgn, t5_ngn, t5_Wgn, t5_Agn;
-        double t6_J_LB, t6_nlb1, t6_detlb1, t6_wlb1, t6_hlb1, t6_thetalb1, t6_nlb2, t6_detlb2, t6_wlb2, t6_hlb2, t6_thetalb2;
-        double t7_nLI, t7_RLI, t7_WLI, t7_detthetaLI, t7_thetaLI;
+        double r_warp, r0;
+        double t0_gamma_w;
+        double t1_ad, t1_bd, t1_n1, t1_h1;
+        double t2_a2, t2_b2, t2_n2, t2_k2;
+        double t3_b2s, t3_ka, t3_narm[5], t3_warm[5], t3_aa, t3_ncn, t3_wcn,
+        t3_thetacn, t3_nsg, t3_wsg, t3_thetasg, t3_rmin[5], t3_phimin[5],
+        t3_tpitch[5], t3_cpitch[5];
+        double t4_ngc, t4_agc, t4_hgc;
+        double t5_kgn, t5_ngn, t5_wgn, t5_agn;
+        double t6_j_lb, t6_nlb1, t6_detlb1, t6_wlb1, t6_hlb1, t6_thetalb1,
+        t6_nlb2, t6_detlb2, t6_wlb2, t6_hlb2, t6_thetalb2;
+        double t7_nli, t7_rli, t7_wli, t7_detthetali, t7_thetali;
     }fereg_ymw16;
     // test
 #ifndef NDEBUG
@@ -174,14 +180,16 @@ public:
     }cre_test;
 #endif
 protected:
-    //
-    void b_param (tinyxml2::XMLDocument *);
-    //
-    void fe_param (tinyxml2::XMLDocument *);
-    //
+    // collect observable related parameters
+    void obs_param (tinyxml2::XMLDocument *);
+    // collect magnetic field related parameters
+    void breg_param (tinyxml2::XMLDocument *);
+    void brnd_param (tinyxml2::XMLDocument *);
+    // collect free/thermal electron related parameters
+    void fereg_param (tinyxml2::XMLDocument *);
+    void fernd_param (tinyxml2::XMLDocument *);
+    // collect CRE related parameters
     void cre_param (tinyxml2::XMLDocument *);
-    //
-    void grid_param (tinyxml2::XMLDocument *);
 };
 
 #endif
