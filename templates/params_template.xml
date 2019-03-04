@@ -26,9 +26,9 @@
     <grid>
         <!-- galactic-centric position of observer -->
         <observer>
-            <x value="-8.3"/> <!-- kpc (optional, default) -->
-            <y value="0"/> <!-- kpc (optional, default) -->
-            <z value="6"/> <!-- pc (optional, default) -->
+            <x value="-8.3"/> <!-- kpc (default) -->
+            <y value="0"/> <!-- kpc (default) -->
+            <z value="6"/> <!-- pc (default) -->
         </observer>
         <!-- regular GMF grid -->
         <box_breg> <!-- (optional) if no breg I/O -->
@@ -245,89 +245,89 @@
             <!-- YMW16 -->
             <ymw16>
                 <warp>
-                    <r_warp value="8.4"/> <!-- Galactic warp, kpc -->
-                    <gamma_w value="0.14"/> <!-- warp ratio -->
-                    <r0 value="8.3"/> <!-- Sun radial position, kpc -->
+                    <r_warp value="8.4"/> <!-- galactic warp, kpc, (default) -->
+                    <gamma_w value="0.14"/> <!-- warp ratio, (default) -->
+                    <r0 value="8.3"/> <!-- Sun radial position, kpc, (default) -->
                 </warp>
                 <thickdisk>
-                    <ad value="2500"/>
-                    <bd value="15000"/>
-                    <n1 value="0.01132"/>
-                    <h1 value="1673"/>
+                    <ad value="2500"/> <!-- (default) -->
+                    <bd value="15000"/> <!-- (default) -->
+                    <n1 value="0.01132"/> <!-- (default) -->
+                    <h1 value="1673"/> <!-- (default) -->
                 </thickdisk>
                 <thindisk>
-                    <a2 value="1200"/>
-                    <b2 value="4000"/>
-                    <n2 value="0.404"/>
-                    <k2 value="1.54"/>
+                    <a2 value="1200"/> <!-- (default) -->
+                    <b2 value="4000"/> <!-- (default) -->
+                    <n2 value="0.404"/> <!-- (default) -->
+                    <k2 value="1.54"/> <!-- (default) -->
                 </thindisk>
                 <!-- using HH14 SpiralArms -->
                 <spiralarm>
-                    <b2s value="4000"/>
-                    <ele_arm_0 value="0.135000"/> <!-- electron density norm, cm^-3 -->
-                    <ele_arm_1 value="0.129000"/> <!-- electron density norm, cm^-3 -->
-                    <ele_arm_2 value="0.103000"/> <!-- electron density norm, cm^-3 -->
-                    <ele_arm_3 value="0.116000"/> <!-- electron density norm, cm^-3 -->
-                    <ele_arm_4 value="0.005700"/> <!-- electron density norm, cm^-3 -->
-                    <wid_arm_0 value="300"/> <!-- typical arm width, pc -->
-                    <wid_arm_1 value="500"/> <!-- typical arm width, pc -->
-                    <wid_arm_2 value="300"/> <!-- typical arm width, pc -->
-                    <wid_arm_3 value="500"/> <!-- typical arm width, pc -->
-                    <wid_arm_4 value="300"/> <!-- typical arm width, pc -->
-                    <rref_arm_0 value="3.35"/> <!-- arm reference radius, kpc -->
-                    <rref_arm_1 value="3.707"/> <!-- arm reference radius, kpc -->
-                    <rref_arm_2 value="3.56"/> <!-- arm reference radius, kpc -->
-                    <rref_arm_3 value="3.670"/> <!-- arm reference radius, kpc -->
-                    <rref_arm_4 value="8.21"/> <!-- arm reference radius, kpc -->
-                    <phiref_arm_0 value="44.4"/> <!-- arm reference azimuthal angle, deg -->
-                    <phiref_arm_1 value="120.0"/> <!-- arm reference azimuthal angle, deg -->
-                    <phiref_arm_2 value="218.6"/> <!-- arm reference azimuthal angle, deg -->
-                    <phiref_arm_3 value="330.3"/> <!-- arm reference azimuthal angle, deg -->
-                    <phiref_arm_4 value="55.1"/> <!-- arm reference azimuthal angle, deg -->
-                    <pitch_arm_0 value="11.43"/> <!-- arm pitch angle, deg -->
-                    <pitch_arm_1 value="9.84"/> <!-- arm pitch angle, deg -->
-                    <pitch_arm_2 value="10.38"/> <!-- arm pitch angle, deg -->
-                    <pitch_arm_3 value="10.54"/> <!-- arm pitch angle, deg -->
-                    <pitch_arm_4 value="2.77"/> <!-- arm pitch angle, deg -->
-                    <aa value="11680"/>
-                    <ka value="5.015"/>
-                    <ncn value="2.4"/>
-                    <wcn value="8.2"/>
-                    <thetacn value="109"/>
-                    <nsg value="0.626"/>
-                    <wsg value="20"/>
-                    <thetasg value="75.8"/>
+                    <b2s value="4000"/> <!-- (default) -->
+                    <ele_arm_0 value="0.135000"/> <!-- electron density norm, cm^-3, (default) -->
+                    <ele_arm_1 value="0.129000"/> <!-- electron density norm, cm^-3, (default) -->
+                    <ele_arm_2 value="0.103000"/> <!-- electron density norm, cm^-3, (default) -->
+                    <ele_arm_3 value="0.116000"/> <!-- electron density norm, cm^-3, (default) -->
+                    <ele_arm_4 value="0.005700"/> <!-- electron density norm, cm^-3, (default) -->
+                    <wid_arm_0 value="300"/> <!-- typical arm width, pc, (default) -->
+                    <wid_arm_1 value="500"/> <!-- typical arm width, pc, (default) -->
+                    <wid_arm_2 value="300"/> <!-- typical arm width, pc, (default) -->
+                    <wid_arm_3 value="500"/> <!-- typical arm width, pc, (default) -->
+                    <wid_arm_4 value="300"/> <!-- typical arm width, pc, (default) -->
+                    <rref_arm_0 value="3.35"/> <!-- arm reference radius, kpc, (default) -->
+                    <rref_arm_1 value="3.707"/> <!-- arm reference radius, kpc, (default) -->
+                    <rref_arm_2 value="3.56"/> <!-- arm reference radius, kpc, (default) -->
+                    <rref_arm_3 value="3.670"/> <!-- arm reference radius, kpc, (default) -->
+                    <rref_arm_4 value="8.21"/> <!-- arm reference radius, kpc, (default) -->
+                    <phiref_arm_0 value="44.4"/> <!-- arm reference azimuthal angle, deg, (default) -->
+                    <phiref_arm_1 value="120.0"/> <!-- arm reference azimuthal angle, deg, (default)-->
+                    <phiref_arm_2 value="218.6"/> <!-- arm reference azimuthal angle, deg, (default) -->
+                    <phiref_arm_3 value="330.3"/> <!-- arm reference azimuthal angle, deg, (default) -->
+                    <phiref_arm_4 value="55.1"/> <!-- arm reference azimuthal angle, deg, (default) -->
+                    <pitch_arm_0 value="11.43"/> <!-- arm pitch angle, deg, (default) -->
+                    <pitch_arm_1 value="9.84"/> <!-- arm pitch angle, deg, (default) -->
+                    <pitch_arm_2 value="10.38"/> <!-- arm pitch angle, deg, (default) -->
+                    <pitch_arm_3 value="10.54"/> <!-- arm pitch angle, deg, (default) -->
+                    <pitch_arm_4 value="2.77"/> <!-- arm pitch angle, deg, (default) -->
+                    <aa value="11680"/> <!-- (default) -->
+                    <ka value="5.015"/> <!-- (default) -->
+                    <ncn value="2.4"/> <!-- (default) -->
+                    <wcn value="8.2"/> <!-- (default) -->
+                    <thetacn value="109"/> <!-- (default) -->
+                    <nsg value="0.626"/> <!-- (default) -->
+                    <wsg value="20"/> <!-- (default) -->
+                    <thetasg value="75.8"/> <!-- (default) -->
                 </spiralarm>
                 <galcenter>
-                    <ngc value="6.2"/>
-                    <agc value="160"/>
-                    <hgc value="35"/>
+                    <ngc value="6.2"/> <!-- (default) -->
+                    <agc value="160"/> <!-- (default) -->
+                    <hgc value="35"/> <!-- (default) -->
                 </galcenter>
                 <gumnebula>
-                    <ngn value="1.84"/>
-                    <wgn value="15.1"/>
-                    <agn value="125.8"/>
-                    <kgn value="1.4"/>
+                    <ngn value="1.84"/> <!-- (default) -->
+                    <wgn value="15.1"/> <!-- (default) -->
+                    <agn value="125.8"/> <!-- (default) -->
+                    <kgn value="1.4"/> <!-- (default) -->
                 </gumnebula>
                 <localbubble>
-                    <j_lb value="0.480"/>
-                    <nlb1 value="1.094"/>
-                    <detlb1 value="28.4"/>
-                    <wlb1 value="14.2"/>
-                    <hlb1 value="112.9"/>
-                    <thetalb1 value="195.4"/>
-                    <nlb2 value="2.33"/>
-                    <detlb2 value="14.7"/>
-                    <wlb2 value="15.6"/>
-                    <hlb2 value="43.6"/>
-                    <thetalb2 value="278.2"/>
+                    <j_lb value="0.480"/> <!-- (default) -->
+                    <nlb1 value="1.094"/> <!-- (default) -->
+                    <detlb1 value="28.4"/> <!-- (default) -->
+                    <wlb1 value="14.2"/> <!-- (default) -->
+                    <hlb1 value="112.9"/> <!-- (default) -->
+                    <thetalb1 value="195.4"/> <!-- (default) -->
+                    <nlb2 value="2.33"/> <!-- (default) -->
+                    <detlb2 value="14.7"/> <!-- (default) -->
+                    <wlb2 value="15.6"/> <!-- (default) -->
+                    <hlb2 value="43.6"/> <!-- (default) -->
+                    <thetalb2 value="278.2"/> <!-- (default) -->
                 </localbubble>
                 <loopi>
-                    <nli value="1.907"/>
-                    <rli value="80.0"/>
-                    <wli value="15.0"/>
-                    <detthetali value="30.0"/>
-                    <thetali value="40.0"/>
+                    <nli value="1.907"/> <!-- (default) -->
+                    <rli value="80.0"/> <!-- (default) -->
+                    <wli value="15.0"/> <!-- (default) -->
+                    <detthetali value="30.0"/> <!-- (default) -->
+                    <thetali value="40.0"/> <!-- (default) -->
                 </loopi>
             </ymw16>
             <!-- verification -->
@@ -369,16 +369,16 @@
             <r0 value="5.0"/> <!-- kpc -->
             <z0 value="1.0"/> <!-- kpc -->
             <!-- by default, we choose AMS02 20.6GeV -->
-            <E0 value="20.6"/> <!-- CRE kinetic energy reference, GeV -->
-            <j0 value="0.0217"/> <!-- local CRE flux norm factor @ E0 -->
+            <E0 value="20.6"/> <!-- CRE kinetic energy reference, GeV, (default) -->
+            <j0 value="0.0217"/> <!-- local CRE flux norm factor @ E0, (default) -->
         </analytic>
         <!-- verification -->
         <test>
             <alpha value="3.0"/>
             <r0 value="3.0"/> <!-- cutoff radius, kpc -->
             <!-- by default, we choose AMS02 20.6GeV -->
-            <E0 value="20.6"/> <!-- CRE kinetic energy reference, GeV -->
-            <j0 value="0.0217"/> <!-- local CRE flux norm factor @ E0 -->
+            <E0 value="20.6"/> <!-- CRE kinetic energy reference, GeV, (default) -->
+            <j0 value="0.0217"/> <!-- local CRE flux norm factor @ E0, (default) -->
         </test>
     </cre>
 </root>

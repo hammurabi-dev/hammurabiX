@@ -56,7 +56,6 @@ ENV LD_LIBRARY_PATH /usr/local/lib:${LD_LIBRARY_PATH}
 # HAMMURABI X
 RUN git clone https://bitbucket.org/hammurabicode/hamx hamx
 WORKDIR /home/lab/hamx
-RUN git fetch origin fix && git checkout fix
 RUN mkdir /home/lab/hamx/build
 WORKDIR /home/lab/hamx/build
 RUN cmake .. && make && make install

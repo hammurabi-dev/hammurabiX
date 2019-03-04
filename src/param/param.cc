@@ -307,93 +307,93 @@ void Param::fereg_param (tinyxml2::XMLDocument* doc){
         if (fereg_type=="ymw16"){
             // Warp_Sun
             tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"freeelectron","regular","ymw16","warp"})};
-            fereg_ymw16.r_warp = toolkit::fetchdouble(subptr,"value","r_warp")*CGS_U_kpc; //kpc
-            fereg_ymw16.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
-            fereg_ymw16.t0_gamma_w = toolkit::fetchdouble(subptr,"value","gamma_w");
+            fereg_ymw16.r_warp = toolkit::fetchdouble(subptr,"value","r_warp",8.4)*CGS_U_kpc; //kpc
+            fereg_ymw16.r0 = toolkit::fetchdouble(subptr,"value","r0",8.3)*CGS_U_kpc; //kpc
+            fereg_ymw16.t0_gamma_w = toolkit::fetchdouble(subptr,"value","gamma_w",0.14);
             // thick disk
             subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","thickdisk"});
-            fereg_ymw16.t1_ad = toolkit::fetchdouble(subptr,"value","ad")*CGS_U_pc;//pc
-            fereg_ymw16.t1_bd = toolkit::fetchdouble(subptr,"value","bd")*CGS_U_pc;//pc
-            fereg_ymw16.t1_n1 = toolkit::fetchdouble(subptr,"value","n1");//pccm
-            fereg_ymw16.t1_h1 = toolkit::fetchdouble(subptr,"value","h1")*CGS_U_pc;//pc
+            fereg_ymw16.t1_ad = toolkit::fetchdouble(subptr,"value","ad",2500)*CGS_U_pc;//pc
+            fereg_ymw16.t1_bd = toolkit::fetchdouble(subptr,"value","bd",15000)*CGS_U_pc;//pc
+            fereg_ymw16.t1_n1 = toolkit::fetchdouble(subptr,"value","n1",0.01132);//pccm
+            fereg_ymw16.t1_h1 = toolkit::fetchdouble(subptr,"value","h1",1673)*CGS_U_pc;//pc
             // thin disk
             subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","thindisk"});
-            fereg_ymw16.t2_a2 = toolkit::fetchdouble(subptr,"value","a2")*CGS_U_pc;//pc
-            fereg_ymw16.t2_b2 = toolkit::fetchdouble(subptr,"value","b2")*CGS_U_pc;//pc
-            fereg_ymw16.t2_n2 = toolkit::fetchdouble(subptr,"value","n2");//pccm
-            fereg_ymw16.t2_k2 = toolkit::fetchdouble(subptr,"value","k2");
+            fereg_ymw16.t2_a2 = toolkit::fetchdouble(subptr,"value","a2",1200)*CGS_U_pc;//pc
+            fereg_ymw16.t2_b2 = toolkit::fetchdouble(subptr,"value","b2",4000)*CGS_U_pc;//pc
+            fereg_ymw16.t2_n2 = toolkit::fetchdouble(subptr,"value","n2",0.404);//pccm
+            fereg_ymw16.t2_k2 = toolkit::fetchdouble(subptr,"value","k2",1.54);
             // spiral arm
             subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","spiralarm"});
-            fereg_ymw16.t3_b2s = toolkit::fetchdouble(subptr,"value","b2s")*CGS_U_pc; //pc
-            fereg_ymw16.t3_narm[0] = toolkit::fetchdouble(subptr,"value","ele_arm_0");//pccm
-            fereg_ymw16.t3_narm[1] = toolkit::fetchdouble(subptr,"value","ele_arm_1");
-            fereg_ymw16.t3_narm[2] = toolkit::fetchdouble(subptr,"value","ele_arm_2");
-            fereg_ymw16.t3_narm[3] = toolkit::fetchdouble(subptr,"value","ele_arm_3");
-            fereg_ymw16.t3_narm[4] = toolkit::fetchdouble(subptr,"value","ele_arm_4");
-            fereg_ymw16.t3_warm[0] = toolkit::fetchdouble(subptr,"value","wid_arm_0")*CGS_U_pc;//pc
-            fereg_ymw16.t3_warm[1] = toolkit::fetchdouble(subptr,"value","wid_arm_1")*CGS_U_pc;
-            fereg_ymw16.t3_warm[2] = toolkit::fetchdouble(subptr,"value","wid_arm_2")*CGS_U_pc;
-            fereg_ymw16.t3_warm[3] = toolkit::fetchdouble(subptr,"value","wid_arm_3")*CGS_U_pc;
-            fereg_ymw16.t3_warm[4] = toolkit::fetchdouble(subptr,"value","wid_arm_4")*CGS_U_pc;
-            fereg_ymw16.t3_rmin[0] = toolkit::fetchdouble(subptr,"value","rref_arm_0")*CGS_U_kpc;//kpc
-            fereg_ymw16.t3_rmin[1] = toolkit::fetchdouble(subptr,"value","rref_arm_1")*CGS_U_kpc;
-            fereg_ymw16.t3_rmin[2] = toolkit::fetchdouble(subptr,"value","rref_arm_2")*CGS_U_kpc;
-            fereg_ymw16.t3_rmin[3] = toolkit::fetchdouble(subptr,"value","rref_arm_3")*CGS_U_kpc;
-            fereg_ymw16.t3_rmin[4] = toolkit::fetchdouble(subptr,"value","rref_arm_4")*CGS_U_kpc;
-            fereg_ymw16.t3_phimin[0] = toolkit::fetchdouble(subptr,"value","phiref_arm_0")*CGS_U_rad;//rad
-            fereg_ymw16.t3_phimin[1] = toolkit::fetchdouble(subptr,"value","phiref_arm_1")*CGS_U_rad;//rad
-            fereg_ymw16.t3_phimin[2] = toolkit::fetchdouble(subptr,"value","phiref_arm_2")*CGS_U_rad;//rad
-            fereg_ymw16.t3_phimin[3] = toolkit::fetchdouble(subptr,"value","phiref_arm_3")*CGS_U_rad;//rad
-            fereg_ymw16.t3_phimin[4] = toolkit::fetchdouble(subptr,"value","phiref_arm_4")*CGS_U_rad;//rad
-            fereg_ymw16.t3_tpitch[0] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_0")*CGS_U_rad);
-            fereg_ymw16.t3_tpitch[1] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_1")*CGS_U_rad);
-            fereg_ymw16.t3_tpitch[2] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_2")*CGS_U_rad);
-            fereg_ymw16.t3_tpitch[3] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_3")*CGS_U_rad);
-            fereg_ymw16.t3_tpitch[4] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_4")*CGS_U_rad);
-            fereg_ymw16.t3_cpitch[0] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_0")*CGS_U_rad);
-            fereg_ymw16.t3_cpitch[1] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_1")*CGS_U_rad);
-            fereg_ymw16.t3_cpitch[2] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_2")*CGS_U_rad);
-            fereg_ymw16.t3_cpitch[3] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_3")*CGS_U_rad);
-            fereg_ymw16.t3_cpitch[4] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_4")*CGS_U_rad);
-            fereg_ymw16.t3_aa = toolkit::fetchdouble(subptr,"value","aa")*CGS_U_pc;//pc
-            fereg_ymw16.t3_ka = toolkit::fetchdouble(subptr,"value","ka");
-            fereg_ymw16.t3_ncn = toolkit::fetchdouble(subptr,"value","ncn");
-            fereg_ymw16.t3_thetacn = toolkit::fetchdouble(subptr,"value","thetacn");//deg
-            fereg_ymw16.t3_wcn = toolkit::fetchdouble(subptr,"value","wcn");//deg
-            fereg_ymw16.t3_nsg = toolkit::fetchdouble(subptr,"value","nsg");
-            fereg_ymw16.t3_thetasg = toolkit::fetchdouble(subptr,"value","thetasg");//deg
-            fereg_ymw16.t3_wsg = toolkit::fetchdouble(subptr,"value","wsg");//deg
+            fereg_ymw16.t3_b2s = toolkit::fetchdouble(subptr,"value","b2s",4000)*CGS_U_pc; //pc
+            fereg_ymw16.t3_narm[0] = toolkit::fetchdouble(subptr,"value","ele_arm_0",0.135000);//pccm
+            fereg_ymw16.t3_narm[1] = toolkit::fetchdouble(subptr,"value","ele_arm_1",0.129000);
+            fereg_ymw16.t3_narm[2] = toolkit::fetchdouble(subptr,"value","ele_arm_2",0.103000);
+            fereg_ymw16.t3_narm[3] = toolkit::fetchdouble(subptr,"value","ele_arm_3",0.116000);
+            fereg_ymw16.t3_narm[4] = toolkit::fetchdouble(subptr,"value","ele_arm_4",0.005700);
+            fereg_ymw16.t3_warm[0] = toolkit::fetchdouble(subptr,"value","wid_arm_0",300)*CGS_U_pc;//pc
+            fereg_ymw16.t3_warm[1] = toolkit::fetchdouble(subptr,"value","wid_arm_1",500)*CGS_U_pc;
+            fereg_ymw16.t3_warm[2] = toolkit::fetchdouble(subptr,"value","wid_arm_2",300)*CGS_U_pc;
+            fereg_ymw16.t3_warm[3] = toolkit::fetchdouble(subptr,"value","wid_arm_3",500)*CGS_U_pc;
+            fereg_ymw16.t3_warm[4] = toolkit::fetchdouble(subptr,"value","wid_arm_4",300)*CGS_U_pc;
+            fereg_ymw16.t3_rmin[0] = toolkit::fetchdouble(subptr,"value","rref_arm_0",3.35)*CGS_U_kpc;//kpc
+            fereg_ymw16.t3_rmin[1] = toolkit::fetchdouble(subptr,"value","rref_arm_1",3.707)*CGS_U_kpc;
+            fereg_ymw16.t3_rmin[2] = toolkit::fetchdouble(subptr,"value","rref_arm_2",3.56)*CGS_U_kpc;
+            fereg_ymw16.t3_rmin[3] = toolkit::fetchdouble(subptr,"value","rref_arm_3",3.670)*CGS_U_kpc;
+            fereg_ymw16.t3_rmin[4] = toolkit::fetchdouble(subptr,"value","rref_arm_4",8.21)*CGS_U_kpc;
+            fereg_ymw16.t3_phimin[0] = toolkit::fetchdouble(subptr,"value","phiref_arm_0",44.4)*CGS_U_rad;//rad
+            fereg_ymw16.t3_phimin[1] = toolkit::fetchdouble(subptr,"value","phiref_arm_1",120.0)*CGS_U_rad;//rad
+            fereg_ymw16.t3_phimin[2] = toolkit::fetchdouble(subptr,"value","phiref_arm_2",218.6)*CGS_U_rad;//rad
+            fereg_ymw16.t3_phimin[3] = toolkit::fetchdouble(subptr,"value","phiref_arm_3",330.3)*CGS_U_rad;//rad
+            fereg_ymw16.t3_phimin[4] = toolkit::fetchdouble(subptr,"value","phiref_arm_4",55.1)*CGS_U_rad;//rad
+            fereg_ymw16.t3_tpitch[0] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_0",11.43)*CGS_U_rad);
+            fereg_ymw16.t3_tpitch[1] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_1",9.84)*CGS_U_rad);
+            fereg_ymw16.t3_tpitch[2] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_2",10.38)*CGS_U_rad);
+            fereg_ymw16.t3_tpitch[3] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_3",10.54)*CGS_U_rad);
+            fereg_ymw16.t3_tpitch[4] = tan(toolkit::fetchdouble(subptr,"value","pitch_arm_4",2.77)*CGS_U_rad);
+            fereg_ymw16.t3_cpitch[0] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_0",11.43)*CGS_U_rad);
+            fereg_ymw16.t3_cpitch[1] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_1",9.84)*CGS_U_rad);
+            fereg_ymw16.t3_cpitch[2] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_2",10.38)*CGS_U_rad);
+            fereg_ymw16.t3_cpitch[3] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_3",10.54)*CGS_U_rad);
+            fereg_ymw16.t3_cpitch[4] = cos(toolkit::fetchdouble(subptr,"value","pitch_arm_4",2.77)*CGS_U_rad);
+            fereg_ymw16.t3_aa = toolkit::fetchdouble(subptr,"value","aa",11680)*CGS_U_pc;//pc
+            fereg_ymw16.t3_ka = toolkit::fetchdouble(subptr,"value","ka",5.015);
+            fereg_ymw16.t3_ncn = toolkit::fetchdouble(subptr,"value","ncn",2.4);
+            fereg_ymw16.t3_thetacn = toolkit::fetchdouble(subptr,"value","thetacn",109);//deg
+            fereg_ymw16.t3_wcn = toolkit::fetchdouble(subptr,"value","wcn",8.2);//deg
+            fereg_ymw16.t3_nsg = toolkit::fetchdouble(subptr,"value","nsg",0.626);
+            fereg_ymw16.t3_thetasg = toolkit::fetchdouble(subptr,"value","thetasg",75.8);//deg
+            fereg_ymw16.t3_wsg = toolkit::fetchdouble(subptr,"value","wsg",20);//deg
             // gc
             subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","galcenter"});
-            fereg_ymw16.t4_ngc = toolkit::fetchdouble(subptr,"value","ngc");//pccm
-            fereg_ymw16.t4_agc = toolkit::fetchdouble(subptr,"value","agc")*CGS_U_pc;//pc
-            fereg_ymw16.t4_hgc = toolkit::fetchdouble(subptr,"value","hgc")*CGS_U_pc;//pc
+            fereg_ymw16.t4_ngc = toolkit::fetchdouble(subptr,"value","ngc",6.2);//pccm
+            fereg_ymw16.t4_agc = toolkit::fetchdouble(subptr,"value","agc",160)*CGS_U_pc;//pc
+            fereg_ymw16.t4_hgc = toolkit::fetchdouble(subptr,"value","hgc",35)*CGS_U_pc;//pc
             // Gum
             subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","gumnebula"});
-            fereg_ymw16.t5_ngn = toolkit::fetchdouble(subptr,"value","ngn");//pccm
-            fereg_ymw16.t5_wgn = toolkit::fetchdouble(subptr,"value","wgn")*CGS_U_pc;//pc
-            fereg_ymw16.t5_agn = toolkit::fetchdouble(subptr,"value","agn")*CGS_U_pc;//pc
-            fereg_ymw16.t5_kgn = toolkit::fetchdouble(subptr,"value","kgn");
+            fereg_ymw16.t5_ngn = toolkit::fetchdouble(subptr,"value","ngn",1.84);//pccm
+            fereg_ymw16.t5_wgn = toolkit::fetchdouble(subptr,"value","wgn",15.1)*CGS_U_pc;//pc
+            fereg_ymw16.t5_agn = toolkit::fetchdouble(subptr,"value","agn",125.8)*CGS_U_pc;//pc
+            fereg_ymw16.t5_kgn = toolkit::fetchdouble(subptr,"value","kgn",1.4);
             // Local Bubble
             subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","localbubble"});
-            fereg_ymw16.t6_j_lb = toolkit::fetchdouble(subptr,"value","j_lb");
-            fereg_ymw16.t6_nlb1 = toolkit::fetchdouble(subptr,"value","nlb1");//pccm
-            fereg_ymw16.t6_thetalb1 = toolkit::fetchdouble(subptr,"value","thetalb1");//deg
-            fereg_ymw16.t6_detlb1 = toolkit::fetchdouble(subptr,"value","detlb1");//deg
-            fereg_ymw16.t6_wlb1 = toolkit::fetchdouble(subptr,"value","wlb1")*CGS_U_pc;//pc
-            fereg_ymw16.t6_hlb1 = toolkit::fetchdouble(subptr,"value","hlb1")*CGS_U_pc;//pc
-            fereg_ymw16.t6_nlb2 = toolkit::fetchdouble(subptr,"value","nlb2");//pccm
-            fereg_ymw16.t6_thetalb2 = toolkit::fetchdouble(subptr,"value","thetalb2");//deg
-            fereg_ymw16.t6_detlb2 = toolkit::fetchdouble(subptr,"value","detlb2");//deg
-            fereg_ymw16.t6_wlb2 = toolkit::fetchdouble(subptr,"value","wlb2")*CGS_U_pc;//pc
-            fereg_ymw16.t6_hlb2 = toolkit::fetchdouble(subptr,"value","hlb2")*CGS_U_pc;//pc
+            fereg_ymw16.t6_j_lb = toolkit::fetchdouble(subptr,"value","j_lb",0.480);
+            fereg_ymw16.t6_nlb1 = toolkit::fetchdouble(subptr,"value","nlb1",1.094);//pccm
+            fereg_ymw16.t6_thetalb1 = toolkit::fetchdouble(subptr,"value","thetalb1",195.4);//deg
+            fereg_ymw16.t6_detlb1 = toolkit::fetchdouble(subptr,"value","detlb1",28.4);//deg
+            fereg_ymw16.t6_wlb1 = toolkit::fetchdouble(subptr,"value","wlb1",14.2)*CGS_U_pc;//pc
+            fereg_ymw16.t6_hlb1 = toolkit::fetchdouble(subptr,"value","hlb1",112.9)*CGS_U_pc;//pc
+            fereg_ymw16.t6_nlb2 = toolkit::fetchdouble(subptr,"value","nlb2",2.33);//pccm
+            fereg_ymw16.t6_thetalb2 = toolkit::fetchdouble(subptr,"value","thetalb2",278.2);//deg
+            fereg_ymw16.t6_detlb2 = toolkit::fetchdouble(subptr,"value","detlb2",14.7);//deg
+            fereg_ymw16.t6_wlb2 = toolkit::fetchdouble(subptr,"value","wlb2",15.6)*CGS_U_pc;//pc
+            fereg_ymw16.t6_hlb2 = toolkit::fetchdouble(subptr,"value","hlb2",43.6)*CGS_U_pc;//pc
             // Loop I
             subptr = toolkit::tracexml(doc,{"freeelectron","regular","ymw16","loopi"});
-            fereg_ymw16.t7_nli = toolkit::fetchdouble(subptr,"value","nli");//pccm
-            fereg_ymw16.t7_rli = toolkit::fetchdouble(subptr,"value","rli")*CGS_U_pc;//pc
-            fereg_ymw16.t7_wli = toolkit::fetchdouble(subptr,"value","wli")*CGS_U_pc;//pc
-            fereg_ymw16.t7_detthetali = toolkit::fetchdouble(subptr,"value","detthetali");//deg
-            fereg_ymw16.t7_thetali = toolkit::fetchdouble(subptr,"value","thetali");//deg
+            fereg_ymw16.t7_nli = toolkit::fetchdouble(subptr,"value","nli",1.907);//pccm
+            fereg_ymw16.t7_rli = toolkit::fetchdouble(subptr,"value","rli",80.0)*CGS_U_pc;//pc
+            fereg_ymw16.t7_wli = toolkit::fetchdouble(subptr,"value","wli",15.0)*CGS_U_pc;//pc
+            fereg_ymw16.t7_detthetali = toolkit::fetchdouble(subptr,"value","detthetali",30.0);//deg
+            fereg_ymw16.t7_thetali = toolkit::fetchdouble(subptr,"value","thetali",40.0);//deg
         }
         // testing
         else if (fereg_type=="test"){
@@ -493,16 +493,16 @@ void Param::cre_param (tinyxml2::XMLDocument* doc){
             cre_ana.theta = toolkit::fetchdouble(subptr,"value","theta");
             cre_ana.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
             cre_ana.z0 = toolkit::fetchdouble(subptr,"value","z0")*CGS_U_kpc; //kpc
-            cre_ana.E0 = toolkit::fetchdouble(subptr,"value","E0")*CGS_U_GeV; //GeV
-            cre_ana.j0 = toolkit::fetchdouble(subptr,"value","j0");
+            cre_ana.E0 = toolkit::fetchdouble(subptr,"value","E0",20.6)*CGS_U_GeV; //GeV
+            cre_ana.j0 = toolkit::fetchdouble(subptr,"value","j0",0.0217);
         }
         // testing
         else if (cre_type=="test"){
             tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"cre","test"})};
             cre_test.alpha = toolkit::fetchdouble(subptr,"value","alpha");
             cre_test.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
-            cre_test.E0 = toolkit::fetchdouble(subptr,"value","E0")*CGS_U_GeV; //GeV
-            cre_test.j0 = toolkit::fetchdouble(subptr,"value","j0");
+            cre_test.E0 = toolkit::fetchdouble(subptr,"value","E0",20.6)*CGS_U_GeV; //GeV
+            cre_test.j0 = toolkit::fetchdouble(subptr,"value","j0",0.0217);
         }
         else{
             throw std::runtime_error("unsupported cre model");
