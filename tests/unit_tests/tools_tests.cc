@@ -172,6 +172,10 @@ TEST(toolkit, xml_parser){
     
     EXPECT_EQ(toolkit::fetchdouble(el,"dft_value"),double(0));
     
+    el = toolkit::tracexml(doc.get(),{"empty_double"});
+    
+    EXPECT_EQ(toolkit::fetchdouble(el,"value",5.0),double(5.0));
+    
     el = toolkit::tracexml(doc.get(),{"integer"});
     
     EXPECT_EQ(toolkit::fetchunsigned(el,"value"),unsigned(23));

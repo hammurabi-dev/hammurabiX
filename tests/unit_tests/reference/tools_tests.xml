@@ -2,6 +2,7 @@
 <root>
     <integer value="23"/>
     <double value="3.14"/>
+    <empty_double value=""/>
     <string value="string"/>
     <true value="1"/>
     <false value="0"/>
