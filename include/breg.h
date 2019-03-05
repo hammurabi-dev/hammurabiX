@@ -44,20 +44,18 @@ public:
                              Grid_breg *) const;
 };
 
-#ifndef NDEBUG
-//designed for verification
-class Breg_test final : public Breg{
+// uniform field modeling
+class Breg_unif final : public Breg{
 public:
-    Breg_test () = default;
-    Breg_test (const Breg_test &) = delete;
-    Breg_test (Breg_test &&) = delete;
-    Breg_test& operator= (const Breg_test &) = delete;
-    Breg_test& operator= (Breg_test &&) = delete;
-    virtual ~Breg_test () = default;
+    Breg_unif () = default;
+    Breg_unif (const Breg_unif &) = delete;
+    Breg_unif (Breg_unif &&) = delete;
+    Breg_unif& operator= (const Breg_unif &) = delete;
+    Breg_unif& operator= (Breg_unif &&) = delete;
+    virtual ~Breg_unif () = default;
     hvec<3,double> breg (const hvec<3,double> &,
                          const Param *) const override;
 };
-#endif
 
 //WMAP LSA modeling
 //http://iopscience.iop.org/article/10.1086/513699/meta

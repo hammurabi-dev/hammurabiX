@@ -96,23 +96,26 @@ SET(ALL_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 SET(ALL_LIBRARIES)
 
 # find sources
-SET(SRC_FILES 
+SET(SRC_FILES
+	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/brnd_jaffe.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg_jaffe.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg_wmap.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg_unif.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/brnd.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/brnd_es.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/brnd_mhd.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/brnd.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/src/field/cre/cre.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/field/cre/cre_num.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/field/cre/cre_ana.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/cre/cre_unif.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fereg.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fernd_dft.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fernd.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fereg_unif.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fereg_ymw16.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fernd.cc
+	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fernd_dft.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/src/param/param.cc
 
@@ -129,13 +132,6 @@ SET(SRC_FILES
 	${CMAKE_CURRENT_LIST_DIR}/src/tools/tinyxml2.cc
 	${CMAKE_CURRENT_LIST_DIR}/src/tools/namespace_toolkit.cc
 )
-IF(ENABLE_TESTING)
-	LIST(APPEND SRC_FILES
-		${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg_test.cc
-		${CMAKE_CURRENT_LIST_DIR}/src/field/cre/cre_test.cc
-		${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fereg_test.cc
-	)
-ENDIF()
 
 # find HEALPix
 FIND_PATH(HEALPIX_INCLUDE_DIR

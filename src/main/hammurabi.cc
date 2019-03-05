@@ -71,8 +71,8 @@ void Pipeline::assemble_fereg (){
     else if (par->fereg_type=="ymw16"){
         fereg = std::make_unique<FEreg_ymw16> ();
     }
-    else if (par->fereg_type=="test"){
-        fereg = std::make_unique<FEreg_test> ();
+    else if (par->fereg_type=="unif"){
+        fereg = std::make_unique<FEreg_unif> ();
     }
     else throw std::runtime_error("unsupported fereg model");
     // if export to file
@@ -99,8 +99,8 @@ void Pipeline::assemble_breg (){
     else if (par->breg_type=="jaffe"){
         breg = std::make_unique<Breg_jaffe> ();
     }
-    else if (par->breg_type=="test"){
-        breg = std::make_unique<Breg_test> ();
+    else if (par->breg_type=="unif"){
+        breg = std::make_unique<Breg_unif> ();
     }
     else throw std::runtime_error("unsupported breg model");
     // if export to file
@@ -190,8 +190,8 @@ void Pipeline::assemble_cre (){
         if (par->cre_type=="analytic"){
             cre = std::make_unique<CRE_ana> ();
         }
-        else if (par->cre_type=="test"){
-            cre = std::make_unique<CRE_test>();
+        else if (par->cre_type=="unif"){
+            cre = std::make_unique<CRE_unif>();
         }
         else throw std::runtime_error("unsupported cre model");
     }

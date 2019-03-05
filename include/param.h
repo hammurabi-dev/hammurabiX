@@ -89,11 +89,11 @@ public:
     }breg_wmap;
     // test
 #ifndef NDEBUG
-    struct param_breg_test{
+    struct param_breg_unif{
         double b0;
         double l0;
         double r;
-    }breg_test;
+    }breg_unif;
 #endif
     // jaffe
     struct param_breg_jaffe{
@@ -148,10 +148,10 @@ public:
     }fereg_ymw16;
     // test
 #ifndef NDEBUG
-    struct param_fereg_test{
+    struct param_fereg_unif{
         double n0;
         double r0;
-    }fereg_test;
+    }fereg_unif;
 #endif
     // random seed
     std::size_t fernd_seed;
@@ -173,11 +173,11 @@ public:
     }cre_ana;
     // test
 #ifndef NDEBUG
-    struct param_cre_test{
+    struct param_cre_unif{
         double alpha;
         double r0;
         double E0,j0;
-    }cre_test;
+    }cre_unif;
 #endif
 protected:
     // collect observable related parameters

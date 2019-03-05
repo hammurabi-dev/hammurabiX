@@ -192,12 +192,12 @@
                 <comp_r value="12"/> <!-- radial cutoff scale, kpc -->
                 <comp_p value="3"/> <!-- cutoff power -->
             </jaffe>
-            <!-- verification -->
-            <test>
+            <!-- uniform -->
+            <unif>
                 <b0 value="2.0"/> <!-- microG -->
                 <l0 value="70"/> <!-- deg -->
                 <r value="0.3"/>
-            </test>
+            </unif>
         </regular>
         <!-- random/turbulent fields -->
         <!-- seed should be non-negative int -->
@@ -330,11 +330,11 @@
                     <thetali value="40.0"/> <!-- (default) -->
                 </loopi>
             </ymw16>
-            <!-- verification -->
-            <test>
+            <!-- uniform -->
+            <unif>
                 <n0 value="0.01"/> <!-- pccm -->
                 <r0 value="3.0"/> <!-- kpc -->
-            </test>
+            </unif>
         </regular>
         <!-- random/turbulent free electron -->
         <!-- if cue="0", all child elements are opitonal -->
@@ -372,13 +372,13 @@
             <E0 value="20.6"/> <!-- CRE kinetic energy reference, GeV, (default) -->
             <j0 value="0.0217"/> <!-- local CRE flux norm factor @ E0, (default) -->
         </analytic>
-        <!-- verification -->
-        <test>
+        <!-- uniform -->
+        <unif>
             <alpha value="3.0"/>
             <r0 value="3.0"/> <!-- cutoff radius, kpc -->
             <!-- by default, we choose AMS02 20.6GeV -->
             <E0 value="20.6"/> <!-- CRE kinetic energy reference, GeV, (default) -->
             <j0 value="0.0217"/> <!-- local CRE flux norm factor @ E0, (default) -->
-        </test>
+        </unif>
     </cre>
 </root>

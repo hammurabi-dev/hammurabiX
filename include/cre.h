@@ -44,16 +44,15 @@ public:
                          const double &) const;
 };
 
-// designed for testing
-#ifndef NDEBUG
-class CRE_test : public CRE{
+// uniform field modeling
+class CRE_unif : public CRE{
 public:
-    CRE_test () = default;
-    CRE_test (const CRE_test &) = delete;
-    CRE_test (CRE_test &&) = delete;
-    CRE_test& operator= (const CRE_test &) = delete;
-    CRE_test& operator= (CRE_test &&) = delete;
-    virtual ~CRE_test () = default;
+    CRE_unif () = default;
+    CRE_unif (const CRE_unif &) = delete;
+    CRE_unif (CRE_unif &&) = delete;
+    CRE_unif& operator= (const CRE_unif &) = delete;
+    CRE_unif& operator= (CRE_unif &&) = delete;
+    virtual ~CRE_unif () = default;
     double get_emissivity_t (const hvec<3,double> &,
                              const Param *,
                              const Grid_cre *,
@@ -75,7 +74,6 @@ public:
     double rescal (const hvec<3,double> &,
                    const Param *) const;
 };
-#endif
 
 // Analytical CRE modeling
 class CRE_ana : public CRE{

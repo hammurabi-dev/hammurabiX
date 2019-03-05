@@ -37,20 +37,18 @@ public:
                                  const Param *) const;
 };
 
-// designed for testing
-#ifndef NDEBUG
-class FEreg_test final : public FEreg{
+// uniform field modeling
+class FEreg_unif final : public FEreg{
 public:
-    FEreg_test () = default;
-    FEreg_test (const FEreg_test &) = delete;
-    FEreg_test (FEreg_test &&) = delete;
-    FEreg_test& operator= (const FEreg_test &) = delete;
-    FEreg_test& operator= (FEreg_test &&) = delete;
-    virtual ~FEreg_test () = default;
+    FEreg_unif () = default;
+    FEreg_unif (const FEreg_unif &) = delete;
+    FEreg_unif (FEreg_unif &&) = delete;
+    FEreg_unif& operator= (const FEreg_unif &) = delete;
+    FEreg_unif& operator= (FEreg_unif &&) = delete;
+    virtual ~FEreg_unif () = default;
     double density (const hvec<3,double> &,
                     const Param *) const override;
 };
-#endif
 
 // YMW16 modeling (ignore Fermi Bubble due to lack of observation)
 class FEreg_ymw16 final : public FEreg{

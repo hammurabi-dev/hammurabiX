@@ -41,7 +41,7 @@
     <magneticfield>
         <!-- regular fields -->
         <!-- if cue="0", all child elements are opitonal -->
-        <regular cue="0" type="test">
+        <regular cue="0" type="unif">
         </regular>
         <!-- random/turbulent fields -->
         <!-- seed should be non-negative int -->
@@ -151,6 +151,6 @@
     <!-- analytic CRE -->
     <!-- flux norm comes with unit [GeV m^2 s Sr]^-1 -->
     <!-- if cue="0", all child elements are opitonal -->
-    <cre cue="0" type="test">
+    <cre cue="0" type="unif">
     </cre>
 </root>

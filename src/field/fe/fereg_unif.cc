@@ -3,12 +3,12 @@
 #include <fereg.h>
 #include <param.h>
 
-double FEreg_test::density (const hvec<3,double> &pos,
+double FEreg_unif::density (const hvec<3,double> &pos,
                             const Param *par) const{
-    if ((pos-par->observer).length() > par->fereg_test.r0){
+    if ((pos-par->observer).length() > par->fereg_unif.r0){
         return 0.;
     }
-    return par->fereg_test.n0;
+    return par->fereg_unif.n0;
 }
 
 // END

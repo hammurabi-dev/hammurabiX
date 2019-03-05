@@ -63,7 +63,7 @@
     <!-- magnetic fields -->
     <magneticfield>
         <!-- regular fields -->
-        <regular cue="0" type="test">
+        <regular cue="0" type="unif">
         </regular>
         <!-- random/turbulent fields -->
         <!-- seed should be non-negative int -->
@@ -73,7 +73,7 @@
     </magneticfield>
     <!-- free electron field -->
     <freeelectron>
-        <regular cue="0" type="test">
+        <regular cue="0" type="unif">
         </regular>
         <!-- random/turbulent free electron -->
         <random cue="0" type="global" seed="0">
@@ -81,6 +81,6 @@
     </freeelectron>
     <!-- analytic CRE -->
     <!-- flux norm comes with unit [GeV m^2 s Sr]^-1 -->
-    <cre cue="0" type="test">
+    <cre cue="0" type="unif">
     </cre>
 </root>

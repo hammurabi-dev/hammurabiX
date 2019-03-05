@@ -34,7 +34,7 @@ void Param::obs_param (tinyxml2::XMLDocument* doc){
     // if dispersion measure is required
     if (ptr->FirstChildElement("dm")!=nullptr){
         grid_int.write_permission = true;
-        grid_int.do_dm = toolkit::fetchbool (ptr,"cue","dm");
+        grid_int.do_dm = toolkit::fetchbool (ptr,"cue","dm",0);
         grid_int.sim_dm_name = toolkit::fetchstring (ptr,"filename","dm");
         grid_int.nside_dm = toolkit::fetchunsigned (ptr,"nside","dm");
         grid_int.npix_dm = 12*grid_int.nside_dm*grid_int.nside_dm;
@@ -45,7 +45,7 @@ void Param::obs_param (tinyxml2::XMLDocument* doc){
     // if faraday depth is required
     if (ptr->FirstChildElement("faraday")!=nullptr){
         grid_int.write_permission = true;
-        grid_int.do_fd = toolkit::fetchbool (ptr,"cue","faraday");
+        grid_int.do_fd = toolkit::fetchbool (ptr,"cue","faraday",0);
         grid_int.sim_fd_name = toolkit::fetchstring (ptr,"filename","faraday");
         grid_int.nside_fd = toolkit::fetchunsigned (ptr,"nside","faraday");
         grid_int.npix_fd = 12*grid_int.nside_fd*grid_int.nside_fd;
@@ -57,13 +57,13 @@ void Param::obs_param (tinyxml2::XMLDocument* doc){
     if (ptr->FirstChildElement("sync")!=nullptr){
         grid_int.write_permission = true;
         tinyxml2::XMLElement* subptr {toolkit::tracexml (doc,{"observable","sync"})};
-        grid_int.do_sync.push_back (toolkit::fetchbool (subptr,"cue"));
+        grid_int.do_sync.push_back (toolkit::fetchbool (subptr,"cue",0));
         grid_int.sim_sync_freq.push_back (toolkit::fetchdouble (subptr,"freq")*CGS_U_GHz);
         grid_int.sim_sync_name.push_back (toolkit::fetchstring (subptr,"filename"));
         grid_int.nside_sync.push_back (toolkit::fetchunsigned (subptr,"nside"));
         grid_int.npix_sync.push_back (12*grid_int.nside_sync.back()*grid_int.nside_sync.back());
         for (auto e = subptr->NextSiblingElement("sync");e!=nullptr;e=e->NextSiblingElement("sync")){
-            grid_int.do_sync.push_back (toolkit::fetchbool (e,"cue"));
+            grid_int.do_sync.push_back (toolkit::fetchbool (e,"cue",0));
             grid_int.sim_sync_freq.push_back (toolkit::fetchdouble (e,"freq")*CGS_U_GHz);
             grid_int.sim_sync_name.push_back (toolkit::fetchstring (e,"filename"));
             grid_int.nside_sync.push_back (toolkit::fetchunsigned (e,"nside"));
@@ -136,7 +136,7 @@ void Param::breg_param (tinyxml2::XMLDocument* doc){
     }
     // breg internal
     ptr = toolkit::tracexml(doc,{"magneticfield"});
-    grid_breg.build_permission = toolkit::fetchbool (ptr,"cue","regular");
+    grid_breg.build_permission = toolkit::fetchbool (ptr,"cue","regular",0);
     // if no external read and internal model is active
     if (grid_breg.build_permission and not grid_breg.read_permission){
         breg_type = toolkit::fetchstring(ptr,"type","regular");
@@ -151,8 +151,8 @@ void Param::breg_param (tinyxml2::XMLDocument* doc){
         // bjaffe
         else if (breg_type=="jaffe"){
             tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"magneticfield","regular","jaffe"})};
-            breg_jaffe.quadruple = toolkit::fetchbool(subptr,"cue","quadruple");
-            breg_jaffe.bss = toolkit::fetchbool(subptr,"cue","bss");
+            breg_jaffe.quadruple = toolkit::fetchbool(subptr,"cue","quadruple",0);
+            breg_jaffe.bss = toolkit::fetchbool(subptr,"cue","bss",0);
             breg_jaffe.disk_amp = toolkit::fetchdouble(subptr,"value","disk_amp")*CGS_U_muGauss; //microG
             breg_jaffe.disk_z0 = toolkit::fetchdouble(subptr,"value","disk_z0")*CGS_U_kpc; //kpc
             breg_jaffe.halo_amp = toolkit::fetchdouble(subptr,"value","halo_amp")*CGS_U_muGauss; //microG
@@ -160,10 +160,10 @@ void Param::breg_param (tinyxml2::XMLDocument* doc){
             breg_jaffe.r_inner = toolkit::fetchdouble(subptr,"value","r_inner")*CGS_U_kpc; //kpc
             breg_jaffe.r_scale = toolkit::fetchdouble(subptr,"value","r_scale")*CGS_U_kpc; //kpc
             breg_jaffe.r_peak = toolkit::fetchdouble(subptr,"value","r_peak")*CGS_U_kpc; //kpc
-            breg_jaffe.ring = toolkit::fetchbool(subptr,"cue","ring");
+            breg_jaffe.ring = toolkit::fetchbool(subptr,"cue","ring",0);
             breg_jaffe.ring_amp = toolkit::fetchdouble(subptr,"value","ring_amp")*CGS_U_muGauss; //microG
             breg_jaffe.ring_r = toolkit::fetchdouble(subptr,"value","ring_r")*CGS_U_kpc; //kpc
-            breg_jaffe.bar = toolkit::fetchbool(subptr,"cue","bar");
+            breg_jaffe.bar = toolkit::fetchbool(subptr,"cue","bar",0);
             breg_jaffe.bar_amp = toolkit::fetchdouble(subptr,"value","bar_amp")*CGS_U_muGauss; //microG
             breg_jaffe.bar_a = toolkit::fetchdouble(subptr,"value","bar_a")*CGS_U_kpc; //kpc
             breg_jaffe.bar_b = toolkit::fetchdouble(subptr,"value","bar_b")*CGS_U_kpc; //kpc
@@ -185,11 +185,11 @@ void Param::breg_param (tinyxml2::XMLDocument* doc){
             breg_jaffe.comp_r = toolkit::fetchdouble(subptr,"value","comp_r")*CGS_U_kpc; //kpc
             breg_jaffe.comp_p = toolkit::fetchdouble(subptr,"value","comp_p");
         }
-        else if (breg_type=="test"){
-            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"magneticfield","regular","test"})};
-            breg_test.b0 = toolkit::fetchdouble(subptr,"value","b0")*CGS_U_muGauss; //microGauss
-            breg_test.l0 = toolkit::fetchdouble(subptr,"value","l0")*CGS_U_rad; //rad
-            breg_test.r = toolkit::fetchdouble(subptr,"value","r");
+        else if (breg_type=="unif"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"magneticfield","regular","unif"})};
+            breg_unif.b0 = toolkit::fetchdouble(subptr,"value","b0")*CGS_U_muGauss; //microGauss
+            breg_unif.l0 = toolkit::fetchdouble(subptr,"value","l0")*CGS_U_rad; //rad
+            breg_unif.r = toolkit::fetchdouble(subptr,"value","r");
         }
         else{
             throw std::runtime_error("unsupported breg model");
@@ -222,7 +222,7 @@ void Param::brnd_param (tinyxml2::XMLDocument* doc){
     }
     // brnd internal
     ptr = toolkit::tracexml(doc,{"magneticfield"});
-    grid_brnd.build_permission = toolkit::fetchbool (ptr,"cue","random");
+    grid_brnd.build_permission = toolkit::fetchbool (ptr,"cue","random",0);
     // if no external read and internal model is active
     if (grid_brnd.build_permission and not grid_brnd.read_permission){
         // random seed
@@ -300,7 +300,7 @@ void Param::fereg_param (tinyxml2::XMLDocument* doc){
     }
     // fereg internal
     ptr = toolkit::tracexml(doc,{"freeelectron"});
-    grid_fereg.build_permission = toolkit::fetchbool (ptr,"cue","regular");
+    grid_fereg.build_permission = toolkit::fetchbool (ptr,"cue","regular",0);
     if (grid_fereg.build_permission){
         fereg_type = toolkit::fetchstring(ptr,"type","regular");
         // YMW16
@@ -395,11 +395,11 @@ void Param::fereg_param (tinyxml2::XMLDocument* doc){
             fereg_ymw16.t7_detthetali = toolkit::fetchdouble(subptr,"value","detthetali",30.0);//deg
             fereg_ymw16.t7_thetali = toolkit::fetchdouble(subptr,"value","thetali",40.0);//deg
         }
-        // testing
-        else if (fereg_type=="test"){
-            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"freeelectron","regular","test"})};
-            fereg_test.n0 = toolkit::fetchdouble(subptr,"value","n0");
-            fereg_test.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
+        // uniform
+        else if (fereg_type=="unif"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"freeelectron","regular","unif"})};
+            fereg_unif.n0 = toolkit::fetchdouble(subptr,"value","n0");
+            fereg_unif.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
         }
         else{
             throw std::runtime_error("unsupported fereg model");
@@ -431,7 +431,7 @@ void Param::fernd_param (tinyxml2::XMLDocument* doc){
     }
     // fernd internal
     ptr = toolkit::tracexml(doc,{"freeelectron"});
-    grid_fernd.build_permission = toolkit::fetchbool (ptr,"cue","random");
+    grid_fernd.build_permission = toolkit::fetchbool (ptr,"cue","random",0);
     if (grid_fernd.build_permission){
         // random seed
         fernd_seed = toolkit::fetchunsigned(ptr,"seed","random");
@@ -482,7 +482,7 @@ void Param::cre_param (tinyxml2::XMLDocument* doc){
     }
     // cre internal
     ptr = toolkit::tracexml(doc,{"cre"});
-    grid_cre.build_permission = toolkit::fetchbool (ptr,"cue");
+    grid_cre.build_permission = toolkit::fetchbool (ptr,"cue",0);
     if (grid_cre.build_permission){
         cre_type = ptr->Attribute("type");
         // analytical
@@ -496,13 +496,13 @@ void Param::cre_param (tinyxml2::XMLDocument* doc){
             cre_ana.E0 = toolkit::fetchdouble(subptr,"value","E0",20.6)*CGS_U_GeV; //GeV
             cre_ana.j0 = toolkit::fetchdouble(subptr,"value","j0",0.0217);
         }
-        // testing
-        else if (cre_type=="test"){
-            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"cre","test"})};
-            cre_test.alpha = toolkit::fetchdouble(subptr,"value","alpha");
-            cre_test.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
-            cre_test.E0 = toolkit::fetchdouble(subptr,"value","E0",20.6)*CGS_U_GeV; //GeV
-            cre_test.j0 = toolkit::fetchdouble(subptr,"value","j0",0.0217);
+        // uniform
+        else if (cre_type=="unif"){
+            tinyxml2::XMLElement* subptr {toolkit::tracexml(doc,{"cre","unif"})};
+            cre_unif.alpha = toolkit::fetchdouble(subptr,"value","alpha");
+            cre_unif.r0 = toolkit::fetchdouble(subptr,"value","r0")*CGS_U_kpc; //kpc
+            cre_unif.E0 = toolkit::fetchdouble(subptr,"value","E0",20.6)*CGS_U_GeV; //GeV
+            cre_unif.j0 = toolkit::fetchdouble(subptr,"value","j0",0.0217);
         }
         else{
             throw std::runtime_error("unsupported cre model");

@@ -10,9 +10,9 @@
 #include <cgs_units_file.h>
 
 // CRE flux spatial rescaling
-double CRE_test::rescal (const hvec<3,double> &pos,
+double CRE_unif::rescal (const hvec<3,double> &pos,
                            const Param *par) const{
-    if ((pos-par->observer).length() > par->cre_test.r0){
+    if ((pos-par->observer).length() > par->cre_unif.r0){
         return 0;
     }
     else
@@ -20,43 +20,43 @@ double CRE_test::rescal (const hvec<3,double> &pos,
 }
 
 // CRE spectral index
-double CRE_test::flux_idx (const hvec<3,double> &/*pos*/,
+double CRE_unif::flux_idx (const hvec<3,double> &/*pos*/,
                              const Param *par) const{
-    return -(par->cre_test.alpha);
+    return -(par->cre_unif.alpha);
 }
 
 // analytical CRE flux
 // give values to spectral index and norm factor, in cgs units
 // analytical CRE integration use N(\gamma)
-double CRE_test::flux_norm (const hvec<3,double> &pos,
+double CRE_unif::flux_norm (const hvec<3,double> &pos,
                               const Param *par) const{
     // j0 is in [GeV m^2 s sr]^-1 units
-    const double gamma0 {par->cre_test.E0/CGS_U_MEC2+1};
+    const double gamma0 {par->cre_unif.E0/CGS_U_MEC2+1};
     const double beta0 {std::sqrt(1.-1./gamma0)};
     // from PHI(E) to N(\gamma) convertion
     const double unit {(4.*CGS_U_pi*CGS_U_MEC)/(CGS_U_GeV*100.*CGS_U_cm*100.*CGS_U_cm*CGS_U_sec*beta0)};
-    const double norm {par->cre_test.j0*std::pow(gamma0,-flux_idx(par->observer,par))};
+    const double norm {par->cre_unif.j0*std::pow(gamma0,-flux_idx(par->observer,par))};
     
     return norm*unit*rescal(pos,par);
 }
 
 // analytical modeling use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
-double CRE_test::flux (const hvec<3,double> &pos,
+double CRE_unif::flux (const hvec<3,double> &pos,
                          const Param *par,
                          const double &En) const{
     // j0 is in [GeV m^2 s sr]^-1 units
     const double gamma {En/CGS_U_MEC2};
-    const double gamma0 {par->cre_test.E0/CGS_U_MEC2+1};
+    const double gamma0 {par->cre_unif.E0/CGS_U_MEC2+1};
     // converting from N to PHI
     const double unit {std::sqrt((1.-1./gamma)/(1.-1./gamma0))};
-    const double norm {par->cre_test.j0*std::pow(gamma0,-flux_idx(par->observer,par))};
+    const double norm {par->cre_unif.j0*std::pow(gamma0,-flux_idx(par->observer,par))};
     
     return norm*unit*std::pow(gamma,flux_idx(pos,par))*rescal(pos,par);
 }
 
 // J_tot(\nu)
-double CRE_test::get_emissivity_t (const hvec<3,double> &pos,
+double CRE_unif::get_emissivity_t (const hvec<3,double> &pos,
                                      const Param *par,
                                      const Grid_cre */*grid*/,
                                      const double &Bper) const{
@@ -76,7 +76,7 @@ double CRE_test::get_emissivity_t (const hvec<3,double> &pos,
 }
 
 // J_pol(\nu)
-double CRE_test::get_emissivity_p (const hvec<3,double> &pos,
+double CRE_unif::get_emissivity_p (const hvec<3,double> &pos,
                                      const Param *par,
                                      const Grid_cre */*grid*/,
                                      const double &Bper) const{
