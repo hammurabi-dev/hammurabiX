@@ -209,7 +209,7 @@ void Pipeline::assemble_obs (){
     if (par->grid_int.write_permission){
         const auto repeat = par->grid_int.do_sync.size();
         for (unsigned int i=0;i<repeat;++i){
-            if (i>0) {
+            if (i>0){
                 par->grid_int.do_dm = false;
                 par->grid_int.do_fd = false;
                 // need to rebuild integration grid
@@ -229,11 +229,13 @@ void Pipeline::assemble_obs (){
                                 par.get());
             grid_int->export_grid (par.get());
             // delete obsolete parameters
-            par->grid_int.nside_sync.pop_back ();
-            par->grid_int.npix_sync.pop_back ();
-            par->grid_int.do_sync.pop_back ();
-            par->grid_int.sim_sync_freq.pop_back ();
-            par->grid_int.sim_sync_name.pop_back ();
+            if (par->grid_int.do_sync.back()){
+                par->grid_int.nside_sync.pop_back ();
+                par->grid_int.npix_sync.pop_back ();
+                par->grid_int.do_sync.pop_back ();
+                par->grid_int.sim_sync_freq.pop_back ();
+                par->grid_int.sim_sync_name.pop_back ();
+            }
         }
     }
 }

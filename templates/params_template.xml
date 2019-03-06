@@ -143,7 +143,7 @@
     <magneticfield>
         <!-- regular fields -->
         <!-- if cue="0", all child elements are opitonal -->
-        <regular cue="1" type="test">
+        <regular cue="1" type="unif">
             <!-- WMAP LSA -->
             <wmap>
                 <b0 value="1.2"/> <!-- microG -->
@@ -241,7 +241,7 @@
     <!-- free electron field -->
     <freeelectron>
         <!-- if cue="0", all child elements are opitonal -->
-        <regular cue="1" type="test">
+        <regular cue="1" type="unif">
             <!-- YMW16 -->
             <ymw16>
                 <warp>
@@ -360,7 +360,7 @@
     <!-- analytic CRE -->
     <!-- flux norm comes with unit [GeV m^2 s Sr]^-1 -->
     <!-- if cue="0", all child elements are opitonal -->
-    <cre cue="1" type="test">
+    <cre cue="1" type="unif">
         <analytic>
             <!-- CRE spectral index: -alpha+beta*r+theta*z, Galactic cylindric frame -->
             <alpha value="3.0"/>

@@ -21,8 +21,8 @@ double CRE_ana::rescal (const hvec<3,double> &pos,
 // CRE spectral index
 double CRE_ana::flux_idx (const hvec<3,double> &pos,
                           const Param *par) const{
-    const double r {std::sqrt(pos[0]*pos[0]+pos[1]*pos[1])};
-    const double z {std::fabs(pos[2])};
+    const double r {std::sqrt(pos[0]*pos[0]+pos[1]*pos[1])/CGS_U_kpc};
+    const double z {std::fabs(pos[2])/CGS_U_kpc};
     return -par->cre_ana.alpha+par->cre_ana.beta*r+par->cre_ana.theta*z;
 }
 

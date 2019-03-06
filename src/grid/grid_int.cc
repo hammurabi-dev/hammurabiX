@@ -35,8 +35,11 @@ void Grid_int::build_grid (const Param *par){
         Us_map = std::make_unique<Healpix_Map<double>>();
         Us_map->SetNside (par->grid_int.nside_sync.back(),
                           RING);
+        fd_map = std::make_unique<Healpix_Map<double>>();
+        fd_map->SetNside (par->grid_int.nside_sync.back(),
+                          RING);
     }
-    if (par->grid_int.do_fd or par->grid_int.do_sync.back()) {
+    if (par->grid_int.do_fd) {
         fd_map = std::make_unique<Healpix_Map<double>>();
         fd_map->SetNside (par->grid_int.nside_fd,
                           RING);

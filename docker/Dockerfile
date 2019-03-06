@@ -48,11 +48,6 @@ WORKDIR /home/lab/googletest/build
 RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local .. && make && make install && cp ../googletest/src/* /usr/local/src
 WORKDIR /home/lab
 
-# CLEAN PACKAGES
-RUN rm -f *.tar.gz
-# SET PATH
-ENV LD_LIBRARY_PATH /usr/local/lib:${LD_LIBRARY_PATH}
-
 # HAMMURABI X
 RUN git clone https://bitbucket.org/hammurabicode/hamx hamx
 WORKDIR /home/lab/hamx
@@ -62,3 +57,13 @@ RUN cmake .. && make && make install
 # SET PATH
 ENV PATH /usr/local/hammurabi/bin:${PATH}
 ENV LD_LIBRARY_PATH /usr/local/hammurabi/lib:${LD_LIBRARY_PATH}
+WORKDIR /home/lab
+
+#Jupyter OPEN ISSUE
+#downgrading tornado
+RUN pip3 install tornado==5.1.1
+
+# CLEAN PACKAGES
+RUN rm -f *.tar.gz
+# SET PATH
+ENV LD_LIBRARY_PATH /usr/local/lib:${LD_LIBRARY_PATH}

@@ -77,7 +77,7 @@ void Param::obs_param (tinyxml2::XMLDocument* doc){
     if (grid_int.write_permission){
         ptr = toolkit::tracexml (doc,{"grid","shell"});
         grid_int.ec_r_min = toolkit::fetchdouble (ptr,"value","ec_r_min",0)*CGS_U_kpc;
-        grid_int.ec_r_max = toolkit::fetchdouble (ptr,"value","ec_r_max",10)*CGS_U_kpc;
+        grid_int.ec_r_max = toolkit::fetchdouble (ptr,"value","ec_r_max",30)*CGS_U_kpc;
         grid_int.gc_r_min = toolkit::fetchdouble (ptr,"value","gc_r_min",0)*CGS_U_kpc;
         grid_int.gc_r_max = toolkit::fetchdouble (ptr,"value","gc_r_max",20)*CGS_U_kpc;
         grid_int.gc_z_min = toolkit::fetchdouble (ptr,"value","gc_z_min",0)*CGS_U_kpc;
