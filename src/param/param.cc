@@ -94,7 +94,6 @@ void Param::obs_param (tinyxml2::XMLDocument* doc){
             for (std::size_t i=0;i!=grid_int.total_shell;++i){
                 grid_int.nside_shell.push_back (pow(2,i)*toolkit::fetchunsigned (subptr,"value","nside_min",32));
             }
-            std::cout<<"auto shell nside size "<<grid_int.nside_shell.size()<<std::endl;
             grid_int.radii_shell.push_back (grid_int.ec_r_min);
             for (std::size_t i=0;i<grid_int.total_shell;++i) {
                 grid_int.radii_shell.push_back ((grid_int.ec_r_max-grid_int.ec_r_min)*std::pow(0.5,grid_int.total_shell-i-1) + grid_int.ec_r_min);
@@ -108,7 +107,6 @@ void Param::obs_param (tinyxml2::XMLDocument* doc){
                 grid_int.total_shell++;
                 grid_int.nside_shell.push_back (toolkit::fetchunsigned(e,"value"));
             }
-            std::cout<<"manual shell nside size "<<grid_int.nside_shell.size()<<std::endl;
             for (auto e = subptr->FirstChildElement("cut");e!=nullptr;e=e->NextSiblingElement("cut")){
                 grid_int.cut_shell.push_back (toolkit::fetchdouble(e,"value"));
             }
