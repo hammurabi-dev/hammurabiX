@@ -122,7 +122,7 @@
             </layer>
             <!-- helio/observer-centric radial limit -->
             <ec_r_min value="0.0"/> <!-- kpc (default) -->
-            <ec_r_max value="10.0"/> <!-- kpc (default) -->
+            <ec_r_max value="30.0"/> <!-- kpc (default) -->
             <!-- galactic-centric radial limit -->
             <gc_r_min value="0.0"/> <!-- kpc (default) -->
             <gc_r_max value="20.0"/> <!-- kpc (default) -->

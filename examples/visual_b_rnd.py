@@ -163,11 +163,11 @@ def simulator(_fieldtype, _anisotropy, _nx, _ny, _nz, _n2l):
     
     obj.mod_par(['fieldio', 'brnd'], {'read': str(0), 'write': str(1), 'filename': 'brnd.bin'})
     # use 'test' regular B field setting
-    obj.mod_par(['magneticfield', 'regular'], {'cue': str(1), 'type': 'test'})
-    obj.mod_par(['magneticfield', 'regular', 'test', 'b0'], {'value': str(2.0)})
+    obj.mod_par(['magneticfield', 'regular'], {'cue': str(1), 'type': 'unif'})
+    obj.mod_par(['magneticfield', 'regular', 'unif', 'b0'], {'value': str(2.0)})
     # set field along x direction
-    obj.mod_par(['magneticfield', 'regular', 'test', 'l0'], {'value': str(0.)})
-    obj.mod_par(['magneticfield', 'regular', 'test', 'r'], {'value': str(0.)})
+    obj.mod_par(['magneticfield', 'regular', 'unif', 'l0'], {'value': str(0.)})
+    obj.mod_par(['magneticfield', 'regular', 'unif', 'r'], {'value': str(0.)})
     # choose turublent/random field type
     obj.mod_par(['magneticfield', 'random'], {'cue': str(1), 'type': _fieldtype, 'seed': str(0)})
 
@@ -190,7 +190,7 @@ def simulator(_fieldtype, _anisotropy, _nx, _ny, _nz, _n2l):
     obj.mod_par(['magneticfield', 'random', 'local', 'mhd', 'beta'], {'value': str(0.1)})
     obj.mod_par(['magneticfield', 'random', 'local', 'mhd', 'ma'], {'value': str(0.5)})
 
-    obj(True)
+    obj()
 
 
 def index(_i, _j, _k, _nx, _ny, _nz):
@@ -373,15 +373,17 @@ def multi_run_plot():
     
     print(a1, b1)
     print(a2, b2)
-    plt.plot(np.arange(5, 60, 0.5), fit_func(np.arange(5, 60, 0.5), a1, b1),
+    fig, ax = plt.subplots(figsize=(9,9))
+    ax.plot(np.arange(5, 60, 0.5), fit_func(np.arange(5, 60, 0.5), a1, b1),
              linestyle=':', color='firebrick', linewidth=2)
-    plt.plot(np.arange(5, 60, 0.5), fit_func(np.arange(5, 60, 0.5), a2, b2),
+    ax.plot(np.arange(5, 60, 0.5), fit_func(np.arange(5, 60, 0.5), a2, b2),
              linestyle=':', color='steelblue', linewidth=2)
-    plt.errorbar(d1[:, 0], d1[:, 1], yerr=d1[:, 2], fmt='.', color='firebrick', label='local generator')
-    plt.errorbar(d2[:, 0]+1.5, d2[:, 1], yerr=d2[:, 2], fmt='d', color='steelblue', label='global generator')
-    plt.xlabel('$N/L$ $(kpc^{-1})$', fontsize=20)
-    plt.ylabel('$\\sigma_{div}/RMS$', fontsize=20)
-    plt.legend(loc=1, fontsize=20)
+    ax.errorbar(d1[:, 0], d1[:, 1], yerr=d1[:, 2], fmt='.', color='firebrick', label='local generator')
+    ax.errorbar(d2[:, 0]+1.5, d2[:, 1], yerr=d2[:, 2], fmt='d', color='steelblue', label='global generator')
+    ax.tick_params(axis='both', which='major', labelsize='20')
+    ax.xlabel('$N/L$ $(kpc^{-1})$', fontsize=20)
+    ax.ylabel('$\\sigma_{div}/RMS$', fontsize=20)
+    ax.legend(loc=1, fontsize=20)
     plt.savefig('div.pdf')
 
 
@@ -391,9 +393,9 @@ if __name__ == '__main__':
     # do a single run and print info
     # single_run_print('local', 0.5, 200, 200, 200, 50)
     # single_run_print('global', 0.5, 200, 200, 200, 50)
-    single_run_plot('global', 0.2, 200, 200, 200, 50, '$\\rho=0.2$')
+    # single_run_plot('global', 0.2, 200, 200, 200, 50, '$\\rho=0.2$')
     # single_run_plot('local', 0.9, 200, 200, 200, 50, '$\\rho=0.9$')
-    single_run_plot('local', 0.2, 200, 200, 200, 50, '$P_{s,f}/P_A=0.2$')
+    # single_run_plot('local', 0.2, 200, 200, 200, 50, '$P_{s,f}/P_A=0.2$')
     
     # do multiple runs and plot results may take 1hr
-    # multi_run_plot()
+    multi_run_plot()
