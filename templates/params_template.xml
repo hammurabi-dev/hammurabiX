@@ -132,7 +132,7 @@
             <!-- radial integration resolution -->
             <ec_r_res value="0.01"/> <!-- kpc (default) -->
             <!-- galactic latitude limit, both poles -->
-            <lat_min value="0."/> <!--  (default) -->
+            <lat_min value="-90."/> <!--  (default) -->
             <lat_max value="90."/> <!--  (default) -->
             <!-- galactic longitude limit, both poles -->
             <lon_min value="0."/> <!--  (default) -->

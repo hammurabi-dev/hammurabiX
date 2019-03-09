@@ -83,7 +83,7 @@ void Param::obs_param (tinyxml2::XMLDocument* doc){
         grid_int.gc_z_min = toolkit::fetchdouble (ptr,"value","gc_z_min",0)*CGS_U_kpc;
         grid_int.gc_z_max = toolkit::fetchdouble (ptr,"value","gc_z_max",10)*CGS_U_kpc;
         grid_int.radial_res = toolkit::fetchdouble (ptr,"value","ec_r_res",0.01)*CGS_U_kpc;
-        grid_int.lat_min = toolkit::fetchdouble (ptr,"value","lat_min",0)*CGS_U_rad;
+        grid_int.lat_min = toolkit::fetchdouble (ptr,"value","lat_min",-90)*CGS_U_rad;
         grid_int.lat_max = toolkit::fetchdouble (ptr,"value","lat_max",90)*CGS_U_rad;
         grid_int.lon_min = toolkit::fetchdouble (ptr,"value","lon_min",0)*CGS_U_rad;
         grid_int.lon_max = toolkit::fetchdouble (ptr,"value","lon_max",360)*CGS_U_rad;

@@ -186,8 +186,8 @@ void Integrator::radial_integration (struct_shell *shell_ref,
     // angular position
     const double THE {ptg_in.theta};
     const double PHI {ptg_in.phi};
-    if (check_simulation_lower_limit (std::fabs(0.5*CGS_U_pi-THE),par->grid_int.lat_min)) {return;}
-    if (check_simulation_upper_limit (std::fabs(0.5*CGS_U_pi-THE),par->grid_int.lat_max)) {return;}
+    if (check_simulation_lower_limit (0.5*CGS_U_pi-THE,par->grid_int.lat_min)) {return;}
+    if (check_simulation_upper_limit (0.5*CGS_U_pi-THE,par->grid_int.lat_max)) {return;}
     if (check_simulation_lower_limit (PHI,par->grid_int.lon_min)) {return;}
     if (check_simulation_upper_limit (PHI,par->grid_int.lon_max)) {return;}
     double lambda_square=0.,i2bt_sync=0.,fd_forefactor=0.;
