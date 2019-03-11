@@ -37,7 +37,6 @@ void Param::obs_param (tinyxml2::XMLDocument* doc){
         grid_int.do_dm = toolkit::fetchbool (ptr,"cue","dm",0);
         grid_int.sim_dm_name = toolkit::fetchstring (ptr,"filename","dm");
         grid_int.nside_dm = toolkit::fetchunsigned (ptr,"nside","dm");
-        grid_int.npix_dm = 12*grid_int.nside_dm*grid_int.nside_dm;
     }
     else {
         grid_int.do_dm = false;
@@ -48,7 +47,6 @@ void Param::obs_param (tinyxml2::XMLDocument* doc){
         grid_int.do_fd = toolkit::fetchbool (ptr,"cue","faraday",0);
         grid_int.sim_fd_name = toolkit::fetchstring (ptr,"filename","faraday");
         grid_int.nside_fd = toolkit::fetchunsigned (ptr,"nside","faraday");
-        grid_int.npix_fd = 12*grid_int.nside_fd*grid_int.nside_fd;
     }
     else {
         grid_int.do_fd = false;
@@ -61,13 +59,11 @@ void Param::obs_param (tinyxml2::XMLDocument* doc){
         grid_int.sim_sync_freq.push_back (toolkit::fetchdouble (subptr,"freq")*CGS_U_GHz);
         grid_int.sim_sync_name.push_back (toolkit::fetchstring (subptr,"filename"));
         grid_int.nside_sync.push_back (toolkit::fetchunsigned (subptr,"nside"));
-        grid_int.npix_sync.push_back (12*grid_int.nside_sync.back()*grid_int.nside_sync.back());
         for (auto e = subptr->NextSiblingElement("sync");e!=nullptr;e=e->NextSiblingElement("sync")){
             grid_int.do_sync.push_back (toolkit::fetchbool (e,"cue",0));
             grid_int.sim_sync_freq.push_back (toolkit::fetchdouble (e,"freq")*CGS_U_GHz);
             grid_int.sim_sync_name.push_back (toolkit::fetchstring (e,"filename"));
             grid_int.nside_sync.push_back (toolkit::fetchunsigned (e,"nside"));
-            grid_int.npix_sync.push_back (12*grid_int.nside_sync.back()*grid_int.nside_sync.back());
         }
     }
     else {

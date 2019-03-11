@@ -231,7 +231,6 @@ void Pipeline::assemble_obs (){
             // delete obsolete parameters
             if (par->grid_int.do_sync.back()){
                 par->grid_int.nside_sync.pop_back ();
-                par->grid_int.npix_sync.pop_back ();
                 par->grid_int.do_sync.pop_back ();
                 par->grid_int.sim_sync_freq.pop_back ();
                 par->grid_int.sim_sync_name.pop_back ();

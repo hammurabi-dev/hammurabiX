@@ -133,30 +133,33 @@ void Integrator::write_grid (Breg *breg,
         }
         //adding up new shell map to sim map
         if (par->grid_int.do_dm) {
+            std::size_t npix_dm = gint->dm_map->Npix();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-            for (std::size_t ipix=0;ipix<par->grid_int.npix_dm;++ipix) {
+            for (std::size_t ipix=0;ipix<npix_dm;++ipix) {
                 pointing ptg {gint->dm_map->pix2ang (ipix)};
                 (*gint->dm_map)[ipix] += current_dm_map->interpolated_value (ptg);
             }
         }
         if (par->grid_int.do_sync.back()) {
+            std::size_t npix_sync = gint->Is_map->Npix();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-            for (std::size_t ipix=0;ipix<par->grid_int.npix_sync.back();++ipix) {
+            for (std::size_t ipix=0;ipix<npix_sync;++ipix) {
                 pointing ptg = {gint->Is_map->pix2ang (ipix)};
                 (*gint->Is_map)[ipix] += current_Is_map->interpolated_value (ptg);
                 (*gint->Qs_map)[ipix] += current_Qs_map->interpolated_value (ptg);
                 (*gint->Us_map)[ipix] += current_Us_map->interpolated_value (ptg);
             }
         }
-        if (par->grid_int.do_fd or par->grid_int.do_sync.back()) {
+        if (par->grid_int.do_fd) {
+            std::size_t npix_fd = gint->fd_map->Npix();
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-            for (std::size_t ipix=0;ipix<par->grid_int.npix_fd;++ipix) {
+            for (std::size_t ipix=0;ipix<npix_fd;++ipix) {
                 pointing ptg = {gint->fd_map->pix2ang (ipix)};
                 (*gint->fd_map)[ipix] += current_fd_map->interpolated_value (ptg);
             }
