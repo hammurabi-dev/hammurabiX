@@ -87,14 +87,12 @@ public:
         double psi1;
         double chi0;
     }breg_wmap;
-    // test
-#ifndef NDEBUG
+    // uniform
     struct param_breg_unif{
         double b0;
         double l0;
         double r;
     }breg_unif;
-#endif
     // jaffe
     struct param_breg_jaffe{
         bool quadruple,bss;
@@ -146,13 +144,11 @@ public:
         t6_nlb2, t6_detlb2, t6_wlb2, t6_hlb2, t6_thetalb2;
         double t7_nli, t7_rli, t7_wli, t7_detthetali, t7_thetali;
     }fereg_ymw16;
-    // test
-#ifndef NDEBUG
+    // uniform
     struct param_fereg_unif{
         double n0;
         double r0;
     }fereg_unif;
-#endif
     // random seed
     std::size_t fernd_seed;
     // isotropic
@@ -171,14 +167,12 @@ public:
         double r0,z0;
         double E0,j0;
     }cre_ana;
-    // test
-#ifndef NDEBUG
+    // uniform
     struct param_cre_unif{
         double alpha;
         double r0;
         double E0,j0;
     }cre_unif;
-#endif
 protected:
     // collect observable related parameters
     void obs_param (tinyxml2::XMLDocument *);
