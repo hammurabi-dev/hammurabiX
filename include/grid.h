@@ -157,6 +157,7 @@ public:
     void build_grid (const Param *) override;
     void export_grid (const Param *) override;
     std::unique_ptr<Healpix_Map<double>> dm_map, Is_map, Qs_map, Us_map, fd_map;
+    std::unique_ptr<Healpix_Map<double>> tmp_dm_map, tmp_Is_map, tmp_Qs_map, tmp_Us_map, tmp_fd_map;
 };
 
 #endif

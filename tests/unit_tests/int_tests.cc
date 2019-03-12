@@ -28,12 +28,6 @@ TEST(integrator, shell_info_assembling){
     EXPECT_EQ (par->grid_int.sim_sync_freq[0],test_double);
     test_double = 1.4*CGS_U_GHz;
     EXPECT_EQ (par->grid_int.sim_sync_freq[1],test_double);
-    test_unsigned = 32;
-    EXPECT_EQ (par->grid_int.nside_shell[0],test_unsigned);
-    test_unsigned = 64;
-    EXPECT_EQ (par->grid_int.nside_shell[1],test_unsigned);
-    test_unsigned = 128;
-    EXPECT_EQ (par->grid_int.nside_shell[2],test_unsigned);
     //
     prop->assemble_shell_ref(ref.get(),par.get(),1);
     test_unsigned = 667;
@@ -54,13 +48,6 @@ TEST(integrator, shell_info_assembling){
     EXPECT_EQ (ref->d_stop,test_double);
     //
     par = std::make_unique<Param> ("reference/int_tests_02.xml");
-    //
-    test_unsigned = 32;
-    EXPECT_EQ (par->grid_int.nside_shell[0],test_unsigned);
-    test_unsigned = 16;
-    EXPECT_EQ (par->grid_int.nside_shell[1],test_unsigned);
-    test_unsigned = 8;
-    EXPECT_EQ (par->grid_int.nside_shell[2],test_unsigned);
     //
     prop->assemble_shell_ref(ref.get(),par.get(),1);
     test_unsigned = 201;

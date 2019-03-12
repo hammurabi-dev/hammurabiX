@@ -196,7 +196,7 @@ def precision(_res):
     # calibrate simulation box
     obj.mod_par(['grid', 'shell', 'layer'], {'type': 'auto'})
     obj.mod_par(['grid', 'shell', 'layer', 'auto', 'shell_num'], {'value': str(shell)})
-    obj.mod_par(['grid', 'shell', 'layer', 'auto', 'nside_min'], {'value': str(nside)})
+    obj.mod_par(['grid', 'shell', 'nside_sim'], {'value': str(nside)})
     obj.mod_par(['grid', 'shell', 'ec_r_max'], {'value': str(radius)})
     obj.mod_par(['grid', 'shell', 'gc_r_max'], {'value': str(radius+9.)})
     obj.mod_par(['grid', 'shell', 'gc_z_max'], {'value': str(radius+1.)})

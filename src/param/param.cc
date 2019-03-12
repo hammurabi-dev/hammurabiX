@@ -83,13 +83,11 @@ void Param::obs_param (tinyxml2::XMLDocument* doc){
         grid_int.lat_max = toolkit::fetchdouble (ptr,"value","lat_max",90)*CGS_U_rad;
         grid_int.lon_min = toolkit::fetchdouble (ptr,"value","lon_min",0)*CGS_U_rad;
         grid_int.lon_max = toolkit::fetchdouble (ptr,"value","lon_max",360)*CGS_U_rad;
+        grid_int.nside_sim = toolkit::fetchunsigned (ptr,"value","nside_sim",32);
         // auto shell cutting
         if (toolkit::fetchstring (ptr,"type","layer")=="auto"){
             tinyxml2::XMLElement* subptr {toolkit::tracexml (doc,{"grid","shell","layer","auto"})};
             grid_int.total_shell = toolkit::fetchunsigned (subptr,"value","shell_num",1);
-            for (std::size_t i=0;i!=grid_int.total_shell;++i){
-                grid_int.nside_shell.push_back (pow(2,i)*toolkit::fetchunsigned (subptr,"value","nside_min",32));
-            }
             grid_int.radii_shell.push_back (grid_int.ec_r_min);
             for (std::size_t i=0;i<grid_int.total_shell;++i) {
                 grid_int.radii_shell.push_back ((grid_int.ec_r_max-grid_int.ec_r_min)*std::pow(0.5,grid_int.total_shell-i-1) + grid_int.ec_r_min);
@@ -98,17 +96,13 @@ void Param::obs_param (tinyxml2::XMLDocument* doc){
         // manual shell cutting
         else if (toolkit::fetchstring (ptr,"type","layer")=="manual"){
             tinyxml2::XMLElement* subptr {toolkit::tracexml (doc,{"grid","shell","layer","manual"})};
-            grid_int.total_shell = 0;
-            for (auto e = subptr->FirstChildElement("nside");e!=nullptr;e=e->NextSiblingElement("nside")){
-                grid_int.total_shell++;
-                grid_int.nside_shell.push_back (toolkit::fetchunsigned(e,"value"));
-            }
+            grid_int.total_shell = 1;
             for (auto e = subptr->FirstChildElement("cut");e!=nullptr;e=e->NextSiblingElement("cut")){
+                grid_int.total_shell++;
                 grid_int.cut_shell.push_back (toolkit::fetchdouble(e,"value"));
             }
             grid_int.cut_shell.push_back (1.);
             assert (grid_int.cut_shell.size() == grid_int.total_shell);
-            assert (grid_int.nside_shell.size() == grid_int.total_shell);
             grid_int.radii_shell.push_back (grid_int.ec_r_min);
             for (auto& i : grid_int.cut_shell){
                 grid_int.radii_shell.push_back ((grid_int.ec_r_max-grid_int.ec_r_min)*i+grid_int.ec_r_min);
