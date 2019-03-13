@@ -351,6 +351,7 @@ def precision_dist(_res):
     ax.hist((isim-ith)/ith,30,histtype='step',stacked=True,fill=False,color='firebrick')
     ax.hist((pisim-pith)/pith,30,histtype='step',stacked=True,fill=False,color='steelblue')
     ax.hist((fsim-fth)/fth,30,histtype='step',stacked=True,fill=False,color='darkseagreen')
+    ax.tick_params(axis='both', which='major', labelsize='20')
     ax.legend(loc=1)
     plt.savefig('precision_dist.pdf')
 
@@ -372,6 +373,7 @@ def main():
     plt.plot(x, z2_t, '-', linewidth=4, color='steelblue')
     plt.plot(x, z2_p, '-.', linewidth=4, color='steelblue')
     plt.plot(x, z2_f, ':', linewidth=4, color='steelblue')
+    ax.tick_params(axis='both', which='major', labelsize='20')
 
     def myfmt(_x, _pos):
         return '%0.2f' % (_x*100)
