@@ -1,5 +1,5 @@
 # hammurabi README
-##### (version X.02.01)
+##### (version X.02.02)
 
 hammurabi is an open-source (GNU General Public License v3) HEALPix-based tool 
 for simulating full-sky Galactic foreground observables.
@@ -40,7 +40,10 @@ Original hammurabi source code can be found [**here**](https://sourceforge.net/p
 - synchrotron emission with radial integration test presented in wiki
 - multi-threading performace presented in wiki
 
-### update X.02.01
+### patch X.02.02
+- fix integration precision behavior
+
+### patch X.02.01
 - observable output resolution can be defined independently for each map
 - redesigned ouput map dictionary entry in hampyx
 - mem-leak fixed
