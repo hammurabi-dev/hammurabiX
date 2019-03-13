@@ -263,6 +263,98 @@ def precision(_res):
     return min_t, min_p, min_f, max_t, max_p, max_f
 
 
+def precision_dist(_res):
+    """
+    precision
+    :param _res:
+    :return:
+    """
+    # observable controllers
+    nside = 8  # shouldn't affect precision
+    shell = 1  # shouldn't affect precision
+    res = _res  # affecting precision
+    radius = 4.0  # shouldn't affect precision
+
+    # field controllers
+    b0 = 6.0  # muG
+    r = 0
+    l0 = 0.0
+    alpha = 3
+    je = 0.25
+    freq = 23  # affecting precision??
+    ne = 0.01  # pccm
+
+    # call hammurabiX wrapper
+    obj = ham.Hampyx()
+    # assuming the xml file is not prepared
+    obj.del_par(['observable', 'sync'], 'all')
+    obj.add_par(['observable'], 'sync', {'cue': str(1),
+                                         'freq': str(freq),
+                                         'filename': 'dumy',
+                                         'nside': str(nside)})
+    obj.mod_par(['observable', 'dm'], {'cue': str(1), 'nside': str(nside)})
+    obj.mod_par(['observable', 'faraday'], {'cue': str(1), 'nside': str(nside)})
+    # mute all field output/input
+    obj.del_par(['fieldio', 'breg'], 'all')
+    obj.del_par(['fieldio', 'brnd'], 'all')
+    obj.del_par(['fieldio', 'fereg'], 'all')
+    obj.del_par(['fieldio', 'fernd'], 'all')
+    obj.del_par(['fieldio', 'cre'], 'all')
+    # calibrate simulation box
+    obj.mod_par(['grid', 'shell', 'layer'], {'type': 'auto'})
+    obj.mod_par(['grid', 'shell', 'layer', 'auto', 'shell_num'], {'value': str(shell)})
+    obj.mod_par(['grid', 'shell', 'nside_sim'], {'value': str(nside)})
+    obj.mod_par(['grid', 'shell', 'ec_r_max'], {'value': str(radius)})
+    obj.mod_par(['grid', 'shell', 'gc_r_max'], {'value': str(radius+9.)})
+    obj.mod_par(['grid', 'shell', 'gc_z_max'], {'value': str(radius+1.)})
+    obj.mod_par(['grid', 'shell', 'ec_r_res'], {'value': str(res)})
+    # fix GMF
+    obj.mod_par(['magneticfield', 'regular'], {'cue': str(1), 'type': 'unif'})
+    obj.mod_par(['magneticfield', 'regular', 'unif', 'b0'], {'value': str(b0)})
+    obj.mod_par(['magneticfield', 'regular', 'unif', 'l0'], {'value': str(l0)})
+    obj.mod_par(['magneticfield', 'regular', 'unif', 'r'], {'value': str(r)})
+    obj.mod_par(['magneticfield', 'random'], {'cue': str(0)})
+    # fix FE
+    obj.mod_par(['freeelectron', 'regular'], {'cue': str(1), 'type': 'unif'})
+    obj.mod_par(['freeelectron', 'regular', 'unif', 'n0'], {'value': str(ne)})
+    obj.mod_par(['freeelectron', 'regular', 'unif', 'r0'], {'value': str(radius)})
+    obj.mod_par(['freeelectron', 'random'], {'cue': str(0)})
+    # fix CRE
+    obj.mod_par(['cre'], {'type': 'unif'})
+    obj.mod_par(['cre', 'unif', 'alpha'], {'value': str(alpha)})
+    obj.mod_par(['cre', 'unif', 'E0'], {'value': str(10.0)})
+    obj.mod_par(['cre', 'unif', 'j0'], {'value': str(je)})
+    obj.mod_par(['cre', 'unif', 'r0'], {'value': str(radius)})
+    # call hammurabi executable
+    obj(True)
+    # (in mK_cmb)
+    qsim = obj.sim_map[('sync', str(freq), str(nside), 'Q')]*1.e+3
+    usim = obj.sim_map[('sync', str(freq), str(nside), 'U')]*1.e+3
+    isim = obj.sim_map[('sync', str(freq), str(nside), 'I')]*1.e+3
+    fsim = obj.sim_map[('fd', 'nan', str(nside), 'nan')]
+
+    ith = np.zeros_like(isim)
+    qth = np.zeros_like(qsim)
+    uth = np.zeros_like(usim)
+    fth = np.zeros_like(fsim)
+    for i in range(0, np.size(qth)):
+        l, b = hp.pix2ang(nside, i, lonlat=True)
+        ith[i] = i_th([b0, r, l0, alpha, je, freq], l, b)*radius*kpc
+        qth[i] = q_th([b0, r, l0, alpha, je, freq], l, b)*radius*kpc
+        uth[i] = u_th([b0, r, l0, alpha, je, freq], l, b)*radius*kpc
+        fth[i] = fd_th([b0, r, l0, ne], l, b)*radius*kpc*1.e+4
+    
+    pith = np.sqrt(qth**2 + uth**2)
+    pisim = np.sqrt(qsim**2+usim**2)	
+
+    fig, ax = plt.subplots(figsize=(9,9))
+    ax.hist((isim-ith)/ith,30,histtype='step',stacked=True,fill=False,color='firebrick')
+    ax.hist((pisim-pith)/pith,30,histtype='step',stacked=True,fill=False,color='steelblue')
+    ax.hist((fsim-fth)/fth,30,histtype='step',stacked=True,fill=False,color='darkseagreen')
+    ax.legend(loc=1)
+    plt.savefig('precision_dist.pdf')
+
+
 def main():
     from matplotlib.ticker import FuncFormatter
     num = 50
@@ -276,21 +368,20 @@ def main():
     for i in range(0, num):
         z1_t[i], z1_p[i], z1_f[i], z2_t[i], z2_p[i], z2_f[i] = precision(x[i]*0.001)
     
-    fig, ax = plt.subplots()
-    plt.plot(x, z2_t, 'k-', label='total intensity')
-    plt.plot(x, z2_p, 'k-.', label='polarized intensity')
-    plt.plot(x, z2_f, 'k:', label='Faraday depth')
+    fig, ax = plt.subplots(figsize=(9,9))
+    plt.plot(x, z2_t, '-', linewidth=4, color='steelblue')
+    plt.plot(x, z2_p, '-.', linewidth=4, color='steelblue')
+    plt.plot(x, z2_f, ':', linewidth=4, color='steelblue')
 
     def myfmt(_x, _pos):
         return '%0.2f' % (_x*100)
 
     ax.yaxis.set_major_formatter(FuncFormatter(myfmt))
-    plt.legend(loc=2, fontsize=20)
     plt.ylabel('maximum relative error ($\\%$)', fontsize=20)
     plt.xlabel('raidal integration resolution (pc)', fontsize=20)
     plt.savefig('precision.pdf')
 
 
 if __name__ == '__main__':
-    # precision(0.01)
+    # precision_dist(0.1)
     main()

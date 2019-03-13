@@ -144,10 +144,8 @@ void Integrator::radial_integration (struct_shell *shell_ref,
     if (par->grid_int.do_fd){
         fd_forefactor = -(CGS_U_qe*CGS_U_qe*CGS_U_qe)/(2.*CGS_U_pi*CGS_U_MEC2*CGS_U_MEC2);
     }
-    // precalc for Simpson's rule
-    std::vector<double> F_dm,F_fd,F_Jtot,F_Jpol,intr_pol_ang;
-    decltype(shell_ref->step) looper, counter=0;
-    for(looper=0;looper<shell_ref->step;++looper){
+    // radial accumulation
+    for(decltype(shell_ref->step) looper=0;looper<shell_ref->step;++looper){
         // ec and gc position
         hvec<3,double> ec_pos {toolkit::los_versor(THE,PHI)*shell_ref->dist[looper]};
         hvec<3,double> pos {ec_pos + par->observer};
@@ -156,7 +154,6 @@ void Integrator::radial_integration (struct_shell *shell_ref,
         if (check_simulation_upper_limit (pos.length(),par->grid_int.gc_r_max)) {continue;}
         if (check_simulation_lower_limit (std::fabs(pos[2]),par->grid_int.gc_z_min)) {continue;}
         if (check_simulation_upper_limit (std::fabs(pos[2]),par->grid_int.gc_z_max)) {continue;}
-        counter++;
         // B field
         hvec<3,double> B_vec {breg->get_breg(pos,par,gbreg)};
         // add random field
@@ -173,47 +170,23 @@ void Integrator::radial_integration (struct_shell *shell_ref,
         te *= double(te>0.);
         // DM
         if (par->grid_int.do_dm){
-            F_dm.push_back (te*shell_ref->delta_d);
+            pixobs.dm += te*shell_ref->delta_d;
         }
         // Faraday depth
         if (par->grid_int.do_fd or par->grid_int.do_sync.back()){
-            F_fd.push_back (te*B_par*fd_forefactor*shell_ref->delta_d);
+            pixobs.fd += te*B_par*fd_forefactor*shell_ref->delta_d;
         }
         // Synchrotron Emission
         if (par->grid_int.do_sync.back()){
-            F_Jtot.push_back (cre->get_emissivity_t(pos,par,gcre,B_per)*shell_ref->delta_d*i2bt_sync);
-            // J_pol receive no contribution from missing random
-            F_Jpol.push_back (cre->get_emissivity_p(pos,par,gcre,B_per)*shell_ref->delta_d*i2bt_sync);
+            pixobs.Is += cre->get_emissivity_t(pos,par,gcre,B_per)*shell_ref->delta_d*i2bt_sync;
+            // J_pol receives no contribution from unresolved random field
+            const double Jpol {cre->get_emissivity_p(pos,par,gcre,B_per)*shell_ref->delta_d*i2bt_sync};
             // intrinsic polarization angle, following IAU definition
-            intr_pol_ang.push_back (toolkit::intr_pol_ang(B_vec,THE,PHI));
+            const double qui {(inner_shells_fd+pixobs.fd)*lambda_square+toolkit::intr_pol_ang(B_vec,THE,PHI)};
+            pixobs.Qs += cos(2.*qui)*Jpol;
+            pixobs.Us += sin(2.*qui)*Jpol;
         }
     }// precalc
-    // apply Simpson's 1/3 rule
-    for (decltype(shell_ref->step) i=1;i<counter-1;i+=2){
-        // DM
-        if (par->grid_int.do_dm){
-            pixobs.dm += (F_dm[i-1]+4.*F_dm[i]+F_dm[i+1])*0.16666667;
-        }
-        // FD
-        if (par->grid_int.do_fd or par->grid_int.do_sync.back()){
-            pixobs.fd += (F_fd[i-1]+4.*F_fd[i]+F_fd[i+1])*0.16666667;
-        }
-        // Sync
-        if (par->grid_int.do_sync.back()){
-            // pol. angle after Faraday rotation
-            double qui_base {(inner_shells_fd+pixobs.fd)*lambda_square};
-            double qui_0 {qui_base+intr_pol_ang[i-1]};
-            double qui_1 {qui_base+intr_pol_ang[i]};
-            double qui_2 {qui_base+intr_pol_ang[i+1]};
-            
-            assert (std::fabs(qui_0)+std::fabs(qui_1)+std::fabs(qui_2)<1e30);
-            assert (F_Jtot[i-1]>=0 and F_Jtot[i]>=0 and F_Jtot[i+1]>=0);
-            
-            pixobs.Is += (F_Jtot[i-1]+4.*F_Jtot[i]+F_Jtot[i+1])*0.16666667;
-            pixobs.Qs += (cos(2.*qui_0)*F_Jpol[i-1]+4.*cos(2.*qui_1)*F_Jpol[i]+cos(2.*qui_2)*F_Jpol[i+1])*0.16666667;
-            pixobs.Us += (sin(2.*qui_0)*F_Jpol[i-1]+4.*sin(2.*qui_1)*F_Jpol[i]+sin(2.*qui_2)*F_Jpol[i+1])*0.16666667;
-        }
-    }
 }//end of radial_integrate
 
 // TOOLS
@@ -227,10 +200,11 @@ void Integrator::assemble_shell_ref (struct_shell *target,
     target->d_start = par->grid_int.radii_shell[shell_num-1];
     target->d_stop = par->grid_int.radii_shell[shell_num];
     target->delta_d = par->grid_int.radial_res;
-    // dragging target->delta_d outside will lose precision
-    target->step = floor(2.*(target->d_stop/target->delta_d - target->d_start/target->delta_d))+1;
+    target->step = floor((target->d_stop/target->delta_d - target->d_start/target->delta_d))+1;
+    // get rid of error in the previous step
+    target->delta_d = (target->d_stop - target->d_start)/(target->step-1);
     for (std::size_t i=0;i<target->step;++i){
-        target->dist.push_back(target->d_start+i*0.5*target->delta_d);
+        target->dist.push_back(target->d_start+i*target->delta_d);
     }
 }
 
