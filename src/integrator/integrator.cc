@@ -159,15 +159,17 @@ void Integrator::radial_integration (struct_shell *shell_ref,
         // add random field
         B_vec += brnd->get_brnd (pos,par,gbrnd);
         const double B_par {toolkit::par2los(B_vec,THE,PHI)};
-        // un-scaled B_per, if random B is active, we scale up this
-        // in calculating emissivity, so it is not constant
-        double B_per {toolkit::perp2los (B_vec,THE,PHI)};
+        assert (std::isfinite(B_par));
+        // be aware of un-resolved random B_per in calculating emissivity
+        const double B_per {toolkit::perp2los (B_vec,THE,PHI)};
+        assert (std::isfinite(B_per));
         // FE field
         double te {fereg->get_density (pos,par,gfereg)};
         // add random field
         te += fernd->get_fernd (pos,par,gfernd);
         // to avoid negative value
         te *= double(te>0.);
+        assert (std::isfinite(te));
         // DM
         if (par->grid_int.do_dm){
             pixobs.dm += te*shell_ref->delta_d;
@@ -178,11 +180,14 @@ void Integrator::radial_integration (struct_shell *shell_ref,
         }
         // Synchrotron Emission
         if (par->grid_int.do_sync.back()){
-            pixobs.Is += cre->get_emissivity_t(pos,par,gcre,B_per)*shell_ref->delta_d*i2bt_sync;
+            const double Jtot {cre->get_emissivity_t(pos,par,gcre,B_per)*shell_ref->delta_d*i2bt_sync};
             // J_pol receives no contribution from unresolved random field
             const double Jpol {cre->get_emissivity_p(pos,par,gcre,B_per)*shell_ref->delta_d*i2bt_sync};
+            assert (Jtot<1e30 and Jpol<1e30 and Jtot>=0 and Jpol>=0);
+            pixobs.Is += Jtot;
             // intrinsic polarization angle, following IAU definition
             const double qui {(inner_shells_fd+pixobs.fd)*lambda_square+toolkit::intr_pol_ang(B_vec,THE,PHI)};
+            assert (std::isfinite(qui));
             pixobs.Qs += cos(2.*qui)*Jpol;
             pixobs.Us += sin(2.*qui)*Jpol;
         }
