@@ -5,7 +5,7 @@ MAINTAINER jiaxin.wang@sissa.it
 # users may need python-tk, please install it manually: # apt-get install python3-tk
 
 RUN apt-get update --fix-missing
-RUN apt-get install -y build-essential git gfortran autoconf gsl-bin libgsl-dev wget cmake vim unzip valgrind
+RUN apt-get install -y build-essential git autoconf gsl-bin libgsl-dev wget cmake vim unzip valgrind
 RUN apt-get install -y python3 python3-dev python3-pip
 RUN pip3 install numpy scipy matplotlib astropy healpy jupyter
 
@@ -53,7 +53,7 @@ RUN git clone https://bitbucket.org/hammurabicode/hamx hamx
 WORKDIR /home/lab/hamx
 RUN mkdir /home/lab/hamx/build
 WORKDIR /home/lab/hamx/build
-RUN cmake .. && make && make install
+RUN cmake .. && make install
 # SET PATH
 ENV PATH /usr/local/hammurabi/bin:${PATH}
 ENV LD_LIBRARY_PATH /usr/local/hammurabi/lib:${LD_LIBRARY_PATH}
