@@ -61,8 +61,8 @@ public:
     struct param_int_grid{
         bool write_permission=false;
         // shell parameters
-        std::size_t nside_dm, nside_fd, total_shell, nside_sim;
-        std::vector<std::size_t> nside_sync;
+        std::size_t nside_dm, nside_fd, total_shell;
+        std::vector<std::size_t> nside_sync, nside_shell;
         // storing upper limit of shell raidus ratio to max radius, except the last shell
         std::vector<double> cut_shell;
         std::vector<double> radii_shell;

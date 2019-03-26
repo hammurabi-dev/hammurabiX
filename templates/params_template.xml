@@ -109,14 +109,17 @@
             <layer type="auto">
                 <auto>
                     <shell_num value="1"/> <!-- total shell number (default) -->
+                    <nside_sim value="32"/> <!-- lowest shell nside (default) -->
                 </auto>
                 <!-- set shell resolution from inside out -->
                 <!-- set shell cutting point from inside out -->
                 <manual> <!-- total shell number calculated automatically -->
                     <cut value="0.5"/> <!-- cut at half of total shell radius -->
+                    <!-- shell nsides from inside out -->
+                    <nside_sim value="32"/>
+                    <nside_sim value="64"/>
                 </manual>
             </layer>
-            <nside_sim value="32"/> <!-- uniform shell nside (default) -->
             <!-- helio/observer-centric radial limit -->
             <ec_r_min value="0.0"/> <!-- kpc (default) -->
             <ec_r_max value="30.0"/> <!-- kpc (default) -->

@@ -381,8 +381,8 @@ def multi_run_plot():
     ax.errorbar(d1[:, 0], d1[:, 1], yerr=d1[:, 2], fmt='.', color='firebrick', label='local generator')
     ax.errorbar(d2[:, 0]+1.5, d2[:, 1], yerr=d2[:, 2], fmt='d', color='steelblue', label='global generator')
     ax.tick_params(axis='both', which='major', labelsize='20')
-    ax.xlabel('$N/L$ $(kpc^{-1})$', fontsize=20)
-    ax.ylabel('$\\sigma_{div}/RMS$', fontsize=20)
+    ax.set_xlabel('$N/L$ $(kpc^{-1})$', fontsize=20)
+    ax.set_ylabel('$\\sigma_{div}/RMS$', fontsize=20)
     ax.legend(loc=1, fontsize=20)
     plt.savefig('div.pdf')
 

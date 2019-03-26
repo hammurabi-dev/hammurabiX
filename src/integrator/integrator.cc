@@ -34,19 +34,42 @@ void Integrator::write_grid (Breg *breg,
                              Grid_int *gint,
                              const Param *par) const{
     if (par->grid_int.do_dm) {
-        gint->tmp_dm_map->fill (0.);
+        gint->dm_map->fill (0.);
     }
     if (par->grid_int.do_sync.back()) {
-        gint->tmp_Is_map->fill (0.);
-        gint->tmp_Qs_map->fill (0.);
-        gint->tmp_Us_map->fill (0.);
+        gint->Is_map->fill (0.);
+        gint->Qs_map->fill (0.);
+        gint->Us_map->fill (0.);
     }
     if (par->grid_int.do_fd or par->grid_int.do_sync.back()) {
-        gint->tmp_fd_map->fill (0.);
+        gint->fd_map->fill (0.);
     }
     auto shell_ref = std::make_unique<struct_shell>();
-    const std::size_t npix_sim {12*par->grid_int.nside_sim*par->grid_int.nside_sim};
-    for (decltype(par->grid_int.total_shell) current_shell=1;current_shell!=(par->grid_int.total_shell+1);++current_shell) {
+    for (decltype(par->grid_int.total_shell) current_shell=1;current_shell!=(par->grid_int.total_shell+1);++current_shell){
+        // fetch current shell nside & npix
+        const std::size_t current_nside {par->grid_int.nside_shell[current_shell-1]};
+        const std::size_t current_npix {12*current_nside*current_nside};
+        if (par->grid_int.do_dm) {
+            gint->tmp_dm_map->SetNside (current_nside,
+                                        RING);
+            gint->tmp_dm_map->fill (0.);
+        }
+        if (par->grid_int.do_sync.back()) {
+            gint->tmp_Is_map->SetNside (current_nside,
+                                        RING);
+            gint->tmp_Qs_map->SetNside (current_nside,
+                                        RING);
+            gint->tmp_Us_map->SetNside (current_nside,
+                                        RING);
+            gint->tmp_Is_map->fill (0.);
+            gint->tmp_Qs_map->fill (0.);
+            gint->tmp_Us_map->fill (0.);
+        }
+        if (par->grid_int.do_fd or par->grid_int.do_sync.back()) {
+            gint->tmp_fd_map->SetNside (current_nside,
+                                        RING);
+            gint->tmp_fd_map->fill (0.);
+        }
         // setting for radial_integration
         // call auxiliary function assemble_shell_ref
         // use unique_ptr to avoid stack overflow
@@ -56,14 +79,12 @@ void Integrator::write_grid (Breg *breg,
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
-        for (std::size_t ipix=0;ipix<npix_sim;++ipix) {
+        for (std::size_t ipix=0;ipix<current_npix;++ipix) {
             struct_observables observables;
             observables.Is = 0.;
             observables.Qs = 0.;
             observables.Us = 0.;
             observables.dm = 0.;
-            // accumulate Faraday rotation
-            observables.fd = (*gint->tmp_fd_map)[ipix];
             // remember to complete logic for ptg assignment!
             pointing ptg;
             if (par->grid_int.do_dm) {
@@ -71,9 +92,13 @@ void Integrator::write_grid (Breg *breg,
             }
             else if (par->grid_int.do_fd){
                 ptg = gint->tmp_fd_map->pix2ang (ipix);
+                // accumulate Faraday rotation
+                observables.fd = gint->fd_map->interpolated_value (ptg);
             }
             else if (par->grid_int.do_sync.back()) {
                 ptg = gint->tmp_Is_map->pix2ang (ipix);
+                // accumulate Faraday rotation
+                observables.fd = gint->fd_map->interpolated_value (ptg);
             }
             // check angular direction boundaries
             if (check_simulation_lower_limit (0.5*CGS_U_pi-ptg.theta,par->grid_int.lat_min)) {continue;}
@@ -109,7 +134,40 @@ void Integrator::write_grid (Breg *breg,
                 (*gint->tmp_fd_map)[ipix] += observables.fd;
             }
         }
-    }// shell
+        // accumulating new shell map to sim map
+        if (par->grid_int.do_dm) {
+            std::size_t npix_dm = gint->dm_map->Npix();
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+            for (std::size_t ipix=0;ipix<npix_dm;++ipix) {
+                pointing ptg {gint->dm_map->pix2ang (ipix)};
+                (*gint->dm_map)[ipix] += gint->tmp_dm_map->interpolated_value (ptg);
+            }
+        }
+        if (par->grid_int.do_sync.back()) {
+            std::size_t npix_sync = gint->Is_map->Npix();
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+            for (std::size_t ipix=0;ipix<npix_sync;++ipix) {
+                pointing ptg = {gint->Is_map->pix2ang (ipix)};
+                (*gint->Is_map)[ipix] += gint->tmp_Is_map->interpolated_value (ptg);
+                (*gint->Qs_map)[ipix] += gint->tmp_Qs_map->interpolated_value (ptg);
+                (*gint->Us_map)[ipix] += gint->tmp_Us_map->interpolated_value (ptg);
+            }
+        }
+        if (par->grid_int.do_fd) {
+            std::size_t npix_fd = gint->fd_map->Npix();
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+            for (std::size_t ipix=0;ipix<npix_fd;++ipix) {
+                pointing ptg = {gint->fd_map->pix2ang (ipix)};
+                (*gint->fd_map)[ipix] += gint->tmp_fd_map->interpolated_value (ptg);
+            }
+        }// end shell accumulation
+    }// end shell iteration
 }
 
 void Integrator::radial_integration (struct_shell *shell_ref,

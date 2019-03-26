@@ -30,13 +30,15 @@
             <layer type="auto">
                 <auto>
                     <shell_num value="3"/> <!-- total shell number (default) -->
+                    <nside_sim value="32"/>
                 </auto>
                 <!-- set shell cutting point from inside out -->
                 <manual> <!-- total shell number calculated automatically -->
                     <cut value="0.5"/> <!-- cut at half of total shell radius -->
+                    <nside_sim value="32"/>
+                    <nside_sim value="16"/>
                 </manual>
             </layer>
-            <nside_sim value="32"/>
             <!-- helio/observer-centric radial limit -->
             <ec_r_min value="5.0"/> <!-- kpc (default) -->
             <ec_r_max value="45.0"/> <!-- kpc (default) -->

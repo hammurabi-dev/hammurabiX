@@ -217,45 +217,25 @@ double Brnd_mhd::hf (const double &beta,
 double Brnd_mhd::speca (const double &k,
                         const Param *par) const{
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_mhd.pa0};
-    const double kr {k/par->brnd_mhd.k0};
-    const double a0 {par->brnd_mhd.aa0};
-    const double unit = 1./(4*CGS_U_pi*k*k);
+    const double unit = 0.25/(CGS_U_pi*k*k);
     // power law
-    double P {0.};
-    if (kr>=1.){
-        P = p0/std::pow(kr,a0);
-    }
-    return P*unit;
+    return par->brnd_mhd.pa0*unit*double(k>par->brnd_mhd.k0)/std::pow(k/par->brnd_mhd.k0,par->brnd_mhd.aa0);
 }
 
 double Brnd_mhd::specf (const double &k,
                         const Param *par) const{
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_mhd.pf0};
-    const double kr {k/par->brnd_mhd.k0};
-    const double a0 {par->brnd_mhd.af0};
-    const double unit = 1./(4*CGS_U_pi*k*k);
+    const double unit = 0.25/(CGS_U_pi*k*k);
     // power law
-    double P{0.};
-    if (kr>=1.){
-        P = p0/std::pow(kr,a0);
-    }
-    return P*unit;
+    return par->brnd_mhd.pf0*unit*double(k>par->brnd_mhd.k0)/std::pow(k/par->brnd_mhd.k0,par->brnd_mhd.af0);
 }
 
 double Brnd_mhd::specs (const double &k,
                         const Param *par) const{
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_mhd.ps0};
-    const double kr {k/par->brnd_mhd.k0};
-    const double a0 {par->brnd_mhd.as0};
-    const double unit = 1./(4*CGS_U_pi*k*k);
+    const double unit = 0.25/(CGS_U_pi*k*k);
     // power law
-    double P {0.};
-    if (kr>=1.){
-        P = p0/std::pow(kr,a0);
-    }
-    return P*unit;
+    return par->brnd_mhd.ps0*unit*double(k>par->brnd_mhd.k0)/std::pow(k/par->brnd_mhd.k0,par->brnd_mhd.as0);
 }
+
 // END

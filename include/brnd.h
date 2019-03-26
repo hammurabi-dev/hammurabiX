@@ -1,15 +1,28 @@
-// (an)iso-tropic (Gaussian) turbulent/random GMF generators
+// (Gaussian) random GMF generators
+// field parameterized modelling is implemented in breg function
+// interactions with grid are carried out via read_grid and write_grid
+// notice that read/write_grid acts with internal grid in memory
+// interactions with disk data are carried out in Grid_brnd class
+// get_breg is the universal interface for retrieving field vector
+// at given 3D spatial position
+// get_breg knows where to read the information
+// either from grid or parameterzed modelling
+//
+// Brnd_global and Brnd_local are ghosts (of no technical usage)
+// designed for distinguish global and local random GMF generators
+//
+// it is impossible to describe Brnd_es/jaffe/mhd in details here
+// please check the wiki page
+//
+// customized field modelling can be added as derived class of Brnd
 
 #ifndef HAMMURABI_BRND_H
 #define HAMMURABI_BRND_H
 
 #include <hvec.h>
-#include <gsl/gsl_integration.h>
-
 #include <param.h>
 #include <grid.h>
 #include <breg.h>
-#include <namespace_toolkit.h>
 
 // base class with read_grid implemented
 // get_brnd is invoked when no specific derived class object is instantiated
@@ -131,7 +144,7 @@ protected:
 // Jaffe method of global (an)isotropic turbulent GMF
 //class Brnd_Jaffe final : public Brnd_global
 
-// local anisotropic turbulent GMF
+// local anisotropic random GMF
 // in compressive MHD plasma
 // check technical report for details
 class Brnd_mhd final : public Brnd_local{

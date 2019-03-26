@@ -37,15 +37,10 @@ double Brnd_es::anisotropy_ratio (const hvec<3,double> &,
 double Brnd_es::spec(const double &k,
                      const Param *par) const{
     //units fixing, wave vector in 1/kpc units
-    const double p0 {par->brnd_es.rms*CGS_U_muGauss};
-    const double kr {k/par->brnd_es.k0};
-    const double a0 {par->brnd_es.a0};
+    const double p0 {par->brnd_es.rms*par->brnd_es.rms};
     const double unit = 1./(4*CGS_U_pi*k*k);
     // power law
-    double P {0.};
-    if (kr>1){
-        P = p0/std::pow(kr,a0);
-    }
+    const double P = p0*double(k>par->brnd_es.k0)/std::pow(k/par->brnd_es.k0,par->brnd_es.a0);
     return P*unit;
 }
 
@@ -55,9 +50,7 @@ double Brnd_es::rescal (const hvec<3,double> &pos,
                         const Param *par) const{
     const double r_cyl {std::sqrt(pos[0]*pos[0]+pos[1]*pos[1]) - std::fabs(par->observer[0])};
     const double z {std::fabs(pos[2]) - std::fabs(par->observer[2])};
-    const double r0 {par->brnd_es.r0};
-    const double z0 {par->brnd_es.z0};
-    return std::exp(-r_cyl/r0)*std::exp(-z/z0);
+    return std::exp(-r_cyl/par->brnd_es.r0)*std::exp(-z/par->brnd_es.z0);
 }
 
 // Gram-Schimdt, rewritten using Healpix vec3 library
