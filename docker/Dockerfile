@@ -4,9 +4,9 @@ MAINTAINER jiaxin.wang@sissa.it
 
 # users may need python-tk, please install it manually: # apt-get install python3-tk
 
-RUN apt-get update --fix-missing
-RUN apt-get install -y build-essential time gfortran libblas-dev liblapack-dev gsl-bin libgsl-dev autoconf cmake
-RUN apt-get install -y git wget vim unzip valgrind python3 python3-dev python3-pip
+RUN apt-get update
+RUN apt-get install -y --fix-missing build-essential time gfortran libblas-dev liblapack-dev gsl-bin libgsl-dev autoconf cmake
+RUN apt-get install -y --fix-missing git wget vim unzip valgrind python3 python3-dev python3-pip
 RUN pip3 install numpy scipy matplotlib astropy healpy jupyter
 
 RUN mkdir /home/lab
