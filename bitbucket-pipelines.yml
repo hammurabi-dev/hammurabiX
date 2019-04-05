@@ -5,5 +5,5 @@ pipelines:
   default:
     - step:
         script:
-          - ./contrib/utilities/compile_clang_format
+          - ./contrib/utilities/download_clang_format
           - ./contrib/utilities/check_indentation.sh
