@@ -1,5 +1,22 @@
+/*build*
 sites
 *.d
+
+# eclipse
+/.cproject
+/.project
+qtcreator/
+
+# visual studio code
+/.vscode
+
+# misc
+/.clang_complete
+/contrib/utilities/programs
+
+# emacs temporary and backup files
+*~
+*#
 
 # Compiled Object files
 *.slo
@@ -30,9 +47,6 @@ sites
 *.exe
 *.out
 *.app
-
-# Temps
-*.~
 
 #plots
 *.fits
