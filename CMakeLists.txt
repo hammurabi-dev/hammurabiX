@@ -97,40 +97,40 @@ SET(ALL_LIBRARIES)
 
 # find sources
 SET(SRC_FILES
-	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/brnd_jaffe.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg_jaffe.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg_wmap.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/breg_unif.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/brnd.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/brnd_es.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/gmf/brnd_mhd.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/breg.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/brnd_jaffe.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/breg_jaffe.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/breg_wmap.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/breg_unif.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/brnd.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/brnd_es.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/brnd_mhd.cc
 
-	${CMAKE_CURRENT_LIST_DIR}/src/field/cre/cre.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/cre/cre_num.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/cre/cre_ana.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/cre/cre_unif.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre_num.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre_ana.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre_unif.cc
 
-	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fereg.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fereg_unif.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fereg_ymw16.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fernd.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/field/fe/fernd_dft.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/fe/fereg.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/fe/fereg_unif.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/fe/fereg_ymw16.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/fe/fernd.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/fe/fernd_dft.cc
 
-	${CMAKE_CURRENT_LIST_DIR}/src/param/param.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/param/param.cc
 
-	${CMAKE_CURRENT_LIST_DIR}/src/integrator/integrator.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/integrator/integrator.cc
 
-	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid_int.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid_fernd.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid_brnd.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid_cre.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid_fereg.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/grid/grid_breg.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_int.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_fernd.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_brnd.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_cre.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_fereg.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_breg.cc
 
-	${CMAKE_CURRENT_LIST_DIR}/src/tools/tinyxml2.cc
-	${CMAKE_CURRENT_LIST_DIR}/src/tools/namespace_toolkit.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/tools/tinyxml2.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/tools/namespace_toolkit.cc
 )
 
 # find HEALPix
@@ -329,7 +329,7 @@ IF(ENABLE_TESTING)
 ENDIF()
 
 # build executable
-ADD_EXECUTABLE(hamx src/main/hammurabi.cc)
+ADD_EXECUTABLE(hamx source/main/hammurabi.cc)
 TARGET_LINK_LIBRARIES(hamx hammurabi)
 # copy template parameter file into build directory
 FILE(COPY
