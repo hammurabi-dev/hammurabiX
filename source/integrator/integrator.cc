@@ -215,9 +215,9 @@ void Integrator::radial_integration(struct_shell *shell_ref, pointing &ptg_in,
       continue;
     }
     // B field
-    hvec<3, double> B_vec{breg->get_breg(pos, par, gbreg)};
+    hvec<3, double> B_vec{breg->get_vector(pos, par, gbreg)};
     // add random field
-    B_vec += brnd->get_brnd(pos, par, gbrnd);
+    B_vec += brnd->get_vector(pos, par, gbrnd);
     const double B_par{toolkit::par2los(B_vec, THE, PHI)};
     assert(std::isfinite(B_par));
     // be aware of un-resolved random B_per in calculating emissivity
@@ -226,7 +226,7 @@ void Integrator::radial_integration(struct_shell *shell_ref, pointing &ptg_in,
     // FE field
     double te{fereg->get_density(pos, par, gfereg)};
     // add random field
-    te += fernd->get_fernd(pos, par, gfernd);
+    te += fernd->get_density(pos, par, gfernd);
     // to avoid negative value
     te *= double(te > 0.);
     assert(std::isfinite(te));

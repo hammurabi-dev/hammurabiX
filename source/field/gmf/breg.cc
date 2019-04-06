@@ -9,12 +9,12 @@
 #include <namespace_toolkit.h>
 #include <param.h>
 
-hvec<3, double> Breg::get_breg(const hvec<3, double> &pos, const Param *par,
-                               const Grid_breg *grid) const {
+hvec<3, double> Breg::get_vector(const hvec<3, double> &pos, const Param *par,
+                                 const Grid_breg *grid) const {
   if (par->grid_breg.read_permission) {
     return read_grid(pos, par, grid);
   } else if (par->grid_breg.build_permission) {
-    return breg(pos, par);
+    return gmf(pos, par);
   } else {
     return hvec<3, double>{0., 0., 0.};
   }
@@ -22,7 +22,7 @@ hvec<3, double> Breg::get_breg(const hvec<3, double> &pos, const Param *par,
 
 // if no specified field model is built
 // Breg object link directly here and return null field when invoked
-hvec<3, double> Breg::breg(const hvec<3, double> &, const Param *) const {
+hvec<3, double> Breg::gmf(const hvec<3, double> &, const Param *) const {
   return hvec<3, double>{0., 0., 0.};
 }
 
@@ -111,7 +111,7 @@ void Breg::write_grid(const Param *par, Grid_breg *grid) const {
       gc_pos[1] = j * ly / (par->grid_breg.ny - 1) + par->grid_breg.y_min;
       for (decltype(par->grid_breg.nz) k = 0; k != par->grid_breg.nz; ++k) {
         gc_pos[2] = k * lz / (par->grid_breg.nz - 1) + par->grid_breg.z_min;
-        tmp_vec = breg(gc_pos, par);
+        tmp_vec = gmf(gc_pos, par);
         std::size_t idx{toolkit::index3d(par->grid_breg.nx, par->grid_breg.ny,
                                          par->grid_breg.nz, i, j, k)};
         grid->bx[idx] = tmp_vec[0];

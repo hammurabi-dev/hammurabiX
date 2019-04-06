@@ -3,9 +3,9 @@
 // interactions with grid are carried out via read_grid and write_grid
 // notice that read/write_grid acts with internal grid in memory
 // interactions with disk data are carried out in Grid_brnd class
-// get_breg is the universal interface for retrieving field vector
+// get_vector is the universal interface for retrieving field vector
 // at given 3D spatial position
-// get_breg knows where to read the information
+// get_vector knows where to read the information
 // either from grid or parameterzed modelling
 //
 // Brnd_global and Brnd_local are ghosts (of no technical usage)
@@ -25,7 +25,7 @@
 #include <param.h>
 
 // base class with read_grid implemented
-// get_brnd is invoked when no specific derived class object is instantiated
+// get_vector is invoked when no specific derived class object is instantiated
 class Brnd {
 public:
   Brnd() = default;
@@ -38,8 +38,8 @@ public:
   // return zero field when read_grid is not invoked
   // 1st argument: Galactic centric Cartesian frame position
   // 2nd argument: random GMF grid object
-  virtual hvec<3, double> get_brnd(const hvec<3, double> &, const Param *,
-                                   const Grid_brnd *) const;
+  virtual hvec<3, double> get_vector(const hvec<3, double> &, const Param *,
+                                     const Grid_brnd *) const;
   // read field from grid with trilinear interpolation
   // user has to call write_grid ahead in main routine
   // 1st argument: Galactic centric Cartesian frame position

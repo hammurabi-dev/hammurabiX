@@ -7,8 +7,8 @@
 #include <param.h>
 
 // wmap-3yr
-hvec<3, double> Breg_wmap::breg(const hvec<3, double> &pos,
-                                const Param *par) const {
+hvec<3, double> Breg_wmap::gmf(const hvec<3, double> &pos,
+                               const Param *par) const {
   const double r{std::sqrt(pos[0] * pos[0] + pos[1] * pos[1])};
   if (r > (20. * CGS_U_kpc) or r < (3. * CGS_U_kpc)) {
     return hvec<3, double>{0., 0., 0.};

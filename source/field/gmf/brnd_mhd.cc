@@ -31,7 +31,7 @@ void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
   const double lx{par->grid_brnd.x_max - par->grid_brnd.x_min};
   const double ly{par->grid_brnd.y_max - par->grid_brnd.y_min};
   const double lz{par->grid_brnd.z_max - par->grid_brnd.z_min};
-  const hvec<3, double> B{breg->get_breg(par->observer, par, gbreg)};
+  const hvec<3, double> B{breg->get_vector(par->observer, par, gbreg)};
   // physical dk^3
   const double dk3{CGS_U_kpc * CGS_U_kpc * CGS_U_kpc / (lx * ly * lz)};
 #ifdef _OPENMP

@@ -216,10 +216,6 @@
                     <r0 value="8.0"/> <!-- in kpc -->
                     <z0 value="1.0"/> <!-- in kpc -->
                 </es>
-                <!-- Jaffe method -->
-                <jaffe>
-                    <!-- to be implemented -->
-                </jaffe>
             </global>
             <!-- local generators -->
             <local type="mhd">

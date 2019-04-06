@@ -20,7 +20,7 @@ hvec<3, double> Brnd_es::anisotropy_direction(const hvec<3, double> &pos,
                                               const Param *par,
                                               const Breg *breg,
                                               const Grid_breg *gbreg) const {
-  return (breg->get_breg(pos, par, gbreg)).versor();
+  return (breg->get_vector(pos, par, gbreg)).versor();
 }
 
 // global anisotropic turbulent field

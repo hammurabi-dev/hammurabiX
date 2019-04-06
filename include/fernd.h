@@ -19,8 +19,8 @@ public:
   FErnd &operator=(FErnd &&) = delete;
   virtual ~FErnd() = default;
   // return 0 if no derived class is instantiated
-  virtual double get_fernd(const hvec<3, double> &, const Param *,
-                           const Grid_fernd *) const;
+  virtual double get_density(const hvec<3, double> &, const Param *,
+                             const Grid_fernd *) const;
   virtual double read_grid(const hvec<3, double> &, const Param *,
                            const Grid_fernd *) const;
   virtual void write_grid(const Param *, Grid_fernd *) const;

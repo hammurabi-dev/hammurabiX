@@ -10,8 +10,8 @@
 #include <namespace_toolkit.h>
 #include <param.h>
 
-double FErnd::get_fernd(const hvec<3, double> &pos, const Param *par,
-                        const Grid_fernd *grid) const {
+double FErnd::get_density(const hvec<3, double> &pos, const Param *par,
+                          const Grid_fernd *grid) const {
   if (par->grid_fernd.read_permission or par->grid_fernd.build_permission) {
     return read_grid(pos, par, grid);
   }

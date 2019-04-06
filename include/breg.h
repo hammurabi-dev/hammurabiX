@@ -3,9 +3,9 @@
 // interactions with grid are carried out via read_grid and write_grid
 // notice that read/write_grid acts with internal grid in memory
 // interactions with disk data are carried out in Grid_breg class
-// get_breg is the universal interface for retrieving field vector
+// get_vector is the universal interface for retrieving field vector
 // at given 3D spatial position
-// get_breg knows where to read the information
+// get_vector knows where to read the information
 // either from grid or parameterzed modelling
 //
 // customized field modelling can be added as derived class of Breg
@@ -34,12 +34,12 @@ public:
   // 3rd argument: regular GMF grid class object
   // inovke read_grid regardless of field type if permitted, otherwise invoke
   // breg
-  virtual hvec<3, double> get_breg(const hvec<3, double> &, const Param *,
-                                   const Grid_breg *) const;
+  virtual hvec<3, double> get_vector(const hvec<3, double> &, const Param *,
+                                     const Grid_breg *) const;
   // GMF assembler, specified only in derived class
   // 1st argument: Galactic centric Cartesian frame position
   // 2nd argument: parameter class object
-  virtual hvec<3, double> breg(const hvec<3, double> &, const Param *) const;
+  virtual hvec<3, double> gmf(const hvec<3, double> &, const Param *) const;
   // read from field grid with trilinear interpolation
   // 1st argument: Galactic centric Cartesian frame position
   // 2nd argument: regular GMF grid class object
@@ -61,7 +61,7 @@ public:
   Breg_unif &operator=(const Breg_unif &) = delete;
   Breg_unif &operator=(Breg_unif &&) = delete;
   virtual ~Breg_unif() = default;
-  hvec<3, double> breg(const hvec<3, double> &, const Param *) const override;
+  hvec<3, double> gmf(const hvec<3, double> &, const Param *) const override;
 };
 
 // WMAP LSA modeling
@@ -76,7 +76,7 @@ public:
   Breg_wmap &operator=(const Breg_wmap &) = delete;
   Breg_wmap &operator=(Breg_wmap &&) = delete;
   virtual ~Breg_wmap() = default;
-  hvec<3, double> breg(const hvec<3, double> &, const Param *) const override;
+  hvec<3, double> gmf(const hvec<3, double> &, const Param *) const override;
 };
 
 // Jaffe modeling
@@ -90,7 +90,7 @@ public:
   Breg_jaffe &operator=(const Breg_jaffe &) = delete;
   Breg_jaffe &operator=(Breg_jaffe &&) = delete;
   virtual ~Breg_jaffe() = default;
-  hvec<3, double> breg(const hvec<3, double> &, const Param *) const override;
+  hvec<3, double> gmf(const hvec<3, double> &, const Param *) const override;
 #ifndef NDEBUG
 protected:
 #endif
