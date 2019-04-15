@@ -206,11 +206,11 @@ void Integrator::radial_integration(struct_shell *shell_ref, pointing &ptg_in,
     if (check_simulation_upper_limit(pos.length(), par->grid_int.gc_r_max)) {
       continue;
     }
-    if (check_simulation_lower_limit(std::fabs(pos[2]),
+    if (check_simulation_lower_limit(pos[2],
                                      par->grid_int.gc_z_min)) {
       continue;
     }
-    if (check_simulation_upper_limit(std::fabs(pos[2]),
+    if (check_simulation_upper_limit(pos[2],
                                      par->grid_int.gc_z_max)) {
       continue;
     }

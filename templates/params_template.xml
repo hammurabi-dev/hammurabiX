@@ -127,7 +127,7 @@
             <gc_r_min value="0.0"/> <!-- kpc (default) -->
             <gc_r_max value="20.0"/> <!-- kpc (default) -->
             <!-- galactic-centric height limit -->
-            <gc_z_min value="0.0"/> <!-- kpc (default) -->
+            <gc_z_min value="-10.0"/> <!-- kpc (default) -->
             <gc_z_max value="10.0"/> <!-- kpc (default) -->
             <!-- radial integration resolution -->
             <ec_r_res value="0.01"/> <!-- kpc (default) -->
