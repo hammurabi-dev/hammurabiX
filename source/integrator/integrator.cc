@@ -38,12 +38,14 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, FEreg *fereg, FErnd *fernd,
     gint->fd_map->fill(0.);
   }
   auto shell_ref = std::make_unique<struct_shell>();
+  // loop through shells
   for (decltype(par->grid_int.total_shell) current_shell = 1;
        current_shell != (par->grid_int.total_shell + 1); ++current_shell) {
     // fetch current shell nside & npix
     const std::size_t current_nside{
         par->grid_int.nside_shell[current_shell - 1]};
     const std::size_t current_npix{12 * current_nside * current_nside};
+    // prepare temporary maps for current shell
     if (par->grid_int.do_dm) {
       gint->tmp_dm_map->SetNside(current_nside, RING);
       gint->tmp_dm_map->fill(0.);
@@ -62,7 +64,6 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, FEreg *fereg, FErnd *fernd,
     }
     // setting for radial_integration
     // call auxiliary function assemble_shell_ref
-    // use unique_ptr to avoid stack overflow
     assemble_shell_ref(shell_ref.get(), par, current_shell);
 #ifdef _OPENMP
 #pragma omp parallel for
@@ -266,12 +267,11 @@ void Integrator::assemble_shell_ref(struct_shell *target, const Param *par,
   target->d_stop = par->grid_int.radii_shell[shell_num];
   target->delta_d = par->grid_int.radial_res;
   target->step = floor((target->d_stop / target->delta_d -
-                        target->d_start / target->delta_d)) +
-                 1;
+                        target->d_start / target->delta_d));
   // get rid of error in the previous step
-  target->delta_d = (target->d_stop - target->d_start) / (target->step - 1);
+  target->delta_d = (target->d_stop - target->d_start) / (target->step);
   for (std::size_t i = 0; i < target->step; ++i) {
-    target->dist.push_back(target->d_start + i * target->delta_d);
+    target->dist.push_back(target->d_start + i * 0.5 * target->delta_d);
   }
 }
 
