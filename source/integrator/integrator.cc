@@ -268,20 +268,22 @@ void Integrator::assemble_shell_ref(struct_shell *target, const Param *par,
   target->d_start = par->grid_int.radii_shell[shell_num - 1];
   target->d_stop = par->grid_int.radii_shell[shell_num];
   target->delta_d = par->grid_int.radial_res;
-  target->step = floor((target->d_stop / target->delta_d -
-                        target->d_start / target->delta_d));
+  target->step = floor(
+      (target->d_stop / target->delta_d - target->d_start / target->delta_d));
   // get rid of error in the previous step
   target->delta_d = (target->d_stop - target->d_start) / (target->step);
   for (std::size_t i = 0; i < target->step; ++i) {
     target->dist.push_back(target->d_start + i * 0.5 * target->delta_d);
   }
 #ifdef VERBOSE
-  std::cout<<" shell reference: "<<std::endl
-  <<" shell No. "<<target->shell_num<<std::endl
-  <<" resolution "<<target->delta_d/CGS_U_kpc<<" kpc "<<std::endl
-  <<" d_start "<<target->d_start/CGS_U_kpc<<" kpc "<<std::endl
-  <<" d_stop "<<target->d_stop/CGS_U_kpc<<" kpc "<<std::endl
-  <<" steps "<<target->step<<std::endl;
+  std::cout << " shell reference: " << std::endl
+            << " shell No. " << target->shell_num << std::endl
+            << " resolution " << target->delta_d / CGS_U_kpc << " kpc "
+            << std::endl
+            << " d_start " << target->d_start / CGS_U_kpc << " kpc "
+            << std::endl
+            << " d_stop " << target->d_stop / CGS_U_kpc << " kpc " << std::endl
+            << " steps " << target->step << std::endl;
 #endif
 }
 
