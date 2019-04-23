@@ -75,16 +75,19 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, FEreg *fereg, FErnd *fernd,
       observables.Us = 0.;
       observables.dm = 0.;
       // remember to complete logic for ptg assignment!
+      // and for caching Faraday depth and/or optical depth
+      // make serious tests after changing this part!
       pointing ptg;
       if (par->grid_int.do_dm) {
         ptg = gint->tmp_dm_map->pix2ang(ipix);
-      } else if (par->grid_int.do_fd) {
+      }
+      if (par->grid_int.do_fd) {
         ptg = gint->tmp_fd_map->pix2ang(ipix);
-        // accumulate Faraday rotation
+        // cache Faraday rotation from inner shells
         observables.fd = gint->fd_map->interpolated_value(ptg);
       } else if (par->grid_int.do_sync.back()) {
         ptg = gint->tmp_Is_map->pix2ang(ipix);
-        // accumulate Faraday rotation
+        // cache Faraday rotation from inner shells
         observables.fd = gint->fd_map->interpolated_value(ptg);
       }
       // check angular direction boundaries
@@ -105,21 +108,20 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, FEreg *fereg, FErnd *fernd,
       // core function!
       radial_integration(shell_ref.get(), ptg, observables, breg, brnd, fereg,
                          fernd, cre, gbreg, gbrnd, gfereg, gfernd, gcre, par);
-      // assembling new shell
+      // collect from pixels
       if (par->grid_int.do_dm) {
-        (*gint->tmp_dm_map)[ipix] += observables.dm;
+        (*gint->tmp_dm_map)[ipix] = observables.dm;
       }
       if (par->grid_int.do_sync.back()) {
-        (*gint->tmp_Is_map)[ipix] += toolkit::temp_convert(
+        (*gint->tmp_Is_map)[ipix] = toolkit::temp_convert(
             observables.Is, par->grid_int.sim_sync_freq.back());
-        (*gint->tmp_Qs_map)[ipix] += toolkit::temp_convert(
+        (*gint->tmp_Qs_map)[ipix] = toolkit::temp_convert(
             observables.Qs, par->grid_int.sim_sync_freq.back());
-        (*gint->tmp_Us_map)[ipix] += toolkit::temp_convert(
+        (*gint->tmp_Us_map)[ipix] = toolkit::temp_convert(
             observables.Us, par->grid_int.sim_sync_freq.back());
       }
-      // accumulate Faraday rotation
       if (par->grid_int.do_fd or par->grid_int.do_sync.back()) {
-        (*gint->tmp_fd_map)[ipix] += observables.fd;
+        (*gint->tmp_fd_map)[ipix] = observables.fd;
       }
     }
     // accumulating new shell map to sim map
@@ -250,8 +252,8 @@ void Integrator::radial_integration(struct_shell *shell_ref, pointing &ptg_in,
       const double qui{(inner_shells_fd + pixobs.fd) * lambda_square +
                        toolkit::intr_pol_ang(B_vec, THE, PHI)};
       assert(std::isfinite(qui));
-      pixobs.Qs += cos(2. * qui) * Jpol;
-      pixobs.Us += sin(2. * qui) * Jpol;
+      pixobs.Qs += std::cos(2. * qui) * Jpol;
+      pixobs.Us += std::sin(2. * qui) * Jpol;
     }
   } // precalc
 } // end of radial_integrate
@@ -273,6 +275,14 @@ void Integrator::assemble_shell_ref(struct_shell *target, const Param *par,
   for (std::size_t i = 0; i < target->step; ++i) {
     target->dist.push_back(target->d_start + i * 0.5 * target->delta_d);
   }
+#ifdef VERBOSE
+  std::cout<<" shell reference: "<<std::endl
+  <<" shell No. "<<target->shell_num<<std::endl
+  <<" resolution "<<target->delta_d/CGS_U_kpc<<" kpc "<<std::endl
+  <<" d_start "<<target->d_start/CGS_U_kpc<<" kpc "<<std::endl
+  <<" d_stop "<<target->d_stop/CGS_U_kpc<<" kpc "<<std::endl
+  <<" steps "<<target->step<<std::endl;
+#endif
 }
 
 // END ALL
