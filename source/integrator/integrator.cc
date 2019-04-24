@@ -38,12 +38,14 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, FEreg *fereg, FErnd *fernd,
     gint->fd_map->fill(0.);
   }
   auto shell_ref = std::make_unique<struct_shell>();
+  // loop through shells
   for (decltype(par->grid_int.total_shell) current_shell = 1;
        current_shell != (par->grid_int.total_shell + 1); ++current_shell) {
     // fetch current shell nside & npix
     const std::size_t current_nside{
         par->grid_int.nside_shell[current_shell - 1]};
     const std::size_t current_npix{12 * current_nside * current_nside};
+    // prepare temporary maps for current shell
     if (par->grid_int.do_dm) {
       gint->tmp_dm_map->SetNside(current_nside, RING);
       gint->tmp_dm_map->fill(0.);
@@ -62,7 +64,6 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, FEreg *fereg, FErnd *fernd,
     }
     // setting for radial_integration
     // call auxiliary function assemble_shell_ref
-    // use unique_ptr to avoid stack overflow
     assemble_shell_ref(shell_ref.get(), par, current_shell);
 #ifdef _OPENMP
 #pragma omp parallel for
@@ -74,16 +75,19 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, FEreg *fereg, FErnd *fernd,
       observables.Us = 0.;
       observables.dm = 0.;
       // remember to complete logic for ptg assignment!
+      // and for caching Faraday depth and/or optical depth
+      // make serious tests after changing this part!
       pointing ptg;
       if (par->grid_int.do_dm) {
         ptg = gint->tmp_dm_map->pix2ang(ipix);
-      } else if (par->grid_int.do_fd) {
+      }
+      if (par->grid_int.do_fd) {
         ptg = gint->tmp_fd_map->pix2ang(ipix);
-        // accumulate Faraday rotation
+        // cache Faraday rotation from inner shells
         observables.fd = gint->fd_map->interpolated_value(ptg);
       } else if (par->grid_int.do_sync.back()) {
         ptg = gint->tmp_Is_map->pix2ang(ipix);
-        // accumulate Faraday rotation
+        // cache Faraday rotation from inner shells
         observables.fd = gint->fd_map->interpolated_value(ptg);
       }
       // check angular direction boundaries
@@ -104,21 +108,20 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, FEreg *fereg, FErnd *fernd,
       // core function!
       radial_integration(shell_ref.get(), ptg, observables, breg, brnd, fereg,
                          fernd, cre, gbreg, gbrnd, gfereg, gfernd, gcre, par);
-      // assembling new shell
+      // collect from pixels
       if (par->grid_int.do_dm) {
-        (*gint->tmp_dm_map)[ipix] += observables.dm;
+        (*gint->tmp_dm_map)[ipix] = observables.dm;
       }
       if (par->grid_int.do_sync.back()) {
-        (*gint->tmp_Is_map)[ipix] += toolkit::temp_convert(
+        (*gint->tmp_Is_map)[ipix] = toolkit::temp_convert(
             observables.Is, par->grid_int.sim_sync_freq.back());
-        (*gint->tmp_Qs_map)[ipix] += toolkit::temp_convert(
+        (*gint->tmp_Qs_map)[ipix] = toolkit::temp_convert(
             observables.Qs, par->grid_int.sim_sync_freq.back());
-        (*gint->tmp_Us_map)[ipix] += toolkit::temp_convert(
+        (*gint->tmp_Us_map)[ipix] = toolkit::temp_convert(
             observables.Us, par->grid_int.sim_sync_freq.back());
       }
-      // accumulate Faraday rotation
       if (par->grid_int.do_fd or par->grid_int.do_sync.back()) {
-        (*gint->tmp_fd_map)[ipix] += observables.fd;
+        (*gint->tmp_fd_map)[ipix] = observables.fd;
       }
     }
     // accumulating new shell map to sim map
@@ -206,18 +209,16 @@ void Integrator::radial_integration(struct_shell *shell_ref, pointing &ptg_in,
     if (check_simulation_upper_limit(pos.length(), par->grid_int.gc_r_max)) {
       continue;
     }
-    if (check_simulation_lower_limit(std::fabs(pos[2]),
-                                     par->grid_int.gc_z_min)) {
+    if (check_simulation_lower_limit(pos[2], par->grid_int.gc_z_min)) {
       continue;
     }
-    if (check_simulation_upper_limit(std::fabs(pos[2]),
-                                     par->grid_int.gc_z_max)) {
+    if (check_simulation_upper_limit(pos[2], par->grid_int.gc_z_max)) {
       continue;
     }
     // B field
-    hvec<3, double> B_vec{breg->get_breg(pos, par, gbreg)};
+    hvec<3, double> B_vec{breg->get_vector(pos, par, gbreg)};
     // add random field
-    B_vec += brnd->get_brnd(pos, par, gbrnd);
+    B_vec += brnd->get_vector(pos, par, gbrnd);
     const double B_par{toolkit::par2los(B_vec, THE, PHI)};
     assert(std::isfinite(B_par));
     // be aware of un-resolved random B_per in calculating emissivity
@@ -226,7 +227,7 @@ void Integrator::radial_integration(struct_shell *shell_ref, pointing &ptg_in,
     // FE field
     double te{fereg->get_density(pos, par, gfereg)};
     // add random field
-    te += fernd->get_fernd(pos, par, gfernd);
+    te += fernd->get_density(pos, par, gfernd);
     // to avoid negative value
     te *= double(te > 0.);
     assert(std::isfinite(te));
@@ -251,8 +252,8 @@ void Integrator::radial_integration(struct_shell *shell_ref, pointing &ptg_in,
       const double qui{(inner_shells_fd + pixobs.fd) * lambda_square +
                        toolkit::intr_pol_ang(B_vec, THE, PHI)};
       assert(std::isfinite(qui));
-      pixobs.Qs += cos(2. * qui) * Jpol;
-      pixobs.Us += sin(2. * qui) * Jpol;
+      pixobs.Qs += std::cos(2. * qui) * Jpol;
+      pixobs.Us += std::sin(2. * qui) * Jpol;
     }
   } // precalc
 } // end of radial_integrate
@@ -267,14 +268,23 @@ void Integrator::assemble_shell_ref(struct_shell *target, const Param *par,
   target->d_start = par->grid_int.radii_shell[shell_num - 1];
   target->d_stop = par->grid_int.radii_shell[shell_num];
   target->delta_d = par->grid_int.radial_res;
-  target->step = floor((target->d_stop / target->delta_d -
-                        target->d_start / target->delta_d)) +
-                 1;
+  target->step = floor(
+      (target->d_stop / target->delta_d - target->d_start / target->delta_d));
   // get rid of error in the previous step
-  target->delta_d = (target->d_stop - target->d_start) / (target->step - 1);
+  target->delta_d = (target->d_stop - target->d_start) / (target->step);
   for (std::size_t i = 0; i < target->step; ++i) {
-    target->dist.push_back(target->d_start + i * target->delta_d);
+    target->dist.push_back(target->d_start + i * 0.5 * target->delta_d);
   }
+#ifdef VERBOSE
+  std::cout << " shell reference: " << std::endl
+            << " shell No. " << target->shell_num << std::endl
+            << " resolution " << target->delta_d / CGS_U_kpc << " kpc "
+            << std::endl
+            << " d_start " << target->d_start / CGS_U_kpc << " kpc "
+            << std::endl
+            << " d_stop " << target->d_stop / CGS_U_kpc << " kpc " << std::endl
+            << " steps " << target->step << std::endl;
+#endif
 }
 
 // END ALL

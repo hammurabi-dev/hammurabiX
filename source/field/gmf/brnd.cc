@@ -11,8 +11,8 @@
 #include <namespace_toolkit.h>
 #include <param.h>
 
-hvec<3, double> Brnd::get_brnd(const hvec<3, double> &pos, const Param *par,
-                               const Grid_brnd *grid) const {
+hvec<3, double> Brnd::get_vector(const hvec<3, double> &pos, const Param *par,
+                                 const Grid_brnd *grid) const {
   if (par->grid_brnd.read_permission or par->grid_brnd.build_permission) {
     return read_grid(pos, par, grid);
   }

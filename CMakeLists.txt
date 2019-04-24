@@ -98,7 +98,6 @@ SET(ALL_LIBRARIES)
 # find sources
 SET(SRC_FILES
 	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/breg.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/brnd_jaffe.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/breg_jaffe.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/breg_wmap.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/breg_unif.cc

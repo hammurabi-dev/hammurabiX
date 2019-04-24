@@ -83,7 +83,7 @@ void Param::obs_param(tinyxml2::XMLDocument *doc) {
     grid_int.gc_r_max =
         toolkit::fetchdouble(ptr, "value", "gc_r_max", 20) * CGS_U_kpc;
     grid_int.gc_z_min =
-        toolkit::fetchdouble(ptr, "value", "gc_z_min", 0) * CGS_U_kpc;
+        toolkit::fetchdouble(ptr, "value", "gc_z_min", -10) * CGS_U_kpc;
     grid_int.gc_z_max =
         toolkit::fetchdouble(ptr, "value", "gc_z_max", 10) * CGS_U_kpc;
     grid_int.radial_res =

@@ -139,12 +139,8 @@ void Pipeline::assemble_brnd() {
     if (par->brnd_type == "global") {
       if (par->brnd_method == "es") {
         brnd = std::make_unique<Brnd_es>();
-      }
-      /*
-      else if (par->brnd_method=="jaffe"){
-          brnd = std::make_unique<Brnd_jaffe> ();
-      }
-       */
+      } else
+        throw std::runtime_error("unsupported brnd model");
       // fill grid with random fields
       brnd->write_grid(par.get(), breg.get(), grid_breg.get(), grid_brnd.get());
     } else if (par->brnd_type == "local") {

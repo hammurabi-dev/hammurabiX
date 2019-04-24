@@ -36,7 +36,7 @@ TEST(integrator, shell_info_assembling) {
   EXPECT_EQ(par->grid_int.nside_shell[2], test_unsigned);
   //
   prop->assemble_shell_ref(ref.get(), par.get(), 1);
-  test_unsigned = 334;
+  test_unsigned = 333;
   EXPECT_EQ(ref->step, test_unsigned);
   test_double = 5 * CGS_U_kpc;
   EXPECT_EQ(ref->d_start, test_double);
@@ -44,7 +44,7 @@ TEST(integrator, shell_info_assembling) {
   EXPECT_EQ(ref->d_stop, test_double);
   //
   prop->assemble_shell_ref(ref.get(), par.get(), 3);
-  test_unsigned = 667;
+  test_unsigned = 666;
   EXPECT_EQ(ref->step, test_unsigned);
   test_double = 40 * CGS_U_kpc / 2 + 5 * CGS_U_kpc;
   EXPECT_EQ(ref->d_start, test_double);
@@ -61,7 +61,7 @@ TEST(integrator, shell_info_assembling) {
   EXPECT_EQ(par->grid_int.nside_shell[2], test_unsigned);
   //
   prop->assemble_shell_ref(ref.get(), par.get(), 1);
-  test_unsigned = 101;
+  test_unsigned = 100;
   EXPECT_EQ(ref->step, test_unsigned);
   test_double = 0.;
   EXPECT_EQ(ref->d_start, test_double);
@@ -69,7 +69,7 @@ TEST(integrator, shell_info_assembling) {
   EXPECT_EQ(ref->d_stop, test_double);
   //
   prop->assemble_shell_ref(ref.get(), par.get(), 2);
-  test_unsigned = 601;
+  test_unsigned = 600;
   EXPECT_EQ(ref->step, test_unsigned);
   test_double = par->grid_int.ec_r_max * 0.1;
   EXPECT_EQ(ref->d_start, test_double);
@@ -77,7 +77,7 @@ TEST(integrator, shell_info_assembling) {
   EXPECT_EQ(ref->d_stop, test_double);
   //
   prop->assemble_shell_ref(ref.get(), par.get(), 3);
-  test_unsigned = 301;
+  test_unsigned = 300;
   EXPECT_EQ(ref->step, test_unsigned);
   test_double = par->grid_int.ec_r_max * 0.7;
   EXPECT_EQ(ref->d_start, test_double);

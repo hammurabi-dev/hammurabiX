@@ -9,8 +9,8 @@
 #include <namespace_toolkit.h>
 #include <param.h>
 
-hvec<3, double> Breg_jaffe::breg(const hvec<3, double> &pos,
-                                 const Param *par) const {
+hvec<3, double> Breg_jaffe::gmf(const hvec<3, double> &pos,
+                                const Param *par) const {
   double inner_b{0};
   if (par->breg_jaffe.ring)
     inner_b = par->breg_jaffe.ring_amp;
