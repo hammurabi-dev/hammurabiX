@@ -103,12 +103,12 @@ double CRE::read_grid(const std::size_t &Eidx, const hvec<3, double> &pos,
 void CRE::write_grid(const Param *par, Grid_cre *grid) const {
   assert(par->grid_cre.write_permission);
   hvec<3, double> gc_pos;
-
+  double E;
   double lx{par->grid_cre.x_max - par->grid_cre.x_min};
   double ly{par->grid_cre.y_max - par->grid_cre.y_min};
   double lz{par->grid_cre.z_max - par->grid_cre.z_min};
   for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE; ++i) {
-    double E{par->grid_cre.E_min * std::exp(i * par->grid_cre.E_fact)};
+    E = par->grid_cre.E_min * std::exp(i * par->grid_cre.E_fact);
     for (decltype(par->grid_cre.nx) j = 0; j != par->grid_cre.nx; ++j) {
       gc_pos[0] = lx * j / (par->grid_cre.nx - 1) + par->grid_cre.x_min;
       for (decltype(par->grid_cre.ny) k = 0; k != par->grid_cre.ny; ++k) {

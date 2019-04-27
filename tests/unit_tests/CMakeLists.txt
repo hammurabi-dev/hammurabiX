@@ -1,8 +1,10 @@
 FILE(COPY ${CMAKE_CURRENT_LIST_DIR}/reference DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 SET(_timer_tests timer_tests.cc)
-SET(_tools_tests tools_tests.cc)
-SET(_int_tests int_tests.cc)
 SET(_vector_tests vector_tests.cc)
+SET(_tools_tests tools_tests.cc)
+SET(_grid_tests grid_tests.cc)
+SET(_int_tests int_tests.cc)
+
 
 FOREACH(_t ${_vector_tests})
   ADD_EXECUTABLE(${_t}_exe ${_t} ${GTEST_LIB_SOURCES} ${GTEST_MAIN_SOURCES})
@@ -19,6 +21,13 @@ FOREACH(_t ${_timer_tests})
 ENDFOREACH()
 
 FOREACH(_t ${_tools_tests})
+  ADD_EXECUTABLE(${_t}_exe ${_t} ${GTEST_LIB_SOURCES} ${GTEST_MAIN_SOURCES})
+  TARGET_INCLUDE_DIRECTORIES(${_t}_exe PRIVATE ${ALL_INCLUDE_DIR} ${GTEST_INCLUDE_DIRS})
+  TARGET_LINK_LIBRARIES(${_t}_exe ${CMAKE_THREAD_LIBS_INIT} ${ALL_LIBRARIES} hammurabi)
+  ADD_TEST(${_t} ${_t}_exe)
+ENDFOREACH()
+
+FOREACH(_t ${_grid_tests})
   ADD_EXECUTABLE(${_t}_exe ${_t} ${GTEST_LIB_SOURCES} ${GTEST_MAIN_SOURCES})
   TARGET_INCLUDE_DIRECTORIES(${_t}_exe PRIVATE ${ALL_INCLUDE_DIR} ${GTEST_INCLUDE_DIRS})
   TARGET_LINK_LIBRARIES(${_t}_exe ${CMAKE_THREAD_LIBS_INIT} ${ALL_LIBRARIES} hammurabi)

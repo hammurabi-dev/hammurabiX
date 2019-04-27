@@ -67,7 +67,7 @@ double FEreg::read_grid(const hvec<3, double> &pos, const Param *par,
                         const Grid_fereg *grid) const {
   double tmp{(par->grid_fereg.nx - 1) * (pos[0] - par->grid_fereg.x_min) /
              (par->grid_fereg.x_max - par->grid_fereg.x_min)};
-  if (tmp < 1 or tmp > par->grid_fereg.nx - 1) {
+  if (tmp < 0 or tmp > par->grid_fereg.nx - 1) {
     return 0.;
   }
   decltype(par->grid_fereg.nx) xl{(std::size_t)std::floor(tmp)};
@@ -75,7 +75,7 @@ double FEreg::read_grid(const hvec<3, double> &pos, const Param *par,
 
   tmp = (par->grid_fereg.ny - 1) * (pos[1] - par->grid_fereg.y_min) /
         (par->grid_fereg.y_max - par->grid_fereg.y_min);
-  if (tmp < 1 or tmp > par->grid_fereg.ny - 1) {
+  if (tmp < 0 or tmp > par->grid_fereg.ny - 1) {
     return 0.;
   }
   decltype(par->grid_fereg.nx) yl{(std::size_t)std::floor(tmp)};
@@ -83,7 +83,7 @@ double FEreg::read_grid(const hvec<3, double> &pos, const Param *par,
 
   tmp = (par->grid_fereg.nz - 1) * (pos[2] - par->grid_fereg.z_min) /
         (par->grid_fereg.z_max - par->grid_fereg.z_min);
-  if (tmp < 1 or tmp > par->grid_fereg.nz - 1) {
+  if (tmp < 0 or tmp > par->grid_fereg.nz - 1) {
     return 0.;
   }
   decltype(par->grid_fereg.nx) zl{(std::size_t)std::floor(tmp)};

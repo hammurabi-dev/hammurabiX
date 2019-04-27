@@ -96,7 +96,7 @@ hvec<3, double> Brnd::read_grid(const hvec<3, double> &pos, const Param *par,
                                      par->grid_brnd.nz, xl, yl, zl)};
     b_vec3 = hvec<3, double>{grid->bx[idx], grid->by[idx], grid->bz[idx]};
   }
-  assert(b_vec3.length() < 1e+6 * CGS_U_muGauss);
+  // assert(b_vec3.length() < 1e+6 * CGS_U_muGauss); // inactivated
   return b_vec3;
 }
 
