@@ -1,9 +1,7 @@
-/**
- * unit tests for timer module
- * timer record time elapse from Timer::start to Timer::stop
- * timer support nested/overlaped recording
- * feel free to add more rational testing blocks
- */
+// unit tests for timer module
+// timer record time elapse from Timer::start to Timer::stop
+// timer support nested/overlaped recording
+
 #include <gtest/gtest.h>
 
 #include <chrono>
@@ -11,6 +9,9 @@
 #include <thread>
 #include <timer.h>
 
+// testing:
+// Timer::start
+// Timer::stop
 TEST(timing, precision) {
   Timer t;
   t.start("main");

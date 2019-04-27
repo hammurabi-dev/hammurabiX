@@ -52,6 +52,13 @@ void cart_coord2cyl_coord(const hvec<3, double> &, double &, double &,
 // 2nd argument: vec3_t{r,phi,z} in cylindrical frame
 void cart_coord2cyl_coord(const hvec<3, double> &, hvec<3, double> &);
 // find index of 3D grid
+// by convention, dimensions are ordered as x-y-z
+// 1st argument: number of vertices in 1st dimension (not used)
+// 2nd argument: number of vertices in 2nd direction
+// 3rd argument: number of vertices in 3rd direction
+// 4th argument: index for 1st dimension
+// 5th argument: index of 2nd dimension
+// 6th argument: index for 3rd dimenstion
 inline std::size_t index3d(const std::size_t & /* n1 */, const std::size_t &n2,
                            const std::size_t &n3, const std::size_t &i,
                            const std::size_t &j, const std::size_t &l) {
@@ -59,6 +66,8 @@ inline std::size_t index3d(const std::size_t & /* n1 */, const std::size_t &n2,
   return (i * n2 * n3 + j * n3 + l);
 }
 // find index for 4D grid
+// following the same idea as index3d function
+// but adding the 4th dimension
 inline std::size_t index4d(const std::size_t & /* n1 */, const std::size_t &n2,
                            const std::size_t &n3, const std::size_t &n4,
                            const std::size_t &e, const std::size_t &i,
@@ -66,17 +75,28 @@ inline std::size_t index4d(const std::size_t & /* n1 */, const std::size_t &n2,
   assert(i <= n2 and j <= n3 and l <= n4);
   return (e * n2 * n3 * n4 + i * n3 * n4 + j * n4 + l);
 }
-//
+// mean value estimator
+// 1st argument: pointer for a double array
+// 2nd argument: size of array
 double mean(const double *, const std::size_t &);
-//
+// mean value estimator
+// 1st argument: ref for a double vector
 double mean(const std::vector<double> &);
-//
+// variance estimator
+// 1st argument: pointer for a double array
+// 2nd argument: size of array
 double variance(const double *, const std::size_t &);
-//
+// variance estimator
+// 1st argument: ref for a double vector
 double variance(const std::vector<double> &);
-//
+// covariance estimator
+// 1st argument: pointer for 1st double array
+// 2nd argument: pointer for 2nd double array
+// 3rd argument: size of array
 double covariance(const double *, const double *, const std::size_t &);
-//
+// covariance estimator
+// 1st argument: ref for 1st double vector
+// 2nd argument: ref for 2nd double vector
 double covariance(const std::vector<double> &, const std::vector<double> &);
 // converting brightness temp into thermal temp with T_0 = 2.725K,
 // Prog.Theor.Exp.Phys. (2014) 2014 (6): 06B109.

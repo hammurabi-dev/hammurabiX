@@ -1,3 +1,6 @@
+// unit tests for Integrator class member functions
+// feel free to add more rational testing blocks
+
 #include <gtest/gtest.h>
 
 #include <cgs_units_file.h>
@@ -6,6 +9,9 @@
 #include <integrator.h>
 #include <memory>
 
+// testing:
+// Integrator::check_simulation_upper_limit
+// Integrator::check_simulation_lower_limit
 TEST(integrator, boundary_check) {
   Integrator test;
   double R0 = 10.;
@@ -14,6 +20,8 @@ TEST(integrator, boundary_check) {
   EXPECT_TRUE(test.check_simulation_lower_limit(R0, R_lim));
 }
 
+// testing:
+// Integrator::assemble_shell_ref
 TEST(integrator, shell_info_assembling) {
   unsigned int test_unsigned;
   double test_double;
