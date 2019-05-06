@@ -202,32 +202,26 @@ hvec<3, double> Brnd_mhd::eminus(const hvec<3, double> &b,
 }
 
 double Brnd_mhd::hs(const double &beta, const double &cosa) const {
-  if (cosa < 1e-6) {
-    return 0;
-  } else {
-    double dispersion{
-        0.5 * (1 + 0.5 * beta) *
-        (1 - std::sqrt(1 - 2 * beta * cosa * cosa /
-                               ((1 + 0.5 * beta) * (1 + 0.5 * beta))))};
-    double lambda{(1 - std::sqrt(dynamo(beta, cosa)) - 0.5 * beta) /
-                  (1 + std::sqrt(dynamo(beta, cosa)) + 0.5 * beta)};
-    return lambda * lambda /
-           (dispersion * (1. / (cosa * cosa) + (lambda * lambda - 1)));
-  }
+  const double sqrtD {std::sqrt(dynamo(beta,cosa))};
+  const double dpp {1+sqrtD+0.5*beta};
+  const double dmm {1-sqrtD-0.5*beta};
+  const double dmp {1-sqrtD+0.5*beta};
+  const double demon {1/(dmp*(cosa*cosa+dpp*dpp*(1-cosa*cosa)/(dmm*dmm)))};
+  if (std::isfinite(demon))
+    return 2.*cosa*cosa*demon*(demon>0);
+  return 0;
 }
 
 double Brnd_mhd::hf(const double &beta, const double &cosa) const {
-  if (cosa < 1e-6) {
-    return 0;
-  } else {
-    double dispersion{
-        0.5 * (1 + 0.5 * beta) *
-        (1 + std::sqrt(1 - 2 * beta * cosa * cosa /
-                               ((1 + 0.5 * beta) * (1 + 0.5 * beta))))};
-    double lambda{(1 - std::sqrt(dynamo(beta, cosa)) + 0.5 * beta) /
-                  (1 + std::sqrt(dynamo(beta, cosa)) - 0.5 * beta)};
-    return 1. / (dispersion * (1 + lambda * lambda * (1. / (cosa * cosa) - 1)));
-  }
+  if (cosa == 0) return 0;
+  const double sqrtD {std::sqrt(dynamo(beta,cosa))};
+  const double dpp {1+sqrtD+0.5*beta};
+  const double dpm {1+sqrtD-0.5*beta};
+  const double dmp {(1-sqrtD+0.5*beta)};
+  const double demon {1/(dpp*(cosa*cosa+dmp*dmp*(1-cosa*cosa)/(dpm*dpm)))};
+  if (std::isfinite(demon))
+    return 2.*cosa*cosa*demon;
+  return 0;
 }
 
 double Brnd_mhd::speca(const double &k, const Param *par) const {

@@ -154,7 +154,7 @@ protected:
   // 1st argument: plasma beta
   // 2nd argument: cosine of k-B pitch angle
   inline double dynamo(const double &beta, const double &cosa) const {
-    return (1 + 0.5 * beta) * (1 + 0.5 * beta) - 2. * beta * cosa * cosa;
+    return 1 + 0.25 * beta * beta + beta * (1. - 2. * cosa * cosa);
   }
   // fast mode anisotropic tensor structure
   // 1st argument: plasma beta
@@ -168,15 +168,15 @@ protected:
   // 1st argument: plasma March number
   // 2nd argument: cosine of k-B pitch angle
   inline double fa(const double &ma, const double &cosa) const {
-    return std::exp(-1. * std::pow(ma, -1.33333333) * cosa * cosa /
-                    std::pow(1 - cosa * cosa, 0.66666667));
+    return std::exp(-1. * std::pow(ma, -1.33333333) * std::fabs(cosa) /
+                    std::pow(1 - cosa * cosa, 0.33333333));
   }
   // slow mode anisotropy power factor
   // 1st argument: plasma March number
   // 2nd argument: cosine of k-B pitch angle
   inline double fs(const double &ma, const double &cosa) const {
-    return std::exp(-1. * std::pow(ma, -1.33333333) * cosa * cosa /
-                    std::pow(1 - cosa * cosa, 0.66666667));
+    return std::exp(-1. * std::pow(ma, -1.33333333) * std::fabs(cosa) /
+                    std::pow(1 - cosa * cosa, 0.33333333));
   }
   // cosine of pitch angle between wavevector and regular GMF
   // 1st argument: field vector
