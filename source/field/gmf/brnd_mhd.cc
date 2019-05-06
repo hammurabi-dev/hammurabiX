@@ -202,25 +202,28 @@ hvec<3, double> Brnd_mhd::eminus(const hvec<3, double> &b,
 }
 
 double Brnd_mhd::hs(const double &beta, const double &cosa) const {
-  const double sqrtD {std::sqrt(dynamo(beta,cosa))};
-  const double dpp {1+sqrtD+0.5*beta};
-  const double dmm {1-sqrtD-0.5*beta};
-  const double dmp {1-sqrtD+0.5*beta};
-  const double demon {1/(dmp*(cosa*cosa+dpp*dpp*(1-cosa*cosa)/(dmm*dmm)))};
+  const double sqrtD{std::sqrt(dynamo(beta, cosa))};
+  const double dpp{1 + sqrtD + 0.5 * beta};
+  const double dmm{1 - sqrtD - 0.5 * beta};
+  const double dmp{1 - sqrtD + 0.5 * beta};
+  const double demon{
+      1 / (dmp * (cosa * cosa + dpp * dpp * (1 - cosa * cosa) / (dmm * dmm)))};
   if (std::isfinite(demon))
-    return 2.*cosa*cosa*demon*(demon>0);
+    return 2. * cosa * cosa * demon * (demon > 0);
   return 0;
 }
 
 double Brnd_mhd::hf(const double &beta, const double &cosa) const {
-  if (cosa == 0) return 0;
-  const double sqrtD {std::sqrt(dynamo(beta,cosa))};
-  const double dpp {1+sqrtD+0.5*beta};
-  const double dpm {1+sqrtD-0.5*beta};
-  const double dmp {(1-sqrtD+0.5*beta)};
-  const double demon {1/(dpp*(cosa*cosa+dmp*dmp*(1-cosa*cosa)/(dpm*dpm)))};
+  if (cosa == 0)
+    return 0;
+  const double sqrtD{std::sqrt(dynamo(beta, cosa))};
+  const double dpp{1 + sqrtD + 0.5 * beta};
+  const double dpm{1 + sqrtD - 0.5 * beta};
+  const double dmp{(1 - sqrtD + 0.5 * beta)};
+  const double demon{
+      1 / (dpp * (cosa * cosa + dmp * dmp * (1 - cosa * cosa) / (dpm * dpm)))};
   if (std::isfinite(demon))
-    return 2.*cosa*cosa*demon;
+    return 2. * cosa * cosa * demon;
   return 0;
 }
 
