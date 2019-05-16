@@ -90,11 +90,11 @@ void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
           // c1_I = by_Im + bz_Re
           // bx_R = bkp_Re[0]+bkm_Re[0];
           // etc.
-          // note that all Im parts are zero, c1_I = c0_R
-          grid->c0[idx][0] = bkp[0] + bkm[0];
-          grid->c0[idx][1] = bkp[1] + bkm[1];
-          grid->c1[idx][0] = bkp[1] + bkm[1];
-          grid->c1[idx][1] = bkp[2] + bkm[2];
+          // note that all Im parts are zero, c1_R = c0_I
+          grid->c0[idx][0] = bkp[0] + bkm[0];  // bx_Re
+          grid->c0[idx][1] = bkp[1] + bkm[1];  // by_Re
+          grid->c1[idx][0] = grid->c0[idx][1]; // by_Re
+          grid->c1[idx][1] = bkp[2] + bkm[2];  // bz_Re
         } else {
           double Pf{specf(ks, par) * hf(par->brnd_mhd.beta, 1) * dk3};
           if (i == 0 and j == 0) {

@@ -123,8 +123,9 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
         // P ~ (bx^2 + by^2 + bz^2)
         // c0^2 ~ c1^2 ~ (bx^2 + by^2) ~ P*2/3
         // as renormalization comes in PHASE II,
-        // 2/3, P0 in spec, dk3 are numerically redundant
-        const double sigma{std::sqrt(0.66666667 * spec(ks, par) * dk3)};
+        // 1/3, P0 in spec, dk3 are numerically redundant
+        // while useful for precision check
+        const double sigma{std::sqrt(0.33333333 * spec(ks, par) * dk3)};
         grid->c0[idx][0] = sigma * gsl_ran_ugaussian(seed_id);
         grid->c0[idx][1] = sigma * gsl_ran_ugaussian(seed_id);
         grid->c1[idx][0] = sigma * gsl_ran_ugaussian(seed_id);
