@@ -176,15 +176,17 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
                              grid->c1[idx][1] * ratio};
         // impose anisotropy
         hvec<3, double> H_versor = anisotropy_direction(pos, par, breg, gbreg);
-        double rho{anisotropy_ratio(pos, par, breg, gbreg)};
-        assert(rho >= 0. and rho <= 1.);
+        const double rho{anisotropy_ratio(pos, par, breg, gbreg)};
+        assert(rho >= 0.);
+        const double rho2 = rho * rho;
+        const double rhonorm =
+            1. / std::sqrt(0.33333333 * rho2 + 0.66666667 / rho2);
         if (H_versor.lengthsq() <
             1e-10) // zero regular field, no prefered anisotropy
           continue;
         hvec<3, double> b_re_par{H_versor * H_versor.dotprod(b_re)};
         hvec<3, double> b_re_perp{b_re - b_re_par};
-        b_re =
-            (b_re_par * rho + b_re_perp * (1 - rho)).versor() * b_re.length();
+        b_re = (b_re_par * rho + b_re_perp / rho) * rhonorm;
         // push b_re back to c0 and c1
         grid->c0[idx][0] = b_re[0];
         grid->c0[idx][1] = b_re[1];

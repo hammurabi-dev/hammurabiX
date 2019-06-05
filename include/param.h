@@ -82,6 +82,10 @@ public:
     std::vector<bool> do_sync;
     std::string sim_fd_name, sim_dm_name;
     std::vector<std::string> sim_sync_name;
+    bool mask_dm = false, mask_fd = false, mask_all = false;
+    std::vector<bool> mask_sync;
+    std::string mask_fd_name, mask_dm_name;
+    std::vector<std::string> mask_sync_name;
     std::vector<double> sim_sync_freq;
   } grid_int;
   //----------------------- FIELD PARAMETERS
@@ -97,9 +101,8 @@ public:
   } breg_wmap;
   // uniform
   struct param_breg_unif {
-    double b0;
+    double bp, bv;
     double l0;
-    double r;
   } breg_unif;
   // jaffe
   struct param_breg_jaffe {

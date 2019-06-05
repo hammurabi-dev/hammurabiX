@@ -240,11 +240,12 @@ void Param::breg_param(tinyxml2::XMLDocument *doc) {
     } else if (breg_type == "unif") {
       tinyxml2::XMLElement *subptr{
           toolkit::tracexml(doc, {"magneticfield", "regular", "unif"})};
-      breg_unif.b0 = toolkit::fetchdouble(subptr, "value", "b0") *
+      breg_unif.bp = toolkit::fetchdouble(subptr, "value", "bp") *
+                     CGS_U_muGauss; // microGauss
+      breg_unif.bv = toolkit::fetchdouble(subptr, "value", "bv") *
                      CGS_U_muGauss; // microGauss
       breg_unif.l0 =
           toolkit::fetchdouble(subptr, "value", "l0") * CGS_U_rad; // rad
-      breg_unif.r = toolkit::fetchdouble(subptr, "value", "r");
     } else {
       throw std::runtime_error("unsupported breg model");
     }

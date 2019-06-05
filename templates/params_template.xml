@@ -12,6 +12,13 @@
         <sync cue="1" freq="23" filename="sync_23.fits" nside="16"/> <!-- synchrotron dmission (optional) -->
         <sync cue="1" freq="1.4" filename="sync_1.4.fits" nside="32"/> <!-- synchrotron dmission (optional) -->
     </observable>
+    <!-- mask maps -->
+    <masks>
+      <dm cue="1" filename="dm_mask.fits"/> <!-- Dispersion Measure mask (optional) -->
+      <faraday cue="1" filename="fd_mask.fits"/> <!-- Faraday depth mask (optional) -->
+      <sync cue="1" freq="23" filename="sync_23_mask.fits"/> <!-- synchrotron dmission mask (optional) -->
+      <sync cue="1" freq="1.4" filename="sync_1.4_mask.fits"/> <!-- synchrotron dmission mask (optional) -->
+    </masks>
     <!-- physical field in/out -->
     <!-- resolution defined in './Grid/Box' -->
     <!-- CRE field resolution defined in './CRE/Numeric' -->
@@ -194,9 +201,9 @@
             </jaffe>
             <!-- uniform -->
             <unif>
-                <b0 value="2.0"/> <!-- microG -->
-                <l0 value="70"/> <!-- deg -->
-                <r value="0.3"/>
+                <bp value="2.0"/> <!-- parallel, microG -->
+                <bv value="0.0"/> <!-- vertical, microG -->
+                <l0 value="70"/> <!-- longitude, deg -->
             </unif>
         </regular>
         <!-- random/turbulent fields -->
@@ -211,7 +218,7 @@
                     <rms value="0.8"/> <!-- RMS -->
                     <k0 value="0.5"/> <!-- cutoff, 1/(Lambda in kpc) -->
                     <a0 value="1.7"/> <!-- 5/3, Kolmogorov -->
-                    <rho value="0.5"/> <!-- [0,1] -->
+                    <rho value="1.0"/> <!-- [0,infinity] -->
                     <!-- energy density rescaling -->
                     <r0 value="8.0"/> <!-- in kpc -->
                     <z0 value="1.0"/> <!-- in kpc -->
