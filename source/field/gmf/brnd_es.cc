@@ -56,15 +56,14 @@ double Brnd_es::rescal(const hvec<3, double> &pos, const Param *par) const {
 hvec<3, double> Brnd_es::gramschmidt(const hvec<3, double> &k,
                                      const hvec<3, double> &b) const {
   if (k.lengthsq() == 0 or b.lengthsq() == 0) {
-    return hvec<3, double>{0, 0, 0};
+    return b;
   }
   const double inv_k_mod = 1. / k.lengthsq();
   hvec<3, double> b_free{b[0] - k[0] * k.dotprod(b) * inv_k_mod,
                          b[1] - k[1] * k.dotprod(b) * inv_k_mod,
                          b[2] - k[2] * k.dotprod(b) * inv_k_mod};
-
-  b_free = b_free.versor() * b.length();
-  return b_free;
+  
+  return b_free*1.22474487;
 }
 
 void Brnd_es::write_grid(const Param *par, const Breg *breg,
@@ -273,7 +272,7 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
   fftw_execute_dft(grid->plan_c1_bw, grid->c1, grid->c1);
   // according to FFTW convention
   // transform forward followed by backword scale up array by nx*ny*nz
-  double inv_grid_size = 1.0 / par->grid_brnd.full_size;
+  const double inv_grid_size = 1.0 / par->grid_brnd.full_size;
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
