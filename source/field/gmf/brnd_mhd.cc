@@ -164,13 +164,13 @@ void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
                                           l}; // apply Hermitian symmetry
         if (l == 0)
           l_sym = l;
-        const std::size_t idx{idx_lv2 + l};             // k
-        const std::size_t idx_sym{idx_sym_lv2 + l_sym}; //-k
+        const std::size_t idx{idx_lv2 + l};             // q
+        const std::size_t idx_sym{idx_sym_lv2 + l_sym}; //-q
         // reconstruct bx,by,bz from c0,c1,c*0,c*1
-        // c0(k) = bx(k) + i by(k)
-        // c*0(-k) = bx(k) - i by(k)
-        // c1(k) = by(k) + i bz(k)
-        // c1*1(-k) = by(k) - i bz(k)
+        // c0(q) = bx(q) + i by(q)
+        // c*0(-q) = bx(q) - i by(q)
+        // c1(q) = by(q) + i bz(q)
+        // c1*1(-q) = by(q) - i bz(q)
         grid->bx[idx] = 0.5 * (grid->c0[idx][0] + grid->c0[idx_sym][0]);
         grid->by[idx] = 0.5 * (grid->c1[idx][0] + grid->c1[idx_sym][0]);
         grid->bz[idx] = 0.5 * (grid->c1[idx_sym][1] + grid->c1[idx][1]);

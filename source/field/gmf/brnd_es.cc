@@ -62,8 +62,8 @@ hvec<3, double> Brnd_es::gramschmidt(const hvec<3, double> &k,
   hvec<3, double> b_free{b[0] - k[0] * k.dotprod(b) * inv_k_mod,
                          b[1] - k[1] * k.dotprod(b) * inv_k_mod,
                          b[2] - k[2] * k.dotprod(b) * inv_k_mod};
-  
-  return b_free*1.22474487;
+
+  return b_free * 1.22474487;
 }
 
 void Brnd_es::write_grid(const Param *par, const Breg *breg,
@@ -249,21 +249,18 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
             0.5 * (grid->c0[idx][0] + grid->c0[idx_sym][0]),
             0.5 * (grid->c1[idx][0] + grid->c1[idx_sym][0]),
             0.5 * (grid->c1[idx_sym][1] + grid->c1[idx][1])};
-
-        const hvec<3, double> tmp_b_im{
-            0.5 * (grid->c0[idx][1] - grid->c0[idx_sym][1]),
-            0.5 * (grid->c1[idx][1] - grid->c1[idx_sym][1]),
-            0.5 * (grid->c1[idx_sym][0] - grid->c1[idx][0])};
-
+        // Gram-Schmidt process
         const hvec<3, double> free_b_re{gramschmidt(tmp_k, tmp_b_re)};
-        const hvec<3, double> free_b_im{gramschmidt(tmp_k, tmp_b_im)};
         // reassemble c0,c1 from bx,by,bz
         // c0(k) = bx(k) + i by(k)
         // c1(k) = by(k) + i bz(k)
-        grid->c0[idx][0] = free_b_re[0] - free_b_im[1];
-        grid->c0[idx][1] = free_b_im[0] + free_b_re[1];
-        grid->c1[idx][0] = free_b_re[1] - free_b_im[2];
-        grid->c1[idx][1] = free_b_im[1] + free_b_re[2];
+        // we take only the real part, multiply it by sqrt(2)
+        // cause after G-S process, conjugate symmetry might have been destroied
+        // sqrt(2) preserve the total spectral power
+        grid->c0[idx][0] = 1.41421356 * free_b_re[0];
+        grid->c0[idx][1] = 1.41421356 * free_b_re[1];
+        grid->c1[idx][0] = 1.41421356 * free_b_re[1];
+        grid->c1[idx][1] = 1.41421356 * free_b_re[2];
       } // l
     }   // j
   }     // i
@@ -276,9 +273,46 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
-  for (std::size_t i = 0; i < par->grid_brnd.full_size; ++i) {
-    grid->bx[i] = grid->c0[i][0] * inv_grid_size;
-    grid->by[i] = grid->c0[i][1] * inv_grid_size;
-    grid->bz[i] = grid->c1[i][1] * inv_grid_size;
+  for (decltype(par->grid_brnd.nx) i = 0; i < par->grid_brnd.nx; ++i) {
+    decltype(par->grid_brnd.nx) i_sym{par->grid_brnd.nx -
+                                      i}; // apply Hermitian symmetry
+    if (i == 0)
+      i_sym = i;
+    // it's better to calculate indeces manually
+    // just for reference, how indeces are calculated
+    // const std::size_t idx
+    // {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i,j,l)};
+    // const std::size_t idx_sym
+    // {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i_sym,j_sym,l_sym)};
+    const std::size_t idx_lv1{i * par->grid_brnd.ny * par->grid_brnd.nz};
+    const std::size_t idx_sym_lv1{i_sym * par->grid_brnd.ny *
+                                  par->grid_brnd.nz};
+    for (decltype(par->grid_brnd.ny) j = 0; j < par->grid_brnd.ny; ++j) {
+      decltype(par->grid_brnd.ny) j_sym{par->grid_brnd.ny -
+                                        j}; // apply Hermitian symmetry
+      if (j == 0)
+        j_sym = j;
+      const std::size_t idx_lv2{idx_lv1 + j * par->grid_brnd.nz};
+      const std::size_t idx_sym_lv2{idx_sym_lv1 + j_sym * par->grid_brnd.nz};
+      for (decltype(par->grid_brnd.nz) l = 0; l < par->grid_brnd.nz; ++l) {
+        decltype(par->grid_brnd.nz) l_sym{par->grid_brnd.nz -
+                                          l}; // apply Hermitian symmetry
+        if (l == 0)
+          l_sym = l;
+        const std::size_t idx{idx_lv2 + l};             // q
+        const std::size_t idx_sym{idx_sym_lv2 + l_sym}; //-q
+        // reconstruct bx,by,bz from c0,c1,c*0,c*1
+        // c0(q) = bx(q) + i by(q)
+        // c*0(-q) = bx(q) - i by(q)
+        // c1(q) = by(q) + i bz(q)
+        // c1*1(-q) = by(q) - i bz(q)
+        grid->bx[idx] =
+            0.5 * (grid->c0[idx][0] + grid->c0[idx_sym][0]) * inv_grid_size;
+        grid->by[idx] =
+            0.5 * (grid->c1[idx][0] + grid->c1[idx_sym][0]) * inv_grid_size;
+        grid->bz[idx] =
+            0.5 * (grid->c1[idx_sym][1] + grid->c1[idx][1]) * inv_grid_size;
+      }
+    }
   }
 }
