@@ -230,25 +230,49 @@ double Brnd_mhd::hf(const double &beta, const double &cosa) const {
 double Brnd_mhd::speca(const double &k, const Param *par) const {
   // units fixing, wave vector in 1/kpc units
   const double unit = 0.25 / (CGS_U_pi * k * k);
-  // power law
-  return par->brnd_mhd.pa0 * unit * double(k > par->brnd_mhd.k0) /
-         std::pow(k / par->brnd_mhd.k0, par->brnd_mhd.aa0);
+  // power laws
+  const double band1{double(k < par->brnd_mhd.k1)};
+  const double band2{double(k > par->brnd_mhd.k1) *
+                     double(k < par->brnd_mhd.k0)};
+  const double band3{double(k > par->brnd_mhd.k0)};
+  const double P =
+      band1 * std::pow(par->brnd_mhd.k0 / par->brnd_mhd.k1, par->brnd_mhd.a1) *
+          std::pow(k / par->brnd_mhd.k1, 6.0) +
+      band2 / std::pow(k / par->brnd_mhd.k0, par->brnd_mhd.a1) +
+      band3 / std::pow(k / par->brnd_mhd.k0, par->brnd_mhd.aa0);
+  return P * par->brnd_mhd.pa0 * unit;
 }
 
 double Brnd_mhd::specf(const double &k, const Param *par) const {
   // units fixing, wave vector in 1/kpc units
   const double unit = 0.25 / (CGS_U_pi * k * k);
-  // power law
-  return par->brnd_mhd.pf0 * unit * double(k > par->brnd_mhd.k0) /
-         std::pow(k / par->brnd_mhd.k0, par->brnd_mhd.af0);
+  // power laws
+  const double band1{double(k < par->brnd_mhd.k1)};
+  const double band2{double(k > par->brnd_mhd.k1) *
+                     double(k < par->brnd_mhd.k0)};
+  const double band3{double(k > par->brnd_mhd.k0)};
+  const double P =
+      band1 * std::pow(par->brnd_mhd.k0 / par->brnd_mhd.k1, par->brnd_mhd.a1) *
+          std::pow(k / par->brnd_mhd.k1, 6.0) +
+      band2 / std::pow(k / par->brnd_mhd.k0, par->brnd_mhd.a1) +
+      band3 / std::pow(k / par->brnd_mhd.k0, par->brnd_mhd.af0);
+  return P * par->brnd_mhd.pf0 * unit;
 }
 
 double Brnd_mhd::specs(const double &k, const Param *par) const {
   // units fixing, wave vector in 1/kpc units
   const double unit = 0.25 / (CGS_U_pi * k * k);
-  // power law
-  return par->brnd_mhd.ps0 * unit * double(k > par->brnd_mhd.k0) /
-         std::pow(k / par->brnd_mhd.k0, par->brnd_mhd.as0);
+  // power laws
+  const double band1{double(k < par->brnd_mhd.k1)};
+  const double band2{double(k > par->brnd_mhd.k1) *
+                     double(k < par->brnd_mhd.k0)};
+  const double band3{double(k > par->brnd_mhd.k0)};
+  const double P =
+      band1 * std::pow(par->brnd_mhd.k0 / par->brnd_mhd.k1, par->brnd_mhd.a1) *
+          std::pow(k / par->brnd_mhd.k1, 6.0) +
+      band2 / std::pow(k / par->brnd_mhd.k0, par->brnd_mhd.a1) +
+      band3 / std::pow(k / par->brnd_mhd.k0, par->brnd_mhd.as0);
+  return P * par->brnd_mhd.ps0 * unit;
 }
 
 // END

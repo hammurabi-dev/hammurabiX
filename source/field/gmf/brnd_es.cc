@@ -36,10 +36,16 @@ double Brnd_es::spec(const double &k, const Param *par) const {
   // units fixing, wave vector in 1/kpc units
   const double p0{par->brnd_es.rms * par->brnd_es.rms};
   const double unit = 1. / (4 * CGS_U_pi * k * k);
-  // power law
-  const double P = p0 * double(k > par->brnd_es.k0) /
-                   std::pow(k / par->brnd_es.k0, par->brnd_es.a0);
-  return P * unit;
+  // power laws
+  const double band1{double(k < par->brnd_es.k1)};
+  const double band2{double(k > par->brnd_es.k1) * double(k < par->brnd_es.k0)};
+  const double band3{double(k > par->brnd_es.k0)};
+  const double P =
+      band1 * std::pow(par->brnd_es.k0 / par->brnd_es.k1, par->brnd_es.a1) *
+          std::pow(k / par->brnd_es.k1, 6.0) +
+      band2 / std::pow(k / par->brnd_es.k0, par->brnd_es.a1) +
+      band3 / std::pow(k / par->brnd_es.k0, par->brnd_es.a0);
+  return P * p0 * unit;
 }
 
 // galactic scaling of random field energy density

@@ -301,6 +301,8 @@ void Param::brnd_param(tinyxml2::XMLDocument *doc) {
             toolkit::fetchdouble(subptr, "value", "rms") * CGS_U_muGauss;
         brnd_es.k0 = toolkit::fetchdouble(subptr, "value", "k0");
         brnd_es.a0 = toolkit::fetchdouble(subptr, "value", "a0");
+        brnd_es.k1 = toolkit::fetchdouble(subptr, "value", "k1");
+        brnd_es.a1 = toolkit::fetchdouble(subptr, "value", "a1");
         brnd_es.rho = toolkit::fetchdouble(subptr, "value", "rho");
         brnd_es.r0 = toolkit::fetchdouble(subptr, "value", "r0") * CGS_U_kpc;
         brnd_es.z0 = toolkit::fetchdouble(subptr, "value", "z0") * CGS_U_kpc;
@@ -326,10 +328,12 @@ void Param::brnd_param(tinyxml2::XMLDocument *doc) {
                        CGS_U_muGauss * CGS_U_muGauss;
         brnd_mhd.ps0 = toolkit::fetchdouble(subptr, "value", "ps0") *
                        CGS_U_muGauss * CGS_U_muGauss;
+        brnd_mhd.k0 = toolkit::fetchdouble(subptr, "value", "k0");
         brnd_mhd.aa0 = toolkit::fetchdouble(subptr, "value", "aa0");
         brnd_mhd.af0 = toolkit::fetchdouble(subptr, "value", "af0");
         brnd_mhd.as0 = toolkit::fetchdouble(subptr, "value", "as0");
-        brnd_mhd.k0 = toolkit::fetchdouble(subptr, "value", "k0");
+        brnd_mhd.k1 = toolkit::fetchdouble(subptr, "value", "k1");
+        brnd_mhd.a1 = toolkit::fetchdouble(subptr, "value", "a1");
         brnd_mhd.beta = toolkit::fetchdouble(subptr, "value", "beta");
         brnd_mhd.ma = toolkit::fetchdouble(subptr, "value", "ma");
       } else {

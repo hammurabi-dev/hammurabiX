@@ -126,16 +126,16 @@ public:
   // global
   struct param_brnd_global_es {
     double rms;
-    double k0;
-    double a0;
+    double k0, k1;
+    double a0, a1;
     double rho;
     double r0, z0;
   } brnd_es;
   // local
   struct param_brnd_local_mhd {
     double pa0, pf0, ps0;
-    double aa0, af0, as0;
-    double k0;
+    double aa0, af0, as0, a1;
+    double k0, k1;
     double ma, beta;
   } brnd_mhd;
   // FE
