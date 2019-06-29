@@ -69,7 +69,7 @@ hvec<3, double> Brnd_es::gramschmidt(const hvec<3, double> &k,
                          b[1] - k[1] * k.dotprod(b) * inv_k_mod,
                          b[2] - k[2] * k.dotprod(b) * inv_k_mod};
 
-  return b_free * 1.22474487;
+  return b_free;
 }
 
 void Brnd_es::write_grid(const Param *par, const Breg *breg,
