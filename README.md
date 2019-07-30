@@ -24,6 +24,8 @@ Original hammurabi source code can be found [**here**](https://sourceforge.net/p
 
 ### hammurabi team publications:
 
+- [hammurabi X: Simulating Galactic Synchrotron Emission with Random Magnetic Fields](https://arxiv.org/abs/1907.00207)
+
 - [Simulating polarized Galactic synchrotron emission at all frequencies. The Hammurabi code](https://www.aanda.org/articles/aa/abs/2009/08/aa10564-08/aa10564-08.html)
 
 ### contact
