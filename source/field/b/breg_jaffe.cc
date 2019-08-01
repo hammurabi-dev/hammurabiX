@@ -1,24 +1,22 @@
 #include <cmath>
 #include <vector>
 
-#include <hvec.h>
-
-#include <breg.h>
+#include <bfield.h>
 #include <cgs_units_file.h>
 #include <grid.h>
-#include <namespace_toolkit.h>
+#include <hamvec.h>
 #include <param.h>
 
-hvec<3, double> Breg_jaffe::gmf(const hvec<3, double> &pos,
-                                const Param *par) const {
+hamvec<3, double> Breg_jaffe::write_field(const hamvec<3, double> &pos,
+                                          const Param *par) const {
   double inner_b{0};
   if (par->breg_jaffe.ring)
     inner_b = par->breg_jaffe.ring_amp;
   else if (par->breg_jaffe.bar)
     inner_b = par->breg_jaffe.bar_amp;
 
-  hvec<3, double> bhat{orientation(pos, par)};
-  hvec<3, double> btot;
+  hamvec<3, double> bhat{orientation(pos, par)};
+  hamvec<3, double> btot;
   btot = bhat * radial_scaling(pos, par) *
          (par->breg_jaffe.disk_amp * disk_scaling(pos, par) +
           par->breg_jaffe.halo_amp * halo_scaling(pos, par));
@@ -37,14 +35,14 @@ hvec<3, double> Breg_jaffe::gmf(const hvec<3, double> &pos,
   return btot;
 }
 
-hvec<3, double> Breg_jaffe::orientation(const hvec<3, double> &pos,
-                                        const Param *par) const {
+hamvec<3, double> Breg_jaffe::orientation(const hamvec<3, double> &pos,
+                                          const Param *par) const {
   const double r{sqrt(pos[0] * pos[0] + pos[1] * pos[1])}; // cylindrical frame
   const double r_lim{par->breg_jaffe.ring_r};
   const double bar_lim{par->breg_jaffe.bar_a + 0.5 * par->breg_jaffe.comp_d};
   const double cos_p{std::cos(par->breg_jaffe.arm_pitch)};
   const double sin_p{std::sin(par->breg_jaffe.arm_pitch)}; // pitch angle
-  hvec<3, double> tmp;
+  hamvec<3, double> tmp;
   double quadruple{1};
   if (r < 0.5 * CGS_U_kpc) // forbiden region
     return tmp;
@@ -99,7 +97,7 @@ hvec<3, double> Breg_jaffe::orientation(const hvec<3, double> &pos,
   return tmp;
 }
 
-double Breg_jaffe::radial_scaling(const hvec<3, double> &pos,
+double Breg_jaffe::radial_scaling(const hamvec<3, double> &pos,
                                   const Param *par) const {
   const double r2{pos[0] * pos[0] + pos[1] * pos[1]};
   // separate into 3 parts for better view
@@ -113,7 +111,7 @@ double Breg_jaffe::radial_scaling(const hvec<3, double> &pos,
   return s1 * (s2 + s3);
 }
 
-std::vector<double> Breg_jaffe::arm_compress(const hvec<3, double> &pos,
+std::vector<double> Breg_jaffe::arm_compress(const hamvec<3, double> &pos,
                                              const Param *par) const {
   const double r{sqrt(pos[0] * pos[0] + pos[1] * pos[1]) /
                  par->breg_jaffe.comp_r};
@@ -138,7 +136,7 @@ std::vector<double> Breg_jaffe::arm_compress(const hvec<3, double> &pos,
   return a0;
 }
 
-std::vector<double> Breg_jaffe::arm_compress_dust(const hvec<3, double> &pos,
+std::vector<double> Breg_jaffe::arm_compress_dust(const hamvec<3, double> &pos,
                                                   const Param *par) const {
   const double r{sqrt(pos[0] * pos[0] + pos[1] * pos[1]) /
                  par->breg_jaffe.comp_r};
@@ -163,7 +161,7 @@ std::vector<double> Breg_jaffe::arm_compress_dust(const hvec<3, double> &pos,
   return a0;
 }
 
-std::vector<double> Breg_jaffe::dist2arm(const hvec<3, double> &pos,
+std::vector<double> Breg_jaffe::dist2arm(const hamvec<3, double> &pos,
                                          const Param *par) const {
   std::vector<double> d;
   const double r{sqrt(pos[0] * pos[0] + pos[1] * pos[1])};

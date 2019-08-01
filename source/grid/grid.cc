@@ -1,3 +1,5 @@
+// grid base class
+
 #include <cassert>
 #include <stdexcept>
 
@@ -15,5 +17,3 @@ void Grid::export_grid(const Param *) {
 void Grid::import_grid(const Param *) {
   throw std::runtime_error("wrong inheritance");
 }
-
-// END

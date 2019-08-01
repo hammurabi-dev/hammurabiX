@@ -3,15 +3,16 @@
 
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_sf_synchrotron.h>
-#include <hvec.h>
+#include <hamvec.h>
 
 #include <cgs_units_file.h>
-#include <cre.h>
+#include <crefield.h>
 #include <grid.h>
 #include <param.h>
 
 // CRE flux spatial rescaling
-double CRE_ana::rescal(const hvec<3, double> &pos, const Param *par) const {
+double CRE_ana::spatial_profile(const hamvec<3, double> &pos,
+                                const Param *par) const {
   const double R0{std::sqrt(par->observer[0] * par->observer[0] +
                             par->observer[1] * par->observer[1])};
   const double r{std::sqrt(pos[0] * pos[0] + pos[1] * pos[1])};
@@ -21,7 +22,7 @@ double CRE_ana::rescal(const hvec<3, double> &pos, const Param *par) const {
 }
 
 // CRE spectral index
-double CRE_ana::flux_idx(const hvec<3, double> &pos, const Param *par) const {
+double CRE_ana::flux_idx(const hamvec<3, double> &pos, const Param *par) const {
   const double r{std::sqrt(pos[0] * pos[0] + pos[1] * pos[1]) / CGS_U_kpc};
   const double z{std::fabs(pos[2]) / CGS_U_kpc};
   return -par->cre_ana.alpha + par->cre_ana.beta * r + par->cre_ana.theta * z;
@@ -29,7 +30,8 @@ double CRE_ana::flux_idx(const hvec<3, double> &pos, const Param *par) const {
 
 // analytical CRE flux normalization factor at E0
 // analytical CRE spectral integrations use N(\gamma)
-double CRE_ana::flux_norm(const hvec<3, double> &pos, const Param *par) const {
+double CRE_ana::flux_norm(const hamvec<3, double> &pos,
+                          const Param *par) const {
   // j0 is in [GeV m^2 s sr]^-1 units
   const double gamma0{par->cre_ana.E0 / CGS_U_MEC2 + 1};
   const double beta0{std::sqrt(1. - 1. / gamma0)};
@@ -40,12 +42,12 @@ double CRE_ana::flux_norm(const hvec<3, double> &pos, const Param *par) const {
   const double norm{par->cre_ana.j0 *
                     std::pow(gamma0, -flux_idx(par->observer, par))};
 
-  return norm * unit * rescal(pos, par);
+  return norm * unit * spatial_profile(pos, par);
 }
 
 // analytical modelings use N(\gamma) while flux is PHI(E)
 // En in CGS units, return in [GeV m^2 s Sr]^-1
-double CRE_ana::flux(const hvec<3, double> &pos, const Param *par,
+double CRE_ana::flux(const hamvec<3, double> &pos, const Param *par,
                      const double &En) const {
   // units
   // j0 is in [GeV m^2 s sr]^-1 units
@@ -56,13 +58,14 @@ double CRE_ana::flux(const hvec<3, double> &pos, const Param *par,
   const double norm{par->cre_ana.j0 *
                     std::pow(gamma0, -flux_idx(par->observer, par))};
 
-  return norm * unit * std::pow(gamma, flux_idx(pos, par)) * rescal(pos, par);
+  return norm * unit * std::pow(gamma, flux_idx(pos, par)) *
+         spatial_profile(pos, par);
 }
 
 // J_tot(\nu)
-double CRE_ana::get_emissivity_t(const hvec<3, double> &pos, const Param *par,
-                                 const Grid_cre * /*grid*/,
-                                 const double &Bper) const {
+double CRE_ana::read_emissivity_t(const hamvec<3, double> &pos,
+                                  const Param *par, const Grid_cre * /*grid*/,
+                                  const double &Bper) const {
   // assert(!par->grid_cre.read_permission);
   // allocating values to index, norm according to user defined model
   // user may consider building derived class from CRE_ana
@@ -73,7 +76,7 @@ double CRE_ana::get_emissivity_t(const hvec<3, double> &pos, const Param *par,
                     (2. * CGS_U_MEC2)};
   // synchrotron integration
   const double A{4. * CGS_U_MEC * CGS_U_pi *
-                 par->grid_int.sim_sync_freq.back() /
+                 par->grid_obs.sim_sync_freq.back() /
                  (3. * CGS_U_qe * std::fabs(Bper))};
   const double mu{-0.5 * (3. + index)};
   return norm *
@@ -87,9 +90,9 @@ double CRE_ana::get_emissivity_t(const hvec<3, double> &pos, const Param *par,
 }
 
 // J_pol(\nu)
-double CRE_ana::get_emissivity_p(const hvec<3, double> &pos, const Param *par,
-                                 const Grid_cre * /*grid*/,
-                                 const double &Bper) const {
+double CRE_ana::read_emissivity_p(const hamvec<3, double> &pos,
+                                  const Param *par, const Grid_cre * /*grid*/,
+                                  const double &Bper) const {
   // assert(!par->grid_cre.read_permission);
   // allocating values to index, norm according to user defined model
   // user may consider building derived class from CRE_ana
@@ -100,7 +103,7 @@ double CRE_ana::get_emissivity_p(const hvec<3, double> &pos, const Param *par,
                     (2. * CGS_U_MEC2)};
   // synchrotron integration
   const double A{4. * CGS_U_MEC * CGS_U_pi *
-                 par->grid_int.sim_sync_freq.back() /
+                 par->grid_obs.sim_sync_freq.back() /
                  (3. * CGS_U_qe * std::fabs(Bper))};
   const double mu{-0.5 * (3. + index)};
   return norm *

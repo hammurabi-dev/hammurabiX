@@ -1,3 +1,5 @@
+// random magnetic vector field grid
+
 #include <array>
 #include <cassert>
 #include <fstream>
@@ -9,9 +11,7 @@
 
 #include <fftw3.h>
 
-#include <cgs_units_file.h>
 #include <grid.h>
-#include <namespace_toolkit.h>
 #include <param.h>
 
 Grid_brnd::Grid_brnd(const Param *par) {
@@ -22,30 +22,29 @@ Grid_brnd::Grid_brnd(const Param *par) {
 }
 
 void Grid_brnd::build_grid(const Param *par) {
-  // real 3D random b field
+  // allocate spatial domian magnetic field
   bx = std::make_unique<double[]>(par->grid_brnd.full_size);
   by = std::make_unique<double[]>(par->grid_brnd.full_size);
   bz = std::make_unique<double[]>(par->grid_brnd.full_size);
-  // complex a field in k-space
+  // Fourier domain complex field
   c0 = fftw_alloc_complex(par->grid_brnd.full_size);
   c0[0][0] = 0;
   c0[0][1] = 0; // 0th term should be zero
   c1 = fftw_alloc_complex(par->grid_brnd.full_size);
   c1[0][0] = 0;
   c1[0][1] = 0; // 0th term should be zero
-                // DFT plans
 #ifdef _OPENMP
   fftw_init_threads();
   fftw_plan_with_nthreads(omp_get_max_threads());
 #endif
-  // backword plan
+  // backword in-place plans
   plan_c0_bw =
       fftw_plan_dft_3d(par->grid_brnd.nx, par->grid_brnd.ny, par->grid_brnd.nz,
                        c0, c0, FFTW_BACKWARD, FFTW_ESTIMATE);
   plan_c1_bw =
       fftw_plan_dft_3d(par->grid_brnd.nx, par->grid_brnd.ny, par->grid_brnd.nz,
                        c1, c1, FFTW_BACKWARD, FFTW_ESTIMATE);
-  // forward plan
+  // forward in-place plans
   plan_c0_fw =
       fftw_plan_dft_3d(par->grid_brnd.nx, par->grid_brnd.ny, par->grid_brnd.nz,
                        c0, c0, FFTW_FORWARD, FFTW_ESTIMATE);

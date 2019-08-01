@@ -2,17 +2,15 @@
 #include <cmath>
 #include <omp.h>
 
+#include <bfield.h>
+#include <cgs_units_file.h>
 #include <fftw3.h>
+#include <grid.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
-#include <hvec.h>
-
-#include <breg.h>
-#include <brnd.h>
-#include <cgs_units_file.h>
-#include <grid.h>
-#include <namespace_toolkit.h>
+#include <hamvec.h>
 #include <param.h>
+#include <toolkit.h>
 
 void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
                           const Grid_breg *gbreg, Grid_brnd *grid) const {
@@ -31,7 +29,7 @@ void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
   const double lx{par->grid_brnd.x_max - par->grid_brnd.x_min};
   const double ly{par->grid_brnd.y_max - par->grid_brnd.y_min};
   const double lz{par->grid_brnd.z_max - par->grid_brnd.z_min};
-  const hvec<3, double> B{breg->get_vector(par->observer, par, gbreg)};
+  const hamvec<3, double> B{breg->read_field(par->observer, par, gbreg)};
   // physical dk^3
   const double dk3{CGS_U_kpc * CGS_U_kpc * CGS_U_kpc / (lx * ly * lz)};
 #ifdef _OPENMP
@@ -43,7 +41,7 @@ void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
 #else
     auto seed_id = r;
 #endif
-    hvec<3, double> k{CGS_U_kpc * i / lx, 0, 0};
+    hamvec<3, double> k{CGS_U_kpc * i / lx, 0, 0};
     if (i >= (par->grid_brnd.nx + 1) / 2)
       k[0] -= CGS_U_kpc * par->grid_brnd.nx / lx;
     // it's better to calculate indeces manually
@@ -65,25 +63,26 @@ void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
           k[2] -= CGS_U_kpc * par->grid_brnd.nz / lz;
         const double ks{k.length()};
         const std::size_t idx{idx_lv2 + l};
-        hvec<3, double> ep{eplus(B, k)};
-        hvec<3, double> em{eminus(B, k)};
+        hamvec<3, double> ep{e_plus(B, k)};
+        hamvec<3, double> em{e_minus(B, k)};
         // since there is no specific rule about how to allocate spectrum power
         // between Re and Im part in b+ and b-
         // we multiply power by two and set Im parts to zero
         // in the end of backward trans, we retrive Re part of bx,by,bz only
         if (ep.lengthsq() > 1e-6) {
-          double ang{cosa(B, k)};
-          const double Pa{speca(ks, par) * fa(par->brnd_mhd.ma, ang) * dk3};
-          double Pf{specf(ks, par) * hf(par->brnd_mhd.beta, ang) * dk3};
-          double Ps{specs(ks, par) * fs(par->brnd_mhd.ma, ang) *
-                    hs(par->brnd_mhd.beta, ang) * dk3};
+          double ang{cosine(B, k)};
+          const double Pa{spectrum_a(ks, par) * F_a(par->brnd_mhd.ma, ang) *
+                          dk3};
+          double Pf{spectrum_f(ks, par) * h_f(par->brnd_mhd.beta, ang) * dk3};
+          double Ps{spectrum_s(ks, par) * F_s(par->brnd_mhd.ma, ang) *
+                    h_s(par->brnd_mhd.beta, ang) * dk3};
           // b+ is independent from b- in terms of power
           // fast and slow modes are independent
           const double Ap = gsl_ran_ugaussian(seed_id) * std::sqrt(2. * Pa);
           const double Am = gsl_ran_ugaussian(seed_id) * std::sqrt(2. * Pf) +
                             gsl_ran_ugaussian(seed_id) * std::sqrt(2. * Ps);
-          const hvec<3, double> bkp{ep * Ap};
-          const hvec<3, double> bkm{em * Am};
+          const hamvec<3, double> bkp{ep * Ap};
+          const hamvec<3, double> bkm{em * Am};
           // c0_R = bx_Re - by_Im
           // c0_I = bx_Im + by_Re
           // c1_R = by_Re - bz_Im
@@ -96,7 +95,7 @@ void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
           grid->c1[idx][0] = grid->c0[idx][1]; // by_Re
           grid->c1[idx][1] = bkp[2] + bkm[2];  // bz_Re
         } else {
-          double Pf{specf(ks, par) * hf(par->brnd_mhd.beta, 1) * dk3};
+          double Pf{spectrum_f(ks, par) * h_f(par->brnd_mhd.beta, 1) * dk3};
           if (i == 0 and j == 0) {
             ep[0] = k[0];
             em[1] = k[1];
@@ -111,8 +110,8 @@ void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
           // b+ and b- share power
           const double Af = gsl_ran_ugaussian(seed_id) * std::sqrt(2. * Pf);
           const double share = gsl_rng_uniform(seed_id);
-          const hvec<3, double> bkp{ep * Af * share};
-          const hvec<3, double> bkm{em * Af * (1. - share)};
+          const hamvec<3, double> bkp{ep * Af * share};
+          const hamvec<3, double> bkm{em * Af * (1. - share)};
           grid->c0[idx][0] = bkp[0] + bkm[0];
           grid->c0[idx][1] = bkp[1] + bkm[1];
           grid->c1[idx][0] = grid->c0[idx][1];
@@ -121,7 +120,7 @@ void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
       } // l
     }   // j
   }     // i
-        // free random memory
+  // free random memory
 #ifdef _OPENMP
   for (int b = 0; b < omp_get_max_threads(); ++b)
     gsl_rng_free(threadvec[b]);
@@ -179,10 +178,9 @@ void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
   }
 }
 
-// PRIVATE FUNCTIONS FOR LOW-BETA SUB-ALFVENIC PLASMA
-hvec<3, double> Brnd_mhd::eplus(const hvec<3, double> &b,
-                                const hvec<3, double> &k) const {
-  hvec<3, double> tmp{(k.versor()).crossprod(b.versor())};
+hamvec<3, double> Brnd_mhd::e_plus(const hamvec<3, double> &b,
+                                   const hamvec<3, double> &k) const {
+  hamvec<3, double> tmp{(k.versor()).crossprod(b.versor())};
   if (tmp.lengthsq() < 1e-12) {
     return tmp;
   } else {
@@ -190,9 +188,9 @@ hvec<3, double> Brnd_mhd::eplus(const hvec<3, double> &b,
   }
 }
 
-hvec<3, double> Brnd_mhd::eminus(const hvec<3, double> &b,
-                                 const hvec<3, double> &k) const {
-  hvec<3, double> tmp{
+hamvec<3, double> Brnd_mhd::e_minus(const hamvec<3, double> &b,
+                                    const hamvec<3, double> &k) const {
+  hamvec<3, double> tmp{
       ((k.versor()).crossprod(b.versor())).crossprod(k.versor())};
   if (tmp.lengthsq() < 1e-12) {
     return tmp;
@@ -201,7 +199,7 @@ hvec<3, double> Brnd_mhd::eminus(const hvec<3, double> &b,
   }
 }
 
-double Brnd_mhd::hs(const double &beta, const double &cosa) const {
+double Brnd_mhd::h_s(const double &beta, const double &cosa) const {
   const double sqrtD{std::sqrt(dynamo(beta, cosa))};
   const double dpp{1 + sqrtD + 0.5 * beta};
   const double dmm{1 - sqrtD - 0.5 * beta};
@@ -213,7 +211,7 @@ double Brnd_mhd::hs(const double &beta, const double &cosa) const {
   return 0;
 }
 
-double Brnd_mhd::hf(const double &beta, const double &cosa) const {
+double Brnd_mhd::h_f(const double &beta, const double &cosa) const {
   if (cosa == 0)
     return 0;
   const double sqrtD{std::sqrt(dynamo(beta, cosa))};
@@ -227,7 +225,7 @@ double Brnd_mhd::hf(const double &beta, const double &cosa) const {
   return 0;
 }
 
-double Brnd_mhd::speca(const double &k, const Param *par) const {
+double Brnd_mhd::spectrum_a(const double &k, const Param *par) const {
   // units fixing, wave vector in 1/kpc units
   const double unit = 0.25 / (CGS_U_pi * k * k);
   // power laws
@@ -243,7 +241,7 @@ double Brnd_mhd::speca(const double &k, const Param *par) const {
   return P * par->brnd_mhd.pa0 * unit;
 }
 
-double Brnd_mhd::specf(const double &k, const Param *par) const {
+double Brnd_mhd::spectrum_f(const double &k, const Param *par) const {
   // units fixing, wave vector in 1/kpc units
   const double unit = 0.25 / (CGS_U_pi * k * k);
   // power laws
@@ -259,7 +257,7 @@ double Brnd_mhd::specf(const double &k, const Param *par) const {
   return P * par->brnd_mhd.pf0 * unit;
 }
 
-double Brnd_mhd::specs(const double &k, const Param *par) const {
+double Brnd_mhd::spectrum_s(const double &k, const Param *par) const {
   // units fixing, wave vector in 1/kpc units
   const double unit = 0.25 / (CGS_U_pi * k * k);
   // power laws
@@ -274,5 +272,3 @@ double Brnd_mhd::specs(const double &k, const Param *par) const {
       band3 / std::pow(k / par->brnd_mhd.k0, par->brnd_mhd.as0);
   return P * par->brnd_mhd.ps0 * unit;
 }
-
-// END

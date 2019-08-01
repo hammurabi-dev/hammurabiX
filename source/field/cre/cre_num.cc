@@ -6,18 +6,18 @@
 
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_sf_synchrotron.h>
-#include <hvec.h>
 
 #include <cgs_units_file.h>
-#include <cre.h>
+#include <crefield.h>
 #include <grid.h>
+#include <hamvec.h>
 #include <param.h>
 
 // numerical CRE flux
 // J_tot(\nu)
-double CRE_num::get_emissivity_t(const hvec<3, double> &pos, const Param *par,
-                                 const Grid_cre *grid,
-                                 const double &Bper) const {
+double CRE_num::read_emissivity_t(const hamvec<3, double> &pos,
+                                  const Param *par, const Grid_cre *grid,
+                                  const double &Bper) const {
   double J{0.};
   assert(par->grid_cre.read_permission);
   // allocate energy grid
@@ -27,7 +27,7 @@ double CRE_num::get_emissivity_t(const hvec<3, double> &pos, const Param *par,
   std::unique_ptr<double[]> beta = std::make_unique<double[]>(par->grid_cre.nE);
   // consts used in loop, using cgs units
   const double x_fact{(2. * CGS_U_MEC * CGS_U_MEC2 * CGS_U_MEC2 * 2. *
-                       CGS_U_pi * par->grid_int.sim_sync_freq.back()) /
+                       CGS_U_pi * par->grid_obs.sim_sync_freq.back()) /
                       (3. * CGS_U_qe * Bper)};
   // KE in cgs units
   for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE; ++i) {
@@ -61,9 +61,9 @@ double CRE_num::get_emissivity_t(const hvec<3, double> &pos, const Param *par,
 }
 
 // J_pol(\nu)
-double CRE_num::get_emissivity_p(const hvec<3, double> &pos, const Param *par,
-                                 const Grid_cre *grid,
-                                 const double &Bper) const {
+double CRE_num::read_emissivity_p(const hamvec<3, double> &pos,
+                                  const Param *par, const Grid_cre *grid,
+                                  const double &Bper) const {
   double J{0.};
   assert(par->grid_cre.read_permission);
   // allocate energy grid
@@ -73,7 +73,7 @@ double CRE_num::get_emissivity_p(const hvec<3, double> &pos, const Param *par,
   std::unique_ptr<double[]> beta = std::make_unique<double[]>(par->grid_cre.nE);
   // consts used in loop, using cgs units
   const double x_fact{(2. * CGS_U_MEC * CGS_U_MEC2 * CGS_U_MEC2 * 2. *
-                       CGS_U_pi * par->grid_int.sim_sync_freq.back()) /
+                       CGS_U_pi * par->grid_obs.sim_sync_freq.back()) /
                       (3. * CGS_U_qe * Bper)};
   // KE in cgs units
   for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE; ++i) {
@@ -105,5 +105,3 @@ double CRE_num::get_emissivity_p(const hvec<3, double> &pos, const Param *par,
   }
   return fore_factor * J / (4. * CGS_U_pi);
 }
-
-// END

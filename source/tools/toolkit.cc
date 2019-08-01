@@ -5,66 +5,14 @@
 #include <omp.h>
 #include <sstream>
 #include <string>
-#include <thread> // for random seed generator
+#include <thread>
 #include <vector>
 
-#include <fftw3.h>
-#include <hvec.h>
 #include <tinyxml2.h>
-
-#include <cgs_units_file.h>
-#include <namespace_toolkit.h>
+#include <toolkit.h>
 
 namespace toolkit {
-
-// calculate the perpendicular to LOS component of a vector
-double perp2los(const hvec<3, double> &input, const double &the_los,
-                const double &phi_los) {
-  const hvec<3, double> unit_vec{los_versor(the_los, phi_los)};
-  const hvec<3, double> perp_vec{unit_vec.crossprod(input)};
-  return perp_vec.length();
-}
-
-// calculate the parallel to LOS component of a vector
-double par2los(const hvec<3, double> &input, const double &the_los,
-               const double &phi_los) {
-  const hvec<3, double> unit_vec{los_versor(the_los, phi_los)};
-  return unit_vec.dotprod(input);
-}
-
-// calculate intrinsic polarization angle
-double intr_pol_ang(const hvec<3, double> &input, const double &the_ec,
-                    const double &phi_ec) {
-  hvec<3, double> sph_unit_v_the;
-  hvec<3, double> sph_unit_v_phi;
-  sph_unit_v_the = hvec<3, double>{cos(the_ec) * cos(phi_ec),
-                                   cos(the_ec) * sin(phi_ec), -sin(the_ec)};
-  sph_unit_v_phi = hvec<3, double>{-sin(phi_ec), cos(phi_ec), 0.};
-  // IAU convention
-  const double y_component{-sph_unit_v_the.dotprod(input)};
-  const double x_component{-sph_unit_v_phi.dotprod(input)};
-  return atan2(y_component, x_component);
-}
-
-// from Cartesian coordiante to cylindrical coordinate
-void cart_coord2cyl_coord(const hvec<3, double> &input, double &r, double &phi,
-                          double &z) {
-  r = sqrt(input[0] * input[0] + input[1] * input[1]);
-  phi = atan2(input[1], input[0]);
-  // if(phi<0.) {phi+=2.*CGS_U_pi;} // may not be necessary
-  z = input[2];
-}
-
-// overload for vec3 to vec3
-void cart_coord2cyl_coord(const hvec<3, double> &input,
-                          hvec<3, double> &cyl_vec) {
-  cyl_vec[0] = sqrt(input[0] * input[0] + input[1] * input[1]);
-  cyl_vec[1] = atan2(input[1], input[0]);
-  // if(cyl_vec[1]<0.) {cyl_vec[1]+=2.*CGS_U_pi;} // may not be necessary
-  cyl_vec[2] = input[2];
-}
-
-// mean for array
+// mean for double array
 double mean(const double *arr, const std::size_t &size) {
   double avg{0};
   for (std::size_t i = 0; i != size; ++i) {
@@ -73,8 +21,7 @@ double mean(const double *arr, const std::size_t &size) {
   avg /= size;
   return avg;
 }
-
-// mean for vector
+// mean for double vector
 double mean(const std::vector<double> &vect) {
   assert(!vect.empty());
   double avg{0};
@@ -84,8 +31,7 @@ double mean(const std::vector<double> &vect) {
   avg /= vect.size();
   return avg;
 }
-
-// variance for array
+// variance for double array
 double variance(const double *arr, const std::size_t &size) {
   const double avg{mean(arr, size)};
   double var{0.};
@@ -95,8 +41,7 @@ double variance(const double *arr, const std::size_t &size) {
   var /= size;
   return var;
 }
-
-// variance for vector
+// variance for double vector
 double variance(const std::vector<double> &vect) {
   assert(!vect.empty());
   const double avg{mean(vect)};
@@ -107,8 +52,7 @@ double variance(const std::vector<double> &vect) {
   var /= vect.size();
   return var;
 }
-
-// cov for array
+// covariance for double array
 double covariance(const double *arr1, const double *arr2,
                   const std::size_t &size) {
   double avg1{mean(arr1, size)};
@@ -120,8 +64,7 @@ double covariance(const double *arr1, const double *arr2,
   covar /= size;
   return covar;
 }
-
-// cov for vector
+// covariance for double vector
 double covariance(const std::vector<double> &vect1,
                   const std::vector<double> &vect2) {
   assert(vect1.size() == vect2.size());
@@ -134,8 +77,7 @@ double covariance(const std::vector<double> &vect1,
   covar /= vect1.size();
   return covar;
 }
-
-// offer random seed
+// random seed generator
 std::size_t random_seed(const int &s) {
   assert(s >= 0);
   if (s == 0) {
@@ -151,15 +93,14 @@ std::size_t random_seed(const int &s) {
   }
   return s;
 }
-
-// auxiliary functions for parsing parameters
+// load xml file
 std::unique_ptr<tinyxml2::XMLDocument> loadxml(const std::string &filename) {
   auto doc = std::make_unique<tinyxml2::XMLDocument>();
   doc->LoadFile(filename.c_str());
   assert(!doc->Error());
   return std::move(doc);
 }
-
+// trace xml element
 tinyxml2::XMLElement *tracexml(tinyxml2::XMLDocument *doc,
                                const std::vector<std::string> &keychain) {
   tinyxml2::XMLElement *el{doc->FirstChildElement("root")};
@@ -173,31 +114,31 @@ tinyxml2::XMLElement *tracexml(tinyxml2::XMLDocument *doc,
   }
   return el;
 }
-
+// get string value of attribute in child level
 std::string fetchstring(tinyxml2::XMLElement *el, const std::string &att_type,
                         const std::string &key) {
 #ifdef VERBOSE
-  std::cout << "key: " << key << " attrib: " << att_type << std::endl;
+  std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
   return el->FirstChildElement(key.c_str())->Attribute(att_type.c_str());
 }
-
+// get string value of attribute in current level
 std::string fetchstring(tinyxml2::XMLElement *el, const std::string &att_type) {
 #ifdef VERBOSE
   std::cout << "attrib: " << att_type << std::endl;
 #endif
   return el->Attribute(att_type.c_str());
 }
-
+// get integer value of attribute in child level, with default return
 int fetchint(tinyxml2::XMLElement *el, const std::string &att_type,
              const std::string &key, const int &dft) {
 #ifdef VERBOSE
-  std::cout << "key: " << key << " attrib: " << att_type << std::endl;
+  std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
   return el->FirstChildElement(key.c_str())
       ->IntAttribute(att_type.c_str(), dft);
 }
-
+// get integer value of attribute in current level, with default return
 int fetchint(tinyxml2::XMLElement *el, const std::string &att_type,
              const int &dft) {
 #ifdef VERBOSE
@@ -205,17 +146,17 @@ int fetchint(tinyxml2::XMLElement *el, const std::string &att_type,
 #endif
   return el->IntAttribute(att_type.c_str(), dft);
 }
-
+// get unsigned value of attribute in child level, with default return
 unsigned int fetchunsigned(tinyxml2::XMLElement *el,
                            const std::string &att_type, const std::string &key,
                            const unsigned &dft) {
 #ifdef VERBOSE
-  std::cout << "key: " << key << " attrib: " << att_type << std::endl;
+  std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
   return el->FirstChildElement(key.c_str())
       ->UnsignedAttribute(att_type.c_str(), dft);
 }
-
+// get unsigned value of attribute in current level, with default return
 unsigned int fetchunsigned(tinyxml2::XMLElement *el,
                            const std::string &att_type, const unsigned &dft) {
 #ifdef VERBOSE
@@ -223,16 +164,16 @@ unsigned int fetchunsigned(tinyxml2::XMLElement *el,
 #endif
   return el->UnsignedAttribute(att_type.c_str(), dft);
 }
-
+// get Boolean value of attribute in child level, with default return
 bool fetchbool(tinyxml2::XMLElement *el, const std::string &att_type,
                const std::string &key, const int &dft) {
 #ifdef VERBOSE
-  std::cout << "key: " << key << " attrib: " << att_type << std::endl;
+  std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
   return el->FirstChildElement(key.c_str())
       ->BoolAttribute(att_type.c_str(), dft);
 }
-
+// get Boolean value of attribute in current level, with default return
 bool fetchbool(tinyxml2::XMLElement *el, const std::string &att_type,
                const int &dft) {
 #ifdef VERBOSE
@@ -240,16 +181,16 @@ bool fetchbool(tinyxml2::XMLElement *el, const std::string &att_type,
 #endif
   return el->BoolAttribute(att_type.c_str(), dft);
 }
-
+// get double value of attribute in child level, with default return
 double fetchdouble(tinyxml2::XMLElement *el, const std::string &att_type,
                    const std::string &key, const double &dft) {
 #ifdef VERBOSE
-  std::cout << "key: " << key << " attrib: " << att_type << std::endl;
+  std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
   return el->FirstChildElement(key.c_str())
       ->DoubleAttribute(att_type.c_str(), dft);
 }
-
+// get double value of attribute in current level, with default return
 double fetchdouble(tinyxml2::XMLElement *el, const std::string &att_type,
                    const double &dft) {
 #ifdef VERBOSE
@@ -258,39 +199,4 @@ double fetchdouble(tinyxml2::XMLElement *el, const std::string &att_type,
   return el->DoubleAttribute(att_type.c_str(), dft);
 }
 
-// get real components from fftw_complex arrays
-void complex2real(const fftw_complex *input, double *output,
-                  const std::size_t &size) {
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static)
-#endif
-  // DO NOT CHANGE SCHEDULE TYPE
-  for (std::size_t i = 0; i < size; ++i) {
-    output[i] = input[i][0];
-  }
-}
-
-void complex2imag(const fftw_complex *input, double *output,
-                  const std::size_t &size) {
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static) // DO NOT CHANGE SCHEDULE TYPE
-#endif
-  for (std::size_t i = 0; i < size; ++i) {
-    output[i] = input[i][1];
-  }
-}
-
-void complex2rni(const fftw_complex *input, double *realout, double *imagout,
-                 const std::size_t &size) {
-#ifdef _OPENMP
-#pragma omp parallel for schedule(static) // DO NOT CHANGE SCHEDULE TYPE
-#endif
-  for (std::size_t i = 0; i < size; ++i) {
-    realout[i] = input[i][0];
-    imagout[i] = input[i][1];
-  }
-}
-
 } // namespace toolkit
-
-// END

@@ -12,7 +12,7 @@
     <!-- resolution defined in './Grid/Box' -->
     <!-- CRE field resolution defined in './CRE/Numeric' -->
     <fieldio>
-        <fereg read="0" write="1" filename="reference/ymw16_unitest.bin"/>
+        <tereg read="0" write="1" filename="reference/ymw16_unitest.bin"/>
     </fieldio>
     <!-- field & observable grid -->
     <grid>
@@ -23,7 +23,7 @@
             <z value="6"/> <!-- pc (optional, default) -->
         </observer>
         <!-- regular FE field grid -->
-        <box_fereg> <!-- (optional) if no breg I/O -->
+        <box_tereg> <!-- (optional) if no breg I/O -->
             <!-- grid vertex size -->
             <nx value="41"/>
             <ny value="41"/>
@@ -35,7 +35,7 @@
             <y_max value="20.0"/> <!-- kpc -->
             <z_min value="-5.0"/> <!-- kpc -->
             <z_max value="5.0"/> <!-- kpc -->
-        </box_fereg>
+        </box_tereg>
     </grid>
     <!-- magnetic fields -->
     <magneticfield>
@@ -51,7 +51,7 @@
         </random>
     </magneticfield>
     <!-- free electron field -->
-    <freeelectron>
+    <thermalelectron>
         <!-- if cue="0", all child elements are opitonal -->
         <regular cue="1" type="ymw16">
             <!-- YMW16 -->
@@ -147,7 +147,7 @@
         <!-- if cue="0", all child elements are opitonal -->
         <random cue="0" type="global" seed="0">
         </random>
-    </freeelectron>
+    </thermalelectron>
     <!-- analytic CRE -->
     <!-- flux norm comes with unit [GeV m^2 s Sr]^-1 -->
     <!-- if cue="0", all child elements are opitonal -->

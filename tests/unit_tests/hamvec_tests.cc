@@ -1,29 +1,28 @@
-// unit tests for our vector class
-// feel free to add more rational testing blocks
+// unit tests for hamvec class
 
 #include <gtest/gtest.h>
 
 #include <cmath>
-#include <hvec.h>
+#include <hamvec.h>
 #include <iostream>
 #include <memory>
 
 TEST(vector, basic) {
   // default ctor
-  hvec<1, float> vec_dft1;
+  hamvec<1, float> vec_dft1;
   EXPECT_EQ(vec_dft1[0], float(0));
 
-  hvec<2, int> vec_dft2;
+  hamvec<2, int> vec_dft2;
   EXPECT_EQ(vec_dft2[0], int(0));
   EXPECT_EQ(vec_dft2[1], int(0));
 
-  hvec<3, double> vec_dft3;
+  hamvec<3, double> vec_dft3;
   EXPECT_EQ(vec_dft3[0], double(0));
   EXPECT_EQ(vec_dft3[1], double(0));
   EXPECT_EQ(vec_dft3[2], double(0));
 
   // argument ctor
-  hvec<1, float> vec1(0.0);
+  hamvec<1, float> vec1(0.0);
   EXPECT_EQ(vec1[0], 0.);
 
   // implicit ctor
@@ -31,25 +30,25 @@ TEST(vector, basic) {
   EXPECT_EQ(vec1[0], float(0.1));
 
   // cp assign, operator==
-  hvec<1, float> vec1_cpa(0.2);
+  hamvec<1, float> vec1_cpa(0.2);
   vec1 = vec1_cpa;
   EXPECT_EQ(vec1[0], float(0.2));
 
   // cp ctor
-  hvec<1, float> vec1_cpc(vec1);
+  hamvec<1, float> vec1_cpc(vec1);
   EXPECT_EQ(vec1_cpc[0], vec1[0]);
 
   // mv ctor
-  hvec<1, float> vec1_mvc = std::move(vec1_cpc);
+  hamvec<1, float> vec1_mvc = std::move(vec1_cpc);
   EXPECT_EQ(vec1_mvc[0], vec1[0]);
 
   // list ctor
-  hvec<2, double> vec2{0.3, 0.4};
+  hamvec<2, double> vec2{0.3, 0.4};
   EXPECT_EQ(vec2[0], double(0.3));
   EXPECT_EQ(vec2[1], double(0.4));
 
   // operator +
-  auto vecp = vec2 + hvec<2, double>{0.4, 0.8};
+  auto vecp = vec2 + hamvec<2, double>{0.4, 0.8};
   EXPECT_EQ(vecp[0], vec2[0] + double(0.4));
   EXPECT_EQ(vecp[1], vec2[1] + double(0.8));
 
@@ -64,7 +63,7 @@ TEST(vector, basic) {
   EXPECT_EQ(vec2[1], double(0.4));
 
   // operator -
-  auto vecm = vec2 - hvec<2, float>{0.3, 0.8};
+  auto vecm = vec2 - hamvec<2, float>{0.3, 0.8};
   EXPECT_EQ(vecm[0], double(0.3) - static_cast<double>(float(0.3)));
   EXPECT_EQ(vecm[1], double(0.4) - static_cast<double>(float(0.8)));
 
@@ -99,10 +98,10 @@ TEST(vector, basic) {
   EXPECT_EQ(vec2[1], double(1.2) / double(3));
 
   // operator !=
-  auto test = hvec<2, double>(1., 1.);
+  auto test = hamvec<2, double>(1., 1.);
   EXPECT_TRUE(vec2 != test);
 
-  hvec<3, int> vec3{1, 2, 3};
+  hamvec<3, int> vec3{1, 2, 3};
 
   // function lengthsq
   EXPECT_EQ(vec3.lengthsq(), double(14.0));
@@ -110,26 +109,34 @@ TEST(vector, basic) {
   // function length
   EXPECT_EQ(vec3.length(), std::sqrt(double(14.0)));
 
-  // function versor
+  // function versor, non-zero
   auto norm = vec3.versor();
   EXPECT_EQ(norm[0], double(1. / std::sqrt(14.)));
   EXPECT_EQ(norm[1], double(2. / std::sqrt(14.)));
   EXPECT_EQ(norm[2], double(3. / std::sqrt(14.)));
 
+  // function versor, zero
+  vec3 = {0, 0, 0};
+  norm = vec3.versor();
+  EXPECT_EQ(norm[0], double(0));
+  EXPECT_EQ(norm[1], double(0));
+  EXPECT_EQ(norm[2], double(0));
+
   // function flip
-  auto flipt = hvec<3, int>(-1, -2, -3);
+  vec3 = {1, 2, 3};
+  auto flipt = hamvec<3, int>(-1, -2, -3);
   vec3.flip();
   EXPECT_TRUE(vec3 == flipt);
 
-  hvec<3, double> vec3a{0.1, 0.2, 0.3};
-  hvec<3, double> vec3b{0.4, 0.5, 0.6};
+  hamvec<3, double> vec3a{0.1, 0.2, 0.3};
+  hamvec<3, double> vec3b{0.4, 0.5, 0.6};
 
   // function dotprod
   auto rslt = vec3a.dotprod(vec3b);
   EXPECT_EQ(rslt, 0.32);
 
   // function crossprod
-  hvec<3, double> prodt(0, 0, 0);
+  hamvec<3, double> prodt(0, 0, 0);
   prodt[0] = double(0.2) * double(0.6) - double(0.3) * double(0.5);
   prodt[1] = double(0.3) * double(0.4) - double(0.1) * double(0.6);
   prodt[2] = double(0.1) * double(0.5) - double(0.2) * double(0.4);

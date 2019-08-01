@@ -2,29 +2,27 @@
 #include <cmath>
 #include <omp.h>
 
+#include <bfield.h>
+#include <cgs_units_file.h>
 #include <fftw3.h>
+#include <grid.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
-#include <hvec.h>
-
-#include <breg.h>
-#include <brnd.h>
-#include <cgs_units_file.h>
-#include <grid.h>
-#include <namespace_toolkit.h>
+#include <hamvec.h>
 #include <param.h>
+#include <toolkit.h>
 
 // global anisotropic turbulent field
-hvec<3, double> Brnd_es::anisotropy_direction(const hvec<3, double> &pos,
-                                              const Param *par,
-                                              const Breg *breg,
-                                              const Grid_breg *gbreg) const {
-  return (breg->get_vector(pos, par, gbreg)).versor();
+hamvec<3, double> Brnd_es::anisotropy_direction(const hamvec<3, double> &pos,
+                                                const Param *par,
+                                                const Breg *breg,
+                                                const Grid_breg *gbreg) const {
+  return (breg->read_field(pos, par, gbreg)).versor();
 }
 
 // global anisotropic turbulent field
-double Brnd_es::anisotropy_ratio(const hvec<3, double> &, const Param *par,
+double Brnd_es::anisotropy_ratio(const hamvec<3, double> &, const Param *par,
                                  const Breg *, const Grid_breg *) const {
   // the simplest case, const.
   return par->brnd_es.rho;
@@ -32,7 +30,7 @@ double Brnd_es::anisotropy_ratio(const hvec<3, double> &, const Param *par,
 
 // since we are using rms normalization
 // p0 is hidden and not affecting anything
-double Brnd_es::spec(const double &k, const Param *par) const {
+double Brnd_es::spectrum(const double &k, const Param *par) const {
   // units fixing, wave vector in 1/kpc units
   const double p0{par->brnd_es.rms * par->brnd_es.rms};
   const double unit = 1. / (4 * CGS_U_pi * k * k);
@@ -50,7 +48,8 @@ double Brnd_es::spec(const double &k, const Param *par) const {
 
 // galactic scaling of random field energy density
 // set to 1 at observer's place
-double Brnd_es::rescal(const hvec<3, double> &pos, const Param *par) const {
+double Brnd_es::spatial_profile(const hamvec<3, double> &pos,
+                                const Param *par) const {
   const double r_cyl{std::sqrt(pos[0] * pos[0] + pos[1] * pos[1]) -
                      std::fabs(par->observer[0])};
   const double z{std::fabs(pos[2]) - std::fabs(par->observer[2])};
@@ -59,22 +58,20 @@ double Brnd_es::rescal(const hvec<3, double> &pos, const Param *par) const {
 
 // Gram-Schimdt, rewritten using Healpix vec3 library
 // tiny error caused by machine is inevitable
-hvec<3, double> Brnd_es::gramschmidt(const hvec<3, double> &k,
-                                     const hvec<3, double> &b) const {
+hamvec<3, double> Brnd_es::gramschmidt(const hamvec<3, double> &k,
+                                       const hamvec<3, double> &b) const {
   if (k.lengthsq() == 0 or b.lengthsq() == 0) {
     return b;
   }
   const double inv_k_mod = 1. / k.lengthsq();
-  hvec<3, double> b_free{b[0] - k[0] * k.dotprod(b) * inv_k_mod,
-                         b[1] - k[1] * k.dotprod(b) * inv_k_mod,
-                         b[2] - k[2] * k.dotprod(b) * inv_k_mod};
-
-  return b_free;
+  return hamvec<3, double>{b[0] - k[0] * k.dotprod(b) * inv_k_mod,
+                           b[1] - k[1] * k.dotprod(b) * inv_k_mod,
+                           b[2] - k[2] * k.dotprod(b) * inv_k_mod};
 }
 
 void Brnd_es::write_grid(const Param *par, const Breg *breg,
                          const Grid_breg *gbreg, Grid_brnd *grid) const {
-  // PHASE I
+  // STEP I
   // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
   // initialize random seed
 #ifdef _OPENMP
@@ -105,10 +102,7 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
     double kx{CGS_U_kpc * i / lx};
     if (i >= (par->grid_brnd.nx + 1) / 2)
       kx -= CGS_U_kpc * par->grid_brnd.nx / lx;
-    // it's better to calculate indeces manually
-    // just for reference, how indeces are calculated
-    // const size_t idx
-    // {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i,j,l)};
+    // it's faster to calculate indeces manually
     const std::size_t idx_lv1{i * par->grid_brnd.ny * par->grid_brnd.nz};
     for (decltype(par->grid_brnd.ny) j = 0; j < par->grid_brnd.ny; ++j) {
       double ky{CGS_U_kpc * j / ly};
@@ -128,9 +122,9 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
         // P ~ (bx^2 + by^2 + bz^2)
         // c0^2 ~ c1^2 ~ (bx^2 + by^2) ~ P*2/3
         // as renormalization comes in PHASE II,
-        // 1/3, P0 in spec, dk3 are numerically redundant
+        // 1/3, P0 in spectrum, dk3 are numerically redundant
         // while useful for precision check
-        const double sigma{std::sqrt(0.33333333 * spec(ks, par) * dk3)};
+        const double sigma{std::sqrt(0.33333333 * spectrum(ks, par) * dk3)};
         grid->c0[idx][0] = sigma * gsl_ran_ugaussian(seed_id);
         grid->c0[idx][1] = sigma * gsl_ran_ugaussian(seed_id);
         grid->c1[idx][0] = sigma * gsl_ran_ugaussian(seed_id);
@@ -151,7 +145,7 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
   // free random memory
   gsl_rng_free(r);
 #endif
-  // PHASE II
+  // STEP II
   // RESCALING FIELD PROFILE IN REAL SPACE
   // 1./std::sqrt(3*bi_var)
   // after 1st Fourier transformation, c0_R = bx, c0_I = by, c1_I = bz
@@ -162,8 +156,8 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
 #pragma omp parallel for schedule(static)
 #endif
   for (decltype(par->grid_brnd.nx) i = 0; i < par->grid_brnd.nx; ++i) {
-    hvec<3, double> pos{i * lx / (par->grid_brnd.nx - 1) + par->grid_brnd.x_min,
-                        0, 0};
+    hamvec<3, double> pos{
+        i * lx / (par->grid_brnd.nx - 1) + par->grid_brnd.x_min, 0, 0};
     const std::size_t idx_lv1{i * par->grid_brnd.ny * par->grid_brnd.nz};
     for (decltype(par->grid_brnd.ny) j = 0; j < par->grid_brnd.ny; ++j) {
       pos[1] = j * ly / (par->grid_brnd.ny - 1) + par->grid_brnd.y_min;
@@ -171,16 +165,18 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
       for (decltype(par->grid_brnd.nz) l = 0; l < par->grid_brnd.nz; ++l) {
         // get physical position
         pos[2] = l * lz / (par->grid_brnd.nz - 1) + par->grid_brnd.z_min;
-        // get rescaling factor
-        double ratio{std::sqrt(rescal(pos, par)) * par->brnd_es.rms *
+        // get reprofiling factor
+        double ratio{std::sqrt(spatial_profile(pos, par)) * par->brnd_es.rms *
                      b_var_invsq};
         const std::size_t idx{idx_lv2 + l};
         // assemble b_Re
         // after 1st Fourier transformation, c0_R = bx, c0_I = by, c1_I = bz
-        hvec<3, double> b_re{grid->c0[idx][0] * ratio, grid->c0[idx][1] * ratio,
-                             grid->c1[idx][1] * ratio};
+        hamvec<3, double> b_re{grid->c0[idx][0] * ratio,
+                               grid->c0[idx][1] * ratio,
+                               grid->c1[idx][1] * ratio};
         // impose anisotropy
-        hvec<3, double> H_versor = anisotropy_direction(pos, par, breg, gbreg);
+        hamvec<3, double> H_versor =
+            anisotropy_direction(pos, par, breg, gbreg);
         const double rho{anisotropy_ratio(pos, par, breg, gbreg)};
         assert(rho >= 0.);
         const double rho2 = rho * rho;
@@ -189,8 +185,8 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
         if (H_versor.lengthsq() <
             1e-10) // zero regular field, no prefered anisotropy
           continue;
-        hvec<3, double> b_re_par{H_versor * H_versor.dotprod(b_re)};
-        hvec<3, double> b_re_perp{b_re - b_re_par};
+        hamvec<3, double> b_re_par{H_versor * H_versor.dotprod(b_re)};
+        hamvec<3, double> b_re_perp{b_re - b_re_par};
         b_re = (b_re_par * rho + b_re_perp / rho) * rhonorm;
         // push b_re back to c0 and c1
         grid->c0[idx][0] = b_re[0];
@@ -203,7 +199,7 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
   // execute DFT forward plan
   fftw_execute_dft(grid->plan_c0_fw, grid->c0, grid->c0);
   fftw_execute_dft(grid->plan_c1_fw, grid->c1, grid->c1);
-  // PHASE III
+  // STEP III
   // RE-ORTHOGONALIZING IN FOURIER SPACE
   // Gram-Schmidt process
 #ifdef _OPENMP
@@ -214,7 +210,7 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
                                       i}; // apply Hermitian symmetry
     if (i == 0)
       i_sym = i;
-    hvec<3, double> tmp_k{CGS_U_kpc * i / lx, 0, 0};
+    hamvec<3, double> tmp_k{CGS_U_kpc * i / lx, 0, 0};
     // it's better to calculate indeces manually
     // just for reference, how indeces are calculated
     // const std::size_t idx
@@ -251,12 +247,12 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
         // c*0(-k) = bx(k) - i by(k)
         // c1(k) = by(k) + i bz(k)
         // c1*1(-k) = by(k) - i bz(k)
-        const hvec<3, double> tmp_b_re{
+        const hamvec<3, double> tmp_b_re{
             0.5 * (grid->c0[idx][0] + grid->c0[idx_sym][0]),
             0.5 * (grid->c1[idx][0] + grid->c1[idx_sym][0]),
             0.5 * (grid->c1[idx_sym][1] + grid->c1[idx][1])};
         // Gram-Schmidt process
-        const hvec<3, double> free_b_re{gramschmidt(tmp_k, tmp_b_re)};
+        const hamvec<3, double> free_b_re{gramschmidt(tmp_k, tmp_b_re)};
         // reassemble c0,c1 from bx,by,bz
         // c0(k) = bx(k) + i by(k)
         // c1(k) = by(k) + i bz(k)
@@ -284,12 +280,7 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
                                       i}; // apply Hermitian symmetry
     if (i == 0)
       i_sym = i;
-    // it's better to calculate indeces manually
-    // just for reference, how indeces are calculated
-    // const std::size_t idx
-    // {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i,j,l)};
-    // const std::size_t idx_sym
-    // {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i_sym,j_sym,l_sym)};
+    // it's faster to calculate indeces manually
     const std::size_t idx_lv1{i * par->grid_brnd.ny * par->grid_brnd.nz};
     const std::size_t idx_sym_lv1{i_sym * par->grid_brnd.ny *
                                   par->grid_brnd.nz};

@@ -40,8 +40,8 @@
                 </manual>
             </layer>
             <!-- helio/observer-centric radial limit -->
-            <ec_r_min value="5.0"/> <!-- kpc (default) -->
-            <ec_r_max value="45.0"/> <!-- kpc (default) -->
+            <oc_r_min value="5.0"/> <!-- kpc (default) -->
+            <oc_r_max value="45.0"/> <!-- kpc (default) -->
             <!-- galactic-centric radial limit -->
             <gc_r_min value="0.0"/> <!-- kpc (default) -->
             <gc_r_max value="20.0"/> <!-- kpc (default) -->
@@ -49,13 +49,13 @@
             <gc_z_min value="0.0"/> <!-- kpc (default) -->
             <gc_z_max value="10.0"/> <!-- kpc (default) -->
             <!-- radial integration resolution -->
-            <ec_r_res value="0.03"/> <!-- kpc (default) -->
+            <oc_r_res value="0.03"/> <!-- kpc (default) -->
             <!-- galactic latitude limit, both poles -->
-            <lat_min value="0."/> <!--  (default) -->
-            <lat_max value="90."/> <!--  (default) -->
+            <oc_lat_min value="0."/> <!--  (default) -->
+            <oc_lat_max value="90."/> <!--  (default) -->
             <!-- galactic longitude limit, both poles -->
-            <lon_min value="0."/> <!--  (default) -->
-            <lon_max value="360."/> <!--  (default) -->
+            <oc_lon_min value="0."/> <!--  (default) -->
+            <oc_lon_max value="360."/> <!--  (default) -->
         </shell>
     </grid>
     <!-- magnetic fields -->
@@ -70,13 +70,13 @@
         </random>
     </magneticfield>
     <!-- free electron field -->
-    <freeelectron>
+    <thermalelectron>
         <regular cue="0" type="unif">
         </regular>
         <!-- random/turbulent free electron -->
         <random cue="0" type="global" seed="0">
         </random>
-    </freeelectron>
+    </thermalelectron>
     <!-- analytic CRE -->
     <!-- flux norm comes with unit [GeV m^2 s Sr]^-1 -->
     <cre cue="0" type="unif">

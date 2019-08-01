@@ -1,3 +1,5 @@
+// regular magnetic vector field grid
+
 #include <array>
 #include <cassert>
 #include <fstream>
@@ -6,9 +8,7 @@
 #include <string>
 #include <vector>
 
-#include <cgs_units_file.h>
 #include <grid.h>
-#include <namespace_toolkit.h>
 #include <param.h>
 
 Grid_breg::Grid_breg(const Param *par) {
@@ -19,7 +19,7 @@ Grid_breg::Grid_breg(const Param *par) {
 }
 
 void Grid_breg::build_grid(const Param *par) {
-  // real 3D regular b field
+  // allocate spatial domain regular magnetic field
   bx = std::make_unique<double[]>(par->grid_breg.full_size);
   by = std::make_unique<double[]>(par->grid_breg.full_size);
   bz = std::make_unique<double[]>(par->grid_breg.full_size);

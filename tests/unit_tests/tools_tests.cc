@@ -3,115 +3,10 @@
 
 #include <gtest/gtest.h>
 
-#include <cgs_units_file.h>
-#include <cmath>
-#include <fftw3.h>
-#include <hvec.h>
 #include <memory>
-#include <namespace_toolkit.h>
 #include <tinyxml2.h>
+#include <toolkit.h>
 #include <vector>
-
-// testing:
-// toolkit::los_versor
-TEST(toolkit, los_versor) {
-  const double theta[3] = {0., 90. * CGS_U_rad, 90. * CGS_U_rad};
-  const double phi[3] = {0., 180. * CGS_U_rad, 270. * CGS_U_rad};
-
-  EXPECT_LT(std::fabs(toolkit::los_versor(theta[0], phi[0])[0] - 0.), 1e-10);
-  EXPECT_LT(std::fabs(toolkit::los_versor(theta[0], phi[0])[1] - 0.), 1e-10);
-  EXPECT_LT(std::fabs(toolkit::los_versor(theta[0], phi[0])[2] - 1.), 1e-10);
-  EXPECT_LT(std::fabs(toolkit::los_versor(theta[1], phi[1])[0] + 1.), 1e-10);
-  EXPECT_LT(std::fabs(toolkit::los_versor(theta[1], phi[1])[1] - 0.), 1e-10);
-  EXPECT_LT(std::fabs(toolkit::los_versor(theta[1], phi[1])[2] - 0.), 1e-10);
-  EXPECT_LT(std::fabs(toolkit::los_versor(theta[2], phi[2])[0] - 0.), 1e-10);
-  EXPECT_LT(std::fabs(toolkit::los_versor(theta[2], phi[2])[1] + 1.), 1e-10);
-  EXPECT_LT(std::fabs(toolkit::los_versor(theta[2], phi[2])[2] - 0.), 1e-10);
-}
-
-// testing:
-// toolkit::par2los
-TEST(toolkit, par2los) {
-  const double theta[3] = {0., 90. * CGS_U_rad, 90. * CGS_U_rad};
-  const double phi[3] = {0., 180. * CGS_U_rad, 270. * CGS_U_rad};
-  const hvec<3, double> A{1., 0., 0.};
-
-  EXPECT_LT(std::fabs(toolkit::par2los(A, theta[0], phi[0]) - 0.), 1e-10);
-  EXPECT_LT(std::fabs(toolkit::par2los(A, theta[1], phi[1]) + 1.), 1e-10);
-  EXPECT_LT(std::fabs(toolkit::par2los(A, theta[2], phi[2]) - 0.), 1e-10);
-}
-
-// testing:
-// toolkit::per2los
-TEST(toolkit, perp2los) {
-  const double theta[3] = {0., 90. * CGS_U_rad, 90. * CGS_U_rad};
-  const double phi[3] = {0., 180. * CGS_U_rad, 270. * CGS_U_rad};
-  const hvec<3, double> A{1., 0., 0.};
-
-  EXPECT_LT(std::fabs(toolkit::perp2los(A, theta[0], phi[0]) - 1.), 1e-10);
-  EXPECT_LT(std::fabs(toolkit::perp2los(A, theta[1], phi[1]) + 0.), 1e-10);
-  EXPECT_LT(std::fabs(toolkit::perp2los(A, theta[2], phi[2]) - 1.), 1e-10);
-}
-
-// testing:
-// toolkit::intr_pol_ang
-TEST(toolkit, intr_pol_ang) {
-  const double theta[3] = {0., 90. * CGS_U_rad, 90. * CGS_U_rad};
-  const double phi[3] = {0., 180. * CGS_U_rad, 270. * CGS_U_rad};
-  const hvec<3, double> A{1., 0., 0.};
-
-  EXPECT_LT(
-      std::fabs(toolkit::intr_pol_ang(A, theta[0], phi[0]) + 90. * CGS_U_rad),
-      1e-10);
-  EXPECT_LT(
-      std::fabs(toolkit::intr_pol_ang(A, theta[2], phi[2]) - 180. * CGS_U_rad),
-      1e-10);
-}
-
-// testing:
-// toolkit::cart_coord2cyl_coord
-TEST(toolkit, cart_coord2cyl_coord) {
-  const hvec<3, double> A{1., 0., 0.};
-  const hvec<3, double> B{0., 0., 1.};
-  const hvec<3, double> C{0., 1., 0.};
-  hvec<3, double> tmp;
-
-  toolkit::cart_coord2cyl_coord(A, tmp);
-
-  EXPECT_LT(std::fabs(tmp[0] - 1.), 1e-10);
-  EXPECT_LT(std::fabs(tmp[1] - 0.), 1e-10);
-  EXPECT_LT(std::fabs(tmp[2] - 0.), 1e-10);
-
-  toolkit::cart_coord2cyl_coord(B, tmp);
-
-  EXPECT_LT(std::fabs(tmp[0] - 0.), 1e-10);
-  EXPECT_LT(std::fabs(tmp[2] - 1.), 1e-10);
-
-  toolkit::cart_coord2cyl_coord(C, tmp);
-
-  EXPECT_LT(std::fabs(tmp[0] - 1.), 1e-10);
-  EXPECT_LT(std::fabs(tmp[1] - 90. * CGS_U_rad), 1e-10);
-  EXPECT_LT(std::fabs(tmp[2] - 0.), 1e-10);
-
-  double tmp_r, tmp_phi, tmp_z;
-
-  toolkit::cart_coord2cyl_coord(A, tmp_r, tmp_phi, tmp_z);
-
-  EXPECT_LT(std::fabs(tmp_r - 1.), 1e-10);
-  EXPECT_LT(std::fabs(tmp_phi - 0.), 1e-10);
-  EXPECT_LT(std::fabs(tmp_z - 0.), 1e-10);
-
-  toolkit::cart_coord2cyl_coord(B, tmp_r, tmp_phi, tmp_z);
-
-  EXPECT_LT(std::fabs(tmp_r - 0.), 1e-10);
-  EXPECT_LT(std::fabs(tmp_z - 1.), 1e-10);
-
-  toolkit::cart_coord2cyl_coord(C, tmp_r, tmp_phi, tmp_z);
-
-  EXPECT_LT(std::fabs(tmp_r - 1.), 1e-10);
-  EXPECT_LT(std::fabs(tmp_phi - 90. * CGS_U_rad), 1e-10);
-  EXPECT_LT(std::fabs(tmp_z - 0.), 1e-10);
-}
 
 // testing:
 // toolkit::index3d
@@ -157,36 +52,6 @@ TEST(toolkit, covariance) {
   const std::vector<double> test_vector1{1, 2, 3};
   const std::vector<double> test_vector2{3, 4, 5};
   EXPECT_DOUBLE_EQ(toolkit::covariance(test_vector1, test_vector2), 2. / 3.);
-}
-
-// testing:
-// toolkit::complex2real
-// toolkit::complex2imag
-// toolkit::complex2rni
-TEST(toolkit, complex_stripping) {
-  const auto test_complex = fftw_alloc_complex(2);
-  test_complex[0][0] = 1.;
-  test_complex[0][1] = 2.;
-  test_complex[1][0] = 3.;
-  test_complex[1][1] = 4.;
-  double test_real[2];
-  double test_imag[2];
-
-  toolkit::complex2real(test_complex, test_real, 2);
-  EXPECT_DOUBLE_EQ(test_real[0], test_complex[0][0]);
-  EXPECT_DOUBLE_EQ(test_real[1], test_complex[1][0]);
-
-  toolkit::complex2imag(test_complex, test_imag, 2);
-  EXPECT_DOUBLE_EQ(test_imag[0], test_complex[0][1]);
-  EXPECT_DOUBLE_EQ(test_imag[1], test_complex[1][1]);
-
-  toolkit::complex2rni(test_complex, test_real, test_imag, 2);
-  EXPECT_DOUBLE_EQ(test_real[0], test_complex[0][0]);
-  EXPECT_DOUBLE_EQ(test_real[1], test_complex[1][0]);
-  EXPECT_DOUBLE_EQ(test_imag[0], test_complex[0][1]);
-  EXPECT_DOUBLE_EQ(test_imag[1], test_complex[1][1]);
-
-  fftw_free(test_complex);
 }
 
 // testing:

@@ -31,6 +31,6 @@ Original hammurabi source code can be found [**here**](https://sourceforge.net/p
 ### contact
 *bug reports and code contributions are warmly welcomed, feel free to contact*
 
+- [Jiaxin Wang](https://gioacchinowang.bitbucket.io/)
 - [Tess Jaffe](https://science.gsfc.nasa.gov/sed/bio/tess.jaffe)
 - [Torsten Ensslin](https://wwwmpa.mpa-garching.mpg.de/~ensslin/)
-- [Jiaxin Wang](http://www.sissa.it/app/members.php?ID=222)

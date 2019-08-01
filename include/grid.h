@@ -1,4 +1,20 @@
-// allocating physical/observable fields
+// grid for allocating physical/observable fields
+//
+// class design:
+//
+// Grid
+//  |-- Grid_breg (regular magnetic field grid)
+//  |-- Grid_brnd (random magnetic field grid)
+//  |-- Grid_tereg (regular thermal electron field grid)
+//  |-- Grid_ternd (random thermal electron field grid)
+//  |-- Grid_cre (cosmic ray electron flux field grid)
+//  |-- Grid_dreg (regular dust field grid)
+//  |-- Grid_drnd (random dust field grid)
+//  |-- Grid_obs (observable grid)
+//
+// There are three major functions in Grid class
+// ``build_grid`` is in charge of preparing data structure and memory allocation
+// ``import_grid`` and ``export_grid`` interface with external data sotrage
 
 #ifndef HAMMURABI_GRID_H
 #define HAMMURABI_GRID_H
@@ -30,7 +46,7 @@ public:
   virtual void import_grid(const Param *);
 };
 
-// regular GMF grid
+// regular magnetic vector field grid
 class Grid_breg final : public Grid {
 public:
   Grid_breg() = default;
@@ -43,10 +59,11 @@ public:
   void build_grid(const Param *) override;
   void export_grid(const Param *) override;
   void import_grid(const Param *) override;
+  // spatial domain magnetic field
   std::unique_ptr<double[]> bx, by, bz;
 };
 
-// turbulent GMF grid
+// random magnetic vector field grid
 class Grid_brnd final : public Grid {
 public:
   Grid_brnd() = default;
@@ -73,45 +90,46 @@ public:
   void build_grid(const Param *) override;
   void export_grid(const Param *) override;
   void import_grid(const Param *) override;
-  // spatial space
+  // spatial domain magnetic field
   std::unique_ptr<double[]> bx, by, bz;
-  // Fourier space
+  // Fourier domain magnetic field
   fftw_complex *c0, *c1;
-  // for/backward plans
+  // for/backward FFT plans
   fftw_plan plan_c0_bw, plan_c1_bw, plan_c0_fw, plan_c1_fw;
   // for destructor
   bool clean_switch = false;
 };
 
-// regular free electron field grid
-class Grid_fereg final : public Grid {
+// regular thermal electron density field grid
+class Grid_tereg final : public Grid {
 public:
-  Grid_fereg() = default;
-  Grid_fereg(const Param *);
-  Grid_fereg(const Grid_fereg &) = delete;
-  Grid_fereg(const Grid_fereg &&) = delete;
-  Grid_fereg &operator=(const Grid_fereg &) = delete;
-  Grid_fereg &operator=(Grid_fereg &&) = delete;
-  virtual ~Grid_fereg() = default;
+  Grid_tereg() = default;
+  Grid_tereg(const Param *);
+  Grid_tereg(const Grid_tereg &) = delete;
+  Grid_tereg(const Grid_tereg &&) = delete;
+  Grid_tereg &operator=(const Grid_tereg &) = delete;
+  Grid_tereg &operator=(Grid_tereg &&) = delete;
+  virtual ~Grid_tereg() = default;
   void build_grid(const Param *) override;
   void export_grid(const Param *) override;
   void import_grid(const Param *) override;
-  std::unique_ptr<double[]> fe;
+  // spatial domain thermal electron field
+  std::unique_ptr<double[]> te;
 };
 
-// turbulent free electron field grid
-class Grid_fernd final : public Grid {
+// random thermal electron density field grid
+class Grid_ternd final : public Grid {
 public:
-  Grid_fernd() = default;
-  Grid_fernd(const Param *);
-  Grid_fernd(const Grid_fernd &) = delete;
-  Grid_fernd(const Grid_fernd &&) = delete;
-  Grid_fernd &operator=(const Grid_fernd &) = delete;
-  Grid_fernd &operator=(Grid_fernd &&) = delete;
-  virtual ~Grid_fernd() {
+  Grid_ternd() = default;
+  Grid_ternd(const Param *);
+  Grid_ternd(const Grid_ternd &) = delete;
+  Grid_ternd(const Grid_ternd &&) = delete;
+  Grid_ternd &operator=(const Grid_ternd &) = delete;
+  Grid_ternd &operator=(Grid_ternd &&) = delete;
+  virtual ~Grid_ternd() {
     if (clean_switch) {
-      fftw_destroy_plan(plan_fe_bw);
-      fftw_free(fe_k);
+      fftw_destroy_plan(plan_te_bw);
+      fftw_free(te_k);
 #ifdef _OPENMP
       fftw_cleanup_threads();
 #else
@@ -122,13 +140,67 @@ public:
   void build_grid(const Param *) override;
   void export_grid(const Param *) override;
   void import_grid(const Param *) override;
-  std::unique_ptr<double[]> fe;
-  fftw_complex *fe_k;
-  fftw_plan plan_fe_bw;
+  // spatial domain thermal electron field
+  std::unique_ptr<double[]> te;
+  // Fourier domain thermal electron field
+  fftw_complex *te_k;
+  // backward FFT plan
+  fftw_plan plan_te_bw;
+  // for destructor
   bool clean_switch = false;
 };
 
-// CRE grid
+// regular dust density field grid
+class Grid_dreg final : public Grid {
+public:
+  Grid_dreg() = default;
+  Grid_dreg(const Param *);
+  Grid_dreg(const Grid_dreg &) = delete;
+  Grid_dreg(const Grid_dreg &&) = delete;
+  Grid_dreg &operator=(const Grid_dreg &) = delete;
+  Grid_dreg &operator=(Grid_dreg &&) = delete;
+  virtual ~Grid_dreg() = default;
+  void build_grid(const Param *) override;
+  void export_grid(const Param *) override;
+  void import_grid(const Param *) override;
+  // spatial domain dust field
+  std::unique_ptr<double[]> d;
+};
+
+// random dust density field grid
+class Grid_drnd final : public Grid {
+public:
+  Grid_drnd() = default;
+  Grid_drnd(const Param *);
+  Grid_drnd(const Grid_drnd &) = delete;
+  Grid_drnd(const Grid_drnd &&) = delete;
+  Grid_drnd &operator=(const Grid_drnd &) = delete;
+  Grid_drnd &operator=(Grid_drnd &&) = delete;
+  virtual ~Grid_drnd() {
+    if (clean_switch) {
+      fftw_destroy_plan(plan_d_bw);
+      fftw_free(d_k);
+#ifdef _OPENMP
+      fftw_cleanup_threads();
+#else
+      fftw_cleanup();
+#endif
+    }
+  };
+  void build_grid(const Param *) override;
+  void export_grid(const Param *) override;
+  void import_grid(const Param *) override;
+  // spatial domain dust field
+  std::unique_ptr<double[]> d;
+  // Fourier domain dust field
+  fftw_complex *d_k;
+  // backward FFT plan
+  fftw_plan plan_d_bw;
+  // for destructor
+  bool clean_switch = false;
+};
+
+// cosmic ray electron flux phase-space density grid
 class Grid_cre final : public Grid {
 public:
   Grid_cre() = default;
@@ -141,27 +213,36 @@ public:
   void build_grid(const Param *) override;
   void export_grid(const Param *) override;
   void import_grid(const Param *) override;
+  // phase-space domain CRE flux field
   std::unique_ptr<double[]> cre_flux;
 };
 
 // observable field grid
-class Grid_int final : public Grid {
+class Grid_obs final : public Grid {
 public:
-  Grid_int() = default;
-  Grid_int(const Param *);
-  Grid_int(const Grid_int &) = delete;
-  Grid_int(const Grid_int &&) = delete;
-  Grid_int &operator=(const Grid_int &) = delete;
-  Grid_int &operator=(Grid_int &&) = delete;
-  virtual ~Grid_int() = default;
+  Grid_obs() = default;
+  Grid_obs(const Param *);
+  Grid_obs(const Grid_obs &) = delete;
+  Grid_obs(const Grid_obs &&) = delete;
+  Grid_obs &operator=(const Grid_obs &) = delete;
+  Grid_obs &operator=(Grid_obs &&) = delete;
+  virtual ~Grid_obs() = default;
   void build_grid(const Param *) override;
   void export_grid(const Param *) override;
-  std::unique_ptr<Healpix_Map<double>> dm_map, Is_map, Qs_map, Us_map, fd_map;
-  // temporary map cache for each shell
-  std::unique_ptr<Healpix_Map<double>> tmp_dm_map, tmp_Is_map, tmp_Qs_map,
-      tmp_Us_map, tmp_fd_map;
+  // HEALPix map for observables
+  // dm_map: dispersion measure
+  // is_map: synchrotron Stokes I
+  // qs_map: synchrotron Stokes Q
+  // us_map: synchrotron Stokes U
+  // id_map: dust Stokes I
+  // qd_map: dust Stokes Q
+  // ud_map: dust Stokes U
+  // fd_map: Faraday depth
+  std::unique_ptr<Healpix_Map<double>> dm_map, is_map, qs_map, us_map, id_map,
+      qd_map, ud_map, fd_map;
+  // temporary HEALPix map for each shell
+  std::unique_ptr<Healpix_Map<double>> tmp_dm_map, tmp_is_map, tmp_qs_map,
+      tmp_us_map, tmp_id_map, tmp_qd_map, tmp_ud_map, tmp_fd_map;
 };
 
 #endif
-
-// END

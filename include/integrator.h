@@ -1,20 +1,15 @@
-// line-of-sight integration calculator
+// line-of-sight radiative transfer integrator
 
 #ifndef HAMMURABI_INT_H
 #define HAMMURABI_INT_H
 
-#include <healpix_map.h>
-#include <memory>
-#include <omp.h>
-#include <string>
+#include <vector>
 
-#include <breg.h>
-#include <brnd.h>
-#include <cgs_units_file.h>
-#include <cre.h>
-#include <fereg.h>
-#include <fernd.h>
+#include <bfield.h>
+#include <crefield.h>
+#include <grid.h>
 #include <param.h>
+#include <tefield.h>
 
 class Integrator {
 public:
@@ -24,16 +19,47 @@ public:
   Integrator &operator=(const Integrator &) = delete;
   Integrator &operator=(Integrator &&) = delete;
   virtual ~Integrator() = default;
-  // assmebling pixels/shells into Healpix map
-  void write_grid(Breg *, Brnd *, FEreg *, FErnd *, CRE *, Grid_breg *,
-                  Grid_brnd *, Grid_fereg *, Grid_fernd *, Grid_cre *,
-                  Grid_int *, const Param *) const;
+  // assmebling pixels/shells into sky map
+  void write_grid(Breg *, Brnd *, TEreg *, TErnd *, CRE *, Grid_breg *,
+                  Grid_brnd *, Grid_tereg *, Grid_ternd *, Grid_cre *,
+                  Grid_obs *, const Param *) const;
+#ifdef NDEBUG
+protected:
+#endif
+  // Carteisan unit vector of given LoS direction
+  // 1st argument: polar angle (in rad)
+  // 2nd argument: azimuthal angle (in rad)
+  hamvec<3, double> los_versor(const double &, const double &) const;
+  // perpendicular projection of a vector wrt LoS direction
+  // 1st argument: vector in Cartesian frame
+  // 2nd argument: polar angle (in rad)
+  // 3rd argument: azimuthal angle (in rad)
+  double los_perproj(const hamvec<3, double> &, const double &,
+                     const double &) const;
+  // (signed) parallel projection of a vector wrt LoS direction
+  // 1st argument: vector in Cartesian frame
+  // 2nd argument: polar angle (in rad)
+  // 3rd argument: azimuthal angle (in rad)
+  double los_parproj(const hamvec<3, double> &, const double &,
+                     const double &) const;
+  // synchrotron emission intrinsic polarization angle (in rad)
+  // 1st argument: magnetic field in Cartesian frame
+  // 2nd argument: polar angle (in rad) of LOS direction
+  // 3rd argument: azimuthal angle (in rad) of LOS direction
+  // use with caution, since vector can be parallel to LoS direction
+  double sync_ipa(const hamvec<3, double> &, const double &,
+                  const double &) const;
+  // converting brightness temp into thermal temp with T_0 = 2.725K,
+  // Prog.Theor.Exp.Phys. (2014) 2014 (6): 06B109.
+  // 1st argument: brightness temperature
+  // 2nd argument: observational frequency
+  double temp_convert(const double &, const double &) const;
 #ifdef NDEBUG
 private:
 #endif
   // to hold temporary information of observables
   struct struct_observables {
-    double Is, Qs, Us;
+    double is, qs, us;
     double fd;
     double dm;
     double ff;
@@ -49,8 +75,8 @@ private:
   };
   // conduct LOS integration in one pixel at given shell
   void radial_integration(struct_shell *, pointing &, struct_observables &,
-                          Breg *, Brnd *, FEreg *, FErnd *, CRE *, Grid_breg *,
-                          Grid_brnd *, Grid_fereg *, Grid_fernd *, Grid_cre *,
+                          Breg *, Brnd *, TEreg *, TErnd *, CRE *, Grid_breg *,
+                          Grid_brnd *, Grid_tereg *, Grid_ternd *, Grid_cre *,
                           const Param *) const;
   // general upper boundary check
   // return false if 1st argument is larger than 2nd
@@ -64,11 +90,10 @@ private:
                                            const double &limit) const {
     return (value < limit);
   }
-  // assembling shell_ref
-  // assembling shell_ref structure
+  // assembling ``struct_shell``
   // this part may introduce precision loss
-  // wrap into a subroutine for unit-test
   void assemble_shell_ref(struct_shell *, const Param *,
                           const std::size_t &) const;
 };
+
 #endif

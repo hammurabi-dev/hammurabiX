@@ -25,9 +25,9 @@
     <!-- CRE field resolution defined in './CRE/Numeric' -->
     <fieldio>
         <breg read="0" write="0" filename="breg.bin"/> <!-- regular magnetic field (optional) -->
-        <brnd read="0" write="0" filename="brnd.bin"/> <!-- turbulent magnetic field (optional) -->
-        <fereg read="0" write="0" filename="fereg.bin"/> <!-- free/thermal electron field (optional) -->
-        <fernd read="0" write="0" filename="fernd.bin"/> <!-- turbulent free electron field (optional) -->
+        <brnd read="0" write="0" filename="brnd.bin"/> <!-- random magnetic field (optional) -->
+        <tereg read="0" write="0" filename="tereg.bin"/> <!-- thermal electron field (optional) -->
+        <ternd read="0" write="0" filename="ternd.bin"/> <!-- random thermal electron field (optional) -->
         <cre read="0" write="0" filename="cre.bin"/> <!-- cosmic ray electron field (optional) -->
     </fieldio>
     <!-- field & observable grid -->
@@ -67,7 +67,7 @@
             <z_max value="4.0"/> <!-- kpc (default) -->
         </box_brnd>
         <!-- regular FE field grid -->
-        <box_fereg> <!-- (optional) if no breg I/O -->
+        <box_tereg> <!-- (optional) if no breg I/O -->
             <!-- grid vertex size -->
             <nx value="800"/> <!-- (default) -->
             <ny value="800"/> <!-- (default) -->
@@ -79,9 +79,9 @@
             <y_max value="20.0"/> <!-- kpc (default) -->
             <z_min value="-4.0"/> <!-- kpc (default) -->
             <z_max value="4.0"/> <!-- kpc (default) -->
-        </box_fereg>
+        </box_tereg>
         <!-- trubelent FE field grid -->
-        <box_fernd> <!-- (optional) if no fernd I/O AND no internal fernd model -->
+        <box_ternd> <!-- (optional) if no ternd I/O AND no internal ternd model -->
             <!-- grid vertex size -->
             <nx value="800"/> <!-- (default) -->
             <ny value="800"/> <!-- (default) -->
@@ -93,7 +93,7 @@
             <y_max value="20.0"/> <!-- kpc (default) -->
             <z_min value="-4.0"/> <!-- kpc (default) -->
             <z_max value="4.0"/> <!-- kpc (default) -->
-        </box_fernd>
+        </box_ternd>
         <!-- CRE field grid, shared by both regular and turbulent fields -->
         <box_cre> <!-- (optional) if no cre I/O -->
             <!-- grid vertex size -->
@@ -128,23 +128,23 @@
                     <nside_sim value="64"/>
                 </manual>
             </layer>
-            <!-- helio/observer-centric radial limit -->
-            <ec_r_min value="0.0"/> <!-- kpc (default) -->
-            <ec_r_max value="30.0"/> <!-- kpc (default) -->
+            <!-- observer-centric radial limit -->
+            <oc_r_min value="0.0"/> <!-- kpc (default) -->
+            <oc_r_max value="30.0"/> <!-- kpc (default) -->
             <!-- galactic-centric radial limit -->
             <gc_r_min value="0.0"/> <!-- kpc (default) -->
             <gc_r_max value="20.0"/> <!-- kpc (default) -->
             <!-- galactic-centric height limit -->
             <gc_z_min value="-10.0"/> <!-- kpc (default) -->
             <gc_z_max value="10.0"/> <!-- kpc (default) -->
-            <!-- radial integration resolution -->
-            <ec_r_res value="0.01"/> <!-- kpc (default) -->
-            <!-- galactic latitude limit, both poles -->
-            <lat_min value="-90."/> <!--  (default) -->
-            <lat_max value="90."/> <!--  (default) -->
-            <!-- galactic longitude limit, both poles -->
-            <lon_min value="0."/> <!--  (default) -->
-            <lon_max value="360."/> <!--  (default) -->
+            <!-- observer-centric radial integratal resolution -->
+            <oc_r_res value="0.01"/> <!-- kpc (default) -->
+            <!-- observer-centric latitude limit, both poles -->
+            <oc_lat_min value="-90."/> <!--  (default) -->
+            <oc_lat_max value="90."/> <!--  (default) -->
+            <!-- observer-centric longitude limit, both poles -->
+            <oc_lon_min value="0."/> <!--  (default) -->
+            <oc_lon_max value="360."/> <!--  (default) -->
         </shell>
     </grid>
     <!-- magnetic fields -->
@@ -246,8 +246,8 @@
             </local>
         </random>
     </magneticfield>
-    <!-- free electron field -->
-    <freeelectron>
+    <!-- thermal electron field -->
+    <thermalelectron>
         <!-- if cue="0", all child elements are opitonal -->
         <regular cue="1" type="unif">
             <!-- YMW16 -->
@@ -344,7 +344,7 @@
                 <r0 value="3.0"/> <!-- kpc -->
             </unif>
         </regular>
-        <!-- random/turbulent free electron -->
+        <!-- random/turbulent thermal electron -->
         <!-- if cue="0", all child elements are opitonal -->
         <random cue="0" type="global" seed="0">
             <!-- global generator -->
@@ -364,7 +364,7 @@
                 <!-- to be implemented -->
             </local>
         </random>
-    </freeelectron>
+    </thermalelectron>
     <!-- analytic CRE -->
     <!-- flux norm comes with unit [GeV m^2 s Sr]^-1 -->
     <!-- if cue="0", all child elements are opitonal -->

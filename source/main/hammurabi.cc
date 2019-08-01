@@ -1,19 +1,17 @@
-#include <breg.h>
-#include <brnd.h>
-#include <cre.h>
 #include <cstdlib>
-#include <fereg.h>
-#include <fernd.h>
-#include <grid.h>
-#include <integrator.h>
 #include <iostream>
 #include <memory>
-#include <namespace_toolkit.h>
-#include <param.h>
 #include <string>
-#include <timer.h>
-#include <tinyxml2.h>
 #include <vector>
+
+#include <bfield.h>
+#include <crefield.h>
+#include <grid.h>
+#include <integrator.h>
+#include <param.h>
+#include <tefield.h>
+#include <timer.h>
+#include <toolkit.h>
 
 class Pipeline {
 public:
@@ -21,24 +19,24 @@ public:
   Pipeline(const std::string &);
   virtual ~Pipeline() = default;
   void assemble_grid();
-  void assemble_fereg();
+  void assemble_tereg();
   void assemble_breg();
-  void assemble_fernd();
+  void assemble_ternd();
   void assemble_brnd();
   void assemble_cre();
   void assemble_obs();
 
 private:
   std::unique_ptr<Param> par;
-  std::unique_ptr<Grid_fereg> grid_fereg;
+  std::unique_ptr<Grid_tereg> grid_tereg;
   std::unique_ptr<Grid_breg> grid_breg;
   std::unique_ptr<Grid_brnd> grid_brnd;
-  std::unique_ptr<Grid_fernd> grid_fernd;
+  std::unique_ptr<Grid_ternd> grid_ternd;
   std::unique_ptr<Grid_cre> grid_cre;
-  std::unique_ptr<Grid_int> grid_int;
-  std::unique_ptr<FEreg> fereg;
+  std::unique_ptr<Grid_obs> grid_obs;
+  std::unique_ptr<TEreg> tereg;
   std::unique_ptr<Breg> breg;
-  std::unique_ptr<FErnd> fernd;
+  std::unique_ptr<TErnd> ternd;
   std::unique_ptr<Brnd> brnd;
   std::unique_ptr<CRE> cre;
   std::unique_ptr<Integrator> intobj;
@@ -50,39 +48,39 @@ Pipeline::Pipeline(const std::string &filename) {
 }
 
 void Pipeline::assemble_grid() {
-  grid_fereg = std::make_unique<Grid_fereg>(par.get());
+  grid_tereg = std::make_unique<Grid_tereg>(par.get());
   grid_breg = std::make_unique<Grid_breg>(par.get());
   grid_brnd = std::make_unique<Grid_brnd>(par.get());
-  grid_fernd = std::make_unique<Grid_fernd>(par.get());
+  grid_ternd = std::make_unique<Grid_ternd>(par.get());
   grid_cre = std::make_unique<Grid_cre>(par.get());
-  grid_int = std::make_unique<Grid_int>(par.get());
+  grid_obs = std::make_unique<Grid_obs>(par.get());
 }
 
-// regular FE field
-void Pipeline::assemble_fereg() {
-  if (!par->grid_fereg.build_permission) {
-    fereg = std::make_unique<FEreg>();
+// regular thermel electron field
+void Pipeline::assemble_tereg() {
+  if (!par->grid_tereg.build_permission) {
+    tereg = std::make_unique<TEreg>();
     return;
   }
   // if import from file, no need to build specific fe class
-  if (par->grid_fereg.read_permission) {
-    grid_fereg->import_grid(par.get());
-    fereg = std::make_unique<FEreg>();
-  } else if (par->fereg_type == "ymw16") {
-    fereg = std::make_unique<FEreg_ymw16>();
-  } else if (par->fereg_type == "unif") {
-    fereg = std::make_unique<FEreg_unif>();
+  if (par->grid_tereg.read_permission) {
+    grid_tereg->import_grid(par.get());
+    tereg = std::make_unique<TEreg>();
+  } else if (par->tereg_type == "ymw16") {
+    tereg = std::make_unique<TEreg_ymw16>();
+  } else if (par->tereg_type == "unif") {
+    tereg = std::make_unique<TEreg_unif>();
   } else
-    throw std::runtime_error("unsupported fereg model");
+    throw std::runtime_error("unsupported tereg model");
   // if export to file
-  if (par->grid_fereg.write_permission) {
+  if (par->grid_tereg.write_permission) {
     // write out binary file and exit
-    fereg->write_grid(par.get(), grid_fereg.get());
-    grid_fereg->export_grid(par.get());
+    tereg->write_grid(par.get(), grid_tereg.get());
+    grid_tereg->export_grid(par.get());
   }
 }
 
-// regular B field, must before random B field
+// regular magnetic field
 void Pipeline::assemble_breg() {
   if (!par->grid_breg.build_permission) {
     breg = std::make_unique<Breg>();
@@ -106,31 +104,31 @@ void Pipeline::assemble_breg() {
   }
 }
 
-// random FE field
-void Pipeline::assemble_fernd() {
+// random thermal electron field
+void Pipeline::assemble_ternd() {
   // if import from file, no need to build specific fe_rnd class
-  if (par->grid_fernd.read_permission) {
-    grid_fernd->import_grid(par.get());
-    fernd = std::make_unique<FErnd>();
-  } else if (par->grid_fernd.build_permission) {
-    if (par->fernd_type == "global") {
-      if (par->fernd_method == "dft") {
-        fernd = std::make_unique<FErnd_dft>();
+  if (par->grid_ternd.read_permission) {
+    grid_ternd->import_grid(par.get());
+    ternd = std::make_unique<TErnd>();
+  } else if (par->grid_ternd.build_permission) {
+    if (par->ternd_type == "global") {
+      if (par->ternd_method == "dft") {
+        ternd = std::make_unique<TErnd_dft>();
       }
       // fill grid with random fields
-      fernd->write_grid(par.get(), grid_fernd.get());
+      ternd->write_grid(par.get(), grid_ternd.get());
     } else
       throw std::runtime_error("unsupported brnd model");
   } else {
-    fernd = std::make_unique<FErnd>();
+    ternd = std::make_unique<TErnd>();
   }
   // if export to file
-  if (par->grid_fernd.write_permission) {
-    grid_fernd->export_grid(par.get());
+  if (par->grid_ternd.write_permission) {
+    grid_ternd->export_grid(par.get());
   }
 }
 
-// random B field
+// random magnetic field
 void Pipeline::assemble_brnd() {
   if (par->grid_brnd.read_permission) {
     grid_brnd->import_grid(par.get());
@@ -161,7 +159,7 @@ void Pipeline::assemble_brnd() {
   }
 }
 
-// cre
+// cre flux field
 void Pipeline::assemble_cre() {
   if (par->grid_cre.read_permission) {
     grid_cre->import_grid(par.get());
@@ -184,26 +182,26 @@ void Pipeline::assemble_cre() {
 // LoS integration for observables
 void Pipeline::assemble_obs() {
   intobj = std::make_unique<Integrator>();
-  if (par->grid_int.write_permission) {
-    const auto repeat = par->grid_int.do_sync.size();
+  if (par->grid_obs.write_permission) {
+    const auto repeat = par->grid_obs.do_sync.size();
     for (unsigned int i = 0; i < repeat; ++i) {
       if (i > 0) {
-        par->grid_int.do_dm = false;
-        par->grid_int.do_fd = false;
+        par->grid_obs.do_dm = false;
+        par->grid_obs.do_fd = false;
         // need to rebuild integration grid
-        grid_int->build_grid(par.get());
+        grid_obs->build_grid(par.get());
       }
-      intobj->write_grid(breg.get(), brnd.get(), fereg.get(), fernd.get(),
+      intobj->write_grid(breg.get(), brnd.get(), tereg.get(), ternd.get(),
                          cre.get(), grid_breg.get(), grid_brnd.get(),
-                         grid_fereg.get(), grid_fernd.get(), grid_cre.get(),
-                         grid_int.get(), par.get());
-      grid_int->export_grid(par.get());
+                         grid_tereg.get(), grid_ternd.get(), grid_cre.get(),
+                         grid_obs.get(), par.get());
+      grid_obs->export_grid(par.get());
       // delete obsolete parameters
-      if (par->grid_int.do_sync.back()) {
-        par->grid_int.nside_sync.pop_back();
-        par->grid_int.do_sync.pop_back();
-        par->grid_int.sim_sync_freq.pop_back();
-        par->grid_int.sim_sync_name.pop_back();
+      if (par->grid_obs.do_sync.back()) {
+        par->grid_obs.nside_sync.pop_back();
+        par->grid_obs.do_sync.pop_back();
+        par->grid_obs.sim_sync_freq.pop_back();
+        par->grid_obs.sim_sync_name.pop_back();
       }
     }
   }
@@ -217,9 +215,9 @@ int main(int /*argc*/, char **argv) {
   const std::string input(argv[1]);
   auto run = std::make_unique<Pipeline>(input);
   run->assemble_grid();
-  run->assemble_fereg();
+  run->assemble_tereg();
   run->assemble_breg();
-  run->assemble_fernd();
+  run->assemble_ternd();
   run->assemble_brnd();
   run->assemble_cre();
   run->assemble_obs();
@@ -229,5 +227,3 @@ int main(int /*argc*/, char **argv) {
 #endif
   return EXIT_SUCCESS;
 }
-
-// END

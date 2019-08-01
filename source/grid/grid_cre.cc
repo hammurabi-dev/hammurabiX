@@ -1,3 +1,5 @@
+// cosmic ray electron flux phase-space density field grid
+
 #include <array>
 #include <cassert>
 #include <fstream>
@@ -6,9 +8,7 @@
 #include <string>
 #include <vector>
 
-#include <cgs_units_file.h>
 #include <grid.h>
-#include <namespace_toolkit.h>
 #include <param.h>
 
 Grid_cre::Grid_cre(const Param *par) {
@@ -19,6 +19,7 @@ Grid_cre::Grid_cre(const Param *par) {
 }
 
 void Grid_cre::build_grid(const Param *par) {
+  // allocate phase-space CRE flux
   cre_flux = std::make_unique<double[]>(par->grid_cre.cre_size);
 }
 

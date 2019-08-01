@@ -9,10 +9,13 @@ OPTION(BUILD_SHARED_LIBS "Build shared library" ON)
 OPTION(ENABLE_REPORT "Enable verbose report" ON)
 #-------------- instruction ------------------#
 #
-# make sure your compiler is GNU/INTEL, no CLANG, no way
-# ENABLE_TESTING by default OFF, unless you are as paranoid as our developers
-# ON_DOCKER by defauly ON, we highly recommend docker image for non-HPC tasks
-# BUILD_SHARED_LIB by default ON, unless your IT department sucks
+# make sure your compiler is GNU or INTEL,
+# ENABLE_TESTING by default OFF, unless you are as paranoid as us
+# ENABLE_TIMING is also not necessary for users
+# ON_DOCKER by defauly ON, we highly recommend Docker image for non-HPC tasks
+# but if install manually, switch it off and modify the path hints listed below
+# BUILD_SHARED_LIB by default ON
+# you will be overwhelmed by ENABLE_REPORT, switch it off for non-testing tasks
 # 
 # you have to specify your local paths of external libraries just below here
 # in some special cases you have to modify FIND_PATH/FIND_LIBRARY functions
@@ -31,8 +34,8 @@ OPTION(ENABLE_REPORT "Enable verbose report" ON)
 # complain your issue to J.Wang (jiwang@sissa.it)
 #
 # @ enthusiastic or paranoid developers:
-# we use GoogleTest for tests
-# GoogleTest package is assembled INTO testing modules manually
+# we use Google Test for tests
+# Google Test package is assembled INTO testing modules manually
 # you can either install GoogleTest and cp src dir into install path
 # or just download GoogleTest and specify root dir to GTEST_HINTS
 #--------------------------------------------#
@@ -97,39 +100,39 @@ SET(ALL_LIBRARIES)
 
 # find sources
 SET(SRC_FILES
-	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/breg.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/breg_jaffe.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/breg_wmap.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/breg_unif.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/brnd.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/brnd_es.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/gmf/brnd_mhd.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_jaffe.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_wmap.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_unif.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/b/brnd.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/b/brnd_es.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/b/brnd_mhd.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre_num.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre_ana.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre_unif.cc
 
-	${CMAKE_CURRENT_LIST_DIR}/source/field/fe/fereg.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/fe/fereg_unif.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/fe/fereg_ymw16.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/fe/fernd.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/fe/fernd_dft.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/te/tereg.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/te/tereg_unif.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/te/tereg_ymw16.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/te/ternd.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/te/ternd_dft.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/param/param.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/integrator/integrator.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_int.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_fernd.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_obs.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_tereg.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_breg.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_ternd.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_brnd.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_cre.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_fereg.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_breg.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/tools/tinyxml2.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/tools/namespace_toolkit.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/tools/toolkit.cc
 )
 
 # find HEALPix
@@ -340,18 +343,16 @@ DESTINATION
 # install package
 SET(CMAKE_INSTALL_PREFIX ${INSTALL_ROOT_DIR})
 INSTALL(TARGETS hamx DESTINATION bin)
-INSTALL(FILES 
-	${CMAKE_CURRENT_LIST_DIR}/include/breg.h
-	${CMAKE_CURRENT_LIST_DIR}/include/brnd.h
+INSTALL(FILES
 	${CMAKE_CURRENT_LIST_DIR}/include/cgs_units_file.h
-	${CMAKE_CURRENT_LIST_DIR}/include/cre.h
-	${CMAKE_CURRENT_LIST_DIR}/include/fereg.h
-	${CMAKE_CURRENT_LIST_DIR}/include/fernd.h
+	${CMAKE_CURRENT_LIST_DIR}/include/bfield.h
+	${CMAKE_CURRENT_LIST_DIR}/include/crefield.h
+	${CMAKE_CURRENT_LIST_DIR}/include/tefield.h
 	${CMAKE_CURRENT_LIST_DIR}/include/integrator.h
 	${CMAKE_CURRENT_LIST_DIR}/include/tinyxml2.h
 	${CMAKE_CURRENT_LIST_DIR}/include/timer.h
-	${CMAKE_CURRENT_LIST_DIR}/include/hvec.h
-	${CMAKE_CURRENT_LIST_DIR}/include/namespace_toolkit.h
+	${CMAKE_CURRENT_LIST_DIR}/include/hamvec.h
+	${CMAKE_CURRENT_LIST_DIR}/include/toolkit.h
 	${CMAKE_CURRENT_LIST_DIR}/include/param.h
 	${CMAKE_CURRENT_LIST_DIR}/include/grid.h	
 	DESTINATION include
