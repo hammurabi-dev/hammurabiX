@@ -10,8 +10,11 @@
 #include <healpix_map_fitsio.h>
 #include <pointing.h>
 
+#include <gsl/gsl_sf_gamma.h>
+#include <gsl/gsl_sf_synchrotron.h>
+
 #include <bfield.h>
-#include <cgs_units_file.h>
+#include <cgs_units.h>
 #include <crefield.h>
 #include <grid.h>
 #include <hamvec.h>
@@ -62,7 +65,7 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, TEreg *tereg, TErnd *ternd,
     }
     // setting for radial_integration
     // call auxiliary function assemble_shell_ref
-    this->assemble_shell_ref(shell_ref.get(), par, current_shell);
+    assemble_shell_ref(shell_ref.get(), par, current_shell);
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
@@ -89,37 +92,34 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, TEreg *tereg, TErnd *ternd,
         observables.fd = gobs->fd_map->interpolated_value(ptg);
       }
       // check angular direction boundaries
-      if (this->check_simulation_lower_limit(0.5 * CGS_U_pi - ptg.theta,
-                                             par->grid_obs.oc_lat_min)) {
+      if (check_simulation_lower_limit(0.5 * cgs_pi - ptg.theta,
+                                       par->grid_obs.oc_lat_min)) {
         continue;
       }
-      if (this->check_simulation_upper_limit(0.5 * CGS_U_pi - ptg.theta,
-                                             par->grid_obs.oc_lat_max)) {
+      if (check_simulation_upper_limit(0.5 * cgs_pi - ptg.theta,
+                                       par->grid_obs.oc_lat_max)) {
         continue;
       }
-      if (this->check_simulation_lower_limit(ptg.phi,
-                                             par->grid_obs.oc_lon_min)) {
+      if (check_simulation_lower_limit(ptg.phi, par->grid_obs.oc_lon_min)) {
         continue;
       }
-      if (this->check_simulation_upper_limit(ptg.phi,
-                                             par->grid_obs.oc_lon_max)) {
+      if (check_simulation_upper_limit(ptg.phi, par->grid_obs.oc_lon_max)) {
         continue;
       }
       // core function!
-      this->radial_integration(shell_ref.get(), ptg, observables, breg, brnd,
-                               tereg, ternd, cre, gbreg, gbrnd, gtereg, gternd,
-                               gcre, par);
+      radial_integration(shell_ref.get(), ptg, observables, breg, brnd, tereg,
+                         ternd, cre, gbreg, gbrnd, gtereg, gternd, gcre, par);
       // collect from pixels
       if (par->grid_obs.do_dm) {
         (*gobs->tmp_dm_map)[ipix] = observables.dm;
       }
       if (par->grid_obs.do_sync.back()) {
-        (*gobs->tmp_is_map)[ipix] = this->temp_convert(
-            observables.is, par->grid_obs.sim_sync_freq.back());
-        (*gobs->tmp_qs_map)[ipix] = this->temp_convert(
-            observables.qs, par->grid_obs.sim_sync_freq.back());
-        (*gobs->tmp_us_map)[ipix] = this->temp_convert(
-            observables.us, par->grid_obs.sim_sync_freq.back());
+        (*gobs->tmp_is_map)[ipix] =
+            temp_convert(observables.is, par->grid_obs.sim_sync_freq.back());
+        (*gobs->tmp_qs_map)[ipix] =
+            temp_convert(observables.qs, par->grid_obs.sim_sync_freq.back());
+        (*gobs->tmp_us_map)[ipix] =
+            temp_convert(observables.us, par->grid_obs.sim_sync_freq.back());
       }
       if (par->grid_obs.do_fd or par->grid_obs.do_sync.back()) {
         (*gobs->tmp_fd_map)[ipix] = observables.fd;
@@ -184,48 +184,45 @@ void Integrator::radial_integration(struct_shell *shell_ref, pointing &ptg_in,
   double lambda_square = 0., i2bt_sync = 0., fd_forefactor = 0.;
   if (par->grid_obs.do_sync.back()) {
     // for calculating synchrotron emission
-    lambda_square = (CGS_U_C_light / par->grid_obs.sim_sync_freq.back()) *
-                    (CGS_U_C_light / par->grid_obs.sim_sync_freq.back());
+    lambda_square = (cgs_c_light / par->grid_obs.sim_sync_freq.back()) *
+                    (cgs_c_light / par->grid_obs.sim_sync_freq.back());
     // convert sync intensity(freq) to brightness temperature, Rayleigh-Jeans
     // law
-    i2bt_sync = CGS_U_C_light * CGS_U_C_light /
-                (2. * CGS_U_kB * par->grid_obs.sim_sync_freq.back() *
+    i2bt_sync = cgs_c_light * cgs_c_light /
+                (2. * cgs_kB * par->grid_obs.sim_sync_freq.back() *
                  par->grid_obs.sim_sync_freq.back());
   }
   if (par->grid_obs.do_fd) {
-    fd_forefactor = -(CGS_U_qe * CGS_U_qe * CGS_U_qe) /
-                    (2. * CGS_U_pi * CGS_U_MEC2 * CGS_U_MEC2);
+    fd_forefactor =
+        -(cgs_qe * cgs_qe * cgs_qe) / (2. * cgs_pi * cgs_mec2 * cgs_mec2);
   }
   // radial accumulation
   for (decltype(shell_ref->step) looper = 0; looper < shell_ref->step;
        ++looper) {
     // ec and gc position
-    hamvec<3, double> oc_pos{this->los_versor(THE, PHI) *
-                             shell_ref->dist[looper]};
+    hamvec<3, double> oc_pos{los_versor(THE, PHI) * shell_ref->dist[looper]};
     hamvec<3, double> pos{oc_pos + par->observer};
     // check LoS depth limit
-    if (this->check_simulation_lower_limit(pos.length(),
-                                           par->grid_obs.gc_r_min)) {
+    if (check_simulation_lower_limit(pos.length(), par->grid_obs.gc_r_min)) {
       continue;
     }
-    if (this->check_simulation_upper_limit(pos.length(),
-                                           par->grid_obs.gc_r_max)) {
+    if (check_simulation_upper_limit(pos.length(), par->grid_obs.gc_r_max)) {
       continue;
     }
-    if (this->check_simulation_lower_limit(pos[2], par->grid_obs.gc_z_min)) {
+    if (check_simulation_lower_limit(pos[2], par->grid_obs.gc_z_min)) {
       continue;
     }
-    if (this->check_simulation_upper_limit(pos[2], par->grid_obs.gc_z_max)) {
+    if (check_simulation_upper_limit(pos[2], par->grid_obs.gc_z_max)) {
       continue;
     }
     // regular magnetic field
     hamvec<3, double> B_vec{breg->read_field(pos, par, gbreg)};
     // add random magnetic field
     B_vec += brnd->read_field(pos, par, gbrnd);
-    const double B_par{this->los_parproj(B_vec, THE, PHI)};
+    const double B_par{los_parproj(B_vec, THE, PHI)};
     assert(std::isfinite(B_par));
     // be aware of un-resolved random B_per in calculating emissivity
-    const double B_per{this->los_perproj(B_vec, THE, PHI)};
+    const double B_per{los_perproj(B_vec, THE, PHI)};
     assert(std::isfinite(B_per));
     // thermal electron field
     double te{tereg->read_field(pos, par, gtereg)};
@@ -244,16 +241,16 @@ void Integrator::radial_integration(struct_shell *shell_ref, pointing &ptg_in,
     }
     // Synchrotron emission
     if (par->grid_obs.do_sync.back()) {
-      const double Jtot{cre->read_emissivity_t(pos, par, gcre, B_per) *
+      const double Jtot{sync_emissivity_t(pos, par, cre, gcre, B_per) *
                         shell_ref->delta_d * i2bt_sync};
       // J_pol receives no contribution from unresolved random field
-      const double Jpol{cre->read_emissivity_p(pos, par, gcre, B_per) *
+      const double Jpol{sync_emissivity_p(pos, par, cre, gcre, B_per) *
                         shell_ref->delta_d * i2bt_sync};
       assert(Jtot < 1e30 and Jpol < 1e30 and Jtot >= 0 and Jpol >= 0);
       pixobs.is += Jtot;
       // intrinsic polarization angle, following IAU definition
       const double qui{(inner_shells_fd + pixobs.fd) * lambda_square +
-                       this->sync_ipa(B_vec, THE, PHI)};
+                       sync_ipa(B_vec, THE, PHI)};
       assert(std::isfinite(qui));
       pixobs.qs += std::cos(2. * qui) * Jpol;
       pixobs.us += std::sin(2. * qui) * Jpol;
@@ -272,22 +269,32 @@ void Integrator::assemble_shell_ref(struct_shell *target, const Param *par,
       (target->d_stop / target->delta_d - target->d_start / target->delta_d));
   // get rid of error in the previous step
   target->delta_d = (target->d_stop - target->d_start) / (target->step);
+  target->dist.clear(); // clean cache
   for (std::size_t i = 0; i < target->step; ++i) {
-    target->dist.push_back(target->d_start + i * 0.5 * target->delta_d);
+    target->dist.push_back(target->d_start + (i + 0.5) * target->delta_d);
   }
 #ifdef VERBOSE
   std::cout << "shell reference: " << std::endl
             << "shell No. " << target->shell_num << std::endl
-            << "resolution " << target->delta_d / CGS_U_kpc << " kpc"
-            << std::endl
-            << "d_start " << target->d_start / CGS_U_kpc << " kpc" << std::endl
-            << "d_stop " << target->d_stop / CGS_U_kpc << " kpc" << std::endl
+            << "resolution " << target->delta_d / cgs_kpc << " kpc" << std::endl
+            << "d_start " << target->d_start / cgs_kpc << " kpc" << std::endl
+            << "d_stop " << target->d_stop / cgs_kpc << " kpc" << std::endl
             << "steps " << target->step << std::endl;
 #endif
 }
 
 // calculate synchrotron emission intrinsic polarization angle
 double Integrator::sync_ipa(const hamvec<3, double> &input,
+                            const double &the_ec, const double &phi_ec) const {
+  const hamvec<3, double> sph_unit_v_the(
+      cos(the_ec) * cos(phi_ec), cos(the_ec) * sin(phi_ec), -sin(the_ec));
+  const hamvec<3, double> sph_unit_v_phi(-sin(phi_ec), cos(phi_ec), 0.);
+  // IAU convention
+  return atan2(-sph_unit_v_the.dotprod(input), -sph_unit_v_phi.dotprod(input));
+}
+
+// calculate dust emission intrinsic polarization angle
+double Integrator::dust_ipa(const hamvec<3, double> &input,
                             const double &the_ec, const double &phi_ec) const {
   const hamvec<3, double> sph_unit_v_the(
       cos(the_ec) * cos(phi_ec), cos(the_ec) * sin(phi_ec), -sin(the_ec));
@@ -307,19 +314,161 @@ hamvec<3, double> Integrator::los_versor(const double &the_los,
 double Integrator::los_perproj(const hamvec<3, double> &input,
                                const double &the_los,
                                const double &phi_los) const {
-  return (input.crossprod(this->los_versor(the_los, phi_los))).length();
+  return (input.crossprod(los_versor(the_los, phi_los))).length();
 }
 
 // (signed) parallel projection of a vector wrt LoS direction
 double Integrator::los_parproj(const hamvec<3, double> &input,
                                const double &the_los,
                                const double &phi_los) const {
-  return input.dotprod(this->los_versor(the_los, phi_los));
+  return input.dotprod(los_versor(the_los, phi_los));
 }
 
 // converting brightness temp into thermal temp with T_0 = 2.725K
 double Integrator::temp_convert(const double &temp_br,
                                 const double &freq) const {
-  const double p{CGS_U_h_planck * freq / (CGS_U_kB * 2.725)};
+  const double p{cgs_h_planck * freq / (cgs_kB * 2.725)};
   return temp_br * (exp(p) - 1.) * (exp(p) - 1.) / (p * p * exp(p));
+}
+
+// cre synchrotron J_tot(\nu)
+double Integrator::sync_emissivity_t(const hamvec<3, double> &pos,
+                                     const Param *par, const CRE *cre,
+                                     const Grid_cre *grid,
+                                     const double &Bper) const {
+  double J{0};
+  // calculate from grid
+  if (par->grid_cre.read_permission) {
+    // allocate energy grid
+    std::unique_ptr<double[]> KE = std::make_unique<double[]>(par->grid_cre.nE);
+    // we need F(x[E]) and G(x[E]) in spectral integration
+    std::unique_ptr<double[]> x = std::make_unique<double[]>(par->grid_cre.nE);
+    std::unique_ptr<double[]> beta =
+        std::make_unique<double[]>(par->grid_cre.nE);
+    // consts used in loop, using cgs units
+    const double x_fact{(2. * cgs_mec * cgs_mec2 * cgs_mec2 * 2. * cgs_pi *
+                         par->grid_obs.sim_sync_freq.back()) /
+                        (3. * cgs_qe * Bper)};
+    // KE in cgs units
+    for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE; ++i) {
+      KE[i] = par->grid_cre.E_min * std::exp(i * par->grid_cre.E_fact);
+      x[i] = x_fact / (KE[i] * KE[i]);
+      beta[i] = std::sqrt(1 - cgs_mec2 / KE[i]);
+    }
+    // do energy spectrum integration at given position
+    // unit_factor for DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
+    // n(E,pos) = \phi(E,pos)*(4\pi/\beta*c), the relatin between flux \phi and
+    // density n ref: "Cosmic rays n' particle physics", A3
+    const double fore_factor{4. * cgs_pi * std::sqrt(3.) *
+                             (cgs_qe * cgs_qe * cgs_qe) * std::fabs(Bper) /
+                             (cgs_mec2 * cgs_c_light * cgs_GeV * 100. * cgs_cm *
+                              100. * cgs_cm * cgs_sec)};
+    for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE - 1; ++i) {
+      const double xv{(x[i + 1] + x[i]) / 2.};
+      // avoid underflow in gsl functions
+      if (xv > 100) {
+        continue;
+      }
+      const double dE{std::fabs(KE[i + 1] - KE[i])};
+      // we put beta here
+      const double de{(cre->read_grid(pos, i + 1, par, grid) / beta[i + 1] +
+                       cre->read_grid(pos, i, par, grid) / beta[i]) /
+                      2.};
+      assert(de >= 0);
+      J += gsl_sf_synchrotron_1(xv) * de * dE;
+    }
+    J *= fore_factor;
+  }
+  // calculate from model
+  else {
+    // allocating values to index, norm according to user defined model
+    // user may consider building derived class from CRE_ana
+    const double index{cre->flux_idx(pos, par)};
+    // coefficients which do not attend integration
+    const double norm{cre->flux_norm(pos, par) * std::sqrt(3) *
+                      (cgs_qe * cgs_qe * cgs_qe) * std::fabs(Bper) /
+                      (2. * cgs_mec2)};
+    // synchrotron integration
+    const double A{4. * cgs_mec * cgs_pi * par->grid_obs.sim_sync_freq.back() /
+                   (3. * cgs_qe * std::fabs(Bper))};
+    const double mu{-0.5 * (3. + index)};
+    J = norm * (std::pow(A, 0.5 * (index + 1)) * std::pow(2, mu + 1) *
+                gsl_sf_gamma(0.5 * mu + 7. / 3.) *
+                gsl_sf_gamma(0.5 * mu + 2. / 3.) / (mu + 2.));
+  }
+  // the last 4pi comes from solid-angle integration/deviation,
+  // check eq(6.16) in Ribiki-Lightman's where Power is defined,
+  // we need isotropic power which means we need a 1/4pi factor!
+  return J / (4. * cgs_pi);
+}
+
+// cre synchrotron J_pol(\nu)
+double Integrator::sync_emissivity_p(const hamvec<3, double> &pos,
+                                     const Param *par, const CRE *cre,
+                                     const Grid_cre *grid,
+                                     const double &Bper) const {
+  double J{0};
+  // calculate from grid
+  if (par->grid_cre.read_permission) {
+    // allocate energy grid
+    std::unique_ptr<double[]> KE = std::make_unique<double[]>(par->grid_cre.nE);
+    // we need F(x[E]) and G(x[E]) in spectral integration
+    std::unique_ptr<double[]> x = std::make_unique<double[]>(par->grid_cre.nE);
+    std::unique_ptr<double[]> beta =
+        std::make_unique<double[]>(par->grid_cre.nE);
+    // consts used in loop, using cgs units
+    const double x_fact{(2. * cgs_mec * cgs_mec2 * cgs_mec2 * 2. * cgs_pi *
+                         par->grid_obs.sim_sync_freq.back()) /
+                        (3. * cgs_qe * Bper)};
+    // KE in cgs units
+    for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE; ++i) {
+      KE[i] = par->grid_cre.E_min * std::exp(i * par->grid_cre.E_fact);
+      x[i] = x_fact / (KE[i] * KE[i]);
+      beta[i] = std::sqrt(1 - cgs_mec2 / KE[i]);
+    }
+    // do energy spectrum integration at given position
+    // unit_factor for DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
+    // n(E,pos) = \phi(E,pos)*(4\pi/\beta*c), the relatin between flux \phi and
+    // density n ref: "Cosmic rays n' particle physics", A3
+    const double fore_factor{4. * cgs_pi * std::sqrt(3.) *
+                             (cgs_qe * cgs_qe * cgs_qe) * abs(Bper) /
+                             (cgs_mec2 * cgs_c_light * cgs_GeV * 100. * cgs_cm *
+                              100. * cgs_cm * cgs_sec)};
+    for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE - 1; ++i) {
+      const double xv{(x[i + 1] + x[i]) / 2.};
+      // avoid underflow in gsl functions
+      if (xv > 100) {
+        continue;
+      }
+      const double dE{std::fabs(KE[i + 1] - KE[i])};
+      // we put beta here
+      const double de{(cre->read_grid(pos, i + 1, par, grid) / beta[i + 1] +
+                       cre->read_grid(pos, i, par, grid) / beta[i]) /
+                      2.};
+      assert(de >= 0);
+      J += gsl_sf_synchrotron_2(xv) * de * dE;
+    }
+    J *= fore_factor;
+  }
+  // calculate from model
+  else {
+    // allocating values to index, norm according to user defined model
+    // user may consider building derived class from CRE_ana
+    const double index{cre->flux_idx(pos, par)};
+    // coefficients which do not attend integration
+    const double norm{cre->flux_norm(pos, par) * std::sqrt(3) *
+                      (cgs_qe * cgs_qe * cgs_qe) * std::fabs(Bper) /
+                      (2. * cgs_mec2)};
+    // synchrotron integration
+    const double A{4. * cgs_mec * cgs_pi * par->grid_obs.sim_sync_freq.back() /
+                   (3. * cgs_qe * std::fabs(Bper))};
+    const double mu{-0.5 * (3. + index)};
+    J = norm *
+        (std::pow(A, 0.5 * (index + 1)) * std::pow(2, mu) *
+         gsl_sf_gamma(0.5 * mu + 4. / 3.) * gsl_sf_gamma(0.5 * mu + 2. / 3.));
+  }
+  // the last 4pi comes from solid-angle integration/deviation,
+  // check eq(6.16) in Ribiki-Lightman's where Power is defined,
+  // we need isotropic power which means we need a 1/4pi factor!
+  return J / (4. * cgs_pi);
 }

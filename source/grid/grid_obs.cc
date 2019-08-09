@@ -12,7 +12,7 @@
 #include <fitsio.h>
 #include <healpix_map_fitsio.h>
 
-#include <cgs_units_file.h>
+#include <cgs_units.h>
 #include <grid.h>
 #include <param.h>
 
@@ -49,7 +49,7 @@ void Grid_obs::build_grid(const Param *par) {
 void Grid_obs::export_grid(const Param *par) {
   if (par->grid_obs.do_dm) {
     // in units pc/cm^3, conventional units
-    dm_map->Scale(CGS_U_ccm / CGS_U_pc);
+    dm_map->Scale(cgs_ccm / cgs_pc);
     fitshandle out_dm;
     if (std::ifstream(par->grid_obs.sim_dm_name.c_str())) {
       remove(par->grid_obs.sim_dm_name.c_str());
@@ -70,7 +70,7 @@ void Grid_obs::export_grid(const Param *par) {
   }
   if (par->grid_obs.do_fd) {
     // FD units is rad*m^(-2) in our calculation
-    fd_map->Scale(CGS_U_m * CGS_U_m);
+    fd_map->Scale(cgs_m * cgs_m);
     fitshandle out_fd;
     if (std::ifstream(par->grid_obs.sim_fd_name.c_str())) {
       remove(par->grid_obs.sim_fd_name.c_str());

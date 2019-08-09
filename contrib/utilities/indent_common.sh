@@ -32,8 +32,8 @@
 export DEAL_II_CLANG_FORMAT="${DEAL_II_CLANG_FORMAT:-clang-format}"
 
 checks() {
-  if test ! -d source -o ! -d include -o ! -d examples ; then
-    echo "*** This script must be run from the top-level directory of deal.II."
+  if test ! -d source -o ! -d include ; then
+    echo "*** This script must be run from the top-level directory"
     exit 1
   fi
 

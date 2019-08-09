@@ -344,7 +344,7 @@ DESTINATION
 SET(CMAKE_INSTALL_PREFIX ${INSTALL_ROOT_DIR})
 INSTALL(TARGETS hamx DESTINATION bin)
 INSTALL(FILES
-	${CMAKE_CURRENT_LIST_DIR}/include/cgs_units_file.h
+	${CMAKE_CURRENT_LIST_DIR}/include/cgs_units.h
 	${CMAKE_CURRENT_LIST_DIR}/include/bfield.h
 	${CMAKE_CURRENT_LIST_DIR}/include/crefield.h
 	${CMAKE_CURRENT_LIST_DIR}/include/tefield.h
@@ -352,6 +352,7 @@ INSTALL(FILES
 	${CMAKE_CURRENT_LIST_DIR}/include/tinyxml2.h
 	${CMAKE_CURRENT_LIST_DIR}/include/timer.h
 	${CMAKE_CURRENT_LIST_DIR}/include/hamvec.h
+	${CMAKE_CURRENT_LIST_DIR}/include/hampixp.h
 	${CMAKE_CURRENT_LIST_DIR}/include/toolkit.h
 	${CMAKE_CURRENT_LIST_DIR}/include/param.h
 	${CMAKE_CURRENT_LIST_DIR}/include/grid.h	

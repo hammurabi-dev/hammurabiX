@@ -1,107 +1,62 @@
 #include <array>
 #include <cassert>
 #include <cmath>
-#include <memory>
 #include <vector>
 
-#include <gsl/gsl_sf_gamma.h>
-#include <gsl/gsl_sf_synchrotron.h>
-
-#include <cgs_units_file.h>
 #include <crefield.h>
 #include <grid.h>
 #include <hamvec.h>
 #include <param.h>
+#include <toolkit.h>
 
-// numerical CRE flux
-// J_tot(\nu)
-double CRE_num::read_emissivity_t(const hamvec<3, double> &pos,
-                                  const Param *par, const Grid_cre *grid,
-                                  const double &Bper) const {
-  double J{0.};
-  assert(par->grid_cre.read_permission);
-  // allocate energy grid
-  std::unique_ptr<double[]> KE = std::make_unique<double[]>(par->grid_cre.nE);
-  // we need F(x[E]) and G(x[E]) in spectral integration
-  std::unique_ptr<double[]> x = std::make_unique<double[]>(par->grid_cre.nE);
-  std::unique_ptr<double[]> beta = std::make_unique<double[]>(par->grid_cre.nE);
-  // consts used in loop, using cgs units
-  const double x_fact{(2. * CGS_U_MEC * CGS_U_MEC2 * CGS_U_MEC2 * 2. *
-                       CGS_U_pi * par->grid_obs.sim_sync_freq.back()) /
-                      (3. * CGS_U_qe * Bper)};
-  // KE in cgs units
-  for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE; ++i) {
-    KE[i] = par->grid_cre.E_min * std::exp(i * par->grid_cre.E_fact);
-    x[i] = x_fact / (KE[i] * KE[i]);
-    beta[i] = std::sqrt(1 - CGS_U_MEC2 / KE[i]);
+double CRE_num::read_grid(const hamvec<3, double> &pos, const std::size_t &Eidx,
+                          const Param *par, const Grid_cre *grid) const {
+  // trilinear interpolation
+  double tmp{(par->grid_cre.nx - 1) * (pos[0] - par->grid_cre.x_min) /
+             (par->grid_cre.x_max - par->grid_cre.x_min)};
+  if (tmp <= 0 or tmp >= par->grid_cre.nx - 1) {
+    return 0.;
   }
-  // do energy spectrum integration at given position
-  // unit_factor for DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
-  // n(E,pos) = \phi(E,pos)*(4\pi/\beta*c), the relatin between flux \phi and
-  // density n ref: "Cosmic rays n' particle physics", A3
-  const double fore_factor{4. * CGS_U_pi * std::sqrt(3.) *
-                           (CGS_U_qe * CGS_U_qe * CGS_U_qe) * std::fabs(Bper) /
-                           (CGS_U_MEC2 * CGS_U_C_light * CGS_U_GeV * 100. *
-                            CGS_U_cm * 100. * CGS_U_cm * CGS_U_sec)};
-  for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE - 1; ++i) {
-    const double xv{(x[i + 1] + x[i]) / 2.};
-    // avoid underflow in gsl functions
-    if (xv > 100) {
-      continue;
-    }
-    const double dE{std::fabs(KE[i + 1] - KE[i])};
-    // we put beta here
-    const double de{(read_grid(i + 1, pos, par, grid) / beta[i + 1] +
-                     read_grid(i, pos, par, grid) / beta[i]) /
-                    2.};
-    assert(de >= 0);
-    J += gsl_sf_synchrotron_1(xv) * de * dE;
+  decltype(par->grid_cre.nx) xl{(std::size_t)std::floor(tmp)};
+  const double xd{tmp - xl};
+  tmp = (par->grid_cre.ny - 1) * (pos[1] - par->grid_cre.y_min) /
+        (par->grid_cre.y_max - par->grid_cre.y_min);
+  if (tmp <= 0 or tmp >= par->grid_cre.ny - 1) {
+    return 0.;
   }
-  return fore_factor * J / (4. * CGS_U_pi);
-}
-
-// J_pol(\nu)
-double CRE_num::read_emissivity_p(const hamvec<3, double> &pos,
-                                  const Param *par, const Grid_cre *grid,
-                                  const double &Bper) const {
-  double J{0.};
-  assert(par->grid_cre.read_permission);
-  // allocate energy grid
-  std::unique_ptr<double[]> KE = std::make_unique<double[]>(par->grid_cre.nE);
-  // we need F(x[E]) and G(x[E]) in spectral integration
-  std::unique_ptr<double[]> x = std::make_unique<double[]>(par->grid_cre.nE);
-  std::unique_ptr<double[]> beta = std::make_unique<double[]>(par->grid_cre.nE);
-  // consts used in loop, using cgs units
-  const double x_fact{(2. * CGS_U_MEC * CGS_U_MEC2 * CGS_U_MEC2 * 2. *
-                       CGS_U_pi * par->grid_obs.sim_sync_freq.back()) /
-                      (3. * CGS_U_qe * Bper)};
-  // KE in cgs units
-  for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE; ++i) {
-    KE[i] = par->grid_cre.E_min * std::exp(i * par->grid_cre.E_fact);
-    x[i] = x_fact / (KE[i] * KE[i]);
-    beta[i] = std::sqrt(1 - CGS_U_MEC2 / KE[i]);
+  decltype(par->grid_cre.nx) yl{(std::size_t)std::floor(tmp)};
+  const double yd{tmp - yl};
+  tmp = (par->grid_cre.nz - 1) * (pos[2] - par->grid_cre.z_min) /
+        (par->grid_cre.z_max - par->grid_cre.z_min);
+  if (tmp <= 0 or tmp >= par->grid_cre.nz - 1) {
+    return 0.;
   }
-  // do energy spectrum integration at given position
-  // unit_factor for DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
-  // n(E,pos) = \phi(E,pos)*(4\pi/\beta*c), the relatin between flux \phi and
-  // density n ref: "Cosmic rays n' particle physics", A3
-  const double fore_factor{4. * CGS_U_pi * std::sqrt(3.) *
-                           (CGS_U_qe * CGS_U_qe * CGS_U_qe) * abs(Bper) /
-                           (CGS_U_MEC2 * CGS_U_C_light * CGS_U_GeV * 100. *
-                            CGS_U_cm * 100. * CGS_U_cm * CGS_U_sec)};
-  for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE - 1; ++i) {
-    const double xv{(x[i + 1] + x[i]) / 2.};
-    // avoid underflow in gsl functions
-    if (xv > 100) {
-      continue;
-    }
-    const double dE{std::fabs(KE[i + 1] - KE[i])};
-    // we put beta here
-    const double de{(read_grid(i + 1, pos, par, grid) / beta[i + 1] +
-                     read_grid(i, pos, par, grid) / beta[i]) /
-                    2.};
-    assert(de >= 0);
-    J += gsl_sf_synchrotron_2(xv) * de * dE;
-  }
-  return fore_factor * J / (4. * CGS_U_pi);
+  decltype(par->grid_cre.nx) zl{(std::size_t)std::floor(tmp)};
+  const double zd{tmp - zl};
+  assert(xd >= 0 and yd >= 0 and zd >= 0 and xd < 1 and yd < 1 and zd < 1);
+  std::size_t idx1{toolkit::index4d(par->grid_cre.nE, par->grid_cre.nx,
+                                    par->grid_cre.ny, par->grid_cre.nz, Eidx,
+                                    xl, yl, zl)};
+  std::size_t idx2{toolkit::index4d(par->grid_cre.nE, par->grid_cre.nx,
+                                    par->grid_cre.ny, par->grid_cre.nz, Eidx,
+                                    xl, yl, zl + 1)};
+  const double i1{grid->cre_flux[idx1] * (1. - zd) + grid->cre_flux[idx2] * zd};
+  idx1 = toolkit::index4d(par->grid_cre.nE, par->grid_cre.nx, par->grid_cre.ny,
+                          par->grid_cre.nz, Eidx, xl, yl + 1, zl);
+  idx2 = toolkit::index4d(par->grid_cre.nE, par->grid_cre.nx, par->grid_cre.ny,
+                          par->grid_cre.nz, Eidx, xl, yl + 1, zl + 1);
+  const double i2{grid->cre_flux[idx1] * (1 - zd) + grid->cre_flux[idx2] * zd};
+  idx1 = toolkit::index4d(par->grid_cre.nE, par->grid_cre.nx, par->grid_cre.ny,
+                          par->grid_cre.nz, Eidx, xl + 1, yl, zl);
+  idx2 = toolkit::index4d(par->grid_cre.nE, par->grid_cre.nx, par->grid_cre.ny,
+                          par->grid_cre.nz, Eidx, xl + 1, yl, zl + 1);
+  const double j1{grid->cre_flux[idx1] * (1 - zd) + grid->cre_flux[idx2] * zd};
+  idx1 = toolkit::index4d(par->grid_cre.nE, par->grid_cre.nx, par->grid_cre.ny,
+                          par->grid_cre.nz, Eidx, xl + 1, yl + 1, zl);
+  idx2 = toolkit::index4d(par->grid_cre.nE, par->grid_cre.nx, par->grid_cre.ny,
+                          par->grid_cre.nz, Eidx, xl + 1, yl + 1, zl + 1);
+  const double j2{grid->cre_flux[idx1] * (1 - zd) + grid->cre_flux[idx2] * zd};
+  const double w1{i1 * (1 - yd) + i2 * yd};
+  const double w2{j1 * (1 - yd) + j2 * yd};
+  return w1 * (1 - xd) + w2 * xd;
 }

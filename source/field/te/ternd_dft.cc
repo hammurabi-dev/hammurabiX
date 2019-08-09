@@ -5,7 +5,7 @@
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 
-#include <cgs_units_file.h>
+#include <cgs_units.h>
 #include <grid.h>
 #include <hamvec.h>
 #include <param.h>
@@ -18,7 +18,7 @@ double TErnd_dft::spectrum(const double &k, const Param *par) const {
   else
     return par->ternd_dft.rms *
            std::pow(k / par->ternd_dft.k0, par->ternd_dft.a0) /
-           (4 * CGS_U_pi * k * k);
+           (4 * cgs_pi * k * k);
 }
 
 double TErnd_dft::spatial_profile(const hamvec<3, double> &pos,
@@ -49,7 +49,7 @@ void TErnd_dft::write_grid(const Param *par, Grid_ternd *grid) const {
   const double lz{par->grid_ternd.z_max - par->grid_ternd.z_min};
   // physical k in 1/kpc dimension
   // physical dk^3
-  const double dk3{CGS_U_kpc * CGS_U_kpc * CGS_U_kpc / (lx * ly * lz)};
+  const double dk3{cgs_kpc * cgs_kpc * cgs_kpc / (lx * ly * lz)};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
@@ -59,21 +59,21 @@ void TErnd_dft::write_grid(const Param *par, Grid_ternd *grid) const {
 #else
     auto seed_id = r;
 #endif
-    double kx{CGS_U_kpc * i / lx};
+    double kx{cgs_kpc * i / lx};
     if (i >= (par->grid_ternd.nx + 1) / 2)
-      kx -= CGS_U_kpc * par->grid_ternd.nx / lx;
+      kx -= cgs_kpc * par->grid_ternd.nx / lx;
     const size_t idx_lv1{i * par->grid_ternd.ny * par->grid_ternd.nz};
     for (decltype(par->grid_ternd.ny) j = 0; j < par->grid_ternd.ny; ++j) {
-      double ky{CGS_U_kpc * j / ly};
+      double ky{cgs_kpc * j / ly};
       if (j >= (par->grid_ternd.ny + 1) / 2)
-        ky -= CGS_U_kpc * par->grid_ternd.ny / ly;
+        ky -= cgs_kpc * par->grid_ternd.ny / ly;
       const size_t idx_lv2{idx_lv1 + j * par->grid_ternd.nz};
       for (decltype(par->grid_ternd.nz) l = 0; l < par->grid_ternd.nz; ++l) {
         if (i == 0 and j == 0 and l == 0)
           continue;
-        double kz{CGS_U_kpc * l / lz};
+        double kz{cgs_kpc * l / lz};
         if (l >= (par->grid_ternd.nz + 1) / 2)
-          kz -= CGS_U_kpc * par->grid_ternd.nz / lz;
+          kz -= cgs_kpc * par->grid_ternd.nz / lz;
         const double ks{std::sqrt(kx * kx + ky * ky + kz * kz)};
         const size_t idx{idx_lv2 + l};
         // since we drop Im part after DFT

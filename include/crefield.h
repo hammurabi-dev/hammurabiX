@@ -28,43 +28,48 @@ public:
   CRE &operator=(const CRE &) = delete;
   CRE &operator=(CRE &&) = delete;
   virtual ~CRE() = default;
-  // get CRE synchrotron total emissivity
-  // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
-  // 3rd argument: CRE grid object
-  // 4th argument: perpendicular component of magnetic field wrt LoS direction
-  virtual double read_emissivity_t(const hamvec<3, double> &, const Param *,
-                                   const Grid_cre *, const double &) const;
-  // get CRE synchrotron polarized emissivity
-  // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
-  // 3rd argument: CRE grid object
-  // 4th argument: perpendicular component of magnetic field wrt LoS direction
-  virtual double read_emissivity_p(const hamvec<3, double> &, const Param *,
-                                   const Grid_cre *, const double &) const;
-  // read CRE flux from grid at given position
-  // (E_index, sylindrical_r, sylindrical_z) with {r,z} in cgs units,
+  // read CRE flux from grid at given spatial position and energy
   // actual value of E is calculated from {E_index,Ek_min,Ek_fact}
-  // in read_emissivity automatically select bi/trilinear interpolation
-  // according to 2+1/3+1 spatial-spectral CRE flux grid
-  // 1st argument: index in energy
-  // 2nd argument: galactic centric Cartesian frame position
+  // 1st argument: galactic centric Cartesian frame position
+  // 2nd argument: index in energy
   // 3rd argument: parameter class object
   // 4th argument: CRE grid class object
-  virtual double read_grid(const std::size_t &, const hamvec<3, double> &,
+  virtual double read_grid(const hamvec<3, double> &, const double &,
                            const Param *, const Grid_cre *) const;
   // fill the grid with CRE flux distribution
   // 1st argument: parameter class object
   // 2nd argument: CRE grid class object
   virtual void write_grid(const Param *, Grid_cre *) const;
-  // calculate CRE flux at given CRE energy,
-  // input CRE energy at CGS units,
+  // get CRE flux at given CRE energy and spatial position
+  // input CRE energy at CGS units
   // output in [GeV m^2 s sr]^-1 units
+  // notice that ``read_field`` function may not be used
+  // in calculating the synchrotron emissivity
+  // 1st argument: galactic centric Cartesian frame position
+  // 2nd argument: CRE energy in GeV
+  // 3rd argument: parameter class object
+  // 4th argument: CRE grid class object
+  virtual double read_field(const hamvec<3, double> &, const double &,
+                            const Param *, const Grid_cre *) const;
+  // assemble CRE phase-space density at given position
+  // 1st argument: galactic centric Cartesian spatial position
+  // 2nd argument: CRE energy in GeV
+  // 3rd argument: parameter class object
+  virtual double write_field(const hamvec<3, double> &, const double &,
+                             const Param *) const;
+  // flux normalization at given position
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
-  // 3rd argument: CRE energy in GeV
-  virtual double flux(const hamvec<3, double> &, const Param *,
-                      const double &) const;
+  virtual double flux_norm(const hamvec<3, double> &, const Param *) const;
+  // flux index at given position
+  // 1st argument: galactic centric Cartesian frame position
+  // 2nd argument: parameter class object
+  virtual double flux_idx(const hamvec<3, double> &, const Param *) const;
+  // spatial CRE flux reprofiling
+  // 1st argument: galactic centric Cartesian frame position
+  // 2nd argument: parameter class object
+  virtual double spatial_profile(const hamvec<3, double> &,
+                                 const Param *) const;
 };
 
 // uniform CRE flux
@@ -76,21 +81,15 @@ public:
   CRE_unif &operator=(const CRE_unif &) = delete;
   CRE_unif &operator=(CRE_unif &&) = delete;
   virtual ~CRE_unif() = default;
-  double read_emissivity_t(const hamvec<3, double> &, const Param *,
-                           const Grid_cre *, const double &) const override;
-  double read_emissivity_p(const hamvec<3, double> &, const Param *,
-                           const Grid_cre *, const double &) const override;
-  double flux(const hamvec<3, double> &, const Param *,
-              const double &) const override;
-#ifdef NDEBUG
-protected:
-#endif
+  double write_field(const hamvec<3, double> &, const double &,
+                     const Param *) const override;
   // flux normalization at given position
-  double flux_norm(const hamvec<3, double> &, const Param *) const;
+  double flux_norm(const hamvec<3, double> &, const Param *) const override;
   // flux index at given position
-  double flux_idx(const hamvec<3, double> &, const Param *) const;
+  double flux_idx(const hamvec<3, double> &, const Param *) const override;
   // spatial CRE flux reprofiling
-  double spatial_profile(const hamvec<3, double> &, const Param *) const;
+  double spatial_profile(const hamvec<3, double> &,
+                         const Param *) const override;
 };
 
 // analytic CRE flux
@@ -102,21 +101,15 @@ public:
   CRE_ana &operator=(const CRE_ana &) = delete;
   CRE_ana &operator=(CRE_ana &&) = delete;
   virtual ~CRE_ana() = default;
-  double read_emissivity_t(const hamvec<3, double> &, const Param *,
-                           const Grid_cre *, const double &) const override;
-  double read_emissivity_p(const hamvec<3, double> &, const Param *,
-                           const Grid_cre *, const double &) const override;
-  double flux(const hamvec<3, double> &, const Param *,
-              const double &) const override;
-#ifdef NDEBUG
-protected:
-#endif
+  double write_field(const hamvec<3, double> &, const double &,
+                     const Param *) const override;
   // flux normalization at given position
-  double flux_norm(const hamvec<3, double> &, const Param *) const;
+  double flux_norm(const hamvec<3, double> &, const Param *) const override;
   // flux index at given position
-  double flux_idx(const hamvec<3, double> &, const Param *) const;
+  double flux_idx(const hamvec<3, double> &, const Param *) const override;
   // spatial CRE flux reprofiling
-  double spatial_profile(const hamvec<3, double> &, const Param *) const;
+  double spatial_profile(const hamvec<3, double> &,
+                         const Param *) const override;
 };
 
 // use numerical CRE flux
@@ -128,10 +121,16 @@ public:
   CRE_num &operator=(const CRE_num &) = delete;
   CRE_num &operator=(CRE_num &&) = delete;
   virtual ~CRE_num() = default;
-  double read_emissivity_t(const hamvec<3, double> &, const Param *,
-                           const Grid_cre *, const double &) const override;
-  double read_emissivity_p(const hamvec<3, double> &, const Param *,
-                           const Grid_cre *, const double &) const override;
+  // overload the base class read_grid function
+  // read CRE flux from grid at given energy index and spatial position
+  // for reading CRE flux at arbitrary energy, use base class read_field
+  // actual value of E is calculated from {E_index,Ek_min,Ek_fact}
+  // 1st argument: galactic centric Cartesian frame position
+  // 2nd argument: index in energy
+  // 3rd argument: parameter class object
+  // 4th argument: CRE grid class object
+  virtual double read_grid(const hamvec<3, double> &, const std::size_t &,
+                           const Param *, const Grid_cre *) const;
 };
 
 #endif

@@ -3,7 +3,7 @@
 #include <omp.h>
 
 #include <bfield.h>
-#include <cgs_units_file.h>
+#include <cgs_units.h>
 #include <fftw3.h>
 #include <grid.h>
 #include <gsl/gsl_integration.h>
@@ -33,7 +33,7 @@ double Brnd_es::anisotropy_ratio(const hamvec<3, double> &, const Param *par,
 double Brnd_es::spectrum(const double &k, const Param *par) const {
   // units fixing, wave vector in 1/kpc units
   const double p0{par->brnd_es.rms * par->brnd_es.rms};
-  const double unit = 1. / (4 * CGS_U_pi * k * k);
+  const double unit = 1. / (4 * cgs_pi * k * k);
   // power laws
   const double band1{double(k < par->brnd_es.k1)};
   const double band2{double(k > par->brnd_es.k1) * double(k < par->brnd_es.k0)};
@@ -64,9 +64,11 @@ hamvec<3, double> Brnd_es::gramschmidt(const hamvec<3, double> &k,
     return b;
   }
   const double inv_k_mod = 1. / k.lengthsq();
-  return hamvec<3, double>{b[0] - k[0] * k.dotprod(b) * inv_k_mod,
-                           b[1] - k[1] * k.dotprod(b) * inv_k_mod,
-                           b[2] - k[2] * k.dotprod(b) * inv_k_mod};
+  // multiply \sqrt(3) for preserving spectral power statistically
+  return hamvec<3, double>{
+      1.73205081 * (b[0] - k[0] * k.dotprod(b) * inv_k_mod),
+      1.73205081 * (b[1] - k[1] * k.dotprod(b) * inv_k_mod),
+      1.73205081 * (b[2] - k[2] * k.dotprod(b) * inv_k_mod)};
 }
 
 void Brnd_es::write_grid(const Param *par, const Breg *breg,
@@ -89,7 +91,7 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
   const double ly{par->grid_brnd.y_max - par->grid_brnd.y_min};
   const double lz{par->grid_brnd.z_max - par->grid_brnd.z_min};
   // physical dk^3
-  const double dk3{CGS_U_kpc * CGS_U_kpc * CGS_U_kpc / (lx * ly * lz)};
+  const double dk3{cgs_kpc * cgs_kpc * cgs_kpc / (lx * ly * lz)};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
@@ -99,23 +101,23 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
 #else
     auto seed_id = r;
 #endif
-    double kx{CGS_U_kpc * i / lx};
+    double kx{cgs_kpc * i / lx};
     if (i >= (par->grid_brnd.nx + 1) / 2)
-      kx -= CGS_U_kpc * par->grid_brnd.nx / lx;
+      kx -= cgs_kpc * par->grid_brnd.nx / lx;
     // it's faster to calculate indeces manually
     const std::size_t idx_lv1{i * par->grid_brnd.ny * par->grid_brnd.nz};
     for (decltype(par->grid_brnd.ny) j = 0; j < par->grid_brnd.ny; ++j) {
-      double ky{CGS_U_kpc * j / ly};
+      double ky{cgs_kpc * j / ly};
       if (j >= (par->grid_brnd.ny + 1) / 2)
-        ky -= CGS_U_kpc * par->grid_brnd.ny / ly;
+        ky -= cgs_kpc * par->grid_brnd.ny / ly;
       const std::size_t idx_lv2{idx_lv1 + j * par->grid_brnd.nz};
       for (decltype(par->grid_brnd.nz) l = 0; l < par->grid_brnd.nz; ++l) {
         // 0th term is fixed to zero in allocation
         if (i == 0 and j == 0 and l == 0)
           continue;
-        double kz{CGS_U_kpc * l / lz};
+        double kz{cgs_kpc * l / lz};
         if (l >= (par->grid_brnd.nz + 1) / 2)
-          kz -= CGS_U_kpc * par->grid_brnd.nz / lz;
+          kz -= cgs_kpc * par->grid_brnd.nz / lz;
         const double ks{std::sqrt(kx * kx + ky * ky + kz * kz)};
         const std::size_t idx{idx_lv2 + l};
         // turbulent power is shared in following pattern
@@ -210,7 +212,7 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
                                       i}; // apply Hermitian symmetry
     if (i == 0)
       i_sym = i;
-    hamvec<3, double> tmp_k{CGS_U_kpc * i / lx, 0, 0};
+    hamvec<3, double> tmp_k{cgs_kpc * i / lx, 0, 0};
     // it's better to calculate indeces manually
     // just for reference, how indeces are calculated
     // const std::size_t idx
@@ -221,15 +223,15 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
     const std::size_t idx_sym_lv1{i_sym * par->grid_brnd.ny *
                                   par->grid_brnd.nz};
     if (i >= (par->grid_brnd.nx + 1) / 2)
-      tmp_k[0] -= CGS_U_kpc * par->grid_brnd.nx / lx;
+      tmp_k[0] -= cgs_kpc * par->grid_brnd.nx / lx;
     for (decltype(par->grid_brnd.ny) j = 0; j < par->grid_brnd.ny; ++j) {
       decltype(par->grid_brnd.ny) j_sym{par->grid_brnd.ny -
                                         j}; // apply Hermitian symmetry
       if (j == 0)
         j_sym = j;
-      tmp_k[1] = CGS_U_kpc * j / ly;
+      tmp_k[1] = cgs_kpc * j / ly;
       if (j >= (par->grid_brnd.ny + 1) / 2)
-        tmp_k[1] -= CGS_U_kpc * par->grid_brnd.ny / ly;
+        tmp_k[1] -= cgs_kpc * par->grid_brnd.ny / ly;
       const std::size_t idx_lv2{idx_lv1 + j * par->grid_brnd.nz};
       const std::size_t idx_sym_lv2{idx_sym_lv1 + j_sym * par->grid_brnd.nz};
       for (decltype(par->grid_brnd.nz) l = 0; l < par->grid_brnd.nz; ++l) {
@@ -237,9 +239,9 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
                                           l}; // apply Hermitian symmetry
         if (l == 0)
           l_sym = l;
-        tmp_k[2] = CGS_U_kpc * l / lz;
+        tmp_k[2] = cgs_kpc * l / lz;
         if (l >= (par->grid_brnd.nz + 1) / 2)
-          tmp_k[2] -= CGS_U_kpc * par->grid_brnd.nz / lz;
+          tmp_k[2] -= cgs_kpc * par->grid_brnd.nz / lz;
         const std::size_t idx{idx_lv2 + l};             // k
         const std::size_t idx_sym{idx_sym_lv2 + l_sym}; //-k
         // reconstruct bx,by,bz from c0,c1,c*0,c*1
@@ -256,7 +258,7 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
         // reassemble c0,c1 from bx,by,bz
         // c0(k) = bx(k) + i by(k)
         // c1(k) = by(k) + i bz(k)
-        // we take only the real part, multiply it by sqrt(2)
+        // we take only the real part of b, multiply it by sqrt(2)
         // cause after G-S process, conjugate symmetry might have been destroied
         // sqrt(2) preserve the total spectral power
         grid->c0[idx][0] = 1.41421356 * free_b_re[0];

@@ -72,5 +72,3 @@ double TErnd::read_grid(const hamvec<3, double> &pos, const Param *par,
 void TErnd::write_grid(const Param *, Grid_ternd *) const {
   throw std::runtime_error("wrong inheritance");
 }
-
-// END

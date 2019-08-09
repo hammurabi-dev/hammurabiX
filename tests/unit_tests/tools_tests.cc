@@ -4,6 +4,7 @@
 #include <gtest/gtest.h>
 
 #include <memory>
+#include <random>
 #include <tinyxml2.h>
 #include <toolkit.h>
 #include <vector>
@@ -11,25 +12,48 @@
 // testing:
 // toolkit::index3d
 TEST(toolkit, index3d) {
-  std::size_t test_idx{53};
-  EXPECT_EQ(toolkit::index3d(0, 5, 4, 2, 3, 1), test_idx);
+  std::default_random_engine rng;
+  std::uniform_int_distribution<int> smp(1, 10);
+
+  const int nx = smp(rng);
+  const int ny = smp(rng);
+  const int nz = smp(rng);
+  const int ix = smp(rng) % nx;
+  const int iy = smp(rng) % ny;
+  const int iz = smp(rng) % nz;
+  EXPECT_EQ(toolkit::index3d(nx, ny, nz, ix, iy, iz),
+            ix * ny * nz + iy * nz + iz);
 }
 
 // testing:
 // toolkit::index4d
 TEST(toolkit, index4d) {
-  std::size_t test_idx{461};
-  EXPECT_EQ(toolkit::index4d(0, 4, 7, 3, 5, 1, 6, 2), test_idx);
+  std::default_random_engine rng;
+  std::uniform_int_distribution<int> smp(1, 10);
+
+  const int ne = smp(rng);
+  const int nx = smp(rng);
+  const int ny = smp(rng);
+  const int nz = smp(rng);
+  const int ie = smp(rng) % ne;
+  const int ix = smp(rng) % nx;
+  const int iy = smp(rng) % ny;
+  const int iz = smp(rng) % nz;
+  EXPECT_EQ(toolkit::index4d(ne, nx, ny, nz, ie, ix, iy, iz),
+            ie * nx * ny * nz + ix * ny * nz + iy * nz + iz);
 }
 
 // testing:
 // toolkit::mean
 TEST(toolkit, mean) {
-  const double test_array[3] = {3, 4, 5};
-  EXPECT_DOUBLE_EQ(toolkit::mean(test_array, 3), 4.);
+  std::default_random_engine rng;
+  std::uniform_real_distribution<double> smp(0.0, 1.0);
 
-  const std::vector<double> test_vector{3, 4, 5};
-  EXPECT_DOUBLE_EQ(toolkit::mean(test_vector), 4.);
+  const double arr[3] = {smp(rng), smp(rng), smp(rng)};
+  EXPECT_DOUBLE_EQ(toolkit::mean(arr, 3), (arr[0] + arr[1] + arr[2]) / 3.);
+
+  const std::vector<double> vec{smp(rng), smp(rng), smp(rng)};
+  EXPECT_DOUBLE_EQ(toolkit::mean(vec), (vec[0] + vec[1] + vec[2]) / 3.);
 }
 
 // testing:

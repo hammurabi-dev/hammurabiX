@@ -68,8 +68,7 @@ double TEreg::read_grid(const hamvec<3, double> &pos, const Param *par,
   const double j2{grid->te[idx1] * (1 - zd) + grid->te[idx2] * zd};
   const double w1{i1 * (1 - yd) + i2 * yd};
   const double w2{j1 * (1 - yd) + j2 * yd};
-  const double te{w1 * (1 - xd) + w2 * xd};
-  return te;
+  return w1 * (1 - xd) + w2 * xd;
 }
 
 void TEreg::write_grid(const Param *par, Grid_tereg *grid) const {
@@ -92,5 +91,3 @@ void TEreg::write_grid(const Param *par, Grid_tereg *grid) const {
     }
   }
 }
-
-// END

@@ -2,7 +2,6 @@
 #include <cmath>
 
 #include <bfield.h>
-#include <cgs_units_file.h>
 #include <grid.h>
 #include <hamvec.h>
 #include <param.h>
@@ -89,8 +88,7 @@ hamvec<3, double> Breg::read_grid(const hamvec<3, double> &pos,
   const hamvec<3, double> w1{i1 * (1. - yd) + i2 * yd};
   const hamvec<3, double> w2{j1 * (1. - yd) + j2 * yd};
   // interpolate along x direction
-  const hamvec<3, double> bvec{w1 * (1. - xd) + w2 * xd};
-  return bvec;
+  return w1 * (1. - xd) + w2 * xd;
 }
 
 void Breg::write_grid(const Param *par, Grid_breg *grid) const {

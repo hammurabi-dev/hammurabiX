@@ -43,11 +43,36 @@ protected:
   double los_parproj(const hamvec<3, double> &, const double &,
                      const double &) const;
   // synchrotron emission intrinsic polarization angle (in rad)
+  // check Rybicki & Lightman Sec.6.5 'polarization of synchrotron radiation'
   // 1st argument: magnetic field in Cartesian frame
   // 2nd argument: polar angle (in rad) of LOS direction
   // 3rd argument: azimuthal angle (in rad) of LOS direction
   // use with caution, since vector can be parallel to LoS direction
   double sync_ipa(const hamvec<3, double> &, const double &,
+                  const double &) const;
+  // synchrotron total emissivity calculator
+  // 1st argument: galactic centric Cartesian frame position
+  // 2nd argument: parameter class object
+  // 3rd argument: CRE object
+  // 4th argument: CRE grid object
+  // 5th argument: perpendicular component of magnetic field wrt LoS direction
+  double sync_emissivity_t(const hamvec<3, double> &, const Param *,
+                           const CRE *, const Grid_cre *, const double &) const;
+  // synchrotron polarized emissivity calculator
+  // 1st argument: galactic centric Cartesian frame position
+  // 2nd argument: parameter class object
+  // 3rd argument: CRE object
+  // 4th argument: CRE grid object
+  // 5th argument: perpendicular component of magnetic field wrt LoS direction
+  double sync_emissivity_p(const hamvec<3, double> &, const Param *,
+                           const CRE *, const Grid_cre *, const double &) const;
+  // dust emission intrinsic polarization angle (in rad)
+  // check Planck XX, A&A 576, A105 (2015)
+  // 1st argument: magnetic field in Cartesian frame
+  // 2nd argument: polar angle (in rad) of LOS direction
+  // 3rd argument: azimuthal angle (in rad) of LOS direction
+  // use with caution, since vector can be parallel to LoS direction
+  double dust_ipa(const hamvec<3, double> &, const double &,
                   const double &) const;
   // converting brightness temp into thermal temp with T_0 = 2.725K,
   // Prog.Theor.Exp.Phys. (2014) 2014 (6): 06B109.

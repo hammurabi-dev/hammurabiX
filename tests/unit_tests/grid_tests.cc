@@ -1,7 +1,7 @@
-// unit tests for grid interpolation
-// for testing read_grid, we define field with linear relation to coordinates
-// so that an arbitrary position get precisely interpoalted and tested
-// feel free to add more rational testing blocks
+// unit tests for Grid class
+// for testing the ''read_grid'' function
+// we setup field with linear relation to coordinates
+// so that an arbitrary position can be precisely interpoalted and tested
 
 #include <gtest/gtest.h>
 
@@ -283,7 +283,7 @@ TEST(grid, cre_grid) {
   // fill test_grid
   fill_cre_grid(test_par.get(), test_grid.get());
   //
-  auto test_cre = std::make_unique<CRE>();
+  auto test_cre = std::make_unique<CRE_num>();
   // choose an arbitrary position and test read_grid function
   // will be used to obtain a seed for the random number engine
   std::random_device rd;
@@ -296,6 +296,6 @@ TEST(grid, cre_grid) {
   const double E =
       test_par->grid_cre.E_min * std::exp(idxE * test_par->grid_cre.E_fact);
   auto test_c =
-      test_cre->read_grid(idxE, baseline, test_par.get(), test_grid.get());
+      test_cre->read_grid(baseline, idxE, test_par.get(), test_grid.get());
   EXPECT_NEAR(test_c, baseline[0] + baseline[1] + baseline[2] + E, 1.0e-10);
 }
