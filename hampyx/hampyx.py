@@ -364,6 +364,11 @@ class Hampyx(object):
             for key in keychain:
                 path_str += '/' + key
             target = root.find(path_str)
+            # check if (subkey, attrib) already exists
+            for existed in target.findall(subkey):
+                if existed.attrib == attrib:
+                    raise ValueError('repeatitive input %s %s %s' % (keychain, subkey, attrib))
+            # if not, add to the given position
             et.SubElement(target, subkey, attrib)
         elif attrib is None:
             root = self.tree.getroot()
