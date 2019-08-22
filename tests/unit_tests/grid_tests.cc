@@ -296,6 +296,6 @@ TEST(grid, cre_grid) {
   const double E =
       test_par->grid_cre.E_min * std::exp(idxE * test_par->grid_cre.E_fact);
   auto test_c =
-      test_cre->read_grid(baseline, idxE, test_par.get(), test_grid.get());
+      test_cre->read_grid_num(baseline, idxE, test_par.get(), test_grid.get());
   EXPECT_NEAR(test_c, baseline[0] + baseline[1] + baseline[2] + E, 1.0e-10);
 }

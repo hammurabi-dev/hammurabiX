@@ -41,7 +41,7 @@ double Drnd::read_grid(const hamvec<3, double> &pos, const Param *par,
   decltype(par->grid_drnd.nx) zl{(std::size_t)std::floor(tmp)};
   const double zd{tmp - zl};
   assert(xd >= 0 and yd >= 0 and zd >= 0 and xd < 1 and yd < 1 and zd < 1);
-  // trilinear interpolation
+  // linear interpolation
   std::size_t idx1{toolkit::index3d(par->grid_drnd.nx, par->grid_drnd.ny,
                                     par->grid_drnd.nz, xl, yl, zl)};
   std::size_t idx2{toolkit::index3d(par->grid_drnd.nx, par->grid_drnd.ny,

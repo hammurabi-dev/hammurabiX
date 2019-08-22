@@ -341,65 +341,61 @@ double Integrator::sync_emissivity_t(const hamvec<3, double> &pos,
   if (par->grid_cre.read_permission) {
     // allocate energy grid
     std::unique_ptr<double[]> KE = std::make_unique<double[]>(par->grid_cre.nE);
-    // we need F(x[E]) and G(x[E]) in spectral integration
+    // we need F(x[E]) in spectral integration
     std::unique_ptr<double[]> x = std::make_unique<double[]>(par->grid_cre.nE);
     std::unique_ptr<double[]> beta =
         std::make_unique<double[]>(par->grid_cre.nE);
-    // consts used in loop, using cgs units
-    const double x_fact{(2. * cgs_mec * cgs_mec2 * cgs_mec2 * 2. * cgs_pi *
-                         par->grid_obs.sim_sync_freq.back()) /
-                        (3. * cgs_qe * Bper)};
-    // KE in cgs units
+    // consts used for converting E to x, using cgs units
+    const double x_fact{4. * cgs_pi * par->grid_obs.sim_sync_freq.back() *
+                        cgs_mec * cgs_mec2 * cgs_mec2 /
+                        (3. * cgs_qe * std::fabs(Bper))};
+    // KE, x, beta arrays in cgs units
     for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE; ++i) {
       KE[i] = par->grid_cre.E_min * std::exp(i * par->grid_cre.E_fact);
       x[i] = x_fact / (KE[i] * KE[i]);
       beta[i] = std::sqrt(1 - cgs_mec2 / KE[i]);
     }
-    // do energy spectrum integration at given position
-    // unit_factor for DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
-    // n(E,pos) = \phi(E,pos)*(4\pi/\beta*c), the relatin between flux \phi and
-    // density n ref: "Cosmic rays n' particle physics", A3
-    const double fore_factor{4. * cgs_pi * std::sqrt(3.) *
-                             (cgs_qe * cgs_qe * cgs_qe) * std::fabs(Bper) /
-                             (cgs_mec2 * cgs_c_light * cgs_GeV * 100. * cgs_cm *
-                              100. * cgs_cm * cgs_sec)};
+    // spectral integral
     for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE - 1; ++i) {
-      const double xv{(x[i + 1] + x[i]) / 2.};
+      const double xv{0.5 * (x[i + 1] + x[i])};
       // avoid underflow in gsl functions
       if (xv > 100) {
         continue;
       }
       const double dE{std::fabs(KE[i + 1] - KE[i])};
-      // we put beta here
-      const double de{(cre->read_grid(pos, i + 1, par, grid) / beta[i + 1] +
-                       cre->read_grid(pos, i, par, grid) / beta[i]) /
-                      2.};
-      assert(de >= 0);
-      J += gsl_sf_synchrotron_1(xv) * de * dE;
+      // we put beta here, midpoint rule
+      const double flux{
+          0.5 * (cre->read_grid_num(pos, i + 1, par, grid) / beta[i + 1] +
+                 cre->read_grid_num(pos, i, par, grid) / beta[i])};
+      assert(flux >= 0);
+      J += gsl_sf_synchrotron_1(xv) * flux * dE;
     }
+    // do energy spectrum integration at given position
+    // unit_factor for DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
+    // n(E,pos) = \phi(E,pos)*(4\pi/\beta*c), the relatin between flux \phi and
+    // density n ref: "Cosmic rays n' particle physics", A3
+    const double fore_factor{
+        1.73205081 * cgs_qe * cgs_qe * cgs_qe * std::fabs(Bper) /
+        (cgs_mec2 * cgs_c_light * cgs_GeV * cgs_m * cgs_m * cgs_sec)};
     J *= fore_factor;
   }
-  // calculate from model
+  // calculate from N(\gamma) with local constant spectral index
   else {
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
     const double index{cre->flux_idx(pos, par)};
     // coefficients which do not attend integration
-    const double norm{cre->flux_norm(pos, par) * std::sqrt(3) *
+    const double norm{cre->flux_norm(pos, par) * 1.73205081 *
                       (cgs_qe * cgs_qe * cgs_qe) * std::fabs(Bper) /
-                      (2. * cgs_mec2)};
+                      (4. * cgs_pi * cgs_mec2 * (1. - index))};
     // synchrotron integration
-    const double A{4. * cgs_mec * cgs_pi * par->grid_obs.sim_sync_freq.back() /
+    const double A{2. * cgs_pi * par->grid_obs.sim_sync_freq.back() * cgs_mec /
                    (3. * cgs_qe * std::fabs(Bper))};
-    const double mu{-0.5 * (3. + index)};
-    J = norm * (std::pow(A, 0.5 * (index + 1)) * std::pow(2, mu + 1) *
-                gsl_sf_gamma(0.5 * mu + 7. / 3.) *
-                gsl_sf_gamma(0.5 * mu + 2. / 3.) / (mu + 2.));
+    J = norm * (std::pow(A, 0.5 * (index + 1)) *
+                gsl_sf_gamma(-0.25 * index + 19. / 12.) *
+                gsl_sf_gamma(-0.25 * index - 1. / 12.));
   }
-  // the last 4pi comes from solid-angle integration/deviation,
-  // check eq(6.16) in Ribiki-Lightman's where Power is defined,
-  // we need isotropic power which means we need a 1/4pi factor!
-  return J / (4. * cgs_pi);
+  return J;
 }
 
 // cre synchrotron J_pol(\nu)
@@ -412,15 +408,15 @@ double Integrator::sync_emissivity_p(const hamvec<3, double> &pos,
   if (par->grid_cre.read_permission) {
     // allocate energy grid
     std::unique_ptr<double[]> KE = std::make_unique<double[]>(par->grid_cre.nE);
-    // we need F(x[E]) and G(x[E]) in spectral integration
+    // we need F(x[E]) in spectral integration
     std::unique_ptr<double[]> x = std::make_unique<double[]>(par->grid_cre.nE);
     std::unique_ptr<double[]> beta =
         std::make_unique<double[]>(par->grid_cre.nE);
-    // consts used in loop, using cgs units
+    // consts used for converting E to x, using cgs units
     const double x_fact{(2. * cgs_mec * cgs_mec2 * cgs_mec2 * 2. * cgs_pi *
                          par->grid_obs.sim_sync_freq.back()) /
-                        (3. * cgs_qe * Bper)};
-    // KE in cgs units
+                        (3. * cgs_qe * std::fabs(Bper))};
+    // KE, x, beta arrays in cgs units
     for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE; ++i) {
       KE[i] = par->grid_cre.E_min * std::exp(i * par->grid_cre.E_fact);
       x[i] = x_fact / (KE[i] * KE[i]);
@@ -430,45 +426,44 @@ double Integrator::sync_emissivity_p(const hamvec<3, double> &pos,
     // unit_factor for DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
     // n(E,pos) = \phi(E,pos)*(4\pi/\beta*c), the relatin between flux \phi and
     // density n ref: "Cosmic rays n' particle physics", A3
-    const double fore_factor{4. * cgs_pi * std::sqrt(3.) *
-                             (cgs_qe * cgs_qe * cgs_qe) * abs(Bper) /
-                             (cgs_mec2 * cgs_c_light * cgs_GeV * 100. * cgs_cm *
-                              100. * cgs_cm * cgs_sec)};
+    const double fore_factor{
+        1.73205081 * cgs_qe * cgs_qe * cgs_qe * std::fabs(Bper) /
+        (cgs_mec2 * cgs_c_light * cgs_GeV * cgs_m * cgs_m * cgs_sec)};
+    // spectral integral
     for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE - 1; ++i) {
-      const double xv{(x[i + 1] + x[i]) / 2.};
+      const double xv{0.5 * (x[i + 1] + x[i])};
       // avoid underflow in gsl functions
       if (xv > 100) {
         continue;
       }
       const double dE{std::fabs(KE[i + 1] - KE[i])};
-      // we put beta here
-      const double de{(cre->read_grid(pos, i + 1, par, grid) / beta[i + 1] +
-                       cre->read_grid(pos, i, par, grid) / beta[i]) /
-                      2.};
-      assert(de >= 0);
-      J += gsl_sf_synchrotron_2(xv) * de * dE;
+      // we put beta here, midpoint rule
+      const double flux{
+          0.5 * (cre->read_grid_num(pos, i + 1, par, grid) / beta[i + 1] +
+                 cre->read_grid_num(pos, i, par, grid) / beta[i])};
+      assert(flux >= 0);
+      J += gsl_sf_synchrotron_2(xv) * flux * dE;
     }
     J *= fore_factor;
   }
-  // calculate from model
+  // calculate from N(\gamma) with local constant spectral index
   else {
     // allocating values to index, norm according to user defined model
     // user may consider building derived class from CRE_ana
     const double index{cre->flux_idx(pos, par)};
     // coefficients which do not attend integration
-    const double norm{cre->flux_norm(pos, par) * std::sqrt(3) *
+    const double norm{cre->flux_norm(pos, par) * 1.73205081 *
                       (cgs_qe * cgs_qe * cgs_qe) * std::fabs(Bper) /
-                      (2. * cgs_mec2)};
+                      (16. * cgs_pi * cgs_mec2)};
     // synchrotron integration
-    const double A{4. * cgs_mec * cgs_pi * par->grid_obs.sim_sync_freq.back() /
+    const double A{2. * cgs_pi * par->grid_obs.sim_sync_freq.back() * cgs_mec /
                    (3. * cgs_qe * std::fabs(Bper))};
-    const double mu{-0.5 * (3. + index)};
-    J = norm *
-        (std::pow(A, 0.5 * (index + 1)) * std::pow(2, mu) *
-         gsl_sf_gamma(0.5 * mu + 4. / 3.) * gsl_sf_gamma(0.5 * mu + 2. / 3.));
+    J = norm * (std::pow(A, 0.5 * (index + 1)) *
+                gsl_sf_gamma(-0.25 * index + 7. / 12.) *
+                gsl_sf_gamma(-0.25 * index - 1. / 12.));
   }
   // the last 4pi comes from solid-angle integration/deviation,
   // check eq(6.16) in Ribiki-Lightman's where Power is defined,
   // we need isotropic power which means we need a 1/4pi factor!
-  return J / (4. * cgs_pi);
+  return J;
 }

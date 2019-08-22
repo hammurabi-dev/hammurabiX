@@ -46,7 +46,7 @@ hamvec<3, double> Brnd::read_grid(const hamvec<3, double> &pos,
   decltype(par->grid_brnd.nx) zl{(std::size_t)std::floor(tmp)};
   const double zd{tmp - zl};
   assert(xd >= 0 and yd >= 0 and zd >= 0 and xd < 1 and yd < 1 and zd < 1);
-  // trilinear interpolation
+  // linear interpolation
   std::size_t idx1{toolkit::index3d(par->grid_brnd.nx, par->grid_brnd.ny,
                                     par->grid_brnd.nz, xl, yl, zl)};
   std::size_t idx2{toolkit::index3d(par->grid_brnd.nx, par->grid_brnd.ny,

@@ -50,7 +50,7 @@ public:
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
   virtual double write_field(const hamvec<3, double> &, const Param *) const;
-  // read from grid with trilinear interpolation
+  // read from grid with linear interpolation
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: electron field grid class object
   virtual double read_grid(const hamvec<3, double> &, const Param *,

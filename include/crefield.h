@@ -31,11 +31,21 @@ public:
   // read CRE flux from grid at given spatial position and energy
   // actual value of E is calculated from {E_index,Ek_min,Ek_fact}
   // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: index in energy
+  // 2nd argument: energy
   // 3rd argument: parameter class object
   // 4th argument: CRE grid class object
   virtual double read_grid(const hamvec<3, double> &, const double &,
                            const Param *, const Grid_cre *) const;
+  // read CRE flux from grid at given energy index and spatial position
+  // mind its difference to ``read_grid``
+  // for reading CRE flux at arbitrary energy, use base class read_field
+  // actual value of E is calculated from {E_index,Ek_min,Ek_fact}
+  // 1st argument: galactic centric Cartesian frame position
+  // 2nd argument: index in energy
+  // 3rd argument: parameter class object
+  // 4th argument: CRE grid class object
+  double read_grid_num(const hamvec<3, double> &, const std::size_t &,
+                       const Param *, const Grid_cre *) const;
   // fill the grid with CRE flux distribution
   // 1st argument: parameter class object
   // 2nd argument: CRE grid class object
@@ -122,15 +132,6 @@ public:
   CRE_num &operator=(CRE_num &&) = delete;
   virtual ~CRE_num() = default;
   // overload the base class read_grid function
-  // read CRE flux from grid at given energy index and spatial position
-  // for reading CRE flux at arbitrary energy, use base class read_field
-  // actual value of E is calculated from {E_index,Ek_min,Ek_fact}
-  // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: index in energy
-  // 3rd argument: parameter class object
-  // 4th argument: CRE grid class object
-  virtual double read_grid(const hamvec<3, double> &, const std::size_t &,
-                           const Param *, const Grid_cre *) const;
 };
 
 #endif

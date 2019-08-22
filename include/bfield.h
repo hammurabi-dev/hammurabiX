@@ -60,7 +60,7 @@ public:
   // 2nd argument: parameter class object
   virtual hamvec<3, double> write_field(const hamvec<3, double> &,
                                         const Param *) const;
-  // read from field grid with trilinear interpolation
+  // read from field grid with linear interpolation
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
   // 3rd argument: magnetic field grid class object
@@ -84,7 +84,7 @@ public:
   // get random magnetic field
   virtual hamvec<3, double> read_field(const hamvec<3, double> &, const Param *,
                                        const Grid_brnd *) const;
-  // read from field grid with trilinear interpolation
+  // read from field grid with linear interpolation
   virtual hamvec<3, double> read_grid(const hamvec<3, double> &, const Param *,
                                       const Grid_brnd *) const;
   // write random field to grid (model dependent)

@@ -442,7 +442,7 @@
       <alpha value="3.0"/>
       <r0 value="3.0"/> <!-- cutoff radius, kpc -->
       <!-- by default, we choose AMS02 20.6GeV -->
-      <E0 value="20.6"/> <!-- CRE kinetic energy reference, GeV, (default) -->
+      <E0 value="20.6"/> <!-- CRE total energy reference, GeV, (default) -->
       <j0 value="0.0217"/> <!-- local CRE flux norm factor @ E0, (default) -->
     </unif>
   </cre>

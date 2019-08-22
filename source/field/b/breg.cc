@@ -54,7 +54,7 @@ hamvec<3, double> Breg::read_grid(const hamvec<3, double> &pos,
   decltype(par->grid_breg.nx) zl{(std::size_t)floor(tmp)};
   const double zd{tmp - zl};
   assert(xd >= 0 and yd >= 0 and zd >= 0 and xd < 1 and yd < 1 and zd < 1);
-  // trilinear interpolation
+  // linear interpolation
   // interpolate along z direction, there are four interpolated vectors
   std::size_t idx1{toolkit::index3d(par->grid_breg.nx, par->grid_breg.ny,
                                     par->grid_breg.nz, xl, yl, zl)};
