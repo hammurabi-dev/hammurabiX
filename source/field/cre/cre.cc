@@ -8,8 +8,8 @@
 #include <param.h>
 #include <toolkit.h>
 
-double CRE::read_field(const hamvec<3, double> &pos, const double &E,
-                       const Param *par, const Grid_cre *grid) const {
+double CREfield::read_field(const hamvec<3, double> &pos, const double &E,
+                            const Param *par, const Grid_cre *grid) const {
   if (par->grid_cre.read_permission) {
     return read_grid(pos, E, par, grid);
   } else if (par->grid_cre.build_permission) {
@@ -19,28 +19,29 @@ double CRE::read_field(const hamvec<3, double> &pos, const double &E,
   }
 }
 
-double CRE::write_field(const hamvec<3, double> &, const double &,
-                        const Param *) const {
+double CREfield::write_field(const hamvec<3, double> &, const double &,
+                             const Param *) const {
   return 0.;
 }
 
-double CRE::flux_norm(const hamvec<3, double> &, const Param *) const {
+double CREfield::flux_norm(const hamvec<3, double> &, const Param *) const {
   throw std::runtime_error("wrong inheritance");
 }
 
-double CRE::flux_idx(const hamvec<3, double> &, const Param *) const {
+double CREfield::flux_idx(const hamvec<3, double> &, const Param *) const {
   throw std::runtime_error("wrong inheritance");
 }
 
-double CRE::spatial_profile(const hamvec<3, double> &, const Param *) const {
+double CREfield::spatial_profile(const hamvec<3, double> &,
+                                 const Param *) const {
   throw std::runtime_error("wrong inheritance");
 }
 
 // linear interpolate in log(E) frame
 // with tri-linear interpolation in spatial frame
 // En in CGS units, return in [GeV m^2 s Sr]^-1
-double CRE::read_grid(const hamvec<3, double> &pos, const double &En,
-                      const Param *par, const Grid_cre *grid) const {
+double CREfield::read_grid(const hamvec<3, double> &pos, const double &En,
+                           const Param *par, const Grid_cre *grid) const {
   // linear interpolation in log(E)
   double tmp{std::log(En / par->grid_cre.E_min) /
              std::log(par->grid_cre.E_max / par->grid_cre.E_min)};
@@ -127,8 +128,9 @@ double CRE::read_grid(const hamvec<3, double> &pos, const double &En,
   return q1 * (1 - Ed) + q2 * Ed;
 }
 
-double CRE::read_grid_num(const hamvec<3, double> &pos, const std::size_t &Eidx,
-                          const Param *par, const Grid_cre *grid) const {
+double CREfield::read_grid_num(const hamvec<3, double> &pos,
+                               const std::size_t &Eidx, const Param *par,
+                               const Grid_cre *grid) const {
   // linear interpolation
   double tmp{(par->grid_cre.nx - 1) * (pos[0] - par->grid_cre.x_min) /
              (par->grid_cre.x_max - par->grid_cre.x_min)};
@@ -180,7 +182,7 @@ double CRE::read_grid_num(const hamvec<3, double> &pos, const std::size_t &Eidx,
 }
 
 // writing CRE DIFFERENTIAL density flux, in [GeV m^2 s sr]^-1
-void CRE::write_grid(const Param *par, Grid_cre *grid) const {
+void CREfield::write_grid(const Param *par, Grid_cre *grid) const {
   assert(par->grid_cre.write_permission);
   hamvec<3, double> gc_pos;
   double E;

@@ -38,7 +38,7 @@ private:
   std::unique_ptr<Breg> breg;
   std::unique_ptr<TErnd> ternd;
   std::unique_ptr<Brnd> brnd;
-  std::unique_ptr<CRE> cre;
+  std::unique_ptr<CREfield> cre;
   std::unique_ptr<Integrator> intobj;
 };
 

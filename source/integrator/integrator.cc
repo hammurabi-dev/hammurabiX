@@ -22,11 +22,12 @@
 #include <param.h>
 #include <tefield.h>
 
-void Integrator::write_grid(Breg *breg, Brnd *brnd, TEreg *tereg, TErnd *ternd,
-                            CRE *cre, Grid_breg *gbreg, Grid_brnd *gbrnd,
-                            Grid_tereg *gtereg, Grid_ternd *gternd,
-                            Grid_cre *gcre, Grid_obs *gobs,
-                            const Param *par) const {
+void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
+                            const TEreg *tereg, const TErnd *ternd,
+                            const CREfield *cre, const Grid_breg *gbreg,
+                            const Grid_brnd *gbrnd, const Grid_tereg *gtereg,
+                            const Grid_ternd *gternd, const Grid_cre *gcre,
+                            Grid_obs *gobs, const Param *par) const {
   if (par->grid_obs.do_dm) {
     gobs->dm_map->fill(0.);
   }
@@ -70,11 +71,11 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, TEreg *tereg, TErnd *ternd,
 #pragma omp parallel for
 #endif
     for (std::size_t ipix = 0; ipix < current_npix; ++ipix) {
-      struct_observables observables;
-      observables.is = 0.;
-      observables.qs = 0.;
-      observables.us = 0.;
-      observables.dm = 0.;
+      auto observables = std::make_unique<struct_observables>();
+      observables->is = 0.;
+      observables->qs = 0.;
+      observables->us = 0.;
+      observables->dm = 0.;
       // remember to complete logic for ptg assignment!
       // and for caching Faraday depth and/or optical depth
       // make serious tests after changing this part!
@@ -85,11 +86,11 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, TEreg *tereg, TErnd *ternd,
       if (par->grid_obs.do_fd) {
         ptg = gobs->tmp_fd_map->pix2ang(ipix);
         // cache Faraday rotation from inner shells
-        observables.fd = gobs->fd_map->interpolated_value(ptg);
+        observables->fd = gobs->fd_map->interpolated_value(ptg);
       } else if (par->grid_obs.do_sync.back()) {
         ptg = gobs->tmp_is_map->pix2ang(ipix);
         // cache Faraday rotation from inner shells
-        observables.fd = gobs->fd_map->interpolated_value(ptg);
+        observables->fd = gobs->fd_map->interpolated_value(ptg);
       }
       // check angular direction boundaries
       if (check_simulation_lower_limit(0.5 * cgs_pi - ptg.theta,
@@ -107,22 +108,23 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, TEreg *tereg, TErnd *ternd,
         continue;
       }
       // core function!
-      radial_integration(shell_ref.get(), ptg, observables, breg, brnd, tereg,
-                         ternd, cre, gbreg, gbrnd, gtereg, gternd, gcre, par);
+      radial_integration(shell_ref.get(), ptg, observables.get(), breg, brnd,
+                         tereg, ternd, cre, gbreg, gbrnd, gtereg, gternd, gcre,
+                         par);
       // collect from pixels
       if (par->grid_obs.do_dm) {
-        (*gobs->tmp_dm_map)[ipix] = observables.dm;
+        (*gobs->tmp_dm_map)[ipix] = observables->dm;
       }
       if (par->grid_obs.do_sync.back()) {
         (*gobs->tmp_is_map)[ipix] =
-            temp_convert(observables.is, par->grid_obs.sim_sync_freq.back());
+            temp_convert(observables->is, par->grid_obs.sim_sync_freq.back());
         (*gobs->tmp_qs_map)[ipix] =
-            temp_convert(observables.qs, par->grid_obs.sim_sync_freq.back());
+            temp_convert(observables->qs, par->grid_obs.sim_sync_freq.back());
         (*gobs->tmp_us_map)[ipix] =
-            temp_convert(observables.us, par->grid_obs.sim_sync_freq.back());
+            temp_convert(observables->us, par->grid_obs.sim_sync_freq.back());
       }
       if (par->grid_obs.do_fd or par->grid_obs.do_sync.back()) {
-        (*gobs->tmp_fd_map)[ipix] = observables.fd;
+        (*gobs->tmp_fd_map)[ipix] = observables->fd;
       }
     }
     // accumulating new shell map to sim map
@@ -161,23 +163,22 @@ void Integrator::write_grid(Breg *breg, Brnd *brnd, TEreg *tereg, TErnd *ternd,
   }   // end shell iteration
 }
 
-void Integrator::radial_integration(struct_shell *shell_ref, pointing &ptg_in,
-                                    struct_observables &pixobs, Breg *breg,
-                                    Brnd *brnd, TEreg *tereg, TErnd *ternd,
-                                    CRE *cre, Grid_breg *gbreg,
-                                    Grid_brnd *gbrnd, Grid_tereg *gtereg,
-                                    Grid_ternd *gternd, Grid_cre *gcre,
-                                    const Param *par) const {
+void Integrator::radial_integration(
+    const struct_shell *shell_ref, const pointing &ptg_in,
+    struct_observables *pixobs, const Breg *breg, const Brnd *brnd,
+    const TEreg *tereg, const TErnd *ternd, const CREfield *cre,
+    const Grid_breg *gbreg, const Grid_brnd *gbrnd, const Grid_tereg *gtereg,
+    const Grid_ternd *gternd, const Grid_cre *gcre, const Param *par) const {
   // pass in fd, zero others
   double inner_shells_fd{0.};
   if (par->grid_obs.do_fd or par->grid_obs.do_sync.back()) {
-    inner_shells_fd = pixobs.fd;
+    inner_shells_fd = pixobs->fd;
   }
-  pixobs.dm = 0.;
-  pixobs.fd = 0.;
-  pixobs.is = 0.;
-  pixobs.us = 0.;
-  pixobs.qs = 0.;
+  pixobs->dm = 0.;
+  pixobs->fd = 0.;
+  pixobs->is = 0.;
+  pixobs->us = 0.;
+  pixobs->qs = 0.;
   // angular position
   const double THE{ptg_in.theta};
   const double PHI{ptg_in.phi};
@@ -233,11 +234,11 @@ void Integrator::radial_integration(struct_shell *shell_ref, pointing &ptg_in,
     assert(std::isfinite(te));
     // dispersion measure
     if (par->grid_obs.do_dm) {
-      pixobs.dm += te * shell_ref->delta_d;
+      pixobs->dm += te * shell_ref->delta_d;
     }
     // Faraday depth
     if (par->grid_obs.do_fd or par->grid_obs.do_sync.back()) {
-      pixobs.fd += te * B_par * fd_forefactor * shell_ref->delta_d;
+      pixobs->fd += te * B_par * fd_forefactor * shell_ref->delta_d;
     }
     // Synchrotron emission
     if (par->grid_obs.do_sync.back()) {
@@ -247,13 +248,13 @@ void Integrator::radial_integration(struct_shell *shell_ref, pointing &ptg_in,
       const double Jpol{sync_emissivity_p(pos, par, cre, gcre, B_per) *
                         shell_ref->delta_d * i2bt_sync};
       assert(Jtot < 1e30 and Jpol < 1e30 and Jtot >= 0 and Jpol >= 0);
-      pixobs.is += Jtot;
+      pixobs->is += Jtot;
       // intrinsic polarization angle, following IAU definition
-      const double qui{(inner_shells_fd + pixobs.fd) * lambda_square +
+      const double qui{(inner_shells_fd + pixobs->fd) * lambda_square +
                        sync_ipa(B_vec, THE, PHI)};
       assert(std::isfinite(qui));
-      pixobs.qs += std::cos(2. * qui) * Jpol;
-      pixobs.us += std::sin(2. * qui) * Jpol;
+      pixobs->qs += std::cos(2. * qui) * Jpol;
+      pixobs->us += std::sin(2. * qui) * Jpol;
     }
   }
 }
@@ -333,7 +334,7 @@ double Integrator::temp_convert(const double &temp_br,
 
 // cre synchrotron J_tot(\nu)
 double Integrator::sync_emissivity_t(const hamvec<3, double> &pos,
-                                     const Param *par, const CRE *cre,
+                                     const Param *par, const CREfield *cre,
                                      const Grid_cre *grid,
                                      const double &Bper) const {
   double J{0};
@@ -400,7 +401,7 @@ double Integrator::sync_emissivity_t(const hamvec<3, double> &pos,
 
 // cre synchrotron J_pol(\nu)
 double Integrator::sync_emissivity_p(const hamvec<3, double> &pos,
-                                     const Param *par, const CRE *cre,
+                                     const Param *par, const CREfield *cre,
                                      const Grid_cre *grid,
                                      const double &Bper) const {
   double J{0};

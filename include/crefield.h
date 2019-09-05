@@ -20,14 +20,14 @@
 #include <param.h>
 
 // base class, all functions are implemented in derived class
-class CRE {
+class CREfield {
 public:
-  CRE() = default;
-  CRE(const CRE &) = delete;
-  CRE(CRE &&) = delete;
-  CRE &operator=(const CRE &) = delete;
-  CRE &operator=(CRE &&) = delete;
-  virtual ~CRE() = default;
+  CREfield() = default;
+  CREfield(const CREfield &) = delete;
+  CREfield(CREfield &&) = delete;
+  CREfield &operator=(const CREfield &) = delete;
+  CREfield &operator=(CREfield &&) = delete;
+  virtual ~CREfield() = default;
   // read CRE flux from grid at given spatial position and energy
   // actual value of E is calculated from {E_index,Ek_min,Ek_fact}
   // 1st argument: galactic centric Cartesian frame position
@@ -83,7 +83,7 @@ public:
 };
 
 // uniform CRE flux
-class CRE_unif : public CRE {
+class CRE_unif : public CREfield {
 public:
   CRE_unif() = default;
   CRE_unif(const CRE_unif &) = delete;
@@ -103,7 +103,7 @@ public:
 };
 
 // analytic CRE flux
-class CRE_ana : public CRE {
+class CRE_ana : public CREfield {
 public:
   CRE_ana() = default;
   CRE_ana(const CRE_ana &) = delete;
@@ -123,7 +123,7 @@ public:
 };
 
 // use numerical CRE flux
-class CRE_num final : public CRE {
+class CRE_num final : public CREfield {
 public:
   CRE_num() = default;
   CRE_num(const CRE_num &) = delete;

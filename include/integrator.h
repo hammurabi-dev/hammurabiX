@@ -20,8 +20,9 @@ public:
   Integrator &operator=(Integrator &&) = delete;
   virtual ~Integrator() = default;
   // assmebling pixels/shells into sky map
-  void write_grid(Breg *, Brnd *, TEreg *, TErnd *, CRE *, Grid_breg *,
-                  Grid_brnd *, Grid_tereg *, Grid_ternd *, Grid_cre *,
+  void write_grid(const Breg *, const Brnd *, const TEreg *, const TErnd *,
+                  const CREfield *, const Grid_breg *, const Grid_brnd *,
+                  const Grid_tereg *, const Grid_ternd *, const Grid_cre *,
                   Grid_obs *, const Param *) const;
 #ifdef NDEBUG
 protected:
@@ -57,7 +58,8 @@ protected:
   // 4th argument: CRE grid object
   // 5th argument: perpendicular component of magnetic field wrt LoS direction
   double sync_emissivity_t(const hamvec<3, double> &, const Param *,
-                           const CRE *, const Grid_cre *, const double &) const;
+                           const CREfield *, const Grid_cre *,
+                           const double &) const;
   // synchrotron polarized emissivity calculator
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
@@ -65,7 +67,8 @@ protected:
   // 4th argument: CRE grid object
   // 5th argument: perpendicular component of magnetic field wrt LoS direction
   double sync_emissivity_p(const hamvec<3, double> &, const Param *,
-                           const CRE *, const Grid_cre *, const double &) const;
+                           const CREfield *, const Grid_cre *,
+                           const double &) const;
   // dust emission intrinsic polarization angle (in rad)
   // check Planck XX, A&A 576, A105 (2015)
   // 1st argument: magnetic field in Cartesian frame
@@ -99,10 +102,12 @@ private:
     std::vector<double> dist;
   };
   // conduct LOS integration in one pixel at given shell
-  void radial_integration(struct_shell *, pointing &, struct_observables &,
-                          Breg *, Brnd *, TEreg *, TErnd *, CRE *, Grid_breg *,
-                          Grid_brnd *, Grid_tereg *, Grid_ternd *, Grid_cre *,
-                          const Param *) const;
+  void radial_integration(const struct_shell *, const pointing &,
+                          struct_observables *, const Breg *, const Brnd *,
+                          const TEreg *, const TErnd *, const CREfield *,
+                          const Grid_breg *, const Grid_brnd *,
+                          const Grid_tereg *, const Grid_ternd *,
+                          const Grid_cre *, const Param *) const;
   // general upper boundary check
   // return false if 1st argument is larger than 2nd
   inline bool check_simulation_upper_limit(const double &value,

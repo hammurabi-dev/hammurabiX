@@ -109,7 +109,6 @@ SET(SRC_FILES
 	${CMAKE_CURRENT_LIST_DIR}/source/field/b/brnd_mhd.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre_num.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre_ana.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre_unif.cc
 
