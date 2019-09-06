@@ -17,6 +17,10 @@ class Pipeline {
 public:
   Pipeline() = default;
   Pipeline(const std::string &);
+  Pipeline(const Pipeline &) = delete;
+  Pipeline(Pipeline &&) = delete;
+  Pipeline &operator=(const Pipeline &) = delete;
+  Pipeline &operator=(Pipeline &&) = delete;
   virtual ~Pipeline() = default;
   void assemble_grid();
   void assemble_tereg();

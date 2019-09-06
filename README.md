@@ -5,14 +5,14 @@ for simulating full-sky Galactic foreground observables.
 Outputs of hammurabi include:
 
 - **polarized synchrotron emission**
-- **thermal dust emission** [in progress]
+- **thermal dust emission**
 - **dispersion measure** 
 - **Faraday depth**
 
 Essential physical inputs/modelings required during simulation include:  
 
 - **Galactic magnetic fields**
-- **dust distribution** [in progress]
+- **dust distribution**
 - **(cosmic-ray/thermal) electron distribution**
 
 hammurabi is a modular C++ framework which is friendly to user defined models.
