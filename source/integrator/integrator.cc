@@ -92,21 +92,6 @@ void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
         // cache Faraday rotation from inner shells
         observables->fd = gobs->fd_map->interpolated_value(ptg);
       }
-      // check angular direction boundaries
-      if (check_simulation_lower_limit(0.5 * cgs_pi - ptg.theta,
-                                       par->grid_obs.oc_lat_min)) {
-        continue;
-      }
-      if (check_simulation_upper_limit(0.5 * cgs_pi - ptg.theta,
-                                       par->grid_obs.oc_lat_max)) {
-        continue;
-      }
-      if (check_simulation_lower_limit(ptg.phi, par->grid_obs.oc_lon_min)) {
-        continue;
-      }
-      if (check_simulation_upper_limit(ptg.phi, par->grid_obs.oc_lon_max)) {
-        continue;
-      }
       // core function!
       radial_integration(shell_ref.get(), ptg, observables.get(), breg, brnd,
                          tereg, ternd, cre, gbreg, gbrnd, gtereg, gternd, gcre,
@@ -286,16 +271,6 @@ void Integrator::assemble_shell_ref(struct_shell *target, const Param *par,
 
 // calculate synchrotron emission intrinsic polarization angle
 double Integrator::sync_ipa(const hamvec<3, double> &input,
-                            const double &the_ec, const double &phi_ec) const {
-  const hamvec<3, double> sph_unit_v_the(
-      cos(the_ec) * cos(phi_ec), cos(the_ec) * sin(phi_ec), -sin(the_ec));
-  const hamvec<3, double> sph_unit_v_phi(-sin(phi_ec), cos(phi_ec), 0.);
-  // IAU convention
-  return atan2(-sph_unit_v_the.dotprod(input), -sph_unit_v_phi.dotprod(input));
-}
-
-// calculate dust emission intrinsic polarization angle
-double Integrator::dust_ipa(const hamvec<3, double> &input,
                             const double &the_ec, const double &phi_ec) const {
   const hamvec<3, double> sph_unit_v_the(
       cos(the_ec) * cos(phi_ec), cos(the_ec) * sin(phi_ec), -sin(the_ec));

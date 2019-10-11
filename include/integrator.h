@@ -69,14 +69,6 @@ protected:
   double sync_emissivity_p(const hamvec<3, double> &, const Param *,
                            const CREfield *, const Grid_cre *,
                            const double &) const;
-  // dust emission intrinsic polarization angle (in rad)
-  // check Planck XX, A&A 576, A105 (2015)
-  // 1st argument: magnetic field in Cartesian frame
-  // 2nd argument: polar angle (in rad) of LOS direction
-  // 3rd argument: azimuthal angle (in rad) of LOS direction
-  // use with caution, since vector can be parallel to LoS direction
-  double dust_ipa(const hamvec<3, double> &, const double &,
-                  const double &) const;
   // converting brightness temp into thermal temp with T_0 = 2.725K,
   // Prog.Theor.Exp.Phys. (2014) 2014 (6): 06B109.
   // 1st argument: brightness temperature

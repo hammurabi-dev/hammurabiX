@@ -131,72 +131,66 @@ std::string fetchstring(tinyxml2::XMLElement *el, const std::string &att_type) {
 }
 // get integer value of attribute in child level, with default return
 int fetchint(tinyxml2::XMLElement *el, const std::string &att_type,
-             const std::string &key, const int &dft) {
+             const std::string &key) {
 #ifdef VERBOSE
   std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
-  return el->FirstChildElement(key.c_str())
-      ->IntAttribute(att_type.c_str(), dft);
+  return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str());
 }
 // get integer value of attribute in current level, with default return
-int fetchint(tinyxml2::XMLElement *el, const std::string &att_type,
-             const int &dft) {
+int fetchint(tinyxml2::XMLElement *el, const std::string &att_type) {
 #ifdef VERBOSE
   std::cout << "attrib: " << att_type << std::endl;
 #endif
-  return el->IntAttribute(att_type.c_str(), dft);
+  return el->IntAttribute(att_type.c_str());
 }
 // get unsigned value of attribute in child level, with default return
 unsigned int fetchunsigned(tinyxml2::XMLElement *el,
-                           const std::string &att_type, const std::string &key,
-                           const unsigned &dft) {
+                           const std::string &att_type,
+                           const std::string &key) {
 #ifdef VERBOSE
   std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
   return el->FirstChildElement(key.c_str())
-      ->UnsignedAttribute(att_type.c_str(), dft);
+      ->UnsignedAttribute(att_type.c_str());
 }
 // get unsigned value of attribute in current level, with default return
 unsigned int fetchunsigned(tinyxml2::XMLElement *el,
-                           const std::string &att_type, const unsigned &dft) {
+                           const std::string &att_type) {
 #ifdef VERBOSE
   std::cout << "attrib: " << att_type << std::endl;
 #endif
-  return el->UnsignedAttribute(att_type.c_str(), dft);
+  return el->UnsignedAttribute(att_type.c_str());
 }
 // get Boolean value of attribute in child level, with default return
 bool fetchbool(tinyxml2::XMLElement *el, const std::string &att_type,
-               const std::string &key, const int &dft) {
+               const std::string &key) {
 #ifdef VERBOSE
   std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
-  return el->FirstChildElement(key.c_str())
-      ->BoolAttribute(att_type.c_str(), dft);
+  return el->FirstChildElement(key.c_str())->BoolAttribute(att_type.c_str());
 }
 // get Boolean value of attribute in current level, with default return
-bool fetchbool(tinyxml2::XMLElement *el, const std::string &att_type,
-               const int &dft) {
+bool fetchbool(tinyxml2::XMLElement *el, const std::string &att_type) {
 #ifdef VERBOSE
   std::cout << "attrib: " << att_type << std::endl;
 #endif
-  return el->BoolAttribute(att_type.c_str(), dft);
+  return el->BoolAttribute(att_type.c_str());
 }
 // get double value of attribute in child level, with default return
 double fetchdouble(tinyxml2::XMLElement *el, const std::string &att_type,
-                   const std::string &key, const double &dft) {
+                   const std::string &key) {
 #ifdef VERBOSE
   std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
-  return el->FirstChildElement(key.c_str())
-      ->DoubleAttribute(att_type.c_str(), dft);
+  return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str());
 }
 // get double value of attribute in current level, with default return
-double fetchdouble(tinyxml2::XMLElement *el, const std::string &att_type,
-                   const double &dft) {
+double fetchdouble(tinyxml2::XMLElement *el, const std::string &att_type) {
 #ifdef VERBOSE
   std::cout << "attrib: " << att_type << std::endl;
 #endif
-  return el->DoubleAttribute(att_type.c_str(), dft);
+  return el->DoubleAttribute(att_type.c_str());
 }
 
 } // namespace toolkit

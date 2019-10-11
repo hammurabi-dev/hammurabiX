@@ -1,4 +1,4 @@
-// parameters (fixed or free) for physical models
+// parameters
 
 #ifndef HAMMURABI_PARAM_H
 #define HAMMURABI_PARAM_H
@@ -67,29 +67,6 @@ public:
     // number Cartesian grid support points
     std::size_t nx, ny, nz, full_size;
   } grid_ternd;
-  // regular dust grid
-  struct param_dreg_grid {
-    std::string filename;
-    // grid build/read/write controller
-    bool build_permission = false, read_permission = false,
-         write_permission = false;
-    // galactic centric Cartesian limit
-    double x_max, x_min, y_max, y_min, z_max, z_min;
-    // number Cartesian grid support points
-    std::size_t nx, ny, nz, full_size;
-  } grid_dreg;
-  // random dust grid
-  struct param_drnd_grid {
-    // in/output file name
-    std::string filename;
-    // grid build/read/write controller
-    bool read_permission = false, write_permission = false,
-         build_permission = false;
-    // galactic centric Cartesian limit
-    double x_max, x_min, y_max, y_min, z_max, z_min;
-    // number Cartesian grid support points
-    std::size_t nx, ny, nz, full_size;
-  } grid_drnd;
   // cosmic ray electron grid
   struct param_cre_grid {
     // in/output file name
@@ -125,31 +102,27 @@ public:
     double oc_r_min, oc_r_max;
     // LoS integration radial resolution
     double oc_r_res;
-    // observer centric latitude and longitude limit
-    double oc_lat_min, oc_lat_max, oc_lon_min, oc_lon_max;
     // simulation controllers
     bool do_dm = false, do_fd = false;
-    std::vector<bool> do_sync, do_dust;
+    std::vector<bool> do_sync;
     // in/output file name
     std::string sim_fd_name, sim_dm_name;
-    std::vector<std::string> sim_sync_name, sim_dust_name;
+    std::vector<std::string> sim_sync_name;
     // synchrotron frequencies
-    std::vector<double> sim_sync_freq, sim_dust_freq;
+    std::vector<double> sim_sync_freq;
     // mask controllers
-    bool mask_dm = false, mask_fd = false, mask_all = false;
-    std::vector<bool> mask_sync, mask_dust;
-    std::string mask_fd_name, mask_dm_name;
-    std::vector<std::string> mask_sync_name, mask_dust_name;
+    bool do_mask = false;
+    std::string mask_name;
   } grid_obs;
   // magnetic field parameters
   std::string breg_type, brnd_type, brnd_method;
   // LSA model parameters
-  struct param_breg_wmap {
+  struct param_breg_lsa {
     double b0;
     double psi0;
     double psi1;
     double chi0;
-  } breg_wmap;
+  } breg_lsa;
   // uniform model parameters
   struct param_breg_unif {
     double bp, bv;

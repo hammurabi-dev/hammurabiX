@@ -1,39 +1,35 @@
 <?xml version="1.0"?>
-<!-- FULL HAMMURABI PARAMETER SET -->
-<!-- DO NOT USE UPPERCASE, EXCEPT ENERGY -->
-<!-- elements marked with (optional) are optional -->
-<!-- elements marked with (default) have default settings -->
+
 <root>
-    <!-- observable output -->
-    <!-- frequency @ GHz -->
+  
     <observable>
-        <dm cue="1" filename="dm.fits" nside="32"/> <!-- Dispersion Measure (optional) -->
-        <faraday cue="1" filename="fd.fits" nside="32"/> <!-- Faraday depth (optional) -->
-        <sync cue="1" freq="23" filename="iqu_sync_23.fits" nside="32"/> <!-- synchrotron dmission (optional) -->
-        <sync cue="1" freq="1.4" filename="iqu_sync_1.4.fits" nside="32"/> <!-- synchrotron dmission (optional) -->
+        <dm cue="1" filename="dm.fits" nside="32"/>
+        <faraday cue="1" filename="fd.fits" nside="32"/>
+        <sync cue="1" freq="23" filename="iqu_sync_23.fits" nside="32"/>
+        <sync cue="1" freq="1.4" filename="iqu_sync_1.4.fits" nside="32"/>
     </observable>
-    <!-- physical field in/out -->
-    <!-- resolution defined in './Grid/Box' -->
-    <!-- CRE field resolution defined in './CRE/Numeric' -->
+    
+    <mask cue="0"/>
+    
     <fieldio>
     </fieldio>
-    <!-- field & observable grid -->
+    
     <grid>
-        <!-- galactic-centric position of observer -->
+      
         <observer>
-            <x value="-8.3"/> <!-- kpc (optional, default) -->
-            <y value="0"/> <!-- kpc (optional, default) -->
-            <z value="6"/> <!-- pc (optional, default) -->
+            <x value="-8.3"/>
+            <y value="0"/>
+            <z value="0.006"/>
         </observer>
-        <!-- LoS integration helio/observer-centric spherical shell setting -->
-        <shell> <!-- (optional) if nothing under observable -->
+
+        <shell>
             <layer type="manual">
                 <auto>
-                    <shell_num value="1"/> <!-- total shell number (default) -->
+                    <shell_num value="1"/>
                     <nside_sim value="32"/>
                 </auto>
-                <!-- set shell cutting point from inside out -->
-                <manual> <!-- total shell number calculated automatically -->
+                
+                <manual>
                     <cut value="0.1"/>
                     <cut value="0.7"/>
                     <nside_sim value="32"/>
@@ -41,46 +37,33 @@
                     <nside_sim value="8"/>
                 </manual>
             </layer>
-            <!-- helio/observer-centric radial limit -->
-            <oc_r_min value="0.0"/> <!-- kpc (default) -->
-            <oc_r_max value="30.0"/> <!-- kpc (default) -->
-            <!-- galactic-centric radial limit -->
-            <gc_r_min value="0.0"/> <!-- kpc (default) -->
-            <gc_r_max value="20.0"/> <!-- kpc (default) -->
-            <!-- galactic-centric height limit -->
-            <gc_z_min value="0.0"/> <!-- kpc (default) -->
-            <gc_z_max value="10.0"/> <!-- kpc (default) -->
-            <!-- radial integration resolution -->
-            <oc_r_res value="0.03"/> <!-- kpc (default) -->
-            <!-- galactic latitude limit, both poles -->
-            <oc_lat_min value="0."/> <!--  (default) -->
-            <oc_lat_max value="90."/> <!--  (default) -->
-            <!-- galactic longitude limit, both poles -->
-            <oc_lon_min value="0."/> <!--  (default) -->
-            <oc_lon_max value="360."/> <!--  (default) -->
+            <oc_r_min value="0.0"/>
+            <oc_r_max value="30.0"/>
+            <gc_r_min value="0.0"/>
+            <gc_r_max value="20.0"/>
+            <gc_z_min value="0.0"/>
+            <gc_z_max value="10.0"/>
+            <oc_r_res value="0.03"/>
         </shell>
     </grid>
-    <!-- magnetic fields -->
+    
     <magneticfield>
-        <!-- regular fields -->
+        
         <regular cue="0" type="unif">
         </regular>
-        <!-- random/turbulent fields -->
-        <!-- seed should be non-negative int -->
-        <!-- seed=0, seed according to thread id and time -->
-        <random cue="0" type="local" seed="0">
+        
+		<random cue="0" type="local" seed="0">
         </random>
     </magneticfield>
-    <!-- free electron field -->
+    
     <thermalelectron>
         <regular cue="0" type="unif">
         </regular>
-        <!-- random/turbulent free electron -->
+        
         <random cue="0" type="global" seed="0">
         </random>
     </thermalelectron>
-    <!-- analytic CRE -->
-    <!-- flux norm comes with unit [GeV m^2 s Sr]^-1 -->
+    
     <cre cue="0" type="unif">
     </cre>
 </root>

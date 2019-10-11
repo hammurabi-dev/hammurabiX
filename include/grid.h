@@ -8,8 +8,6 @@
 //  |-- Grid_tereg (regular thermal electron field grid)
 //  |-- Grid_ternd (random thermal electron field grid)
 //  |-- Grid_cre (cosmic ray electron flux field grid)
-//  |-- Grid_dreg (regular dust field grid)
-//  |-- Grid_drnd (random dust field grid)
 //  |-- Grid_obs (observable grid)
 //
 // There are three major functions in Grid class
@@ -146,56 +144,6 @@ public:
   fftw_complex *te_k;
   // backward FFT plan
   fftw_plan plan_te_bw;
-  // for destructor
-  bool clean_switch = false;
-};
-
-// regular dust density field grid
-class Grid_dreg final : public Grid {
-public:
-  Grid_dreg() = default;
-  Grid_dreg(const Param *);
-  Grid_dreg(const Grid_dreg &) = delete;
-  Grid_dreg(const Grid_dreg &&) = delete;
-  Grid_dreg &operator=(const Grid_dreg &) = delete;
-  Grid_dreg &operator=(Grid_dreg &&) = delete;
-  virtual ~Grid_dreg() = default;
-  void build_grid(const Param *) override;
-  void export_grid(const Param *) override;
-  void import_grid(const Param *) override;
-  // spatial domain dust field
-  std::unique_ptr<double[]> d;
-};
-
-// random dust density field grid
-class Grid_drnd final : public Grid {
-public:
-  Grid_drnd() = default;
-  Grid_drnd(const Param *);
-  Grid_drnd(const Grid_drnd &) = delete;
-  Grid_drnd(const Grid_drnd &&) = delete;
-  Grid_drnd &operator=(const Grid_drnd &) = delete;
-  Grid_drnd &operator=(Grid_drnd &&) = delete;
-  virtual ~Grid_drnd() {
-    if (clean_switch) {
-      fftw_destroy_plan(plan_d_bw);
-      fftw_free(d_k);
-#ifdef _OPENMP
-      fftw_cleanup_threads();
-#else
-      fftw_cleanup();
-#endif
-    }
-  };
-  void build_grid(const Param *) override;
-  void export_grid(const Param *) override;
-  void import_grid(const Param *) override;
-  // spatial domain dust field
-  std::unique_ptr<double[]> d;
-  // Fourier domain dust field
-  fftw_complex *d_k;
-  // backward FFT plan
-  fftw_plan plan_d_bw;
   // for destructor
   bool clean_switch = false;
 };

@@ -113,16 +113,16 @@ void fill_cre_grid(const Param *par, Grid_cre *grid) {
   double lx{par->grid_cre.x_max - par->grid_cre.x_min};
   double ly{par->grid_cre.y_max - par->grid_cre.y_min};
   double lz{par->grid_cre.z_max - par->grid_cre.z_min};
-  for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE; ++i) {
-    E = par->grid_cre.E_min * std::exp(i * par->grid_cre.E_fact);
-    for (decltype(par->grid_cre.nx) j = 0; j != par->grid_cre.nx; ++j) {
-      gc_pos[0] = lx * j / (par->grid_cre.nx - 1) + par->grid_cre.x_min;
-      for (decltype(par->grid_cre.ny) k = 0; k != par->grid_cre.ny; ++k) {
-        gc_pos[1] = ly * k / (par->grid_cre.ny - 1) + par->grid_cre.y_min;
-        for (decltype(par->grid_cre.nz) m = 0; m != par->grid_cre.nz; ++m) {
-          gc_pos[2] = lz * m / (par->grid_cre.nz - 1) + par->grid_cre.z_min;
-          std::size_t idx{toolkit::index4d(par->grid_cre.nE, par->grid_cre.nx,
-                                           par->grid_cre.ny, par->grid_cre.nz,
+  for (decltype(par->grid_cre.nx) i = 0; i != par->grid_cre.nx; ++i) {
+    gc_pos[0] = lx * i / (par->grid_cre.nx - 1) + par->grid_cre.x_min;
+    for (decltype(par->grid_cre.ny) j = 0; j != par->grid_cre.ny; ++j) {
+      gc_pos[1] = ly * j / (par->grid_cre.ny - 1) + par->grid_cre.y_min;
+      for (decltype(par->grid_cre.nz) k = 0; k != par->grid_cre.nz; ++k) {
+        gc_pos[2] = lz * k / (par->grid_cre.nz - 1) + par->grid_cre.z_min;
+        for (decltype(par->grid_cre.nE) m = 0; m != par->grid_cre.nE; ++m) {
+          E = par->grid_cre.E_min * std::exp(m * par->grid_cre.E_fact);
+          std::size_t idx{toolkit::index4d(par->grid_cre.nx, par->grid_cre.ny,
+                                           par->grid_cre.nz, par->grid_cre.nE,
                                            i, j, k, m)};
           grid->cre_flux[idx] = gc_pos[0] + gc_pos[1] + gc_pos[2] + E;
         }

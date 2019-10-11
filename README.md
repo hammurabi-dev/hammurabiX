@@ -1,26 +1,24 @@
-# hammurabi README
+# hammurabi X README
 
 hammurabi is an open-source (GNU General Public License v3) HEALPix-based tool 
-for simulating full-sky Galactic foreground observables.
-Outputs of hammurabi include:
+for simulating full/partial-sky Galactic emissions.
+The outputs of (current version) hammurabi X include:
 
 - **polarized synchrotron emission**
-- **thermal dust emission**
 - **dispersion measure** 
 - **Faraday depth**
 
 Essential physical inputs/modelings required during simulation include:  
 
-- **Galactic magnetic fields**
-- **dust distribution**
-- **(cosmic-ray/thermal) electron distribution**
+- **Galactic magnetic field**
+- **(cosmic-ray & thermal) electron distribution**
 
-hammurabi is a modular C++ framework which is friendly to user defined models.
-In version X, we mainly focus on improving its numerical reliablility and scalability.
+hammurabi X is a modular C++ framework which is friendly to user defined models.
+Based on earlier versions of hammurabi, we mainly focus on improving its numerical reliablility and scalability.
 
 Please check our [**WIKI PAGE**](https://bitbucket.org/hammurabicode/hamx/wiki/Home) for more detailed technical information.
 
-Original hammurabi source code can be found [**here**](https://sourceforge.net/projects/hammurabicode/).
+The original hammurabi source code can be found [**here**](https://sourceforge.net/projects/hammurabicode/).
 
 ### hammurabi team publications:
 

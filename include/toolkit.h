@@ -86,46 +86,43 @@ std::string fetchstring(tinyxml2::XMLElement *, const std::string &);
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
 // 3rd argument: sub-key under 1st argument
-int fetchint(tinyxml2::XMLElement *, const std::string &, const std::string &,
-             const int &dft = 0);
+int fetchint(tinyxml2::XMLElement *, const std::string &, const std::string &);
 // get integer attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
-int fetchint(tinyxml2::XMLElement *, const std::string &, const int &dft = 0);
+int fetchint(tinyxml2::XMLElement *, const std::string &);
 // get unsigned integer attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
 // 3rd argument: sub-key under 1st argument
 unsigned int fetchunsigned(tinyxml2::XMLElement *, const std::string &,
-                           const std::string &, const unsigned &dft = 0);
+                           const std::string &);
 // get unsigned integer attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
-unsigned int fetchunsigned(tinyxml2::XMLElement *, const std::string &,
-                           const unsigned &dft = 0);
+unsigned int fetchunsigned(tinyxml2::XMLElement *, const std::string &);
 // get bool attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
 // 3rd argument: sub-key under 1st argument
 // 4th argument: default bool, use int instead of bool type
 // since bool can take char* as input
-bool fetchbool(tinyxml2::XMLElement *, const std::string &, const std::string &,
-               const int &dft = 0);
+bool fetchbool(tinyxml2::XMLElement *, const std::string &,
+               const std::string &);
 // get bool attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
-bool fetchbool(tinyxml2::XMLElement *, const std::string &, const int &dft = 0);
+bool fetchbool(tinyxml2::XMLElement *, const std::string &);
 // get double attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
 // 3rd argument: sub-key under 1st argument
 double fetchdouble(tinyxml2::XMLElement *, const std::string &,
-                   const std::string &, const double &dft = 0);
+                   const std::string &);
 // get double attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
-double fetchdouble(tinyxml2::XMLElement *, const std::string &,
-                   const double &dft = 0);
+double fetchdouble(tinyxml2::XMLElement *, const std::string &);
 } // namespace toolkit
 
 #endif

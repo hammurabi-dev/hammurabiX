@@ -108,18 +108,18 @@ public:
                                 const Param *) const override;
 };
 
-// WMAP LSA modeling
+// WMAP-3yr LSA modeling
 // http://iopscience.iop.org/article/10.1086/513699/meta
 // with errata for GMF modeling
 // https://lambda.gsfc.nasa.gov/product/map/dr2/pub_papers/threeyear/polarization/errata.cfm
-class Breg_wmap final : public Breg {
+class Breg_lsa final : public Breg {
 public:
-  Breg_wmap() = default;
-  Breg_wmap(const Breg_wmap &) = delete;
-  Breg_wmap(Breg_wmap &&) = delete;
-  Breg_wmap &operator=(const Breg_wmap &) = delete;
-  Breg_wmap &operator=(Breg_wmap &&) = delete;
-  virtual ~Breg_wmap() = default;
+  Breg_lsa() = default;
+  Breg_lsa(const Breg_lsa &) = delete;
+  Breg_lsa(Breg_lsa &&) = delete;
+  Breg_lsa &operator=(const Breg_lsa &) = delete;
+  Breg_lsa &operator=(Breg_lsa &&) = delete;
+  virtual ~Breg_lsa() = default;
   hamvec<3, double> write_field(const hamvec<3, double> &,
                                 const Param *) const override;
 };

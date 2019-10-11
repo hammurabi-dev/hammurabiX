@@ -27,7 +27,7 @@ index: 4
 index: 5
 - name: Max Planck Institute for Astrophysics, Karl-Schwarzschild-Str. 1, D-85741 Garching, Germany
 index: 6
-date: 13 August 2019
+date: 6 October 2019
 bibliography: paper.bib
 ---
 
@@ -81,7 +81,7 @@ The numerical framework can also be applied to other settings, for example, rece
 
 # Acknowledgements
 
-We acknowledge contributions from Theo Steininger and Joe Taylor,
+We acknowledge technical contributions from Theo Steininger and Joe Taylor,
 and the support from SISSA HPC service and MHPC program.
 
 # References

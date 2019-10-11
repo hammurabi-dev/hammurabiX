@@ -102,7 +102,7 @@ SET(ALL_LIBRARIES)
 SET(SRC_FILES
 	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_jaffe.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_wmap.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_lsa.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_unif.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/b/brnd.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/b/brnd_es.cc

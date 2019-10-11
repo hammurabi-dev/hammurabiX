@@ -87,23 +87,15 @@ TEST(toolkit, xml_parser) {
 
   EXPECT_EQ(toolkit::fetchdouble(el, "value"), double(3.14));
 
-  EXPECT_EQ(toolkit::fetchdouble(el, "value", 2.0), double(3.14));
-
-  EXPECT_EQ(toolkit::fetchdouble(el, "dft_value", 2.0), double(2.0));
-
   EXPECT_EQ(toolkit::fetchdouble(el, "dft_value"), double(0));
 
   el = toolkit::tracexml(doc.get(), {"empty_double"});
 
-  EXPECT_EQ(toolkit::fetchdouble(el, "value", 5.0), double(5.0));
+  EXPECT_EQ(toolkit::fetchdouble(el, "value"), double(0));
 
   el = toolkit::tracexml(doc.get(), {"integer"});
 
   EXPECT_EQ(toolkit::fetchunsigned(el, "value"), unsigned(23));
-
-  EXPECT_EQ(toolkit::fetchunsigned(el, "value", 30), unsigned(23));
-
-  EXPECT_EQ(toolkit::fetchunsigned(el, "dft_value", 30), unsigned(30));
 
   EXPECT_EQ(toolkit::fetchunsigned(el, "dft_value"), unsigned(0));
 

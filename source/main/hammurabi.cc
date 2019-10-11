@@ -93,8 +93,8 @@ void Pipeline::assemble_breg() {
   if (par->grid_breg.read_permission) {
     grid_breg->import_grid(par.get());
     breg = std::make_unique<Breg>();
-  } else if (par->breg_type == "wmap") {
-    breg = std::make_unique<Breg_wmap>();
+  } else if (par->breg_type == "lsa") {
+    breg = std::make_unique<Breg_lsa>();
   } else if (par->breg_type == "jaffe") {
     breg = std::make_unique<Breg_jaffe>();
   } else if (par->breg_type == "unif") {
