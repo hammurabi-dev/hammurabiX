@@ -46,7 +46,7 @@ TEST(integrator, shell_info_assembling) {
   test_unsigned = 128;
   EXPECT_EQ(par->grid_obs.nside_shell[2], test_unsigned);
   // shell info
-  pipe->assemble_shell_ref(ref.get(), par.get(), 1); // 1st shell
+  pipe->assemble_shell_ref(ref.get(), par.get(), 0); // 1st shell
   test_unsigned = 333;
   EXPECT_EQ(ref->step, test_unsigned);
   test_double = 5 * cgs_kpc;
@@ -63,7 +63,7 @@ TEST(integrator, shell_info_assembling) {
   idx = smp(rng);
   EXPECT_EQ(ref->dist[idx], ref->d_start + (idx + 0.5) * ref->delta_d);
   // shell info
-  pipe->assemble_shell_ref(ref.get(), par.get(), 3); // 3rd shell
+  pipe->assemble_shell_ref(ref.get(), par.get(), 2); // 3rd shell
   test_unsigned = 666;
   EXPECT_EQ(ref->step, test_unsigned);
   test_double = 40 * cgs_kpc / 2 + 5 * cgs_kpc;
@@ -88,7 +88,7 @@ TEST(integrator, shell_info_assembling) {
   test_unsigned = 8;
   EXPECT_EQ(par->grid_obs.nside_shell[2], test_unsigned);
   // 1st shell
-  pipe->assemble_shell_ref(ref.get(), par.get(), 1);
+  pipe->assemble_shell_ref(ref.get(), par.get(), 0);
   test_unsigned = 100;
   EXPECT_EQ(ref->step, test_unsigned);
   test_double = 0.;
@@ -104,7 +104,7 @@ TEST(integrator, shell_info_assembling) {
   idx = smp3(rng);
   EXPECT_EQ(ref->dist[idx], ref->d_start + (idx + 0.5) * ref->delta_d);
   // 2nd shell
-  pipe->assemble_shell_ref(ref.get(), par.get(), 2);
+  pipe->assemble_shell_ref(ref.get(), par.get(), 1);
   test_unsigned = 600;
   EXPECT_EQ(ref->step, test_unsigned);
   test_double = par->grid_obs.oc_r_max * 0.1;
@@ -120,7 +120,7 @@ TEST(integrator, shell_info_assembling) {
   idx = smp4(rng);
   EXPECT_EQ(ref->dist[idx], ref->d_start + (idx + 0.5) * ref->delta_d);
   // 3rd shell
-  pipe->assemble_shell_ref(ref.get(), par.get(), 3);
+  pipe->assemble_shell_ref(ref.get(), par.get(), 2);
   test_unsigned = 300;
   EXPECT_EQ(ref->step, test_unsigned);
   test_double = par->grid_obs.oc_r_max * 0.7;

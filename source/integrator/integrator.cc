@@ -21,6 +21,7 @@
 #include <integrator.h>
 #include <param.h>
 #include <tefield.h>
+#include <hampixma.h>
 
 void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
                             const TEreg *tereg, const TErnd *ternd,
@@ -28,6 +29,10 @@ void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
                             const Grid_brnd *gbrnd, const Grid_tereg *gtereg,
                             const Grid_ternd *gternd, const Grid_cre *gcre,
                             Grid_obs *gobs, const Param *par) const {
+  auto mask = std::make_unique<hampixma>();
+  if (par->grid_obs.do_mask) {
+    mask->import(par);
+  }
   if (par->grid_obs.do_dm) {
     gobs->dm_map->fill(0.);
   }
@@ -41,12 +46,16 @@ void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
   }
   auto shell_ref = std::make_unique<struct_shell>();
   // loop through shells
-  for (decltype(par->grid_obs.total_shell) current_shell = 1;
-       current_shell != (par->grid_obs.total_shell + 1); ++current_shell) {
+  for (decltype(par->grid_obs.total_shell) current_shell = 0;
+       current_shell != par->grid_obs.total_shell; ++current_shell) {
     // get current shell nside & npix
     const std::size_t current_nside{
-        par->grid_obs.nside_shell[current_shell - 1]};
+        par->grid_obs.nside_shell[current_shell]};
     const std::size_t current_npix{12 * current_nside * current_nside};
+    // get current mask
+    if (par->grid_obs.do_mask) {
+      mask->duplicate(current_nside);
+    }
     // prepare temporary maps for current shell
     if (par->grid_obs.do_dm) {
       gobs->tmp_dm_map->SetNside(current_nside, RING);
@@ -76,26 +85,29 @@ void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
       observables->qs = 0.;
       observables->us = 0.;
       observables->dm = 0.;
-      // remember to complete logic for ptg assignment!
-      // and for caching Faraday depth and/or optical depth
-      // make serious tests after changing this part!
-      pointing ptg;
-      if (par->grid_obs.do_dm) {
-        ptg = gobs->tmp_dm_map->pix2ang(ipix);
+      // check pixel masking
+      if ((not par->grid_obs.do_mask) or mask->info(current_nside,ipix) == 1.0) {
+        // remember to complete logic for ptg assignment!
+        // and for caching Faraday depth and/or optical depth
+        // make serious tests after changing this part!
+        pointing ptg;
+        if (par->grid_obs.do_dm) {
+          ptg = gobs->tmp_dm_map->pix2ang(ipix);
+        }
+        if (par->grid_obs.do_fd) {
+          ptg = gobs->tmp_fd_map->pix2ang(ipix);
+          // cache Faraday rotation from inner shells
+          observables->fd = gobs->fd_map->interpolated_value(ptg);
+        } else if (par->grid_obs.do_sync.back()) {
+          ptg = gobs->tmp_is_map->pix2ang(ipix);
+          // cache Faraday rotation from inner shells
+          observables->fd = gobs->fd_map->interpolated_value(ptg);
+        }
+        // core function!
+        radial_integration(shell_ref.get(), ptg, observables.get(), breg, brnd,
+                           tereg, ternd, cre, gbreg, gbrnd, gtereg, gternd, gcre,
+                           par);
       }
-      if (par->grid_obs.do_fd) {
-        ptg = gobs->tmp_fd_map->pix2ang(ipix);
-        // cache Faraday rotation from inner shells
-        observables->fd = gobs->fd_map->interpolated_value(ptg);
-      } else if (par->grid_obs.do_sync.back()) {
-        ptg = gobs->tmp_is_map->pix2ang(ipix);
-        // cache Faraday rotation from inner shells
-        observables->fd = gobs->fd_map->interpolated_value(ptg);
-      }
-      // core function!
-      radial_integration(shell_ref.get(), ptg, observables.get(), breg, brnd,
-                         tereg, ternd, cre, gbreg, gbrnd, gtereg, gternd, gcre,
-                         par);
       // collect from pixels
       if (par->grid_obs.do_dm) {
         (*gobs->tmp_dm_map)[ipix] = observables->dm;
@@ -248,8 +260,8 @@ void Integrator::radial_integration(
 void Integrator::assemble_shell_ref(struct_shell *target, const Param *par,
                                     const std::size_t &shell_num) const {
   target->shell_num = shell_num;
-  target->d_start = par->grid_obs.radii_shell[shell_num - 1];
-  target->d_stop = par->grid_obs.radii_shell[shell_num];
+  target->d_start = par->grid_obs.radii_shell[shell_num];
+  target->d_stop = par->grid_obs.radii_shell[shell_num+1];
   target->delta_d = par->grid_obs.oc_r_res;
   target->step = floor(
       (target->d_stop / target->delta_d - target->d_start / target->delta_d));

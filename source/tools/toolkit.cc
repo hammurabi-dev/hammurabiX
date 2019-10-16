@@ -12,6 +12,10 @@
 #include <toolkit.h>
 
 namespace toolkit {
+/*
+// Kahan summation algorithm
+class ksum;
+*/
 // mean for double array
 double mean(const double *arr, const std::size_t &size) {
   double avg{0};
@@ -194,3 +198,19 @@ double fetchdouble(tinyxml2::XMLElement *el, const std::string &att_type) {
 }
 
 } // namespace toolkit
+
+/*
+class toolkit::ksum{
+  double acc, c; // acc, the accumulator; c, the compensator
+public:
+  ksum() : acc(0), c(0) {}
+  virtual ~ksum() = default;
+  void add (const double &val) {
+    const volatile double y = val - c;
+    const volatile double t = acc + y;
+    c = (t - acc) - y; // the missing compensator
+    acc = t;
+  }
+  double result() const {return acc;}
+};
+ */

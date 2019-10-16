@@ -14,7 +14,7 @@ methods:
 In []: import hampyx as hpx
 
 # Initialize object
-In []: object = hpx.hampyx (exe_path, xml_path)
+In []: object = hpx.hampyx (<xml file path>, <executable path>)
 
 hammurabiX executable path is by default '/usr/local/hammurabi/bin/hamx'
 while xml file path is by default './'
@@ -75,8 +75,9 @@ import logging as log
 class Hampyx(object):
 
     """
-    default executable path is '/usr/local/hammurabi/bin/hamx'
-    default executable path is './params.xml'
+    default executable path is None, we will search users' environment,
+    default executable path is './params.xml',
+    otherwise, *absolute* paths are required!!!
     """
     def __init__(self,
                  xml_path='./params.xml',
@@ -109,7 +110,7 @@ class Hampyx(object):
         return self._xml_path
     
     """
-    by default hammurabiX executable "hamx" is in the same directory as this file
+    by default hammurabiX executable "hamx" should be available in 'PATH'
     """
     @exe_path.setter
     def exe_path(self, exe_path):

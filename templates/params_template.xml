@@ -11,7 +11,7 @@
   </observable>
   <!-- mask map, input -->
   <!-- the mask map is universally applied to all observable outputs -->
-  <mask cue="1" filename="mask.fits"/>
+  <mask cue="0" filename="mask.fits"/>
   <!-- physical field in/out -->
   <fieldio>
     <breg read="0" write="0" filename="breg.bin"/> <!-- regular magnetic field (optional) -->
