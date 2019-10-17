@@ -17,11 +17,11 @@
 #include <cgs_units.h>
 #include <crefield.h>
 #include <grid.h>
+#include <hampixma.h>
 #include <hamvec.h>
 #include <integrator.h>
 #include <param.h>
 #include <tefield.h>
-#include <hampixma.h>
 
 void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
                             const TEreg *tereg, const TErnd *ternd,
@@ -49,8 +49,7 @@ void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
   for (decltype(par->grid_obs.total_shell) current_shell = 0;
        current_shell != par->grid_obs.total_shell; ++current_shell) {
     // get current shell nside & npix
-    const std::size_t current_nside{
-        par->grid_obs.nside_shell[current_shell]};
+    const std::size_t current_nside{par->grid_obs.nside_shell[current_shell]};
     const std::size_t current_npix{12 * current_nside * current_nside};
     // get current mask
     if (par->grid_obs.do_mask) {
@@ -86,7 +85,8 @@ void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
       observables->us = 0.;
       observables->dm = 0.;
       // check pixel masking
-      if ((not par->grid_obs.do_mask) or mask->info(current_nside,ipix) == 1.0) {
+      if ((not par->grid_obs.do_mask) or
+          mask->info(current_nside, ipix) == 1.0) {
         // remember to complete logic for ptg assignment!
         // and for caching Faraday depth and/or optical depth
         // make serious tests after changing this part!
@@ -105,8 +105,8 @@ void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
         }
         // core function!
         radial_integration(shell_ref.get(), ptg, observables.get(), breg, brnd,
-                           tereg, ternd, cre, gbreg, gbrnd, gtereg, gternd, gcre,
-                           par);
+                           tereg, ternd, cre, gbreg, gbrnd, gtereg, gternd,
+                           gcre, par);
       }
       // collect from pixels
       if (par->grid_obs.do_dm) {
@@ -261,7 +261,7 @@ void Integrator::assemble_shell_ref(struct_shell *target, const Param *par,
                                     const std::size_t &shell_num) const {
   target->shell_num = shell_num;
   target->d_start = par->grid_obs.radii_shell[shell_num];
-  target->d_stop = par->grid_obs.radii_shell[shell_num+1];
+  target->d_stop = par->grid_obs.radii_shell[shell_num + 1];
   target->delta_d = par->grid_obs.oc_r_res;
   target->step = floor(
       (target->d_stop / target->delta_d - target->d_start / target->delta_d));

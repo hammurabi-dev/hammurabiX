@@ -69,7 +69,7 @@ standards and support for high-performance-computing.
 
 Technically, ``hammurabi X`` performs an efficient line-of-sight radiative transfer integral 
 through the simulated Galaxy model using a HEALpix-based nested grid to produce 
-observables such as Faraday rotation measure and diffuse synchrotron and thermal dust 
+observables such as Faraday rotation measure and diffuse synchrotron 
 emission in full Stokes I, Q and U, while taking into account beam and depth depolarization 
 as well as Faraday effects.
 

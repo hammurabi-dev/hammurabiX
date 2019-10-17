@@ -16,7 +16,8 @@
 // then we leave it as UN-masked
 // we import the mask map as it is (with its resolution)
 // during checking masking regions for each LoS shell
-// we use optismatic downgrading so we won't miss any information at the boundaries
+// we use optismatic downgrading so we won't miss any information at the
+// boundaries
 //
 // alternatively, with non-HEALPix pixelization
 // we provide a list of pointing directions
@@ -26,22 +27,22 @@
 #ifndef HAMMURABI_MASK_H
 #define HAMMURABI_MASK_H
 
+#include <cassert>
+#include <fstream>
+#include <map>
 #include <memory>
+#include <stdexcept>
 #include <utility>
 #include <vector>
-#include <map>
-#include <fstream>
-#include <stdexcept>
-#include <cassert>
 
-#include <healpix_map.h>
 #include <fitshandle.h>
 #include <fitsio.h>
+#include <healpix_map.h>
 #include <healpix_map_fitsio.h>
 
 #include <param.h>
 
-class hampixma{
+class hampixma {
 public:
   hampixma() = default;
   // disable copy
@@ -58,7 +59,7 @@ public:
   // return the mask info at given resolution and index
   // 1st argument: target mask HEALPix resolution
   // 2nd argument: target map index
-  inline double info(const std::size_t &nside, const std::size_t &idx) const{
+  inline double info(const std::size_t &nside, const std::size_t &idx) const {
     return (maps->at(nside))[idx];
   }
 #ifdef NDEBUG
@@ -70,7 +71,7 @@ protected:
   std::size_t pivot_nside = 0;
 };
 
-void hampixma::import(const Param *par){
+void hampixma::import(const Param *par) {
   // double check if a mask map is required
   if (not par->grid_obs.do_mask) {
     throw std::runtime_error("no masking");
@@ -82,25 +83,25 @@ void hampixma::import(const Param *par){
   auto tmp = std::make_unique<Healpix_Map<double>>();
   read_Healpix_map_from_fits(par->grid_obs.mask_name, *tmp);
   // initialize the maps
-  maps = std::make_unique<std::map<std::size_t, Healpix_Map<double>>> ();
+  maps = std::make_unique<std::map<std::size_t, Healpix_Map<double>>>();
   pivot_nside = tmp->Nside();
-  maps->insert({pivot_nside,*tmp});
+  maps->insert({pivot_nside, *tmp});
 }
 
-void hampixma::duplicate(const std::size_t &nside){
+void hampixma::duplicate(const std::size_t &nside) {
   auto tmp = std::make_unique<Healpix_Map<double>>();
   tmp->SetNside(nside, RING);
-  if ( maps->find(nside) != maps->end() ) return; // avoid existed copy
-  if(pivot_nside>nside) {
+  if (maps->find(nside) != maps->end())
+    return; // avoid existed copy
+  if (pivot_nside > nside) {
     tmp->Import_degrade(maps->at(pivot_nside));
-    const std::size_t npix {static_cast<std::size_t>(tmp->Npix())};
-    for (std::size_t i=0;i<npix;++i) {
-      (*tmp)[i] = double((*tmp)[i]>0.0);
+    const std::size_t npix{static_cast<std::size_t>(tmp->Npix())};
+    for (std::size_t i = 0; i < npix; ++i) {
+      (*tmp)[i] = double((*tmp)[i] > 0.0);
     }
-  }
-  else if (pivot_nside<nside)
+  } else if (pivot_nside < nside)
     tmp->Import_upgrade(maps->at(pivot_nside));
-  maps->insert({nside,*tmp});
+  maps->insert({nside, *tmp});
 }
 
 #endif

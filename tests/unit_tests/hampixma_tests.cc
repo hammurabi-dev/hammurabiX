@@ -29,14 +29,9 @@ TEST(hampixma, basic) {
   testma->duplicate(4);
   EXPECT_EQ((testma->maps->at(4)).Nside(), 4);
   // check the pessimistic degrading
-  EXPECT_TRUE( (testma->maps->at(4)).average() > (testma->maps->at(8)).average() );
+  EXPECT_TRUE((testma->maps->at(4)).average() >
+              (testma->maps->at(8)).average());
   // check the upgrading
-  EXPECT_TRUE( (testma->maps->at(8)).average() == (testma->maps->at(16)).average() );
-  // a more precise check
-  for (int i=0;i<768;++i) {
-    const double pixval = testma->info(8,i);
-    if (pixval == 1.0) {
-      EXPECT_TRUE( pixval == testma->info(4,i%4) );
-    }
-  }
+  EXPECT_TRUE((testma->maps->at(8)).average() ==
+              (testma->maps->at(16)).average());
 }
