@@ -30,7 +30,8 @@ double TErnd_dft::spatial_profile(const hamvec<3, double> &pos,
          std::exp(-z / par->ternd_dft.z0);
 }
 
-void TErnd_dft::write_grid(const Param *par, Grid_ternd *grid) const {
+void TErnd_dft::write_grid(const Param *par, const TEreg *, const Grid_tereg *,
+                           Grid_ternd *grid) const {
   // STEP I
   // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
   // initialize random seed

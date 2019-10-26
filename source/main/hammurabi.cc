@@ -120,7 +120,8 @@ void Pipeline::assemble_ternd() {
         ternd = std::make_unique<TErnd_dft>();
       }
       // fill grid with random fields
-      ternd->write_grid(par.get(), grid_ternd.get());
+      ternd->write_grid(par.get(), tereg.get(), grid_tereg.get(),
+                        grid_ternd.get());
     } else
       throw std::runtime_error("unsupported brnd model");
   } else {

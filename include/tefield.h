@@ -75,7 +75,8 @@ public:
                             const Grid_ternd *) const;
   virtual double read_grid(const hamvec<3, double> &, const Param *,
                            const Grid_ternd *) const;
-  virtual void write_grid(const Param *, Grid_ternd *) const;
+  virtual void write_grid(const Param *, const TEreg *, const Grid_tereg *,
+                          Grid_ternd *) const;
 };
 
 //--------------------------- TEreg DERIVED ----------------------------------//
@@ -150,7 +151,8 @@ public:
   TErnd_dft &operator=(TErnd_dft &&) = delete;
   virtual ~TErnd_dft() = default;
   // trivial Fourier transform, with rescaling applied in spatial space
-  void write_grid(const Param *, Grid_ternd *) const override;
+  void write_grid(const Param *, const TEreg *, const Grid_tereg *,
+                  Grid_ternd *) const override;
 
 protected:
   // isotropic turubulent power spectrum

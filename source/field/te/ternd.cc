@@ -69,6 +69,7 @@ double TErnd::read_grid(const hamvec<3, double> &pos, const Param *par,
   return w1 * (1. - xd) + w2 * xd;
 }
 
-void TErnd::write_grid(const Param *, Grid_ternd *) const {
+void TErnd::write_grid(const Param *, const TEreg *, const Grid_tereg *,
+                       Grid_ternd *) const {
   throw std::runtime_error("wrong inheritance");
 }

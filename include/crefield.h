@@ -131,7 +131,6 @@ public:
   CRE_num &operator=(const CRE_num &) = delete;
   CRE_num &operator=(CRE_num &&) = delete;
   virtual ~CRE_num() = default;
-  // overload the base class read_grid function
 };
 
 #endif
