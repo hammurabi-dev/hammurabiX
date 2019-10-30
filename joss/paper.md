@@ -1,5 +1,5 @@
 ---
-title: 'hammurabi X: A C++ package for simulating Galactic emissions'
+title: 'hammurabi X: a C++ package for simulating Galactic emissions'
 tags:
 - C++
 - astronomy
