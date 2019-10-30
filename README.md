@@ -1,5 +1,7 @@
 # hammurabi X README
 
+[![DOI](https://zenodo.org/badge/215691969.svg)](https://zenodo.org/badge/latestdoi/215691969)
+
 hammurabi is an open-source (GNU General Public License v3) HEALPix-based tool 
 for simulating full/partial-sky Galactic emissions.
 The outputs of (current version) hammurabi X include:
