@@ -5,23 +5,23 @@ CXX=g++
 endif
 
 ifeq ($(GSL),)
-GSL=
+GSL=/usr/local/gsl
 endif
 
 ifeq ($(FFTW),)
-FFTW=
+FFTW=/usr/local/fftw
 endif
 
 ifeq ($(CFITSIO),)
-CFITSIO=
+CFITSIO=/usr/local/cifitsio
 endif
 
 ifeq ($(HEALPIX),)
-HEALPIX=
+HEALPIX=/usr/local/healpix
 endif
 
 ifeq ($(HEALPIX_TARGET),)
-HEALPIX_TARGET=
+HEALPIX_TARGET=optimized_cxx
 endif
 
 ifeq ($(EXE),)
