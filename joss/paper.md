@@ -17,9 +17,9 @@ affiliation: 6
 affiliations:
 - name: Scuola Internazionale Superiore di Studi Avanzati, Via Bonomea 265, 34136 Trieste, Italy
 index: 1
-- name: Istituto Nazionale di Fisica Nucleare, Sezione di Trieste, Via Bonomea 265, 34136 Trieste, Italy
-index: 2
 - name: Department of Astronomy, Shanghai Jiao Tong University, 800 Dongchuan Road, 200240 Shanghai, China
+index: 2
+- name: Istituto Nazionale di Fisica Nucleare, Sezione di Trieste, Via Bonomea 265, 34136 Trieste, Italy
 index: 3
 - name: CRESST, NASA Goddard Space Flight Center, Greenbelt, MD 20771, USA
 index: 4
