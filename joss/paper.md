@@ -13,7 +13,10 @@ orcid: 0000-0000-0000-0000
 affiliation: "4, 5"
 - name: Torsten A. Ensslin
 orcid: 0000-0001-5246-1624
-affiliation: 6
+affiliation: "6"
+- name: Joe Taylor
+orcid: 0000-0000-0000-0000
+affiliation: "5"
 affiliations:
 - name: Scuola Internazionale Superiore di Studi Avanzati, Via Bonomea 265, 34136 Trieste, Italy
 index: 1
