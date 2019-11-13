@@ -84,7 +84,7 @@ The numerical framework can also be applied to other settings, for example, rece
 
 # Acknowledgements
 
-We acknowledge technical contributions from Theo Steininger and Joe Taylor,
-and the support from SISSA HPC service and MHPC program.
+We acknowledge technical contributions from Theo Steininger,
+and the support from SISSA HPC service and the MHPC program.
 
 # References
