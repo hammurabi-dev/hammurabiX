@@ -6,32 +6,32 @@ tags:
 - Galactic emission
 authors:
 - name: Jiaxin Wang
-orcid: 0000-0002-7384-7152
-affiliation: "1, 2, 3"
+  orcid: 0000-0002-7384-7152
+  affiliation: "1, 2, 3"
 - name: Tess R. Jaffe
-orcid: 0000-0000-0000-0000
-affiliation: "4, 5"
+  affiliation: "4, 5"
 - name: Torsten A. Ensslin
-orcid: 0000-0001-5246-1624
-affiliation: "6"
+  orcid: 0000-0001-5246-1624
+  affiliation: "6"
 - name: Joe Taylor
-orcid: 0000-0000-0000-0000
-affiliation: "5"
+  affiliation: "5"
 affiliations:
 - name: Scuola Internazionale Superiore di Studi Avanzati, Via Bonomea 265, 34136 Trieste, Italy
-index: 1
+  index: 1
 - name: Department of Astronomy, Shanghai Jiao Tong University, 800 Dongchuan Road, 200240 Shanghai, China
-index: 2
+  index: 2
 - name: Istituto Nazionale di Fisica Nucleare, Sezione di Trieste, Via Bonomea 265, 34136 Trieste, Italy
-index: 3
+  index: 3
 - name: CRESST, NASA Goddard Space Flight Center, Greenbelt, MD 20771, USA
-index: 4
+  index: 4
 - name: Department of Astronomy, University of Maryland, College Park, MD, 20742, USA
-index: 5
+  index: 5
 - name: Max Planck Institute for Astrophysics, Karl-Schwarzschild-Str. 1, D-85741 Garching, Germany
-index: 6
+  index: 6
 date: 6 October 2019
 bibliography: paper.bib
+aas-doi: 10.3847/xxxxx
+aas-journal: Astronomical Journal
 ---
 
 # Summary
