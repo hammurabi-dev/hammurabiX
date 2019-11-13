@@ -9,6 +9,7 @@ authors:
   orcid: 0000-0002-7384-7152
   affiliation: "1, 2, 3"
 - name: Tess R. Jaffe
+  orcid: 0000-0003-2645-1339
   affiliation: "4, 5"
 - name: Torsten A. Ensslin
   orcid: 0000-0001-5246-1624
