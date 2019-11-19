@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cmath>
 #include <omp.h>
 
@@ -100,6 +101,7 @@ void TErnd_dft::write_grid(const Param *par, const TEreg *, const Grid_tereg *,
   const double te_var_invsq{
       1. /
       std::sqrt(toolkit::variance(grid->te_k[0], par->grid_ternd.full_size))};
+  assert(std::isfinite(te_var_invsq));
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif

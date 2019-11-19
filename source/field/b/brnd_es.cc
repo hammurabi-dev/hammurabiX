@@ -154,6 +154,7 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
   const double b_var_invsq{
       1. /
       std::sqrt(3. * toolkit::variance(grid->c0[0], par->grid_brnd.full_size))};
+  assert(std::isfinite(b_var_invsq));
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
