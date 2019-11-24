@@ -334,7 +334,7 @@ ADD_EXECUTABLE(hamx source/main/hammurabi.cc)
 TARGET_LINK_LIBRARIES(hamx hammurabi)
 # copy template parameter file into build directory
 FILE(COPY
-	${CMAKE_CURRENT_LIST_DIR}/templates/params_template.xml
+	${CMAKE_CURRENT_LIST_DIR}/templates/params_template.xml ${CMAKE_CURRENT_LIST_DIR}/templates/run.sh
 DESTINATION
 	${CMAKE_CURRENT_BINARY_DIR}
 )

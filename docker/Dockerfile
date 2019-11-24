@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-MAINTAINER jiaxin.wang@sissa.it
+MAINTAINER jiaxin.wang@sjtu.edu.cn
 
 # users may need python-tk, please install it manually: # apt-get install python3-tk
 
