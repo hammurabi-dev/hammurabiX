@@ -10,42 +10,9 @@
 #include <grid.h>
 #include <integrator.h>
 #include <param.h>
+#include <pipeline.h>
 #include <tefield.h>
-#include <timer.h>
 #include <toolkit.h>
-
-class Pipeline {
-public:
-  Pipeline() = default;
-  Pipeline(const std::string &);
-  Pipeline(const Pipeline &) = delete;
-  Pipeline(Pipeline &&) = delete;
-  Pipeline &operator=(const Pipeline &) = delete;
-  Pipeline &operator=(Pipeline &&) = delete;
-  virtual ~Pipeline() = default;
-  void assemble_grid();
-  void assemble_tereg();
-  void assemble_breg();
-  void assemble_ternd();
-  void assemble_brnd();
-  void assemble_cre();
-  void assemble_obs();
-
-private:
-  std::unique_ptr<Param> par;
-  std::unique_ptr<Grid_tereg> grid_tereg;
-  std::unique_ptr<Grid_breg> grid_breg;
-  std::unique_ptr<Grid_brnd> grid_brnd;
-  std::unique_ptr<Grid_ternd> grid_ternd;
-  std::unique_ptr<Grid_cre> grid_cre;
-  std::unique_ptr<Grid_obs> grid_obs;
-  std::unique_ptr<TEreg> tereg;
-  std::unique_ptr<Breg> breg;
-  std::unique_ptr<TErnd> ternd;
-  std::unique_ptr<Brnd> brnd;
-  std::unique_ptr<CREfield> cre;
-  std::unique_ptr<Integrator> intobj;
-};
 
 // constructor
 Pipeline::Pipeline(const std::string &filename) {
@@ -211,40 +178,4 @@ void Pipeline::assemble_obs() {
       }
     }
   }
-}
-
-int main(int argc, char **argv) {
-  // helping
-  if (argc != 2) {
-    std::cout << "wrong input(s)!" << std::endl
-              << "hammurabi X requires the path to the XML parameter file"
-              << std::endl
-              << "try hamx -h for more details." << std::endl;
-    throw std::runtime_error("exit before execution");
-  }
-  const std::string input(argv[1]);
-  if (input == "-h") {
-    std::cout << "to execute hammurabi X you need to use" << std::endl
-              << "hamx [XML parameter file path]" << std::endl
-              << "an XML template file can be found in the templates directory"
-              << std::endl;
-    return EXIT_SUCCESS;
-  }
-#ifndef NTIMING
-  auto tmr = std::make_unique<Timer>();
-  tmr->start("main");
-#endif
-  auto run = std::make_unique<Pipeline>(input);
-  run->assemble_grid();
-  run->assemble_tereg();
-  run->assemble_breg();
-  run->assemble_ternd();
-  run->assemble_brnd();
-  run->assemble_cre();
-  run->assemble_obs();
-#ifndef NTIMING
-  tmr->stop("main");
-  tmr->print();
-#endif
-  return EXIT_SUCCESS;
 }

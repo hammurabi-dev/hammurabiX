@@ -132,6 +132,8 @@ SET(SRC_FILES
 
 	${CMAKE_CURRENT_LIST_DIR}/source/tools/tinyxml2.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/tools/toolkit.cc
+
+	${CMAKE_CURRENT_LIST_DIR}/source/pipeline/pipeline.cc
 )
 
 # find HEALPix
@@ -330,7 +332,7 @@ IF(ENABLE_TESTING)
 ENDIF()
 
 # build executable
-ADD_EXECUTABLE(hamx source/main/hammurabi.cc)
+ADD_EXECUTABLE(hamx source/main/main_std.cc)
 TARGET_LINK_LIBRARIES(hamx hammurabi)
 # copy template parameter file into build directory
 FILE(COPY
