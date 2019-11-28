@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
 """
 developed by Joe Taylor
 based on the initial work of Theo Steininger
 
-warning:
+WARNING:
 working directory is set as the same directory as this file
 it relies on subprocess to fork c++ routine and passing data through disk
 so, it is not fast
@@ -62,8 +61,6 @@ detailed caption of each function can be found with their implementation
 """
 
 import os
-import sys
-import time
 import subprocess
 import healpy as hp
 import xml.etree.ElementTree as et
@@ -73,18 +70,31 @@ import logging as log
 
 
 class Hampyx(object):
-
-    """
-    default executable path is None, we will search users' environment,
-    default executable path is './params.xml',
-    otherwise, *absolute* paths are required!!!
-    """
+    
     def __init__(self,
-                 xml_path='./params.xml',
+                 xml_path=None,
                  exe_path=None):
+        """
+        Hampyx init
+        
+        Parameters
+        ----------
+        
+        xml_path : str
+            XML parameter file path
+            
+        exe_path : str
+            hammurabi C executable path
+        
+        Note
+        ----
+        default executable path is None, we will search users' environment,
+        default parameter file path is None, we will search current working directory,
+        otherwise, *absolute* paths are required!!!
+        """
         log.debug('initialize Hampyx')
         # current working directory
-        self.wk_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
+        self.wk_dir = os.getcwd()
         log.debug('set working directory at %s' % self.wk_dir)
         # encapsulated below
         self.exe_path = exe_path
@@ -109,11 +119,11 @@ class Hampyx(object):
     def xml_path(self):
         return self._xml_path
     
-    """
-    by default hammurabiX executable "hamx" should be available in 'PATH'
-    """
     @exe_path.setter
     def exe_path(self, exe_path):
+        """
+        by default hammurabiX executable "hamx" should be available in 'PATH'
+        """
         if exe_path is None:  # search sys environ
             env = os.environ.get('PATH').split(os.pathsep)
             cnddt = [s for s in env if 'hammurabi' in s]
@@ -128,9 +138,16 @@ class Hampyx(object):
 
     @xml_path.setter
     def xml_path(self, xml_path):
-        assert isinstance(xml_path, str)
-        self._xml_path = os.path.abspath(xml_path)
-        self._base_file = self.xml_path
+        if xml_path is None:
+            cnddt = [s for s in os.listdir(self._wk_dir) if 'xml' in s]
+            for match in cnddt:
+                if os.path.isfile(os.path.join(self._wk_dir, match)):
+                    self._xml_path = os.path.join(self._wk_dir, match)
+        else:
+            assert isinstance(xml_path, str)
+            self._xml_path = os.path.abspath(xml_path)
+            assert os.path.isfile(self._xml_path)
+        self._base_file = self._xml_path
         log.debug('set hammurabiX base XML parameter file path %s' % str(self._base_file))
 
     @property
@@ -183,11 +200,20 @@ class Hampyx(object):
         except AttributeError:
             self._sim_map = sim_map
             log.debug('set simulation map dict %s' % str(sim_map.keys()))
-
-    """
-    the main routine for running hammurabiX executable
-    """
+    
     def __call__(self, verbose=False):
+        return self.call(verbose)
+        
+    def call(self, verbose=False):
+        """
+        the main routine for running hammurabiX executable
+        
+        Parameters
+        ----------
+        
+        verbose : bool
+            log hammurabi executable std output/error, or not
+        """
         # create new temp parameter file
         if self.temp_file is self._base_file:
             self._new_xml_copy()
@@ -215,10 +241,10 @@ class Hampyx(object):
         self._get_sims()
         self._del_xml_copy()
 
-    """
-    make a temporary parameter file copy and rename output file with random mark
-    """
     def _new_xml_copy(self):
+        """
+        make a temporary parameter file copy and rename output file with random mark
+        """
         # create a random file name which doesn't exist currently
         fd, new_path = tf.mkstemp(prefix='params_', suffix='.xml', dir=self._wk_dir)
         os.close(fd)
@@ -251,10 +277,10 @@ class Hampyx(object):
         # automatically create a new file
         self.tree.write(self.temp_file)
 
-    """
-    grab simulation output from disk and delete corresponding fits file
-    """
     def _get_sims(self):
+        """
+        grab simulation output from disk and delete corresponding fits file
+        """
         # locate the keys
         sync_key = list()
         dm_key = None
@@ -300,10 +326,11 @@ class Hampyx(object):
                     os.remove(self.sim_map_name[i])
                 else:
                     raise ValueError('missing %s' % str(self.sim_map_name[i]))
-    """
-    read a single fits file with healpy
-    """
+    
     def _read_fits_file(self, path):
+        """
+        read a single fits file with healpy
+        """
         rslt = []
         i = 0
         while True:
@@ -315,10 +342,10 @@ class Hampyx(object):
                 break
         return rslt
 
-    """
-    delete temporary parameter file copy
-    """
     def _del_xml_copy(self):
+        """
+        delete temporary parameter file copy
+        """
         if self.temp_file is self._base_file:
             raise ValueError('read only')
         else:
@@ -329,14 +356,14 @@ class Hampyx(object):
     THE FOLLOWING FUNCTIONS ARE RELATED TO XML FILE MANIPULATION
     """
 
-    """
-    modify parameter in self.tree
-    argument of type ['path','to','target'], {attrib}
-    attrib of type {'tag': 'content'}
-    if attribute 'tag' already exists, then new attrib will be assigned
-    if attribute 'tag' is not found, then new 'tag' will be inserted
-    """
     def mod_par(self, keychain=None, attrib=None):
+        """
+        modify parameter in self.tree
+        argument of type ['path','to','target'], {attrib}
+        attrib of type {'tag': 'content'}
+        if attribute 'tag' already exists, then new attrib will be assigned
+        if attribute 'tag' is not found, then new 'tag' will be inserted
+        """
         # input type check
         if type(attrib) is not dict or type(keychain) is not list:
             raise ValueError('wrong input %s %s' % (keychain, attrib))
@@ -350,12 +377,12 @@ class Hampyx(object):
         for i in attrib:
             target.set(i, attrib.get(i))
 
-    """
-    add new subkey under keychain in the tree
-    argument of type ['path','to','target'], 'subkey', {attrib}
-    or of type ['path','to','target'], 'subkey'
-    """
     def add_par(self, keychain=None, subkey=None, attrib=None):
+        """
+        add new subkey under keychain in the tree
+        argument of type ['path','to','target'], 'subkey', {attrib}
+        or of type ['path','to','target'], 'subkey'
+        """
         # input type check
         if type(keychain) is not list or type(subkey) is not str:
             raise ValueError('wrong input %s %s %s' % (keychain, subkey, attrib))
@@ -381,12 +408,12 @@ class Hampyx(object):
         else:
             raise ValueError('wrong input %s %s %s' % (keychain, subkey, attrib))
 
-    """        
-    print a certain parameter
-    argument of type ['path','to','key'] (e.g. ['grid','observer','x'])
-    print all parameters down to the keychain children level
-    """
     def print_par(self, keychain=None):
+        """
+        print a certain parameter
+        argument of type ['path','to','key'] (e.g. ['grid','observer','x'])
+        print all parameters down to the keychain children level
+        """
         # input type check
         if type(keychain) is not list:
             raise ValueError('wrong input %s' % keychain)
@@ -404,12 +431,12 @@ class Hampyx(object):
                 for child in target:
                     print('|--> ', child.tag, child.attrib)
 
-    """        
-    deletes an parameter and all of its children
-    argument of type ['keys','to','target'] (e.g. ['grid','observer','x'])
-    if opt='all', delete all parameters that match given keychain
-    """
     def del_par(self, keychain=None, opt=None):
+        """
+        deletes an parameter and all of its children
+        argument of type ['keys','to','target'] (e.g. ['grid','observer','x'])
+        if opt='all', delete all parameters that match given keychain
+        """
         # input type check
         if type(keychain) is not list:
             raise ValueError('wrong input %s' % keychain)
@@ -429,7 +456,7 @@ class Hampyx(object):
                 raise ValueError('wrong path %s' % path_str)
             if opt is None:
                 parent.remove(target)
-            elif opt is 'all':
+            elif (opt == 'all'):
                 for i in root.findall(path_str):
                     parent.remove(i)
             else:
