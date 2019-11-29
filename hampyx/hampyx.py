@@ -13,7 +13,7 @@ methods:
 In []: import hampyx as hpx
 
 # Initialize object
-In []: object = hpx.hampyx (<xml file path>, <executable path>)
+In []: object = hpx.Hampyx (<xml file path>, <executable path>)
 
 hammurabiX executable path is by default '/usr/local/hammurabi/bin/hamx'
 while xml file path is by default './'
