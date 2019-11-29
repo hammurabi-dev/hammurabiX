@@ -127,9 +127,10 @@ class Hampyx(object):
         if exe_path is None:  # search sys environ
             env = os.environ.get('PATH').split(os.pathsep)
             cnddt = [s for s in env if 'hammurabi' in s]
-            for match in cnddt:
+            for match in cnddt:  # get the first match that exists
                 if os.path.isfile(os.path.join(match, 'hamx')):
                     self._exe_path = os.path.join(match, 'hamx')
+                    break
         else:  # if given
             assert isinstance(exe_path, str)
             self._exe_path = os.path.abspath(exe_path)
@@ -140,9 +141,10 @@ class Hampyx(object):
     def xml_path(self, xml_path):
         if xml_path is None:
             cnddt = [s for s in os.listdir(self._wk_dir) if 'xml' in s]
-            for match in cnddt:
+            for match in cnddt:  # get the first match that exists
                 if os.path.isfile(os.path.join(self._wk_dir, match)):
                     self._xml_path = os.path.join(self._wk_dir, match)
+                    break
         else:
             assert isinstance(xml_path, str)
             self._xml_path = os.path.abspath(xml_path)

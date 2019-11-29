@@ -21,7 +21,7 @@ HEALPIX=/usr/local/healpix
 endif
 
 ifeq ($(HEALPIX_TARGET),)
-HEALPIX_TARGET=optimized_cxx
+HEALPIX_TARGET=optimized_gcc
 endif
 
 ifeq ($(EXE),)
