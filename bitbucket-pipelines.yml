@@ -1,9 +1,26 @@
-# use bitbucket pipeline for indentation check
-#
-image: atlassian/default-image:latest
+# use bitbucket pipeline for
+# 1. indentation check
+# 2. make test
+
+image: dockterwang/hammurabi
+
+options:
+    docker: True
+
 pipelines:
-  default:
-    - step:
-        script:
-          - ./contrib/utilities/download_clang_format
-          - ./contrib/utilities/check_indentation.sh
+    default:
+        - parallel:
+            - step:  # indentation check
+                caches:
+                    - docker
+                script:
+                    - cd /home/lab/hamx
+                    - ./contrib/utilities/download_clang_format
+                    - ./contrib/utilities/check_indentation.sh
+        
+            - step:  # unit-tests
+                caches:
+                    - docker
+                script:
+                    - cd /home/lab/hamx/build
+                    - make test
