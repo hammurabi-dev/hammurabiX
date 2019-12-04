@@ -7,7 +7,7 @@ MAINTAINER jiaxin.wang@sjtu.edu.cn
 RUN apt-get update
 RUN apt-get install -y --fix-missing build-essential time gfortran libblas-dev liblapack-dev gsl-bin libgsl-dev autoconf cmake
 RUN apt-get install -y --fix-missing git wget vim unzip valgrind python3 python3-dev python3-pip
-RUN pip3 install numpy scipy matplotlib astropy healpy jupyter
+RUN pip3 install numpy scipy matplotlib astropy healpy jupyter pytest nbval
 
 RUN mkdir /home/lab
 WORKDIR /home/lab

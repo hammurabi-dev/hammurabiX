@@ -1,6 +1,7 @@
 # use bitbucket pipeline for
 # 1. indentation check
-# 2. make test
+# 2. C++ unit-tests
+# 3. jupyter notebook checks
 
 image: dockterwang/hammurabi
 
@@ -24,3 +25,10 @@ pipelines:
                 script:
                     - cd /home/lab/hamx/build
                     - make test
+                    
+            - step:  # jupyter notebook checks
+                caches:
+                    - docker
+                script:
+                    - cd /home/lab/hamx/tutorials
+                    - pytest --nbval-lax

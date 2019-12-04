@@ -130,7 +130,7 @@ class Hampyx(object):
                 if os.path.isfile(os.path.join(dir, 'hamx')):
                     self._exe_path = os.path.join(dir, 'hamx')
                     break
-            if exe_path is None:
+            if self._exe_path is None:
                 raise ValueError('unable to find the hammurabi X executable from the local PATH')
         else:  # if given
             assert isinstance(exe_path, str)
