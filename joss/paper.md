@@ -63,9 +63,8 @@ Furthermore, the focus in the Galactic emission modelling has migrated recently
 from assuming simple regular fields structure to more complicated fields with turbulence, 
 enhancing the need for an accurate state-of-the-art simulation package for Galactic emission.
 
-To extract information on the Galactic magnetic fields from observations,
-@Boulanger:2018 proposed rigorous Bayesian analysis machinery for parametric as 
-well as non-parametric Galactic magnetic field inference. 
+To extract information on the Galactic magnetic fields,
+@Boulanger:2018 proposed a Bayesian method for parametric and non-parametric Galactic magnetic field inference. 
 As Bayesian inference is computationally expensive, it has to rest on a high-performance 
 simulation package. To meet these requirements, the hammurabi code has been upgraded 
 to ``hammurabi X``, with a complete package redesign including modern coding 
