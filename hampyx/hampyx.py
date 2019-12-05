@@ -2,11 +2,6 @@
 developed by Joe Taylor
 based on the initial work of Theo Steininger
 
-WARNING:
-working directory is set as the same directory as this file
-it relies on subprocess to fork c++ routine and passing data through disk
-so, it is not fast
-
 methods:
 
 # Import class
@@ -57,7 +52,8 @@ object.sim_map[('sync',str(freq),str(Nside),'PA')] # synchrotron pol. angle at '
 object.sim_map[('fd','nan',str(Nside),'nan')] # Faraday depth map
 object.sim_map[('dm','nan',str(Nside),'nan')] # dispersion measure map
 
-detailed caption of each function can be found with their implementation
+note:
+for more detailed instructions please check the wiki page.
 """
 
 import os
