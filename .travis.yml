@@ -1,0 +1,10 @@
+language: ruby
+
+services:
+	- docker
+
+before_install:
+	- docker build -t hammurabi/ci docker
+	- docker run hammurabi/ci bash -c "cd /home/lab/hamx; ./contrib/utilities/download_clang_format; ./contrib/utilities/check_indentation.sh"
+	- docker run hammurabi/ci bash -c "cd /home/lab/hamx/build; make test"
+	- docker run hammurabi/ci bash -c "cd /home/lab/hamx/tutorials; pytest --nbval-lax"
