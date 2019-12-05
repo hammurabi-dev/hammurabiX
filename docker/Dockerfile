@@ -60,6 +60,8 @@ RUN cmake .. && make install
 # SET PATH
 ENV PATH /usr/local/hammurabi/bin:${PATH}
 ENV LD_LIBRARY_PATH /usr/local/hammurabi/lib:${LD_LIBRARY_PATH}
+WORKDIR /home/lab/hamx
+RUN python3 setup.py install
 WORKDIR /home/lab
 
 # CLEAN PACKAGES
