@@ -338,7 +338,7 @@ class Hampyx(object):
         i = 0
         while True:
             try:
-                loaded_map = hp.read_map(path, verbose=False, field=i)
+                loaded_map = hp.read_map(path, field=i, dtype=np.float64, verbose=False)
                 rslt += [loaded_map]
                 i += 1
             except IndexError:
