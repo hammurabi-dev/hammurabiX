@@ -1,6 +1,5 @@
-#include <cmath>
-
 #include <bfield.h>
+#include <cmath>
 #include <hamvec.h>
 #include <param.h>
 

@@ -1,7 +1,7 @@
 #include <cassert>
 #include <cmath>
 
-#include <cgs_units.h>
+#include <cgsunits.h>
 #include <crefield.h>
 #include <hamvec.h>
 #include <param.h>
@@ -20,8 +20,8 @@ double CRE_ana::spatial_profile(const hamvec<3, double> &pos,
 // CRE spectral index
 // for N(\gamma) = flux_norm * \gamma^{flux_idx}
 double CRE_ana::flux_idx(const hamvec<3, double> &pos, const Param *par) const {
-  const double r{std::sqrt(pos[0] * pos[0] + pos[1] * pos[1]) / cgs_kpc};
-  const double z{std::fabs(pos[2]) / cgs_kpc};
+  const double r{std::sqrt(pos[0] * pos[0] + pos[1] * pos[1]) / cgs::kpc};
+  const double z{std::fabs(pos[2]) / cgs::kpc};
   return -par->cre_ana.alpha + par->cre_ana.beta * r + par->cre_ana.theta * z;
 }
 
@@ -33,12 +33,12 @@ double CRE_ana::flux_norm(const hamvec<3, double> &pos,
   // j0 is in [GeV m^2 s sr]^-1 units
   // note that the j0 has already been defined by per steradian
   // which is the conventional units for PHI(E)
-  const double gamma0{par->cre_ana.E0 / cgs_mec2};
+  const double gamma0{par->cre_ana.E0 / cgs::mec2};
   const double beta0{std::sqrt(1. - 1. / gamma0)};
   // N(\gamma) = (4\pi mc/\beta) * PHI(E) by definition
   // the extra 'unit' coefficients come from the definition of 'j0'
-  const double unit{4. * cgs_pi * cgs_mec /
-                    (cgs_GeV * cgs_m * cgs_m * cgs_sec * beta0)};
+  const double unit{4. * cgs::pi * cgs::mec /
+                    (cgs::GeV * cgs::m * cgs::m * cgs::sec * beta0)};
   const double norm{par->cre_ana.j0 *
                     std::pow(gamma0, -flux_idx(par->observer, par))};
   return norm * unit * spatial_profile(pos, par);
@@ -51,8 +51,8 @@ double CRE_ana::write_field(const hamvec<3, double> &pos, const double &En,
                             const Param *par) const {
   // j0 is in [GeV m^2 s sr]^-1 units
   // note that the j0 has already been defined by per steradian
-  const double gamma{En / cgs_mec2};
-  const double gamma0{par->cre_ana.E0 / cgs_mec2};
+  const double gamma{En / cgs::mec2};
+  const double gamma0{par->cre_ana.E0 / cgs::mec2};
   const double beta_ratio{std::sqrt((1. - 1. / gamma) / (1. - 1. / gamma0))};
   const double norm{par->cre_ana.j0 *
                     std::pow(gamma0, -flux_idx(par->observer, par))};

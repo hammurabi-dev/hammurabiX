@@ -9,7 +9,7 @@
 #ifndef HAMMURABI_POINTING_H
 #define HAMMURABI_POINTING_H
 
-#include <cgs_units.h>
+#include <cgsunits.h>
 #include <cmath>
 #include <hamvec.h>
 
@@ -40,22 +40,22 @@ public:
     const double x{vec[0]};
     const double y{vec[1]};
     const double z{vec[2]};
-    Theta = std::fmod(std::atan2(sqrt(x * x + y * y), z), cgs_pi);
-    Theta += (Theta < 0) * cgs_pi;
-    Phi = std::fmod(std::atan2(y, x), 2. * cgs_pi);
-    Phi += (Phi < 0) * 2. * cgs_pi;
+    Theta = std::fmod(std::atan2(sqrt(x * x + y * y), z), cgs::pi);
+    Theta += (Theta < 0) * cgs::pi;
+    Phi = std::fmod(std::atan2(y, x), 2. * cgs::pi);
+    Phi += (Phi < 0) * 2. * cgs::pi;
   }
   ~hampixp() = default;
 
   // read theta value
   void theta(const double &t) {
-    Theta = std::fmod(t, cgs_pi);
-    Theta += (Theta < 0) * cgs_pi;
+    Theta = std::fmod(t, cgs::pi);
+    Theta += (Theta < 0) * cgs::pi;
   }
   // read phi value
   void phi(const double &p) {
-    Phi = std::fmod(p, 2. * cgs_pi);
-    Phi += (Phi < 0) * 2. * cgs_pi;
+    Phi = std::fmod(p, 2. * cgs::pi);
+    Phi += (Phi < 0) * 2. * cgs::pi;
   }
   // return theta value
   double theta() const { return Theta; }
@@ -66,10 +66,10 @@ public:
 };
 
 void hampixp::norm() {
-  Theta = std::fmod(Theta, cgs_pi);
-  Theta += (Theta < 0) * cgs_pi;
-  Phi = std::fmod(Phi, 2. * cgs_pi);
-  Phi += (Phi < 0) * 2. * cgs_pi;
+  Theta = std::fmod(Theta, cgs::pi);
+  Theta += (Theta < 0) * cgs::pi;
+  Phi = std::fmod(Phi, 2. * cgs::pi);
+  Phi += (Phi < 0) * 2. * cgs::pi;
 }
 
 hamvec<3, double> hampixp::versor() const {

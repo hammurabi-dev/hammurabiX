@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include <cgs_units.h>
+#include <cgsunits.h>
 #include <cmath>
 #include <grid.h>
 #include <integrator.h>
@@ -34,9 +34,9 @@ TEST(integrator, shell_info_assembling) {
   // frequency
   test_unsigned = 2;
   EXPECT_EQ(par->grid_obs.sim_sync_freq.size(), test_unsigned);
-  test_double = 23.0 * cgs_GHz;
+  test_double = 23.0 * cgs::GHz;
   EXPECT_EQ(par->grid_obs.sim_sync_freq[0], test_double);
-  test_double = 1.4 * cgs_GHz;
+  test_double = 1.4 * cgs::GHz;
   EXPECT_EQ(par->grid_obs.sim_sync_freq[1], test_double);
   // shell resolution
   test_unsigned = 32;
@@ -49,12 +49,12 @@ TEST(integrator, shell_info_assembling) {
   pipe->assemble_shell_ref(ref.get(), par.get(), 0); // 1st shell
   test_unsigned = 333;
   EXPECT_EQ(ref->step, test_unsigned);
-  test_double = 5 * cgs_kpc;
+  test_double = 5 * cgs::kpc;
   EXPECT_EQ(ref->d_start, test_double);
-  test_double = 40 * cgs_kpc / 4 + 5 * cgs_kpc;
+  test_double = 40 * cgs::kpc / 4 + 5 * cgs::kpc;
   EXPECT_EQ(ref->d_stop, test_double);
-  test_double = (10 * cgs_kpc) / 333;
-  EXPECT_NEAR(ref->delta_d, test_double, 1.0e-10 * cgs_kpc);
+  test_double = (10 * cgs::kpc) / 333;
+  EXPECT_NEAR(ref->delta_d, test_double, 1.0e-10 * cgs::kpc);
   // radial quadrature point
   std::default_random_engine rng;
   std::uniform_int_distribution<int> smp(1, 333);
@@ -66,12 +66,12 @@ TEST(integrator, shell_info_assembling) {
   pipe->assemble_shell_ref(ref.get(), par.get(), 2); // 3rd shell
   test_unsigned = 666;
   EXPECT_EQ(ref->step, test_unsigned);
-  test_double = 40 * cgs_kpc / 2 + 5 * cgs_kpc;
+  test_double = 40 * cgs::kpc / 2 + 5 * cgs::kpc;
   EXPECT_EQ(ref->d_start, test_double);
-  test_double = 45 * cgs_kpc;
+  test_double = 45 * cgs::kpc;
   EXPECT_EQ(ref->d_stop, test_double);
-  test_double = (20 * cgs_kpc) / 666;
-  EXPECT_NEAR(ref->delta_d, test_double, 1.0e-10 * cgs_kpc);
+  test_double = (20 * cgs::kpc) / 666;
+  EXPECT_NEAR(ref->delta_d, test_double, 1.0e-10 * cgs::kpc);
   // radial quadrature point
   std::uniform_int_distribution<int> smp2(1, 666);
   idx = smp2(rng);
@@ -95,8 +95,8 @@ TEST(integrator, shell_info_assembling) {
   EXPECT_EQ(ref->d_start, test_double);
   test_double = par->grid_obs.oc_r_max * 0.1;
   EXPECT_EQ(ref->d_stop, test_double);
-  test_double = (3 * cgs_kpc) / 100;
-  EXPECT_NEAR(ref->delta_d, test_double, 1.0e-10 * cgs_kpc);
+  test_double = (3 * cgs::kpc) / 100;
+  EXPECT_NEAR(ref->delta_d, test_double, 1.0e-10 * cgs::kpc);
   // radial quadrature point
   std::uniform_int_distribution<int> smp3(1, 100);
   idx = smp3(rng);
@@ -111,8 +111,8 @@ TEST(integrator, shell_info_assembling) {
   EXPECT_EQ(ref->d_start, test_double);
   test_double = par->grid_obs.oc_r_max * 0.7;
   EXPECT_EQ(ref->d_stop, test_double);
-  test_double = (18 * cgs_kpc) / 600;
-  EXPECT_NEAR(ref->delta_d, test_double, 1.0e-10 * cgs_kpc);
+  test_double = (18 * cgs::kpc) / 600;
+  EXPECT_NEAR(ref->delta_d, test_double, 1.0e-10 * cgs::kpc);
   // radial quadrature point
   std::uniform_int_distribution<int> smp4(1, 600);
   idx = smp4(rng);
@@ -127,8 +127,8 @@ TEST(integrator, shell_info_assembling) {
   EXPECT_EQ(ref->d_start, test_double);
   test_double = par->grid_obs.oc_r_max * 1.0;
   EXPECT_EQ(ref->d_stop, test_double);
-  test_double = (9 * cgs_kpc) / 300;
-  EXPECT_NEAR(ref->delta_d, test_double, 1.0e-10 * cgs_kpc);
+  test_double = (9 * cgs::kpc) / 300;
+  EXPECT_NEAR(ref->delta_d, test_double, 1.0e-10 * cgs::kpc);
   // radial quadrature point
   std::uniform_int_distribution<int> smp5(1, 300);
   idx = smp5(rng);
@@ -141,8 +141,8 @@ TEST(integrator, shell_info_assembling) {
 // los_versor
 TEST(toolkit, los_versor) {
   auto pipe = std::make_unique<Integrator>();
-  const double theta[3] = {0., 90. * cgs_rad, 90. * cgs_rad};
-  const double phi[3] = {0., 180. * cgs_rad, 270. * cgs_rad};
+  const double theta[3] = {0., 90. * cgs::rad, 90. * cgs::rad};
+  const double phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
 
   EXPECT_LT(std::fabs(pipe->los_versor(theta[0], phi[0])[0] - 0.), 1e-10);
   EXPECT_LT(std::fabs(pipe->los_versor(theta[0], phi[0])[1] - 0.), 1e-10);
@@ -159,8 +159,8 @@ TEST(toolkit, los_versor) {
 // los_parproj
 TEST(toolkit, los_parproj) {
   auto pipe = std::make_unique<Integrator>();
-  const double theta[3] = {0., 90. * cgs_rad, 90. * cgs_rad};
-  const double phi[3] = {0., 180. * cgs_rad, 270. * cgs_rad};
+  const double theta[3] = {0., 90. * cgs::rad, 90. * cgs::rad};
+  const double phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
   const hamvec<3, double> A{1., 0., 0.};
 
   EXPECT_LT(std::fabs(pipe->los_parproj(A, theta[0], phi[0]) - 0.), 1e-10);
@@ -172,8 +172,8 @@ TEST(toolkit, los_parproj) {
 // los_perproj
 TEST(toolkit, los_perproj) {
   auto pipe = std::make_unique<Integrator>();
-  const double theta[3] = {0., 90. * cgs_rad, 90. * cgs_rad};
-  const double phi[3] = {0., 180. * cgs_rad, 270. * cgs_rad};
+  const double theta[3] = {0., 90. * cgs::rad, 90. * cgs::rad};
+  const double phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
   const hamvec<3, double> A{1., 0., 0.};
 
   EXPECT_LT(std::fabs(pipe->los_perproj(A, theta[0], phi[0]) - 1.), 1e-10);
@@ -185,12 +185,12 @@ TEST(toolkit, los_perproj) {
 // sync_ipa
 TEST(toolkit, sync_ipa) {
   auto pipe = std::make_unique<Integrator>();
-  const double theta[3] = {0., 90. * cgs_rad, 90. * cgs_rad};
-  const double phi[3] = {0., 180. * cgs_rad, 270. * cgs_rad};
+  const double theta[3] = {0., 90. * cgs::rad, 90. * cgs::rad};
+  const double phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
   const hamvec<3, double> A{1., 0., 0.};
 
-  EXPECT_LT(std::fabs(pipe->sync_ipa(A, theta[0], phi[0]) + 90. * cgs_rad),
+  EXPECT_LT(std::fabs(pipe->sync_ipa(A, theta[0], phi[0]) + 90. * cgs::rad),
             1e-10);
-  EXPECT_LT(std::fabs(pipe->sync_ipa(A, theta[2], phi[2]) - 180. * cgs_rad),
+  EXPECT_LT(std::fabs(pipe->sync_ipa(A, theta[2], phi[2]) - 180. * cgs::rad),
             1e-10);
 }

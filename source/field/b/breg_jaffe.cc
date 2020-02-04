@@ -2,7 +2,7 @@
 #include <vector>
 
 #include <bfield.h>
-#include <cgs_units.h>
+#include <cgsunits.h>
 #include <grid.h>
 #include <hamvec.h>
 #include <param.h>
@@ -44,7 +44,7 @@ hamvec<3, double> Breg_jaffe::orientation(const hamvec<3, double> &pos,
   const double sin_p{std::sin(par->breg_jaffe.arm_pitch)}; // pitch angle
   hamvec<3, double> tmp;
   double quadruple{1};
-  if (r < 0.5 * cgs_kpc) // forbiden region
+  if (r < 0.5 * cgs::kpc) // forbiden region
     return tmp;
   if (pos[2] > par->breg_jaffe.disk_z0)
     quadruple = (1 - 2 * par->breg_jaffe.quadruple);
@@ -172,7 +172,7 @@ std::vector<double> Breg_jaffe::dist2arm(const hamvec<3, double> &pos,
   const double beta_inv{-sin_p / cos_p};
   double theta{atan2(pos[1], pos[0])};
   if (theta < 0)
-    theta += 2 * cgs_pi;
+    theta += 2 * cgs::pi;
   // if molecular ring
   if (par->breg_jaffe.ring) {
     // in molecular ring, return single element vector
@@ -186,12 +186,14 @@ std::vector<double> Breg_jaffe::dist2arm(const hamvec<3, double> &pos,
         double d_ang{par->breg_jaffe.arm_phi0[i] - theta};
         double d_rad{
             std::fabs(par->breg_jaffe.arm_r0 * std::exp(d_ang * beta_inv) - r)};
-        double d_rad_p{std::fabs(par->breg_jaffe.arm_r0 *
-                                     std::exp((d_ang + 2 * cgs_pi) * beta_inv) -
-                                 r)};
-        double d_rad_m{std::fabs(par->breg_jaffe.arm_r0 *
-                                     std::exp((d_ang - 2 * cgs_pi) * beta_inv) -
-                                 r)};
+        double d_rad_p{
+            std::fabs(par->breg_jaffe.arm_r0 *
+                          std::exp((d_ang + 2 * cgs::pi) * beta_inv) -
+                      r)};
+        double d_rad_m{
+            std::fabs(par->breg_jaffe.arm_r0 *
+                          std::exp((d_ang - 2 * cgs::pi) * beta_inv) -
+                      r)};
         d.push_back(std::min(std::min(d_rad, d_rad_p), d_rad_m) * cos_p);
       }
     }
@@ -221,12 +223,14 @@ std::vector<double> Breg_jaffe::dist2arm(const hamvec<3, double> &pos,
         double d_ang{par->breg_jaffe.arm_phi0[i] - theta};
         double d_rad{
             std::fabs(par->breg_jaffe.arm_r0 * std::exp(d_ang * beta_inv) - r)};
-        double d_rad_p{std::fabs(par->breg_jaffe.arm_r0 *
-                                     std::exp((d_ang + 2 * cgs_pi) * beta_inv) -
-                                 r)};
-        double d_rad_m{std::fabs(par->breg_jaffe.arm_r0 *
-                                     std::exp((d_ang - 2 * cgs_pi) * beta_inv) -
-                                 r)};
+        double d_rad_p{
+            std::fabs(par->breg_jaffe.arm_r0 *
+                          std::exp((d_ang + 2 * cgs::pi) * beta_inv) -
+                      r)};
+        double d_rad_m{
+            std::fabs(par->breg_jaffe.arm_r0 *
+                          std::exp((d_ang - 2 * cgs::pi) * beta_inv) -
+                      r)};
         d.push_back(std::min(std::min(d_rad, d_rad_p), d_rad_m) * cos_p);
       }
     }

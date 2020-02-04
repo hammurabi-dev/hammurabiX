@@ -1,7 +1,7 @@
 #include <cassert>
 #include <cmath>
 
-#include <cgs_units.h>
+#include <cgsunits.h>
 #include <crefield.h>
 #include <hamvec.h>
 #include <param.h>
@@ -30,12 +30,12 @@ double CRE_unif::flux_norm(const hamvec<3, double> &pos,
   // j0 is in [GeV m^2 s sr]^-1 units
   // note that the j0 has already been defined by per steradian
   // which is the conventional units for PHI(E)
-  const double gamma0{par->cre_unif.E0 / cgs_mec2};
+  const double gamma0{par->cre_unif.E0 / cgs::mec2};
   const double beta0{std::sqrt(1. - 1. / gamma0)};
   // N(\gamma) = (4\pi mc/\beta) * PHI(E) by definition
   // the extra 'unit' coefficients come from the definition of 'j0'
-  const double unit{4. * cgs_pi * cgs_mec /
-                    (cgs_GeV * cgs_m * cgs_m * cgs_sec * beta0)};
+  const double unit{4. * cgs::pi * cgs::mec /
+                    (cgs::GeV * cgs::m * cgs::m * cgs::sec * beta0)};
   const double norm{par->cre_unif.j0 *
                     std::pow(gamma0, -flux_idx(par->observer, par))};
   return norm * unit * spatial_profile(pos, par);
@@ -48,8 +48,8 @@ double CRE_unif::write_field(const hamvec<3, double> &pos, const double &En,
                              const Param *par) const {
   // j0 is in [GeV m^2 s sr]^-1 units
   // note that the j0 has already been defined by per steradian
-  const double gamma{En / cgs_mec2};
-  const double gamma0{par->cre_unif.E0 / cgs_mec2};
+  const double gamma{En / cgs::mec2};
+  const double gamma0{par->cre_unif.E0 / cgs::mec2};
   const double beta_ratio{std::sqrt((1. - 1. / gamma) / (1. - 1. / gamma0))};
   const double norm{par->cre_unif.j0 *
                     std::pow(gamma0, -flux_idx(par->observer, par))};

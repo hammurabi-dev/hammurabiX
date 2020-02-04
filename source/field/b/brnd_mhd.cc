@@ -3,7 +3,7 @@
 #include <omp.h>
 
 #include <bfield.h>
-#include <cgs_units.h>
+#include <cgsunits.h>
 #include <fftw3.h>
 #include <grid.h>
 #include <gsl/gsl_randist.h>
@@ -31,7 +31,7 @@ void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
   const double lz{par->grid_brnd.z_max - par->grid_brnd.z_min};
   const hamvec<3, double> B{breg->read_field(par->observer, par, gbreg)};
   // physical dk^3
-  const double dk3{cgs_kpc * cgs_kpc * cgs_kpc / (lx * ly * lz)};
+  const double dk3{cgs::kpc * cgs::kpc * cgs::kpc / (lx * ly * lz)};
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static) // DO NOT CHANGE SCHEDULE TYPE
 #endif
@@ -41,26 +41,26 @@ void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
 #else
     auto seed_id = r;
 #endif
-    hamvec<3, double> k{cgs_kpc * i / lx, 0, 0};
+    hamvec<3, double> k{cgs::kpc * i / lx, 0, 0};
     if (i >= (par->grid_brnd.nx + 1) / 2)
-      k[0] -= cgs_kpc * par->grid_brnd.nx / lx;
+      k[0] -= cgs::kpc * par->grid_brnd.nx / lx;
     // it's better to calculate indeces manually
     // just for reference, how indeces are calculated
     // const size_t idx
     // {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i,j,l)};
     const std::size_t idx_lv1{i * par->grid_brnd.ny * par->grid_brnd.nz};
     for (decltype(par->grid_brnd.ny) j = 0; j < par->grid_brnd.ny; ++j) {
-      k[1] = cgs_kpc * j / ly;
+      k[1] = cgs::kpc * j / ly;
       if (j >= (par->grid_brnd.ny + 1) / 2)
-        k[1] -= cgs_kpc * par->grid_brnd.ny / ly;
+        k[1] -= cgs::kpc * par->grid_brnd.ny / ly;
       const std::size_t idx_lv2{idx_lv1 + j * par->grid_brnd.nz};
       for (decltype(par->grid_brnd.nz) l = 0; l < par->grid_brnd.nz; ++l) {
         // the very 0th term is fixed to zero in allocation
         if (i == 0 and j == 0 and l == 0)
           continue;
-        k[2] = cgs_kpc * l / lz;
+        k[2] = cgs::kpc * l / lz;
         if (l >= (par->grid_brnd.nz + 1) / 2)
-          k[2] -= cgs_kpc * par->grid_brnd.nz / lz;
+          k[2] -= cgs::kpc * par->grid_brnd.nz / lz;
         const double ks{k.length()};
         const std::size_t idx{idx_lv2 + l};
         hamvec<3, double> ep{e_plus(B, k)};
@@ -227,7 +227,7 @@ double Brnd_mhd::h_f(const double &beta, const double &cosa) const {
 
 double Brnd_mhd::spectrum_a(const double &k, const Param *par) const {
   // units fixing, wave vector in 1/kpc units
-  const double unit = 0.25 / (cgs_pi * k * k);
+  const double unit = 0.25 / (cgs::pi * k * k);
   // power laws
   const double band1{double(k < par->brnd_mhd.k1)};
   const double band2{double(k > par->brnd_mhd.k1) *
@@ -243,7 +243,7 @@ double Brnd_mhd::spectrum_a(const double &k, const Param *par) const {
 
 double Brnd_mhd::spectrum_f(const double &k, const Param *par) const {
   // units fixing, wave vector in 1/kpc units
-  const double unit = 0.25 / (cgs_pi * k * k);
+  const double unit = 0.25 / (cgs::pi * k * k);
   // power laws
   const double band1{double(k < par->brnd_mhd.k1)};
   const double band2{double(k > par->brnd_mhd.k1) *
@@ -259,7 +259,7 @@ double Brnd_mhd::spectrum_f(const double &k, const Param *par) const {
 
 double Brnd_mhd::spectrum_s(const double &k, const Param *par) const {
   // units fixing, wave vector in 1/kpc units
-  const double unit = 0.25 / (cgs_pi * k * k);
+  const double unit = 0.25 / (cgs::pi * k * k);
   // power laws
   const double band1{double(k < par->brnd_mhd.k1)};
   const double band2{double(k > par->brnd_mhd.k1) *

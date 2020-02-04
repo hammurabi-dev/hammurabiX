@@ -14,7 +14,7 @@
 #include <gsl/gsl_sf_synchrotron.h>
 
 #include <bfield.h>
-#include <cgs_units.h>
+#include <cgsunits.h>
 #include <crefield.h>
 #include <grid.h>
 #include <hampixma.h>
@@ -182,17 +182,17 @@ void Integrator::radial_integration(
   double lambda_square = 0., i2bt_sync = 0., fd_forefactor = 0.;
   if (par->grid_obs.do_sync.back()) {
     // for calculating synchrotron emission
-    lambda_square = (cgs_c_light / par->grid_obs.sim_sync_freq.back()) *
-                    (cgs_c_light / par->grid_obs.sim_sync_freq.back());
+    lambda_square = (cgs::c_light / par->grid_obs.sim_sync_freq.back()) *
+                    (cgs::c_light / par->grid_obs.sim_sync_freq.back());
     // convert sync intensity(freq) to brightness temperature, Rayleigh-Jeans
     // law
-    i2bt_sync = cgs_c_light * cgs_c_light /
-                (2. * cgs_kB * par->grid_obs.sim_sync_freq.back() *
+    i2bt_sync = cgs::c_light * cgs::c_light /
+                (2. * cgs::kB * par->grid_obs.sim_sync_freq.back() *
                  par->grid_obs.sim_sync_freq.back());
   }
   if (par->grid_obs.do_fd) {
     fd_forefactor =
-        -(cgs_qe * cgs_qe * cgs_qe) / (2. * cgs_pi * cgs_mec2 * cgs_mec2);
+        -(cgs::qe * cgs::qe * cgs::qe) / (2. * cgs::pi * cgs::mec2 * cgs::mec2);
   }
   // radial accumulation
   for (decltype(shell_ref->step) looper = 0; looper < shell_ref->step;
@@ -274,9 +274,10 @@ void Integrator::assemble_shell_ref(struct_shell *target, const Param *par,
 #ifdef VERBOSE
   std::cout << "shell reference: " << std::endl
             << "shell No. " << target->shell_num << std::endl
-            << "resolution " << target->delta_d / cgs_kpc << " kpc" << std::endl
-            << "d_start " << target->d_start / cgs_kpc << " kpc" << std::endl
-            << "d_stop " << target->d_stop / cgs_kpc << " kpc" << std::endl
+            << "resolution " << target->delta_d / cgs::kpc << " kpc"
+            << std::endl
+            << "d_start " << target->d_start / cgs::kpc << " kpc" << std::endl
+            << "d_stop " << target->d_stop / cgs::kpc << " kpc" << std::endl
             << "steps " << target->step << std::endl;
 #endif
 }
@@ -315,7 +316,7 @@ double Integrator::los_parproj(const hamvec<3, double> &input,
 // converting brightness temp into thermal temp with T_0 = 2.725K
 double Integrator::temp_convert(const double &temp_br,
                                 const double &freq) const {
-  const double p{cgs_h_planck * freq / (cgs_kB * 2.725)};
+  const double p{cgs::h_planck * freq / (cgs::kB * 2.725)};
   return temp_br * (exp(p) - 1.) * (exp(p) - 1.) / (p * p * exp(p));
 }
 
@@ -334,14 +335,14 @@ double Integrator::sync_emissivity_t(const hamvec<3, double> &pos,
     std::unique_ptr<double[]> beta =
         std::make_unique<double[]>(par->grid_cre.nE);
     // consts used for converting E to x, using cgs units
-    const double x_fact{4. * cgs_pi * par->grid_obs.sim_sync_freq.back() *
-                        cgs_mec * cgs_mec2 * cgs_mec2 /
-                        (3. * cgs_qe * std::fabs(Bper))};
+    const double x_fact{4. * cgs::pi * par->grid_obs.sim_sync_freq.back() *
+                        cgs::mec * cgs::mec2 * cgs::mec2 /
+                        (3. * cgs::qe * std::fabs(Bper))};
     // KE, x, beta arrays in cgs units
     for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE; ++i) {
       KE[i] = par->grid_cre.E_min * std::exp(i * par->grid_cre.E_fact);
       x[i] = x_fact / (KE[i] * KE[i]);
-      beta[i] = std::sqrt(1 - cgs_mec2 / KE[i]);
+      beta[i] = std::sqrt(1 - cgs::mec2 / KE[i]);
     }
     // spectral integral
     for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE - 1; ++i) {
@@ -363,8 +364,8 @@ double Integrator::sync_emissivity_t(const hamvec<3, double> &pos,
     // n(E,pos) = \phi(E,pos)*(4\pi/\beta*c), the relatin between flux \phi and
     // density n ref: "Cosmic rays n' particle physics", A3
     const double fore_factor{
-        1.73205081 * cgs_qe * cgs_qe * cgs_qe * std::fabs(Bper) /
-        (cgs_mec2 * cgs_c_light * cgs_GeV * cgs_m * cgs_m * cgs_sec)};
+        1.73205081 * cgs::qe * cgs::qe * cgs::qe * std::fabs(Bper) /
+        (cgs::mec2 * cgs::c_light * cgs::GeV * cgs::m * cgs::m * cgs::sec)};
     J *= fore_factor;
   }
   // calculate from N(\gamma) with local constant spectral index
@@ -374,11 +375,11 @@ double Integrator::sync_emissivity_t(const hamvec<3, double> &pos,
     const double index{cre->flux_idx(pos, par)};
     // coefficients which do not attend integration
     const double norm{cre->flux_norm(pos, par) * 1.73205081 *
-                      (cgs_qe * cgs_qe * cgs_qe) * std::fabs(Bper) /
-                      (4. * cgs_pi * cgs_mec2 * (1. - index))};
+                      (cgs::qe * cgs::qe * cgs::qe) * std::fabs(Bper) /
+                      (4. * cgs::pi * cgs::mec2 * (1. - index))};
     // synchrotron integration
-    const double A{2. * cgs_pi * par->grid_obs.sim_sync_freq.back() * cgs_mec /
-                   (3. * cgs_qe * std::fabs(Bper))};
+    const double A{2. * cgs::pi * par->grid_obs.sim_sync_freq.back() *
+                   cgs::mec / (3. * cgs::qe * std::fabs(Bper))};
     J = norm * (std::pow(A, 0.5 * (index + 1)) *
                 gsl_sf_gamma(-0.25 * index + 19. / 12.) *
                 gsl_sf_gamma(-0.25 * index - 1. / 12.));
@@ -401,22 +402,22 @@ double Integrator::sync_emissivity_p(const hamvec<3, double> &pos,
     std::unique_ptr<double[]> beta =
         std::make_unique<double[]>(par->grid_cre.nE);
     // consts used for converting E to x, using cgs units
-    const double x_fact{(2. * cgs_mec * cgs_mec2 * cgs_mec2 * 2. * cgs_pi *
+    const double x_fact{(2. * cgs::mec * cgs::mec2 * cgs::mec2 * 2. * cgs::pi *
                          par->grid_obs.sim_sync_freq.back()) /
-                        (3. * cgs_qe * std::fabs(Bper))};
+                        (3. * cgs::qe * std::fabs(Bper))};
     // KE, x, beta arrays in cgs units
     for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE; ++i) {
       KE[i] = par->grid_cre.E_min * std::exp(i * par->grid_cre.E_fact);
       x[i] = x_fact / (KE[i] * KE[i]);
-      beta[i] = std::sqrt(1 - cgs_mec2 / KE[i]);
+      beta[i] = std::sqrt(1 - cgs::mec2 / KE[i]);
     }
     // do energy spectrum integration at given position
     // unit_factor for DIFFERENTIAL density flux, [GeV m^2 s sr]^-1
     // n(E,pos) = \phi(E,pos)*(4\pi/\beta*c), the relatin between flux \phi and
     // density n ref: "Cosmic rays n' particle physics", A3
     const double fore_factor{
-        1.73205081 * cgs_qe * cgs_qe * cgs_qe * std::fabs(Bper) /
-        (cgs_mec2 * cgs_c_light * cgs_GeV * cgs_m * cgs_m * cgs_sec)};
+        1.73205081 * cgs::qe * cgs::qe * cgs::qe * std::fabs(Bper) /
+        (cgs::mec2 * cgs::c_light * cgs::GeV * cgs::m * cgs::m * cgs::sec)};
     // spectral integral
     for (decltype(par->grid_cre.nE) i = 0; i != par->grid_cre.nE - 1; ++i) {
       const double xv{0.5 * (x[i + 1] + x[i])};
@@ -441,11 +442,11 @@ double Integrator::sync_emissivity_p(const hamvec<3, double> &pos,
     const double index{cre->flux_idx(pos, par)};
     // coefficients which do not attend integration
     const double norm{cre->flux_norm(pos, par) * 1.73205081 *
-                      (cgs_qe * cgs_qe * cgs_qe) * std::fabs(Bper) /
-                      (16. * cgs_pi * cgs_mec2)};
+                      (cgs::qe * cgs::qe * cgs::qe) * std::fabs(Bper) /
+                      (16. * cgs::pi * cgs::mec2)};
     // synchrotron integration
-    const double A{2. * cgs_pi * par->grid_obs.sim_sync_freq.back() * cgs_mec /
-                   (3. * cgs_qe * std::fabs(Bper))};
+    const double A{2. * cgs::pi * par->grid_obs.sim_sync_freq.back() *
+                   cgs::mec / (3. * cgs::qe * std::fabs(Bper))};
     J = norm * (std::pow(A, 0.5 * (index + 1)) *
                 gsl_sf_gamma(-0.25 * index + 7. / 12.) *
                 gsl_sf_gamma(-0.25 * index - 1. / 12.));
