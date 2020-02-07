@@ -40,6 +40,7 @@ RUN echo '4\n\
 	\n\
 	/usr/local/include\n\
 	/usr/local/lib\n\
+	y\n\
 	0\n'\
 	> hlpx_config
 RUN ./configure -L < hlpx_config && make
