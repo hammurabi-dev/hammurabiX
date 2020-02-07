@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/215691969.svg)](https://zenodo.org/badge/latestdoi/215691969)
 
-[![Build Status](https://travis-ci.org/gioacchinowang/hammurabiX.svg?branch=master)](https://travis-ci.org/gioacchinowang/hammurabiX)
+[![Build Status](https://travis-ci.org/hammurabi-dev/hammurabiX.svg?branch=master)](https://travis-ci.org/hammurabi-dev/hammurabiX)
 
 hammurabi is an open-source (GNU General Public License v3) HEALPix-based tool 
 for simulating full/partial-sky Galactic emissions.

@@ -20,15 +20,9 @@ ifeq ($(HEALPIX),)
 HEALPIX=/usr/local/healpix
 endif
 
-ifeq ($(HEALPIX_TARGET),)
-HEALPIX_TARGET=optimized_gcc
-endif
-
 ifeq ($(EXE),)
 EXE=hamx
 endif
-
-HEALPIX_FULL = $(HEALPIX)/src/cxx/$(HEALPIX_TARGET)
 
 SRCDIR=../source
 OBJDIR=../build
@@ -43,14 +37,14 @@ EXEDIR=../bin
 CXXFLAGS = -std=c++14 -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -fopenmp -pthread $(DEBUG)
 
 EXT_INC = -I$(CFITSIO)/include -I$(GSL)/include -I$(FFTW)/include \
-	-I$(HEALPIX_FULL)/include \
+	-I$(HEALPIX)/include/healpix_cxx \
 	-I $(INCDIR) -I.
 CXXFLAGS += $(EXT_INC)
  
 ALL_L = -L$(CFITSIO)/lib -L$(GSL)/lib -L$(FFTW)/lib \
-	-L$(HEALPIX_FULL)/lib
+	-L$(HEALPIX)/lib
 LD_FLAGS = $(ALL_L) \
-	-lhealpix_cxx -lcxxsupport -lc_utils -lpocketfft -lcfitsio \
+	-lhealpix_cxx -lcfitsio \
 	-lgsl -lgslcblas -lm -lfftw3 -lfftw3_omp -lfftw3_threads -fopenmp $(DEBUG)
 LFLAGS = $(LD_FLAGS)
 

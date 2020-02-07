@@ -8,35 +8,34 @@ OPTION(ON_DOCKER "Build on docker image" ON)
 OPTION(BUILD_SHARED_LIBS "Build shared library" ON)
 OPTION(ENABLE_REPORT "Enable verbose report" ON)
 #-------------- instruction ------------------#
-#
-# make sure your compiler is GNU or INTEL,
-# ENABLE_TESTING by default OFF, unless you are as paranoid as us
-# ENABLE_TIMING is also not necessary for users
-# ON_DOCKER by defauly ON, we highly recommend Docker image for non-HPC tasks
-# but if install manually, switch it off and modify the path hints listed below
-# BUILD_SHARED_LIB by default ON
-# you will be overwhelmed by ENABLE_REPORT, switch it off for non-testing tasks
+# ENABLE_TESTING by default ON, for package build testing,
+# ENABLE_TIMING is for checking performance,
+# ON_DOCKER by defauly ON, 
+# we highly recommend Docker image for non-HPC tasks,
+# but if install manually,
+# switch it off and modify the path hints LISTED BELOW,
+# BUILD_SHARED_LIB by default ON,
+# you will be overwhelmed by ENABLE_REPORT,
+# switch it off for non-testing tasks,
 # 
-# you have to specify your local paths of external libraries just below here
-# in some special cases you have to modify FIND_PATH/FIND_LIBRARY functions
+# you have to specify your local paths of external libraries just below here,
+# in some special cases you have to modify FIND_PATH/FIND_LIBRARY functions,
 #
-# in some special cases, you may want to manually fix LFLAGS or CFLAGS
-# 
-# update your CMake as much as you can
+# in some special cases, you may want to manually fix LFLAGS or CFLAGS,
 #
-# if you add new modules/derived classes beyond original code
-# please manually add source file paths to SET(SRC_FILES ...) function
+# if you add new modules/derived classes beyond original code,
+# please manually add source file paths to SET(SRC_FILES ...) function,
 #
-# the last resort would be manually calling homemade Makefile building system
-# you can find cached building files in mfcache
+# the last resort would be manually calling homemade Makefile building system,
+# you can find cached building files in "cache",
 #
-# if even the last resort fails you
-# complain your issue to J.Wang (jiwang@sissa.it)
+# if the Makefile fails you,
+# please contact Jiaxin Wang (jiaxin.wang@sjtu.edu.cn),
 #
 # @ enthusiastic or paranoid developers:
-# we use Google Test for tests
-# Google Test package is assembled INTO testing modules manually
-# you can either install GoogleTest and cp src dir into install path
+# we use Google Test for tests,
+# Google Test package is assembled INTO testing modules manually,
+# you can either install GoogleTest and cp src dir into install path,
 # or just download GoogleTest and specify root dir to GTEST_HINTS
 #--------------------------------------------#
 # we SET GSL_HINTS just in case FindGSL fails
@@ -44,7 +43,7 @@ IF(ON_DOCKER)
 	SET(GSL_HINTS /usr) 
 	SET(FFTW_HINTS /usr/local)
 	SET(CFITSIO_HINTS /usr/local)
-	SET(HEALPIX_HINTS /home/lab/healpix/src/cxx/optimized_gcc)
+	SET(HEALPIX_HINTS /home/lab/healpix)
 	SET(GTEST_HINTS /usr/local)
 	SET(INSTALL_ROOT_DIR /usr/local/hammurabi)
 ELSE()
@@ -52,7 +51,7 @@ ELSE()
 	SET(GSL_HINTS $HOME/local/gsl)
 	SET(FFTW_HINTS $HOME/local/fftw)
 	SET(CFITSIO_HINTS $HOME/local/cfitsio)
-	SET(HEALPIX_HINTS $HOME/local/Healpix_3.50/src/cxx/optimized_gcc)
+	SET(HEALPIX_HINTS $HOME/local/Healpix_3.60)
 	SET(GTEST_HINTS $HOME/local/googletest)
 	SET(INSTALL_ROOT_DIR $HOME/local/hammurabi)
 	SET(CMAKE_EXE_LINKER_FLAGS -lcurl)
@@ -140,31 +139,11 @@ SET(SRC_FILES
 FIND_PATH(HEALPIX_INCLUDE_DIR
 	NAMES healpix_base.h
 	HINTS 
-	${HEALPIX_HINTS}/include
+	${HEALPIX_HINTS}/include/healpix_cxx
 )
 FIND_LIBRARY(HEALPIX_CXX_LIBRARY
 	NAMES healpix_cxx
 	HINTS 
-	${HEALPIX_HINTS}/lib
-)
-FIND_LIBRARY(HEALPIX_SUP_LIBRARY
-	NAMES cxxsupport
-	HINTS 
-	${HEALPIX_HINTS}/lib
-)
-FIND_LIBRARY(HEALPIX_UTI_LIBRARY
-	NAMES c_utils
-	HINTS 
-	${HEALPIX_HINTS}/lib
-)
-FIND_LIBRARY(HEALPIX_FFT_LIBRARY
-	NAMES pocketfft
-	HINTS 
-	${HEALPIX_HINTS}/lib
-)
-FIND_LIBRARY(HEALPIX_SHA_LIBRARY
-	NAMES sharp
-	HINTS
 	${HEALPIX_HINTS}/lib
 )
 IF(HEALPIX_INCLUDE_DIR)
@@ -177,27 +156,6 @@ IF(HEALPIX_CXX_LIBRARY)
 ELSE()
 	MESSAGE(FATAL_ERROR "${HEALPIX_CXX_LIBRARY}")
 ENDIF()
-IF(HEALPIX_SUP_LIBRARY)
-	LIST(APPEND ALL_LIBRARIES ${HEALPIX_SUP_LIBRARY})
-ELSE()
-	MESSAGE(FATAL_ERROR "${HEALPIX_SUP_LIBRARY}")
-ENDIF()
-IF(HEALPIX_UTI_LIBRARY)
-	LIST(APPEND ALL_LIBRARIES ${HEALPIX_UTI_LIBRARY})
-ELSE()
-	MESSAGE(FATAL_ERROR "${HEALPIX_UTI_LIBRARY}")
-ENDIF()
-IF(HEALPIX_FFT_LIBRARY)
-	LIST(APPEND ALL_LIBRARIES ${HEALPIX_FFT_LIBRARY})
-ELSE()
-	MESSAGE(FATAL_ERROR "${HEALPIX_FFT_LIBRARY}")
-ENDIF()
-IF(HEALPIX_SHA_LIBRARY)
-	LIST(APPEND ALL_LIBRARIES ${HEALPIX_SHA_LIBRARY})
-ELSE()
-	MESSAGE(FATAL_ERROR "${HEALPIX_SHA_LIBRARY}")
-ENDIF()
-
 
 # find CFITSIO
 FIND_PATH(CFITSIO_INCLUDE_DIR
