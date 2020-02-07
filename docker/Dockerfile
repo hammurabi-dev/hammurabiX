@@ -56,7 +56,7 @@ RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local .. && make && make install && c
 WORKDIR /home/lab
 
 # HAMMURABI X
-RUN git clone https://bitbucket.org/hammurabicode/hamx hamx
+RUN git clone https://github.com/hammurabi-dev/hammurabiX.git hamx
 WORKDIR /home/lab/hamx
 RUN mkdir /home/lab/hamx/build
 WORKDIR /home/lab/hamx/build
