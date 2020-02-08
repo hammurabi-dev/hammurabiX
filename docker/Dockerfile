@@ -32,12 +32,12 @@ RUN wget http://downloads.sourceforge.net/project/healpix/Healpix_3.60/Healpix_3
 WORKDIR /home/lab/healpix
 # write config file on fly
 RUN echo '4\n\
-	\n\
-	\n\
-	\n\
-	\n\
-	\n\
-	\n\
+	gcc\n\
+	-O3 -fopenmp\n\
+	gcc\n\
+	-O3 -fopenmp\n\
+	g++\n\
+	-O3 -fopenmp\n\
 	/usr/local/include\n\
 	/usr/local/lib\n\
 	y\n\
