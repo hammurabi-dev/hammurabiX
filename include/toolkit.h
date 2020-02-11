@@ -3,9 +3,9 @@
 #ifndef HAMMURABI_TOOLKIT_H
 #define HAMMURABI_TOOLKIT_H
 
-#include <cstddef> // for std::size_t
 #include <cassert>
 #include <cmath>
+#include <cstddef> // for std::size_t
 #include <memory>
 #include <string>
 #include <vector>

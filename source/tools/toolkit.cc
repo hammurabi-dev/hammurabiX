@@ -1,6 +1,6 @@
-#include <cstddef> // for std::size_t
 #include <cassert>
 #include <cmath>
+#include <cstddef> // for std::size_t
 #include <iostream>
 #include <memory>
 #include <omp.h>

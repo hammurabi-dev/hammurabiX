@@ -27,8 +27,8 @@
 #ifndef HAMMURABI_MASK_H
 #define HAMMURABI_MASK_H
 
-#include <cstddef> // for std::size_t
 #include <cassert>
+#include <cstddef> // for std::size_t
 #include <fstream>
 #include <map>
 #include <memory>

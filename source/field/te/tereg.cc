@@ -1,6 +1,6 @@
-#include <cstddef> // for std::size_t
 #include <cassert>
 #include <cmath>
+#include <cstddef> // for std::size_t
 
 #include <grid.h>
 #include <hamvec.h>
