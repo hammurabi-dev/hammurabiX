@@ -1,3 +1,4 @@
+#include <cstddef> // for std::size_t
 #include <cassert>
 #include <cmath>
 

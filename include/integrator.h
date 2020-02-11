@@ -3,6 +3,7 @@
 #ifndef HAMMURABI_INT_H
 #define HAMMURABI_INT_H
 
+#include <cstddef> // for std::size_t
 #include <vector>
 
 #include <bfield.h>

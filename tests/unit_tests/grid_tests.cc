@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 
+#include <cstddef> // for std::size_t
 #include <cmath>
 #include <memory>
 #include <random>

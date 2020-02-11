@@ -3,6 +3,7 @@
 #ifndef HAMMURABI_PARAM_H
 #define HAMMURABI_PARAM_H
 
+#include <cstddef> // for std::size_t
 #include <string>
 #include <vector>
 

@@ -15,6 +15,7 @@
 #ifndef HAMMURABI_CRE_H
 #define HAMMURABI_CRE_H
 
+#include <cstddef> // for std::size_t
 #include <grid.h>
 #include <hamvec.h>
 #include <param.h>
