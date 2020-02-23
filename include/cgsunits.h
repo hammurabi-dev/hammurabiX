@@ -16,7 +16,7 @@ const double gram = (erg * sec * sec / (cm * cm));
 const double joule = (1.e7 * erg);
 const double watt = (joule / sec);
 
-const double pi = 3.14159265358979;
+const double pi = 3.141592653589793238462643383279502884197;
 const double rad = (pi / 180.);
 const double arcmin = (2. * pi / (360. * 60.));
 const double arcsec = (2. * pi / (360. * 60. * 60.));
