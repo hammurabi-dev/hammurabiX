@@ -24,6 +24,7 @@
 #define HAMMURABI_BFIELD_H
 
 #include <grid.h>
+#include <hamtype.h>
 #include <hamvec.h>
 #include <param.h>
 
@@ -53,19 +54,21 @@ public:
   // 3rd argument: magnetic grid class object
   // read from grid of field type if permitted
   // otherwise use the field assembler
-  virtual hamvec<3, double> read_field(const hamvec<3, double> &, const Param *,
-                                       const Grid_breg *) const;
+  virtual Hamvec<3, ham_float> read_field(const Hamvec<3, ham_float> &,
+                                          const Param *,
+                                          const Grid_breg *) const;
   // assemble analytic magnetic field, specified only in derived class
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
-  virtual hamvec<3, double> write_field(const hamvec<3, double> &,
-                                        const Param *) const;
+  virtual Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
+                                           const Param *) const;
   // read from field grid with linear interpolation
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
   // 3rd argument: magnetic field grid class object
-  virtual hamvec<3, double> read_grid(const hamvec<3, double> &, const Param *,
-                                      const Grid_breg *) const;
+  virtual Hamvec<3, ham_float> read_grid(const Hamvec<3, ham_float> &,
+                                         const Param *,
+                                         const Grid_breg *) const;
   // write to field grid
   // 1st argument: parameter class object
   // 2nd argument: magnetic field grid class object
@@ -82,11 +85,13 @@ public:
   Brnd &operator=(Brnd &&) = delete;
   virtual ~Brnd() = default;
   // get random magnetic field
-  virtual hamvec<3, double> read_field(const hamvec<3, double> &, const Param *,
-                                       const Grid_brnd *) const;
+  virtual Hamvec<3, ham_float> read_field(const Hamvec<3, ham_float> &,
+                                          const Param *,
+                                          const Grid_brnd *) const;
   // read from field grid with linear interpolation
-  virtual hamvec<3, double> read_grid(const hamvec<3, double> &, const Param *,
-                                      const Grid_brnd *) const;
+  virtual Hamvec<3, ham_float> read_grid(const Hamvec<3, ham_float> &,
+                                         const Param *,
+                                         const Grid_brnd *) const;
   // write random field to grid (model dependent)
   virtual void write_grid(const Param *, const Breg *, const Grid_breg *,
                           Grid_brnd *) const;
@@ -104,8 +109,8 @@ public:
   Breg_unif &operator=(const Breg_unif &) = delete;
   Breg_unif &operator=(Breg_unif &&) = delete;
   virtual ~Breg_unif() = default;
-  hamvec<3, double> write_field(const hamvec<3, double> &,
-                                const Param *) const override;
+  Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
+                                   const Param *) const override;
 };
 
 // WMAP-3yr LSA modeling
@@ -120,8 +125,8 @@ public:
   Breg_lsa &operator=(const Breg_lsa &) = delete;
   Breg_lsa &operator=(Breg_lsa &&) = delete;
   virtual ~Breg_lsa() = default;
-  hamvec<3, double> write_field(const hamvec<3, double> &,
-                                const Param *) const override;
+  Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
+                                   const Param *) const override;
 };
 
 // Jaffe modeling
@@ -135,25 +140,26 @@ public:
   Breg_jaffe &operator=(const Breg_jaffe &) = delete;
   Breg_jaffe &operator=(Breg_jaffe &&) = delete;
   virtual ~Breg_jaffe() = default;
-  hamvec<3, double> write_field(const hamvec<3, double> &,
-                                const Param *) const override;
+  Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
+                                   const Param *) const override;
 #ifndef NDEBUG
 protected:
 #endif
   // field orientation
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
-  hamvec<3, double> orientation(const hamvec<3, double> &, const Param *) const;
+  Hamvec<3, ham_float> orientation(const Hamvec<3, ham_float> &,
+                                   const Param *) const;
   // field amplitude radial scaling
   // 1st argument: Galactic centric Cartesian frame position
   // 2nd argument: parameter class object
-  double radial_scaling(const hamvec<3, double> &, const Param *) const;
+  ham_float radial_scaling(const Hamvec<3, ham_float> &, const Param *) const;
   // spiral arm height scaling
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
   // remark: inlined function
-  inline double arm_scaling(const hamvec<3, double> &pos,
-                            const Param *par) const {
+  inline ham_float arm_scaling(const Hamvec<3, ham_float> &pos,
+                               const Param *par) const {
     return 1. / (cosh(pos[2] / par->breg_jaffe.arm_z0) *
                  cosh(pos[2] / par->breg_jaffe.arm_z0));
   }
@@ -161,8 +167,8 @@ protected:
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
   // remark: inlined function
-  inline double disk_scaling(const hamvec<3, double> &pos,
-                             const Param *par) const {
+  inline ham_float disk_scaling(const Hamvec<3, ham_float> &pos,
+                                const Param *par) const {
     return 1. / (cosh(pos[2] / par->breg_jaffe.disk_z0) *
                  cosh(pos[2] / par->breg_jaffe.disk_z0));
   }
@@ -170,25 +176,26 @@ protected:
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
   // remark: inlined function
-  inline double halo_scaling(const hamvec<3, double> &pos,
-                             const Param *par) const {
+  inline ham_float halo_scaling(const Hamvec<3, ham_float> &pos,
+                                const Param *par) const {
     return 1. / (cosh(pos[2] / par->breg_jaffe.halo_z0) *
                  cosh(pos[2] / par->breg_jaffe.halo_z0));
   }
   // spiral arm compression factor, for each arm
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
-  std::vector<double> arm_compress(const hamvec<3, double> &,
-                                   const Param *) const;
+  std::vector<ham_float> arm_compress(const Hamvec<3, ham_float> &,
+                                      const Param *) const;
   // spiral arm compression factor for dust, for each arm
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
-  std::vector<double> arm_compress_dust(const hamvec<3, double> &,
-                                        const Param *) const;
+  std::vector<ham_float> arm_compress_dust(const Hamvec<3, ham_float> &,
+                                           const Param *) const;
   // distance to each spiral arm
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
-  std::vector<double> dist2arm(const hamvec<3, double> &, const Param *) const;
+  std::vector<ham_float> dist2arm(const Hamvec<3, ham_float> &,
+                                  const Param *) const;
 };
 
 //------------------------------ Brnd DERIVED --------------------------------//
@@ -236,35 +243,35 @@ protected:
   // isotropic power-spectrum
   // 1st argument: isotropic wave-vector magnitude
   // 2nd argument: parameter class object
-  virtual double spectrum(const double &, const Param *) const;
+  virtual ham_float spectrum(const ham_float &, const Param *) const;
   // field energy density reprofiling factor
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
-  virtual double spatial_profile(const hamvec<3, double> &,
-                                 const Param *) const;
+  virtual ham_float spatial_profile(const Hamvec<3, ham_float> &,
+                                    const Param *) const;
   // anisotropy factor
   // check technical report for details
   // 1st argument: galactic centric Cartesian frame position
   // 2rd argument: parameter class object
   // 3th argument: regular magnetic field class object
   // 4th argument: regular magnetic field grid class object
-  hamvec<3, double> anisotropy_direction(const hamvec<3, double> &,
-                                         const Param *, const Breg *,
-                                         const Grid_breg *) const;
+  Hamvec<3, ham_float> anisotropy_direction(const Hamvec<3, ham_float> &,
+                                            const Param *, const Breg *,
+                                            const Grid_breg *) const;
   // anisotropy ratio
   // 1st argument: Galactic centric Cartesian frame position
   // 2rd argument: parameter class object
   // 3th argument: regular magnetic field class object
   // 4th argument: regular magnetic field grid class object
-  double anisotropy_ratio(const hamvec<3, double> &, const Param *,
-                          const Breg *, const Grid_breg *) const;
+  ham_float anisotropy_ratio(const Hamvec<3, ham_float> &, const Param *,
+                             const Breg *, const Grid_breg *) const;
   // Gram-Schmidt orthogonalization process
   // 1st argument: wave-vector
   // 2nd arugment: input magnetic field vector (in Fourier space)
   // remark: real and imagine parts of complex magnetic field vector
   // in Fourier space handled separately
-  hamvec<3, double> gramschmidt(const hamvec<3, double> &,
-                                const hamvec<3, double> &) const;
+  Hamvec<3, ham_float> gramschmidt(const Hamvec<3, ham_float> &,
+                                   const Hamvec<3, ham_float> &) const;
 };
 
 // local anisotropic random magnetic field
@@ -287,61 +294,61 @@ protected:
   // dynamo number
   // 1st argument: plasma beta
   // 2nd argument: cosine of k-B pitch angle
-  inline double dynamo(const double &beta, const double &cosa) const {
+  inline ham_float dynamo(const ham_float &beta, const ham_float &cosa) const {
     return 1 + 0.25 * beta * beta + beta * (1. - 2. * cosa * cosa);
   }
   // fast mode anisotropic tensor structure
   // 1st argument: plasma beta
   // 2nd argument: cosine of k-B pitch angle
-  double h_f(const double &, const double &) const;
+  ham_float h_f(const ham_float &, const ham_float &) const;
   // slow mode anisotropic tensor structure
   // 1st argument: plasma beta
   // 2nd argument: cosine of k-B pitch angle
-  double h_s(const double &, const double &) const;
+  ham_float h_s(const ham_float &, const ham_float &) const;
   // fast mode anisotropy power factor
   // 1st argument: plasma Mach number
   // 2nd argument: cosine of k-B pitch angle
-  inline double F_a(const double &ma, const double &cosa) const {
+  inline ham_float F_a(const ham_float &ma, const ham_float &cosa) const {
     return std::exp(-1. * std::pow(ma, -1.33333333) * std::fabs(cosa) /
                     std::pow(1 - cosa * cosa, 0.33333333));
   }
   // slow mode anisotropy power factor
   // 1st argument: plasma Mach number
   // 2nd argument: cosine of k-B pitch angle
-  inline double F_s(const double &ma, const double &cosa) const {
+  inline ham_float F_s(const ham_float &ma, const ham_float &cosa) const {
     return std::exp(-1. * std::pow(ma, -1.33333333) * std::fabs(cosa) /
                     std::pow(1 - cosa * cosa, 0.33333333));
   }
   // cosine of pitch angle between wavevector and regular GMF
   // 1st argument: field vector
   // 2nd argument: wave vector
-  inline double cosine(const hamvec<3, double> &b,
-                       const hamvec<3, double> &k) const {
+  inline ham_float cosine(const Hamvec<3, ham_float> &b,
+                          const Hamvec<3, ham_float> &k) const {
     // dotprod is function from vec3.h
     return (b.versor()).dotprod(k.versor());
   }
   // direction of Alfven mode
   // 1st argument: regualr GMF vector
   // 2nd argument: wave vector
-  hamvec<3, double> e_plus(const hamvec<3, double> &,
-                           const hamvec<3, double> &) const;
+  Hamvec<3, ham_float> e_plus(const Hamvec<3, ham_float> &,
+                              const Hamvec<3, ham_float> &) const;
   // direction of slow and fast modes
   // 1st argument: regualr GMF vector
   // 2nd argument: wave vector
-  hamvec<3, double> e_minus(const hamvec<3, double> &,
-                            const hamvec<3, double> &) const;
+  Hamvec<3, ham_float> e_minus(const Hamvec<3, ham_float> &,
+                               const Hamvec<3, ham_float> &) const;
   // isotropic part of power spectrum of Alfvenic mode
   // 1st argument: wave vector magnitude
   // 2nd argument: parameter class object
-  double spectrum_a(const double &, const Param *) const;
+  ham_float spectrum_a(const ham_float &, const Param *) const;
   // isotropic part of power spectrum of fast mode
   // 1st argument: wave vector magnitude
   // 2nd argument: parameter class object
-  double spectrum_f(const double &, const Param *) const;
+  ham_float spectrum_f(const ham_float &, const Param *) const;
   // isotropic part of power spectrum of slow mode
   // 1st argument: wave vector magnitude
   // 2nd argument: parameter class object
-  double spectrum_s(const double &, const Param *) const;
+  ham_float spectrum_s(const ham_float &, const Param *) const;
 };
 
 #endif

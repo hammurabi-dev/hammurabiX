@@ -2,26 +2,27 @@
 #include <vector>
 
 #include <bfield.h>
-#include <cgsunits.h>
 #include <grid.h>
+#include <hamtype.h>
+#include <hamunits.h>
 #include <hamvec.h>
 #include <param.h>
 
-hamvec<3, double> Breg_jaffe::write_field(const hamvec<3, double> &pos,
-                                          const Param *par) const {
-  double inner_b{0};
+Hamvec<3, ham_float> Breg_jaffe::write_field(const Hamvec<3, ham_float> &pos,
+                                             const Param *par) const {
+  ham_float inner_b{0};
   if (par->breg_jaffe.ring)
     inner_b = par->breg_jaffe.ring_amp;
   else if (par->breg_jaffe.bar)
     inner_b = par->breg_jaffe.bar_amp;
 
-  hamvec<3, double> bhat{orientation(pos, par)};
-  hamvec<3, double> btot;
+  Hamvec<3, ham_float> bhat{orientation(pos, par)};
+  Hamvec<3, ham_float> btot;
   btot = bhat * radial_scaling(pos, par) *
          (par->breg_jaffe.disk_amp * disk_scaling(pos, par) +
           par->breg_jaffe.halo_amp * halo_scaling(pos, par));
   // compress factor for each arm or for ring/bar
-  std::vector<double> arm{arm_compress(pos, par)};
+  std::vector<ham_float> arm{arm_compress(pos, par)};
   // only inner region
   if (arm.size() == 1) {
     btot += bhat * arm[0] * inner_b;
@@ -35,15 +36,16 @@ hamvec<3, double> Breg_jaffe::write_field(const hamvec<3, double> &pos,
   return btot;
 }
 
-hamvec<3, double> Breg_jaffe::orientation(const hamvec<3, double> &pos,
-                                          const Param *par) const {
-  const double r{sqrt(pos[0] * pos[0] + pos[1] * pos[1])}; // cylindrical frame
-  const double r_lim{par->breg_jaffe.ring_r};
-  const double bar_lim{par->breg_jaffe.bar_a + 0.5 * par->breg_jaffe.comp_d};
-  const double cos_p{std::cos(par->breg_jaffe.arm_pitch)};
-  const double sin_p{std::sin(par->breg_jaffe.arm_pitch)}; // pitch angle
-  hamvec<3, double> tmp;
-  double quadruple{1};
+Hamvec<3, ham_float> Breg_jaffe::orientation(const Hamvec<3, ham_float> &pos,
+                                             const Param *par) const {
+  const ham_float r{
+      sqrt(pos[0] * pos[0] + pos[1] * pos[1])}; // cylindrical frame
+  const ham_float r_lim{par->breg_jaffe.ring_r};
+  const ham_float bar_lim{par->breg_jaffe.bar_a + 0.5 * par->breg_jaffe.comp_d};
+  const ham_float cos_p{std::cos(par->breg_jaffe.arm_pitch)};
+  const ham_float sin_p{std::sin(par->breg_jaffe.arm_pitch)}; // pitch angle
+  Hamvec<3, ham_float> tmp;
+  ham_float quadruple{1};
   if (r < 0.5 * cgs::kpc) // forbiden region
     return tmp;
   if (pos[2] > par->breg_jaffe.disk_z0)
@@ -65,10 +67,10 @@ hamvec<3, double> Breg_jaffe::orientation(const hamvec<3, double> &pos,
   }
   // elliptical bar (replace molecular ring)
   else if (par->breg_jaffe.bar) {
-    const double cos_phi{std::cos(par->breg_jaffe.bar_phi0)};
-    const double sin_phi{std::sin(par->breg_jaffe.bar_phi0)};
-    const double x{cos_phi * pos[0] - sin_phi * pos[1]};
-    const double y{sin_phi * pos[0] + cos_phi * pos[1]};
+    const ham_float cos_phi{std::cos(par->breg_jaffe.bar_phi0)};
+    const ham_float sin_phi{std::sin(par->breg_jaffe.bar_phi0)};
+    const ham_float x{cos_phi * pos[0] - sin_phi * pos[1]};
+    const ham_float y{sin_phi * pos[0] + cos_phi * pos[1]};
     // inside spiral arm
     if (r > bar_lim) {
       tmp[0] =
@@ -79,10 +81,10 @@ hamvec<3, double> Breg_jaffe::orientation(const hamvec<3, double> &pos,
     // inside elliptical bar
     else {
       if (y != 0) {
-        const double new_x{copysign(1, y)};
-        const double new_y{-copysign(1, y) * (x / y) * par->breg_jaffe.bar_b *
-                           par->breg_jaffe.bar_b /
-                           (par->breg_jaffe.bar_a * par->breg_jaffe.bar_a)};
+        const ham_float new_x{copysign(1, y)};
+        const ham_float new_y{-copysign(1, y) * (x / y) *
+                              par->breg_jaffe.bar_b * par->breg_jaffe.bar_b /
+                              (par->breg_jaffe.bar_a * par->breg_jaffe.bar_a)};
         tmp[0] =
             (cos_phi * new_x + sin_phi * new_y) * (1 - 2 * par->breg_jaffe.bss);
         tmp[1] = (-sin_phi * new_x + cos_phi * new_y) *
@@ -97,33 +99,34 @@ hamvec<3, double> Breg_jaffe::orientation(const hamvec<3, double> &pos,
   return tmp;
 }
 
-double Breg_jaffe::radial_scaling(const hamvec<3, double> &pos,
-                                  const Param *par) const {
-  const double r2{pos[0] * pos[0] + pos[1] * pos[1]};
+ham_float Breg_jaffe::radial_scaling(const Hamvec<3, ham_float> &pos,
+                                     const Param *par) const {
+  const ham_float r2{pos[0] * pos[0] + pos[1] * pos[1]};
   // separate into 3 parts for better view
-  const double s1{
+  const ham_float s1{
       1. - std::exp(-r2 / (par->breg_jaffe.r_inner * par->breg_jaffe.r_inner))};
-  const double s2{
+  const ham_float s2{
       std::exp(-r2 / (par->breg_jaffe.r_scale * par->breg_jaffe.r_scale))};
-  const double s3{std::exp(-r2 * r2 /
-                           (par->breg_jaffe.r_peak * par->breg_jaffe.r_peak *
-                            par->breg_jaffe.r_peak * par->breg_jaffe.r_peak))};
+  const ham_float s3{
+      std::exp(-r2 * r2 /
+               (par->breg_jaffe.r_peak * par->breg_jaffe.r_peak *
+                par->breg_jaffe.r_peak * par->breg_jaffe.r_peak))};
   return s1 * (s2 + s3);
 }
 
-std::vector<double> Breg_jaffe::arm_compress(const hamvec<3, double> &pos,
-                                             const Param *par) const {
-  const double r{sqrt(pos[0] * pos[0] + pos[1] * pos[1]) /
-                 par->breg_jaffe.comp_r};
-  const double c0{1. / par->breg_jaffe.comp_c - 1.};
-  std::vector<double> a0 = dist2arm(pos, par);
-  const double r_scaling{radial_scaling(pos, par)};
-  const double z_scaling{arm_scaling(pos, par)};
+std::vector<ham_float> Breg_jaffe::arm_compress(const Hamvec<3, ham_float> &pos,
+                                                const Param *par) const {
+  const ham_float r{sqrt(pos[0] * pos[0] + pos[1] * pos[1]) /
+                    par->breg_jaffe.comp_r};
+  const ham_float c0{1. / par->breg_jaffe.comp_c - 1.};
+  std::vector<ham_float> a0 = dist2arm(pos, par);
+  const ham_float r_scaling{radial_scaling(pos, par)};
+  const ham_float z_scaling{arm_scaling(pos, par)};
   // for saving computing time
-  const double d0_inv{(r_scaling * z_scaling) / par->breg_jaffe.comp_d};
-  double factor{c0 * r_scaling * z_scaling};
+  const ham_float d0_inv{(r_scaling * z_scaling) / par->breg_jaffe.comp_d};
+  ham_float factor{c0 * r_scaling * z_scaling};
   if (r > 1) {
-    double cdrop{std::pow(r, -par->breg_jaffe.comp_p)};
+    ham_float cdrop{std::pow(r, -par->breg_jaffe.comp_p)};
     for (decltype(a0.size()) i = 0; i < a0.size(); ++i) {
       a0[i] = factor * cdrop *
               std::exp(-a0[i] * a0[i] * cdrop * cdrop * d0_inv * d0_inv);
@@ -136,19 +139,20 @@ std::vector<double> Breg_jaffe::arm_compress(const hamvec<3, double> &pos,
   return a0;
 }
 
-std::vector<double> Breg_jaffe::arm_compress_dust(const hamvec<3, double> &pos,
-                                                  const Param *par) const {
-  const double r{sqrt(pos[0] * pos[0] + pos[1] * pos[1]) /
-                 par->breg_jaffe.comp_r};
-  const double c0{1. / par->breg_jaffe.comp_c - 1.};
-  std::vector<double> a0 = dist2arm(pos, par);
-  const double r_scaling{radial_scaling(pos, par)};
-  const double z_scaling{arm_scaling(pos, par)};
+std::vector<ham_float>
+Breg_jaffe::arm_compress_dust(const Hamvec<3, ham_float> &pos,
+                              const Param *par) const {
+  const ham_float r{sqrt(pos[0] * pos[0] + pos[1] * pos[1]) /
+                    par->breg_jaffe.comp_r};
+  const ham_float c0{1. / par->breg_jaffe.comp_c - 1.};
+  std::vector<ham_float> a0 = dist2arm(pos, par);
+  const ham_float r_scaling{radial_scaling(pos, par)};
+  const ham_float z_scaling{arm_scaling(pos, par)};
   // only difference from normal arm_compress
-  const double d0_inv{(r_scaling) / par->breg_jaffe.comp_d};
-  double factor{c0 * r_scaling * z_scaling};
+  const ham_float d0_inv{(r_scaling) / par->breg_jaffe.comp_d};
+  ham_float factor{c0 * r_scaling * z_scaling};
   if (r > 1) {
-    double cdrop{std::pow(r, -par->breg_jaffe.comp_p)};
+    ham_float cdrop{std::pow(r, -par->breg_jaffe.comp_p)};
     for (decltype(a0.size()) i = 0; i < a0.size(); ++i) {
       a0[i] = factor * cdrop *
               std::exp(-a0[i] * a0[i] * cdrop * cdrop * d0_inv * d0_inv);
@@ -161,16 +165,16 @@ std::vector<double> Breg_jaffe::arm_compress_dust(const hamvec<3, double> &pos,
   return a0;
 }
 
-std::vector<double> Breg_jaffe::dist2arm(const hamvec<3, double> &pos,
-                                         const Param *par) const {
-  std::vector<double> d;
-  const double r{sqrt(pos[0] * pos[0] + pos[1] * pos[1])};
-  const double r_lim{par->breg_jaffe.ring_r};
-  const double bar_lim{par->breg_jaffe.bar_a + 0.5 * par->breg_jaffe.comp_d};
-  const double cos_p{std::cos(par->breg_jaffe.arm_pitch)};
-  const double sin_p{std::sin(par->breg_jaffe.arm_pitch)}; // pitch angle
-  const double beta_inv{-sin_p / cos_p};
-  double theta{atan2(pos[1], pos[0])};
+std::vector<ham_float> Breg_jaffe::dist2arm(const Hamvec<3, ham_float> &pos,
+                                            const Param *par) const {
+  std::vector<ham_float> d;
+  const ham_float r{sqrt(pos[0] * pos[0] + pos[1] * pos[1])};
+  const ham_float r_lim{par->breg_jaffe.ring_r};
+  const ham_float bar_lim{par->breg_jaffe.bar_a + 0.5 * par->breg_jaffe.comp_d};
+  const ham_float cos_p{std::cos(par->breg_jaffe.arm_pitch)};
+  const ham_float sin_p{std::sin(par->breg_jaffe.arm_pitch)}; // pitch angle
+  const ham_float beta_inv{-sin_p / cos_p};
+  ham_float theta{atan2(pos[1], pos[0])};
   if (theta < 0)
     theta += 2 * cgs::pi;
   // if molecular ring
@@ -182,15 +186,15 @@ std::vector<double> Breg_jaffe::dist2arm(const hamvec<3, double> &pos,
     // in spiral arm, return vector with arm_num elements
     else {
       // loop through arms
-      for (unsigned int i = 0; i < par->breg_jaffe.arm_num; ++i) {
-        double d_ang{par->breg_jaffe.arm_phi0[i] - theta};
-        double d_rad{
+      for (ham_uint i = 0; i < par->breg_jaffe.arm_num; ++i) {
+        ham_float d_ang{par->breg_jaffe.arm_phi0[i] - theta};
+        ham_float d_rad{
             std::fabs(par->breg_jaffe.arm_r0 * std::exp(d_ang * beta_inv) - r)};
-        double d_rad_p{
+        ham_float d_rad_p{
             std::fabs(par->breg_jaffe.arm_r0 *
                           std::exp((d_ang + 2 * cgs::pi) * beta_inv) -
                       r)};
-        double d_rad_m{
+        ham_float d_rad_m{
             std::fabs(par->breg_jaffe.arm_r0 *
                           std::exp((d_ang - 2 * cgs::pi) * beta_inv) -
                       r)};
@@ -200,12 +204,12 @@ std::vector<double> Breg_jaffe::dist2arm(const hamvec<3, double> &pos,
   }
   // if elliptical bar
   else if (par->breg_jaffe.bar) {
-    const double cos_tmp{std::cos(par->breg_jaffe.bar_phi0) * pos[0] / r -
-                         std::sin(par->breg_jaffe.bar_phi0) * pos[1] /
-                             r}; // cos(phi)cos(phi0) - sin(phi)sin(phi0)
-    const double sin_tmp{std::cos(par->breg_jaffe.bar_phi0) * pos[1] / r +
-                         std::sin(par->breg_jaffe.bar_phi0) * pos[0] /
-                             r}; // sin(phi)cos(phi0) + cos(phi)sin(phi0)
+    const ham_float cos_tmp{std::cos(par->breg_jaffe.bar_phi0) * pos[0] / r -
+                            std::sin(par->breg_jaffe.bar_phi0) * pos[1] /
+                                r}; // cos(phi)cos(phi0) - sin(phi)sin(phi0)
+    const ham_float sin_tmp{std::cos(par->breg_jaffe.bar_phi0) * pos[1] / r +
+                            std::sin(par->breg_jaffe.bar_phi0) * pos[0] /
+                                r}; // sin(phi)cos(phi0) + cos(phi)sin(phi0)
     // in bar, return single element vector
     if (r < bar_lim) {
       d.push_back(
@@ -219,15 +223,15 @@ std::vector<double> Breg_jaffe::dist2arm(const hamvec<3, double> &pos,
     // in spiral arm, return vector with arm_num elements
     else {
       // loop through arms
-      for (unsigned int i = 0; i < par->breg_jaffe.arm_num; ++i) {
-        double d_ang{par->breg_jaffe.arm_phi0[i] - theta};
-        double d_rad{
+      for (ham_uint i = 0; i < par->breg_jaffe.arm_num; ++i) {
+        ham_float d_ang{par->breg_jaffe.arm_phi0[i] - theta};
+        ham_float d_rad{
             std::fabs(par->breg_jaffe.arm_r0 * std::exp(d_ang * beta_inv) - r)};
-        double d_rad_p{
+        ham_float d_rad_p{
             std::fabs(par->breg_jaffe.arm_r0 *
                           std::exp((d_ang + 2 * cgs::pi) * beta_inv) -
                       r)};
-        double d_rad_m{
+        ham_float d_rad_m{
             std::fabs(par->breg_jaffe.arm_r0 *
                           std::exp((d_ang - 2 * cgs::pi) * beta_inv) -
                       r)};

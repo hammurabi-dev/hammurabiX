@@ -5,11 +5,11 @@
 
 #include <cassert>
 #include <cmath>
-#include <cstddef> // for std::size_t
 #include <memory>
 #include <string>
 #include <vector>
 
+#include <hamtype.h>
 #include <hamvec.h>
 #include <tinyxml2.h>
 
@@ -22,47 +22,48 @@ namespace toolkit {
 // 4th argument: index for 1st dimension
 // 5th argument: index of 2nd dimension
 // 6th argument: index for 3rd dimenstion
-inline std::size_t index3d(const std::size_t & /* n1 */, const std::size_t &n2,
-                           const std::size_t &n3, const std::size_t &i,
-                           const std::size_t &j, const std::size_t &l) {
+inline ham_uint index3d(const ham_uint & /* n1 */, const ham_uint &n2,
+                        const ham_uint &n3, const ham_uint &i,
+                        const ham_uint &j, const ham_uint &l) {
   assert(j <= n2 and l <= n3);
   return (i * n2 * n3 + j * n3 + l);
 }
 // find index for 4D grid
 // following the same idea as index3d function
 // but adding the 4th dimension
-inline std::size_t index4d(const std::size_t & /* n1 */, const std::size_t &n2,
-                           const std::size_t &n3, const std::size_t &n4,
-                           const std::size_t &e, const std::size_t &i,
-                           const std::size_t &j, const std::size_t &l) {
+inline ham_uint index4d(const ham_uint & /* n1 */, const ham_uint &n2,
+                        const ham_uint &n3, const ham_uint &n4,
+                        const ham_uint &e, const ham_uint &i, const ham_uint &j,
+                        const ham_uint &l) {
   assert(i <= n2 and j <= n3 and l <= n4);
   return (e * n2 * n3 * n4 + i * n3 * n4 + j * n4 + l);
 }
-// mean value estimator for double array
-// 1st argument: pointer for a double array
+// mean value estimator for ham_float array
+// 1st argument: pointer for a ham_float array
 // 2nd argument: size of array
-double mean(const double *, const std::size_t &);
-// mean value estimator for double vector
-// 1st argument: ref for a double vector
-double mean(const std::vector<double> &);
-// variance estimator for double array
-// 1st argument: pointer for a double array
+ham_float mean(const ham_float *, const ham_uint &);
+// mean value estimator for ham_float vector
+// 1st argument: ref for a ham_float vector
+ham_float mean(const std::vector<ham_float> &);
+// variance estimator for ham_float array
+// 1st argument: pointer for a ham_float array
 // 2nd argument: size of array
-double variance(const double *, const std::size_t &);
-// variance estimator for double vector
-// 1st argument: ref for a double vector
-double variance(const std::vector<double> &);
-// covariance estimator for double arrays
-// 1st argument: pointer for 1st double array
-// 2nd argument: pointer for 2nd double array
+ham_float variance(const ham_float *, const ham_uint &);
+// variance estimator for ham_float vector
+// 1st argument: ref for a ham_float vector
+ham_float variance(const std::vector<ham_float> &);
+// covariance estimator for ham_float arrays
+// 1st argument: pointer for 1st ham_float array
+// 2nd argument: pointer for 2nd ham_float array
 // 3rd argument: size of array
-double covariance(const double *, const double *, const std::size_t &);
-// covariance estimator double vectors
-// 1st argument: ref for 1st double vector
-// 2nd argument: ref for 2nd double vector
-double covariance(const std::vector<double> &, const std::vector<double> &);
+ham_float covariance(const ham_float *, const ham_float *, const ham_uint &);
+// covariance estimator ham_float vectors
+// 1st argument: ref for 1st ham_float vector
+// 2nd argument: ref for 2nd ham_float vector
+ham_float covariance(const std::vector<ham_float> &,
+                     const std::vector<ham_float> &);
 // use given seed number or generate random seed according to thread and clock
-std::size_t random_seed(const int &);
+ham_uint random_seed(const ham_int &);
 // load tinyxml2::XML file
 // 1st argument: tinyxml2::XML file name (with dir)
 std::unique_ptr<tinyxml2::XMLDocument> loadxml(const std::string &);
@@ -87,21 +88,22 @@ std::string fetchstring(tinyxml2::XMLElement *, const std::string &);
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
 // 3rd argument: sub-key under 1st argument
-int fetchint(tinyxml2::XMLElement *, const std::string &, const std::string &);
+ham_int fetchint(tinyxml2::XMLElement *, const std::string &,
+                 const std::string &);
 // get integer attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
-int fetchint(tinyxml2::XMLElement *, const std::string &);
-// get unsigned integer attribute
+ham_int fetchint(tinyxml2::XMLElement *, const std::string &);
+// get ham_uinteger attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
 // 3rd argument: sub-key under 1st argument
-unsigned int fetchunsigned(tinyxml2::XMLElement *, const std::string &,
-                           const std::string &);
-// get unsigned integer attribute
+ham_uint fetchuint(tinyxml2::XMLElement *, const std::string &,
+                   const std::string &);
+// get ham_uinteger attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
-unsigned int fetchunsigned(tinyxml2::XMLElement *, const std::string &);
+ham_uint fetchuint(tinyxml2::XMLElement *, const std::string &);
 // get bool attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
@@ -114,16 +116,16 @@ bool fetchbool(tinyxml2::XMLElement *, const std::string &,
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
 bool fetchbool(tinyxml2::XMLElement *, const std::string &);
-// get double attribute
+// get ham_float attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
 // 3rd argument: sub-key under 1st argument
-double fetchdouble(tinyxml2::XMLElement *, const std::string &,
-                   const std::string &);
-// get double attribute
+ham_float fetchfloat(tinyxml2::XMLElement *, const std::string &,
+                     const std::string &);
+// get ham_float attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
-double fetchdouble(tinyxml2::XMLElement *, const std::string &);
+ham_float fetchfloat(tinyxml2::XMLElement *, const std::string &);
 } // namespace toolkit
 
 #endif

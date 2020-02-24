@@ -8,6 +8,7 @@
 #include <bfield.h>
 #include <crefield.h>
 #include <grid.h>
+#include <hamtype.h>
 #include <integrator.h>
 #include <param.h>
 #include <pipeline.h>
@@ -157,7 +158,7 @@ void Pipeline::assemble_obs() {
   intobj = std::make_unique<Integrator>();
   if (par->grid_obs.write_permission) {
     const auto repeat = par->grid_obs.do_sync.size();
-    for (unsigned int i = 0; i < repeat; ++i) {
+    for (ham_uint i = 0; i < repeat; ++i) {
       if (i > 0) {
         par->grid_obs.do_dm = false;
         par->grid_obs.do_fd = false;

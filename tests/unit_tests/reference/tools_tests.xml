@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <root>
     <integer value="23"/>
-    <double value="3.14"/>
-    <empty_double value=""/>
+    <float value="3.14"/>
+    <empty_float value=""/>
     <string value="string"/>
     <true value="1"/>
     <false value="0"/>

@@ -12,6 +12,7 @@
 #include <omp.h>
 
 #include <grid.h>
+#include <hamtype.h>
 #include <param.h>
 
 // turbulent free electron density field
@@ -24,7 +25,7 @@ Grid_ternd::Grid_ternd(const Param *par) {
 
 void Grid_ternd::build_grid(const Param *par) {
   // allocate spatial domain thermal electron field
-  te = std::make_unique<double[]>(par->grid_ternd.full_size);
+  te = std::make_unique<ham_float[]>(par->grid_ternd.full_size);
   // allocate Fourier domain thermal electron field
   te_k = fftw_alloc_complex(par->grid_ternd.full_size);
   te_k[0][0] = 0;
@@ -43,12 +44,12 @@ void Grid_ternd::export_grid(const Param *par) {
   std::ofstream output(par->grid_ternd.filename.c_str(),
                        std::ios::out | std::ios::binary);
   assert(output.is_open());
-  double tmp;
+  ham_float tmp;
   for (decltype(par->grid_ternd.full_size) i = 0;
        i != par->grid_ternd.full_size; ++i) {
     assert(!output.eof());
     tmp = te[i];
-    output.write(reinterpret_cast<char *>(&tmp), sizeof(double));
+    output.write(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
   }
   output.close();
 }
@@ -58,11 +59,11 @@ void Grid_ternd::import_grid(const Param *par) {
   std::ifstream input(par->grid_ternd.filename.c_str(),
                       std::ios::in | std::ios::binary);
   assert(input.is_open());
-  double tmp;
+  ham_float tmp;
   for (decltype(par->grid_ternd.full_size) i = 0;
        i != par->grid_ternd.full_size; ++i) {
     assert(!input.eof());
-    input.read(reinterpret_cast<char *>(&tmp), sizeof(double));
+    input.read(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
     te[i] = tmp;
   }
 #ifndef NDEBUG

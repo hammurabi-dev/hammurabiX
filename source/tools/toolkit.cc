@@ -1,6 +1,5 @@
 #include <cassert>
 #include <cmath>
-#include <cstddef> // for std::size_t
 #include <iostream>
 #include <memory>
 #include <omp.h>
@@ -9,6 +8,7 @@
 #include <thread>
 #include <vector>
 
+#include <hamtype.h>
 #include <tinyxml2.h>
 #include <toolkit.h>
 
@@ -17,65 +17,65 @@ namespace toolkit {
 // Kahan summation algorithm
 class ksum;
 */
-// mean for double array
-double mean(const double *arr, const std::size_t &size) {
-  double avg{0};
-  for (std::size_t i = 0; i != size; ++i) {
+// mean for ham_float array
+ham_float mean(const ham_float *arr, const ham_uint &size) {
+  ham_float avg{0};
+  for (ham_uint i = 0; i != size; ++i) {
     avg += arr[i];
   }
   avg /= size;
   return avg;
 }
-// mean for double vector
-double mean(const std::vector<double> &vect) {
+// mean for ham_float vector
+ham_float mean(const std::vector<ham_float> &vect) {
   assert(!vect.empty());
-  double avg{0};
+  ham_float avg{0};
   for (auto &i : vect) {
     avg += i;
   }
   avg /= vect.size();
   return avg;
 }
-// variance for double array
-double variance(const double *arr, const std::size_t &size) {
-  const double avg{mean(arr, size)};
-  double var{0.};
-  for (std::size_t i = 0; i != size; ++i) {
+// variance for ham_float array
+ham_float variance(const ham_float *arr, const ham_uint &size) {
+  const ham_float avg{mean(arr, size)};
+  ham_float var{0.};
+  for (ham_uint i = 0; i != size; ++i) {
     var += (arr[i] - avg) * (arr[i] - avg);
   }
   var /= size;
   return var;
 }
-// variance for double vector
-double variance(const std::vector<double> &vect) {
+// variance for ham_float vector
+ham_float variance(const std::vector<ham_float> &vect) {
   assert(!vect.empty());
-  const double avg{mean(vect)};
-  double var{0.};
+  const ham_float avg{mean(vect)};
+  ham_float var{0.};
   for (auto &i : vect) {
     var += (i - avg) * (i - avg);
   }
   var /= vect.size();
   return var;
 }
-// covariance for double array
-double covariance(const double *arr1, const double *arr2,
-                  const std::size_t &size) {
-  double avg1{mean(arr1, size)};
-  double avg2{mean(arr2, size)};
-  double covar{0.};
-  for (std::size_t m = 0; m != size; ++m) {
+// covariance for ham_float array
+ham_float covariance(const ham_float *arr1, const ham_float *arr2,
+                     const ham_uint &size) {
+  ham_float avg1{mean(arr1, size)};
+  ham_float avg2{mean(arr2, size)};
+  ham_float covar{0.};
+  for (ham_uint m = 0; m != size; ++m) {
     covar += (arr1[m] - avg1) * (arr2[m] - avg2);
   }
   covar /= size;
   return covar;
 }
-// covariance for double vector
-double covariance(const std::vector<double> &vect1,
-                  const std::vector<double> &vect2) {
+// covariance for ham_float vector
+ham_float covariance(const std::vector<ham_float> &vect1,
+                     const std::vector<ham_float> &vect2) {
   assert(vect1.size() == vect2.size());
-  double avg1{mean(vect1)};
-  double avg2{mean(vect2)};
-  double covar{0.};
+  ham_float avg1{mean(vect1)};
+  ham_float avg2{mean(vect2)};
+  ham_float covar{0.};
   for (decltype(vect1.size()) i = 0; i != vect1.size(); ++i) {
     covar += (vect1[i] - avg1) * (vect2[i] - avg2);
   }
@@ -83,7 +83,7 @@ double covariance(const std::vector<double> &vect1,
   return covar;
 }
 // random seed generator
-std::size_t random_seed(const int &s) {
+ham_uint random_seed(const ham_int &s) {
   assert(s >= 0);
   if (s == 0) {
     auto p = std::chrono::system_clock::now();
@@ -135,24 +135,23 @@ std::string fetchstring(tinyxml2::XMLElement *el, const std::string &att_type) {
   return el->Attribute(att_type.c_str());
 }
 // get integer value of attribute in child level, with default return
-int fetchint(tinyxml2::XMLElement *el, const std::string &att_type,
-             const std::string &key) {
+ham_int fetchint(tinyxml2::XMLElement *el, const std::string &att_type,
+                 const std::string &key) {
 #ifdef VERBOSE
   std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
   return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str());
 }
 // get integer value of attribute in current level, with default return
-int fetchint(tinyxml2::XMLElement *el, const std::string &att_type) {
+ham_int fetchint(tinyxml2::XMLElement *el, const std::string &att_type) {
 #ifdef VERBOSE
   std::cout << "attrib: " << att_type << std::endl;
 #endif
   return el->IntAttribute(att_type.c_str());
 }
 // get unsigned value of attribute in child level, with default return
-unsigned int fetchunsigned(tinyxml2::XMLElement *el,
-                           const std::string &att_type,
-                           const std::string &key) {
+ham_uint fetchuint(tinyxml2::XMLElement *el, const std::string &att_type,
+                   const std::string &key) {
 #ifdef VERBOSE
   std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
@@ -160,8 +159,7 @@ unsigned int fetchunsigned(tinyxml2::XMLElement *el,
       ->UnsignedAttribute(att_type.c_str());
 }
 // get unsigned value of attribute in current level, with default return
-unsigned int fetchunsigned(tinyxml2::XMLElement *el,
-                           const std::string &att_type) {
+ham_uint fetchuint(tinyxml2::XMLElement *el, const std::string &att_type) {
 #ifdef VERBOSE
   std::cout << "attrib: " << att_type << std::endl;
 #endif
@@ -182,16 +180,16 @@ bool fetchbool(tinyxml2::XMLElement *el, const std::string &att_type) {
 #endif
   return el->BoolAttribute(att_type.c_str());
 }
-// get double value of attribute in child level, with default return
-double fetchdouble(tinyxml2::XMLElement *el, const std::string &att_type,
-                   const std::string &key) {
+// get ham_float value of attribute in child level, with default return
+ham_float fetchfloat(tinyxml2::XMLElement *el, const std::string &att_type,
+                     const std::string &key) {
 #ifdef VERBOSE
   std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
   return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str());
 }
-// get double value of attribute in current level, with default return
-double fetchdouble(tinyxml2::XMLElement *el, const std::string &att_type) {
+// get ham_float value of attribute in current level, with default return
+ham_float fetchfloat(tinyxml2::XMLElement *el, const std::string &att_type) {
 #ifdef VERBOSE
   std::cout << "attrib: " << att_type << std::endl;
 #endif
@@ -202,16 +200,16 @@ double fetchdouble(tinyxml2::XMLElement *el, const std::string &att_type) {
 
 /*
 class toolkit::ksum{
-  double acc, c; // acc, the accumulator; c, the compensator
+  ham_float acc, c; // acc, the accumulator; c, the compensator
 public:
   ksum() : acc(0), c(0) {}
   virtual ~ksum() = default;
-  void add (const double &val) {
-    const volatile double y = val - c;
-    const volatile double t = acc + y;
+  void add (const ham_float &val) {
+    const volatile ham_float y = val - c;
+    const volatile ham_float t = acc + y;
     c = (t - acc) - y; // the missing compensator
     acc = t;
   }
-  double result() const {return acc;}
+  ham_float result() const {return acc;}
 };
  */

@@ -1,5 +1,5 @@
-#ifndef HAMMURABI_PIPELINE
-#define HAMMURABI_PIPELINE
+#ifndef HAMMURABI_PIPELINE_H
+#define HAMMURABI_PIPELINE_H
 
 #include <string>
 

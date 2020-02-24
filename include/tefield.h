@@ -18,6 +18,7 @@
 #define HAMMURABI_TE_H
 
 #include <grid.h>
+#include <hamtype.h>
 #include <hamvec.h>
 #include <param.h>
 
@@ -45,17 +46,18 @@ public:
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
   // 3rd argument: electron grid class object
-  virtual double read_field(const hamvec<3, double> &, const Param *,
-                            const Grid_tereg *) const;
+  virtual ham_float read_field(const Hamvec<3, ham_float> &, const Param *,
+                               const Grid_tereg *) const;
   // assemble thermal electron density at given position
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: parameter class object
-  virtual double write_field(const hamvec<3, double> &, const Param *) const;
+  virtual ham_float write_field(const Hamvec<3, ham_float> &,
+                                const Param *) const;
   // read from grid with linear interpolation
   // 1st argument: galactic centric Cartesian frame position
   // 2nd argument: electron field grid class object
-  virtual double read_grid(const hamvec<3, double> &, const Param *,
-                           const Grid_tereg *) const;
+  virtual ham_float read_grid(const Hamvec<3, ham_float> &, const Param *,
+                              const Grid_tereg *) const;
   // write to grid
   // 1st argument: parameter class object
   // 2nd argument: electron field grid class object
@@ -71,10 +73,10 @@ public:
   TErnd &operator=(const TErnd &) = delete;
   TErnd &operator=(TErnd &&) = delete;
   virtual ~TErnd() = default;
-  virtual double read_field(const hamvec<3, double> &, const Param *,
-                            const Grid_ternd *) const;
-  virtual double read_grid(const hamvec<3, double> &, const Param *,
-                           const Grid_ternd *) const;
+  virtual ham_float read_field(const Hamvec<3, ham_float> &, const Param *,
+                               const Grid_ternd *) const;
+  virtual ham_float read_grid(const Hamvec<3, ham_float> &, const Param *,
+                              const Grid_ternd *) const;
   virtual void write_grid(const Param *, const TEreg *, const Grid_tereg *,
                           Grid_ternd *) const;
 };
@@ -90,7 +92,8 @@ public:
   TEreg_unif &operator=(const TEreg_unif &) = delete;
   TEreg_unif &operator=(TEreg_unif &&) = delete;
   virtual ~TEreg_unif() = default;
-  double write_field(const hamvec<3, double> &, const Param *) const override;
+  ham_float write_field(const Hamvec<3, ham_float> &,
+                        const Param *) const override;
 };
 
 // YMW16 modeling (ignore Fermi Bubble due to lack of observation)
@@ -102,29 +105,31 @@ public:
   TEreg_ymw16 &operator=(const TEreg_ymw16 &) = delete;
   TEreg_ymw16 &operator=(TEreg_ymw16 &&) = delete;
   virtual ~TEreg_ymw16() = default;
-  double write_field(const hamvec<3, double> &, const Param *) const override;
+  ham_float write_field(const Hamvec<3, ham_float> &,
+                        const Param *) const override;
 #ifdef NDEBUG
 private:
 #endif
   // thick disk
-  double thick(const double &, const double &, const Param *) const;
+  ham_float thick(const ham_float &, const ham_float &, const Param *) const;
   // thin disk
-  double thin(const double &, const double &, const Param *) const;
+  ham_float thin(const ham_float &, const ham_float &, const Param *) const;
   // spiral arms
-  double spiral(const double &, const double &, const double &, const double &,
-                const Param *) const;
+  ham_float spiral(const ham_float &, const ham_float &, const ham_float &,
+                   const ham_float &, const Param *) const;
   // galactic center
-  double galcen(const double &, const double &, const double &,
-                const Param *) const;
+  ham_float galcen(const ham_float &, const ham_float &, const ham_float &,
+                   const Param *) const;
   // gum nebula
-  double gum(const double &, const double &, const double &,
-             const Param *) const;
+  ham_float gum(const ham_float &, const ham_float &, const ham_float &,
+                const Param *) const;
   // local bubble
-  double localbubble(const double &, const double &, const double &,
-                     const double &, const double &, const Param *) const;
+  ham_float localbubble(const ham_float &, const ham_float &, const ham_float &,
+                        const ham_float &, const ham_float &,
+                        const Param *) const;
   // northern polar spurs
-  double nps(const double &, const double &, const double &,
-             const Param *) const;
+  ham_float nps(const ham_float &, const ham_float &, const ham_float &,
+                const Param *) const;
 };
 
 //--------------------------- TErnd DERIVED ----------------------------------//
@@ -156,10 +161,10 @@ public:
 
 protected:
   // isotropic turubulent power spectrum
-  virtual double spectrum(const double &, const Param *) const;
+  virtual ham_float spectrum(const ham_float &, const Param *) const;
   // density variance rescaling factor
-  virtual double spatial_profile(const hamvec<3, double> &,
-                                 const Param *) const;
+  virtual ham_float spatial_profile(const Hamvec<3, ham_float> &,
+                                    const Param *) const;
 };
 
 #endif

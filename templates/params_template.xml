@@ -3,15 +3,15 @@
 <root>
   <!-- observable output, frequency in GHz -->
   <observable>
-    <dm cue="1" filename="dm.fits" nside="8"/> <!-- Dispersion Measure (optional) -->
-    <faraday cue="1" filename="fd.fits" nside="64"/> <!-- Faraday depth (optional) -->
+    <dm cue="1" filename="dm.bin" nside="8"/> <!-- Dispersion Measure (optional) -->
+    <faraday cue="1" filename="fd.bin" nside="64"/> <!-- Faraday depth (optional) -->
     <!-- Dispersion measure or Faraday depth has no frequency dependence -->
-    <sync cue="1" freq="30" filename="sync_30.fits" nside="16"/> <!-- synchrotron dmission (optional) -->
-    <sync cue="1" freq="1.4" filename="sync_1.4.fits" nside="32"/> <!-- synchrotron dmission (optional) -->
+    <sync cue="1" freq="30" filename="sync_30.bin" nside="16"/> <!-- synchrotron dmission (optional) -->
+    <sync cue="1" freq="1.4" filename="sync_1.4.bin" nside="32"/> <!-- synchrotron dmission (optional) -->
   </observable>
   <!-- mask map, input -->
   <!-- the mask map is universally applied to all observable outputs -->
-  <mask cue="0" filename="mask.fits"/>
+  <mask cue="0" filename="mask.bin" nside="32"/>
   <!-- physical field in/out -->
   <fieldio>
     <breg read="0" write="0" filename="breg.bin"/> <!-- regular magnetic field (optional) -->

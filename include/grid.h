@@ -24,7 +24,9 @@
 #include <vector>
 
 #include <fftw3.h>
-#include <healpix_map.h>
+#include <hamdis.h>
+#include <hamsk.h>
+#include <hamtype.h>
 #include <param.h>
 #include <tinyxml2.h>
 
@@ -58,7 +60,7 @@ public:
   void export_grid(const Param *) override;
   void import_grid(const Param *) override;
   // spatial domain magnetic field
-  std::unique_ptr<double[]> bx, by, bz;
+  std::unique_ptr<ham_float[]> bx, by, bz;
 };
 
 // random magnetic vector field grid
@@ -89,7 +91,7 @@ public:
   void export_grid(const Param *) override;
   void import_grid(const Param *) override;
   // spatial domain magnetic field
-  std::unique_ptr<double[]> bx, by, bz;
+  std::unique_ptr<ham_float[]> bx, by, bz;
   // Fourier domain magnetic field
   fftw_complex *c0, *c1;
   // for/backward FFT plans
@@ -112,7 +114,7 @@ public:
   void export_grid(const Param *) override;
   void import_grid(const Param *) override;
   // spatial domain thermal electron field
-  std::unique_ptr<double[]> te;
+  std::unique_ptr<ham_float[]> te;
 };
 
 // random thermal electron density field grid
@@ -139,7 +141,7 @@ public:
   void export_grid(const Param *) override;
   void import_grid(const Param *) override;
   // spatial domain thermal electron field
-  std::unique_ptr<double[]> te;
+  std::unique_ptr<ham_float[]> te;
   // Fourier domain thermal electron field
   fftw_complex *te_k;
   // backward FFT plan
@@ -162,7 +164,7 @@ public:
   void export_grid(const Param *) override;
   void import_grid(const Param *) override;
   // phase-space domain CRE flux field
-  std::unique_ptr<double[]> cre_flux;
+  std::unique_ptr<ham_float[]> cre_flux;
 };
 
 // observable field grid
@@ -182,15 +184,13 @@ public:
   // is_map: synchrotron Stokes I
   // qs_map: synchrotron Stokes Q
   // us_map: synchrotron Stokes U
-  // id_map: dust Stokes I
-  // qd_map: dust Stokes Q
-  // ud_map: dust Stokes U
   // fd_map: Faraday depth
-  std::unique_ptr<Healpix_Map<double>> dm_map, is_map, qs_map, us_map, id_map,
-      qd_map, ud_map, fd_map;
+  std::unique_ptr<Hampix<ham_float>> dm_map, is_map, qs_map, us_map, fd_map;
   // temporary HEALPix map for each shell
-  std::unique_ptr<Healpix_Map<double>> tmp_dm_map, tmp_is_map, tmp_qs_map,
-      tmp_us_map, tmp_id_map, tmp_qd_map, tmp_ud_map, tmp_fd_map;
+  std::unique_ptr<Hampix<ham_float>> tmp_dm_map, tmp_is_map, tmp_qs_map,
+      tmp_us_map, tmp_fd_map;
+  // mask map
+  std::unique_ptr<Hampisk<ham_float>> mask_map;
 };
 
 #endif

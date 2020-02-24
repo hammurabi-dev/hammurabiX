@@ -1,34 +1,35 @@
 #include <cmath>
 
-#include <cgsunits.h>
 #include <grid.h>
+#include <hamtype.h>
+#include <hamunits.h>
 #include <hamvec.h>
 #include <param.h>
 #include <tefield.h>
 
-double TEreg_ymw16::write_field(const hamvec<3, double> &pos,
-                                const Param *par) const {
+ham_float TEreg_ymw16::write_field(const Hamvec<3, ham_float> &pos,
+                                   const Param *par) const {
   // YMW16 using a different Cartesian frame from our default one
-  hamvec<3, double> gc_pos{pos[1], -pos[0], pos[2]};
+  Hamvec<3, ham_float> gc_pos{pos[1], -pos[0], pos[2]};
   // sylindrical r
-  double r_cyl{std::sqrt(gc_pos[0] * gc_pos[0] + gc_pos[1] * gc_pos[1])};
+  ham_float r_cyl{std::sqrt(gc_pos[0] * gc_pos[0] + gc_pos[1] * gc_pos[1])};
   // warp
   if (r_cyl >= par->tereg_ymw16.r_warp) {
-    double theta_warp{std::atan2(gc_pos[1], gc_pos[0])};
+    ham_float theta_warp{std::atan2(gc_pos[1], gc_pos[0])};
     gc_pos[2] -= par->tereg_ymw16.t0_gamma_w *
                  (r_cyl - par->tereg_ymw16.r_warp) * std::cos(theta_warp);
   }
   if (gc_pos.length() > 25 * cgs::kpc) {
     return 0.;
   } else {
-    double ne{0.};
-    double ne_comp[8]{0.};
-    double weight_localbubble{0.};
-    double weight_gum{0.};
-    double weight_loop{0.};
+    ham_float ne{0.};
+    ham_float ne_comp[8]{0.};
+    ham_float weight_localbubble{0.};
+    ham_float weight_gum{0.};
+    ham_float weight_loop{0.};
     // longitude, in deg
-    const double ec_l{std::atan2(gc_pos[0], par->tereg_ymw16.r0 - gc_pos[1]) /
-                      cgs::rad};
+    const ham_float ec_l{
+        std::atan2(gc_pos[0], par->tereg_ymw16.r0 - gc_pos[1]) / cgs::rad};
     // call structure functions
     // since in YMW16, Fermi Bubble is not actually contributing, we ignore FB
     // for thick disk
@@ -38,14 +39,14 @@ double TEreg_ymw16::write_field(const hamvec<3, double> &pos,
     ne_comp[4] = galcen(gc_pos[0], gc_pos[1], gc_pos[2], par);
     ne_comp[5] = gum(gc_pos[0], gc_pos[1], gc_pos[2], par);
     // localbubble boundary
-    const double localbubble_boundary{110. * cgs::pc};
+    const ham_float localbubble_boundary{110. * cgs::pc};
     ne_comp[6] = localbubble(gc_pos[0], gc_pos[1], gc_pos[2], ec_l,
                              localbubble_boundary, par);
     ne_comp[7] = nps(gc_pos[0], gc_pos[1], gc_pos[2], par);
     // adding up rules
     ne_comp[0] = ne_comp[1] + std::max(ne_comp[2], ne_comp[3]);
     // distance to local bubble
-    const double rlb{std::sqrt(
+    const ham_float rlb{std::sqrt(
         std::pow(((gc_pos[1] - 8.34 * cgs::kpc) * 0.94 - 0.34 * gc_pos[2]), 2) +
         gc_pos[0] * gc_pos[0])};
     if (rlb < localbubble_boundary) { // inside local bubble
@@ -78,11 +79,11 @@ double TEreg_ymw16::write_field(const hamvec<3, double> &pos,
 }
 
 // thick disk
-double TEreg_ymw16::thick(const double &zz, const double &rr,
-                          const Param *par) const {
+ham_float TEreg_ymw16::thick(const ham_float &zz, const ham_float &rr,
+                             const Param *par) const {
   if (zz > 10. * par->tereg_ymw16.t1_h1)
     return 0.; // timesaving
-  double gd{1.};
+  ham_float gd{1.};
   if (rr > par->tereg_ymw16.t1_bd) {
     gd = std::pow(
         1. / std::cosh((rr - par->tereg_ymw16.t1_bd) / par->tereg_ymw16.t1_ad),
@@ -93,14 +94,14 @@ double TEreg_ymw16::thick(const double &zz, const double &rr,
 }
 
 // thin disk
-double TEreg_ymw16::thin(const double &zz, const double &rr,
-                         const Param *par) const {
+ham_float TEreg_ymw16::thin(const ham_float &zz, const ham_float &rr,
+                            const Param *par) const {
   // z scaling, K_2*h0 in ref
-  double h0{par->tereg_ymw16.t2_k2 *
-            (32 * cgs::pc + 1.6e-3 * rr + (4.e-7 / cgs::pc) * rr * rr)};
+  ham_float h0{par->tereg_ymw16.t2_k2 *
+               (32 * cgs::pc + 1.6e-3 * rr + (4.e-7 / cgs::pc) * rr * rr)};
   if (zz > 10. * h0)
     return 0.; // timesaving
-  double gd{1.};
+  ham_float gd{1.};
   if (rr > par->tereg_ymw16.t1_bd) {
     gd = std::pow(
         1. / std::cosh((rr - par->tereg_ymw16.t1_bd) / par->tereg_ymw16.t1_ad),
@@ -114,10 +115,11 @@ double TEreg_ymw16::thin(const double &zz, const double &rr,
 }
 
 // spiral arms
-double TEreg_ymw16::spiral(const double &xx, const double &yy, const double &zz,
-                           const double &rr, const Param *par) const {
+ham_float TEreg_ymw16::spiral(const ham_float &xx, const ham_float &yy,
+                              const ham_float &zz, const ham_float &rr,
+                              const Param *par) const {
   // structure scaling
-  double scaling{1.};
+  ham_float scaling{1.};
   if (rr > par->tereg_ymw16.t1_bd) {
     if ((rr - par->tereg_ymw16.t1_bd) > 10. * par->tereg_ymw16.t1_ad)
       return 0.;
@@ -126,8 +128,8 @@ double TEreg_ymw16::spiral(const double &xx, const double &yy, const double &zz,
         2);
   }
   // z scaling, K_a*h0 in ref
-  const double h0{par->tereg_ymw16.t3_ka * (32 * cgs::pc + 1.6e-3 * rr +
-                                            (4.e-7 / cgs::pc) * pow(rr, 2))};
+  const ham_float h0{par->tereg_ymw16.t3_ka * (32 * cgs::pc + 1.6e-3 * rr +
+                                               (4.e-7 / cgs::pc) * pow(rr, 2))};
   if (zz > 10. * h0)
     return 0.; // timesaving
   scaling *= std::pow(1. / std::cosh(zz / h0), 2);
@@ -137,22 +139,23 @@ double TEreg_ymw16::spiral(const double &xx, const double &yy, const double &zz,
   scaling *= std::pow(
       1. / std::cosh((rr - par->tereg_ymw16.t3_b2s) / par->tereg_ymw16.t3_aa),
       2);
-  double smin;
-  double theta{std::atan2(yy, xx)};
+  ham_float smin;
+  ham_float theta{std::atan2(yy, xx)};
   if (theta < 0)
     theta += 2 * cgs::pi;
-  double ne3s{0.};
+  ham_float ne3s{0.};
   // looping through arms
-  for (unsigned int i = 0; i < 4; ++i) {
+  for (ham_uint i = 0; i < 4; ++i) {
     // get distance to arm center
     if (i != 4) {
-      double d_phi = theta - par->tereg_ymw16.t3_phimin[i];
+      ham_float d_phi = theta - par->tereg_ymw16.t3_phimin[i];
       if (d_phi < 0)
         d_phi += 2. * cgs::pi;
-      double d = std::fabs(par->tereg_ymw16.t3_rmin[i] *
-                               std::exp(d_phi * par->tereg_ymw16.t3_tpitch[i]) -
-                           rr);
-      double d_p = std::fabs(
+      ham_float d =
+          std::fabs(par->tereg_ymw16.t3_rmin[i] *
+                        std::exp(d_phi * par->tereg_ymw16.t3_tpitch[i]) -
+                    rr);
+      ham_float d_p = std::fabs(
           par->tereg_ymw16.t3_rmin[i] *
               std::exp((d_phi + 2. * cgs::pi) * par->tereg_ymw16.t3_tpitch[i]) -
           rr);
@@ -178,7 +181,7 @@ double TEreg_ymw16::spiral(const double &xx, const double &yy, const double &zz,
                theta * cgs::rad >
                    par->tereg_ymw16
                        .t3_thetacn) { // correction for Carina-Sagittarius
-      const double ga =
+      const ham_float ga =
           (1. - (par->tereg_ymw16.t3_nsg) *
                     (std::exp(-std::pow(
                         (theta * cgs::rad - par->tereg_ymw16.t3_thetasg) /
@@ -188,7 +191,7 @@ double TEreg_ymw16::spiral(const double &xx, const double &yy, const double &zz,
           std::pow(1. / std::cosh(smin / par->tereg_ymw16.t3_warm[i]), 2);
       ne3s += par->tereg_ymw16.t3_narm[i] * scaling * ga;
     } else {
-      const double ga =
+      const ham_float ga =
           (1. - (par->tereg_ymw16.t3_nsg) *
                     (std::exp(-std::pow(
                         (theta * cgs::rad - par->tereg_ymw16.t3_thetasg) /
@@ -207,60 +210,61 @@ double TEreg_ymw16::spiral(const double &xx, const double &yy, const double &zz,
 }
 
 // galactic center
-double TEreg_ymw16::galcen(const double &xx, const double &yy, const double &zz,
-                           const Param *par) const {
+ham_float TEreg_ymw16::galcen(const ham_float &xx, const ham_float &yy,
+                              const ham_float &zz, const Param *par) const {
   // pos of center
-  const double Xgc{50. * cgs::pc};
-  const double Ygc{0.};
-  const double Zgc{-7. * cgs::pc};
-  const double R2gc{(xx - Xgc) * (xx - Xgc) + (yy - Ygc) * (yy - Ygc)};
+  const ham_float Xgc{50. * cgs::pc};
+  const ham_float Ygc{0.};
+  const ham_float Zgc{-7. * cgs::pc};
+  const ham_float R2gc{(xx - Xgc) * (xx - Xgc) + (yy - Ygc) * (yy - Ygc)};
   if (R2gc > 10. * par->tereg_ymw16.t4_agc * par->tereg_ymw16.t4_agc)
     return 0.; // timesaving
-  const double Ar{
+  const ham_float Ar{
       std::exp(-R2gc / (par->tereg_ymw16.t4_agc * par->tereg_ymw16.t4_agc))};
   if (std::fabs(zz - Zgc) > 10. * par->tereg_ymw16.t4_hgc)
     return 0.; // timesaving
-  const double Az{
+  const ham_float Az{
       std::pow(1. / std::cosh((zz - Zgc) / par->tereg_ymw16.t4_hgc), 2)};
   return par->tereg_ymw16.t4_ngc * Ar * Az;
 }
 
 // gum nebula
-double TEreg_ymw16::gum(const double &xx, const double &yy, const double &zz,
-                        const Param *par) const {
+ham_float TEreg_ymw16::gum(const ham_float &xx, const ham_float &yy,
+                           const ham_float &zz, const Param *par) const {
   if (yy < 0 or xx > 0)
     return 0.; // timesaving
   // center of Gum Nebula
-  const double lc{264. * cgs::rad};
-  const double bc{-4. * cgs::rad};
-  const double dc{450. * cgs::pc};
-  const double xc{dc * std::cos(bc) * std::sin(lc)};
-  const double yc{par->tereg_ymw16.r0 - dc * std::cos(bc) * std::cos(lc)};
-  const double zc{dc * std::sin(bc)};
+  const ham_float lc{264. * cgs::rad};
+  const ham_float bc{-4. * cgs::rad};
+  const ham_float dc{450. * cgs::pc};
+  const ham_float xc{dc * std::cos(bc) * std::sin(lc)};
+  const ham_float yc{par->tereg_ymw16.r0 - dc * std::cos(bc) * std::cos(lc)};
+  const ham_float zc{dc * std::sin(bc)};
   // theta is limited in I quadrant
-  const double theta{
+  const ham_float theta{
       std::atan2(std::fabs(zz - zc),
                  std::sqrt((xx - xc) * (xx - xc) + (yy - yc) * (yy - yc)))};
-  const double tantheta = std::tan(theta);
+  const ham_float tantheta = std::tan(theta);
   // zp is positive
-  double zp{(par->tereg_ymw16.t5_agn * par->tereg_ymw16.t5_agn *
-             par->tereg_ymw16.t5_kgn * tantheta) /
-            std::sqrt(par->tereg_ymw16.t5_agn * par->tereg_ymw16.t5_agn +
-                      par->tereg_ymw16.t5_agn * par->tereg_ymw16.t5_agn *
-                          par->tereg_ymw16.t5_kgn * par->tereg_ymw16.t5_kgn)};
+  ham_float zp{(par->tereg_ymw16.t5_agn * par->tereg_ymw16.t5_agn *
+                par->tereg_ymw16.t5_kgn * tantheta) /
+               std::sqrt(par->tereg_ymw16.t5_agn * par->tereg_ymw16.t5_agn +
+                         par->tereg_ymw16.t5_agn * par->tereg_ymw16.t5_agn *
+                             par->tereg_ymw16.t5_kgn *
+                             par->tereg_ymw16.t5_kgn)};
   // xyp is positive
-  const double xyp{zp / tantheta};
+  const ham_float xyp{zp / tantheta};
   // alpha is positive
-  const double xy_dist = {
+  const ham_float xy_dist = {
       std::sqrt(par->tereg_ymw16.t5_agn * par->tereg_ymw16.t5_agn - xyp * xyp) *
-      double(par->tereg_ymw16.t5_agn > xyp)};
-  const double alpha{std::atan2(par->tereg_ymw16.t5_kgn * xyp, xy_dist) +
-                     theta}; // add theta, timesaving
-  const double R2{(xx - xc) * (xx - xc) + (yy - yc) * (yy - yc) +
-                  (zz - zc) * (zz - zc)};
-  const double r2{zp * zp + xyp * xyp};
-  const double D2min{(R2 + r2 - 2. * std::sqrt(R2 * r2)) * std::sin(alpha) *
-                     std::sin(alpha)};
+      ham_float(par->tereg_ymw16.t5_agn > xyp)};
+  const ham_float alpha{std::atan2(par->tereg_ymw16.t5_kgn * xyp, xy_dist) +
+                        theta}; // add theta, timesaving
+  const ham_float R2{(xx - xc) * (xx - xc) + (yy - yc) * (yy - yc) +
+                     (zz - zc) * (zz - zc)};
+  const ham_float r2{zp * zp + xyp * xyp};
+  const ham_float D2min{(R2 + r2 - 2. * std::sqrt(R2 * r2)) * std::sin(alpha) *
+                        std::sin(alpha)};
   if (D2min > 10. * par->tereg_ymw16.t5_wgn * par->tereg_ymw16.t5_wgn)
     return 0.;
   return par->tereg_ymw16.t5_ngn *
@@ -268,19 +272,21 @@ double TEreg_ymw16::gum(const double &xx, const double &yy, const double &zz,
 }
 
 // local bubble
-double TEreg_ymw16::localbubble(const double &xx, const double &yy,
-                                const double &zz, const double &ll,
-                                const double &Rlb, const Param *par) const {
+ham_float TEreg_ymw16::localbubble(const ham_float &xx, const ham_float &yy,
+                                   const ham_float &zz, const ham_float &ll,
+                                   const ham_float &Rlb,
+                                   const Param *par) const {
   if (yy < 0)
     return 0.; // timesaving
-  double nel{0.};
+  ham_float nel{0.};
   // r_LB in ref
-  const double rLB{
+  const ham_float rLB{
       std::sqrt(std::pow(((yy - 8.34 * cgs::kpc) * 0.94 - 0.34 * zz), 2) +
                 std::pow(xx, 2))};
   // l-l_LB1 in ref
-  const double dl1{std::min(std::fabs(ll + 360. - par->tereg_ymw16.t6_thetalb1),
-                            std::fabs(par->tereg_ymw16.t6_thetalb1 - (ll)))};
+  const ham_float dl1{
+      std::min(std::fabs(ll + 360. - par->tereg_ymw16.t6_thetalb1),
+               std::fabs(par->tereg_ymw16.t6_thetalb1 - (ll)))};
   if (dl1 < 10. * par->tereg_ymw16.t6_detlb1 or
       (rLB - Rlb) < 10. * par->tereg_ymw16.t6_wlb1 or
       zz < 10. * par->tereg_ymw16.t6_hlb1) // timesaving
@@ -289,8 +295,9 @@ double TEreg_ymw16::localbubble(const double &xx, const double &yy,
            std::pow(1. / std::cosh((rLB - Rlb) / par->tereg_ymw16.t6_wlb1), 2) *
            std::pow(1. / std::cosh(zz / par->tereg_ymw16.t6_hlb1), 2);
   // l-l_LB2 in ref
-  const double dl2{std::min(std::fabs(ll + 360 - par->tereg_ymw16.t6_thetalb2),
-                            std::fabs(par->tereg_ymw16.t6_thetalb2 - (ll)))};
+  const ham_float dl2{
+      std::min(std::fabs(ll + 360 - par->tereg_ymw16.t6_thetalb2),
+               std::fabs(par->tereg_ymw16.t6_thetalb2 - (ll)))};
   if (dl2 < 10. * par->tereg_ymw16.t6_detlb2 or
       (rLB - Rlb) < 10. * par->tereg_ymw16.t6_wlb2 or
       zz < 10. * par->tereg_ymw16.t6_hlb2) // timesaving
@@ -302,21 +309,22 @@ double TEreg_ymw16::localbubble(const double &xx, const double &yy,
 }
 
 // north spur
-double TEreg_ymw16::nps(const double &xx, const double &yy, const double &zz,
-                        const Param *par) const {
+ham_float TEreg_ymw16::nps(const ham_float &xx, const ham_float &yy,
+                           const ham_float &zz, const Param *par) const {
   if (yy < 0)
     return 0.; // timesaving
-  const double theta_LI{(par->tereg_ymw16.t7_thetali) * cgs::rad};
-  const double x_c{-10.156 * cgs::pc};
-  const double y_c{8106.207 * cgs::pc};
-  const double z_c{10.467 * cgs::pc};
+  const ham_float theta_LI{(par->tereg_ymw16.t7_thetali) * cgs::rad};
+  const ham_float x_c{-10.156 * cgs::pc};
+  const ham_float y_c{8106.207 * cgs::pc};
+  const ham_float z_c{10.467 * cgs::pc};
   // r_LI in ref
-  const double rLI{std::sqrt((xx - x_c) * (xx - x_c) + (yy - y_c) * (yy - y_c) +
-                             (zz - z_c) * (zz - z_c))};
-  const double theta{std::acos(((xx - x_c) * (std::cos(theta_LI)) +
-                                (zz - z_c) * (std::sin(theta_LI))) /
-                               rLI) /
-                     cgs::rad};
+  const ham_float rLI{std::sqrt((xx - x_c) * (xx - x_c) +
+                                (yy - y_c) * (yy - y_c) +
+                                (zz - z_c) * (zz - z_c))};
+  const ham_float theta{std::acos(((xx - x_c) * (std::cos(theta_LI)) +
+                                   (zz - z_c) * (std::sin(theta_LI))) /
+                                  rLI) /
+                        cgs::rad};
   if (theta > 10. * par->tereg_ymw16.t7_detthetali or
       (rLI - par->tereg_ymw16.t7_rli) > 10. * par->tereg_ymw16.t7_wli)
     return 0.; // timesaving

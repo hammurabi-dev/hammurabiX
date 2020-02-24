@@ -9,14 +9,15 @@
 #include <cassert>
 #include <chrono>
 #include <ctime>
+#include <hamtype.h>
 #include <iostream>
 #include <map>
 #include <string>
 
 class Timer {
   typedef std::chrono::time_point<std::chrono::high_resolution_clock> tick;
-  typedef std::chrono::duration<double, std::milli> duration;
-  typedef std::map<std::string, std::pair<tick, double>> timecache;
+  typedef std::chrono::duration<ham_float, std::milli> duration;
+  typedef std::map<std::string, std::pair<tick, ham_float>> timecache;
 #ifndef NDEBUG
 public:
 #endif
