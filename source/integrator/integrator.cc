@@ -18,6 +18,7 @@
 #include <integrator.h>
 #include <param.h>
 #include <tefield.h>
+#include <timer.h>
 
 void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
                             const TEreg *tereg, const TErnd *ternd,
@@ -51,8 +52,12 @@ void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
     // setting for radial_integration
     // call auxiliary function assemble_shell_ref
     assemble_shell_ref(shell_ref.get(), par, current_shell);
+#ifndef NTIMING
+    auto tmr = std::make_unique<Timer>();
+    tmr->start("pix");
+#endif
 #ifdef _OPENMP
-#pragma omp parallel for
+#pragma omp parallel for schedule(dynamic)
 #endif
     for (ham_uint ipix = 0; ipix < current_npix; ++ipix) {
       auto observables = std::make_unique<struct_observables>();
@@ -80,9 +85,15 @@ void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
           observables->fd = gobs->fd_map->interpolate(ptg);
         }
         // core function!
+#ifndef NTIMING
+        tmr->start("kernel");
+#endif
         radial_integration(shell_ref.get(), ptg, observables.get(), breg, brnd,
                            tereg, ternd, cre, gbreg, gbrnd, gtereg, gternd,
                            gcre, par);
+#ifndef NTIMING
+        tmr->start("kernel");
+#endif
       }
       // collect from pixels
       if (par->grid_obs.do_dm) {
@@ -103,6 +114,10 @@ void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
         gobs->tmp_fd_map->data(ipix, observables->fd);
       }
     }
+#ifndef NTIMING
+    tmr->stop("pix");
+    tmr->print();
+#endif
     // accumulating new shell map to sim map
     if (par->grid_obs.do_dm) {
       gobs->dm_map->accumulate(*(gobs->tmp_dm_map));
@@ -159,18 +174,14 @@ void Integrator::radial_integration(
     Hamvec<3, ham_float> oc_pos{los_versor(THE, PHI) * shell_ref->dist[looper]};
     Hamvec<3, ham_float> pos{oc_pos + par->observer};
     // check LoS depth limit
-    if (check_simulation_lower_limit(pos.length(), par->grid_obs.gc_r_min)) {
+    if (check_simulation_lower_limit(pos.length(), par->grid_obs.gc_r_min))
       continue;
-    }
-    if (check_simulation_upper_limit(pos.length(), par->grid_obs.gc_r_max)) {
+    if (check_simulation_upper_limit(pos.length(), par->grid_obs.gc_r_max))
       continue;
-    }
-    if (check_simulation_lower_limit(pos[2], par->grid_obs.gc_z_min)) {
+    if (check_simulation_lower_limit(pos[2], par->grid_obs.gc_z_min))
       continue;
-    }
-    if (check_simulation_upper_limit(pos[2], par->grid_obs.gc_z_max)) {
+    if (check_simulation_upper_limit(pos[2], par->grid_obs.gc_z_max))
       continue;
-    }
     // regular magnetic field
     Hamvec<3, ham_float> B_vec{breg->read_field(pos, par, gbreg)};
     // add random magnetic field
