@@ -22,7 +22,7 @@ class Timer {
 public:
 #endif
   timecache record;
-
+  bool usato=false; // marker for multiple time recording
 public:
   Timer() = default;
   virtual ~Timer() = default;
@@ -40,8 +40,13 @@ public:
   // 1st argument: name of timing record
   inline void stop(std::string flag) {
     duration diff =
-        (std::chrono::high_resolution_clock::now() - record[flag].first);
-    record[flag].second = diff.count();
+    (std::chrono::high_resolution_clock::now() - record[flag].first);
+    if (usato) { // multiple stop
+      record[flag].second += diff.count();
+    } else { // 1st stop
+      record[flag].second = diff.count();
+      usato = true;
+    }
   }
   // print to stdout the elapsed time in ms resolution
   // 1st argument: (optional) name of timing record

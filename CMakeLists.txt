@@ -134,7 +134,6 @@ SET(SRC_FILES
 	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_cre.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/tools/tinyxml2.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/tools/toolkit.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/pipeline/pipeline.cc
 )
@@ -281,7 +280,6 @@ SET(CMAKE_INSTALL_PREFIX ${INSTALL_ROOT_DIR})
 INSTALL(TARGETS hamx DESTINATION bin)
 INSTALL(FILES
 	${CMAKE_CURRENT_LIST_DIR}/include/tinyxml2.h
-	
 	${CMAKE_CURRENT_LIST_DIR}/include/hamtype.h
 	${CMAKE_CURRENT_LIST_DIR}/include/hamunits.h
 	${CMAKE_CURRENT_LIST_DIR}/include/hamvec.h
@@ -289,10 +287,8 @@ INSTALL(FILES
 	${CMAKE_CURRENT_LIST_DIR}/include/hamdis.h
 	${CMAKE_CURRENT_LIST_DIR}/include/hamio.h
 	${CMAKE_CURRENT_LIST_DIR}/include/hamsk.h
-	${CMAKE_CURRENT_LIST_DIR}/include/timer.h
-
 	${CMAKE_CURRENT_LIST_DIR}/include/toolkit.h
-	
+	${CMAKE_CURRENT_LIST_DIR}/include/timer.h
 	${CMAKE_CURRENT_LIST_DIR}/include/bfield.h
 	${CMAKE_CURRENT_LIST_DIR}/include/crefield.h
 	${CMAKE_CURRENT_LIST_DIR}/include/tefield.h

@@ -401,7 +401,7 @@ public:
     this->Nside = n;
     this->prepare();
     this->Map = std::make_unique<std::vector<Node<T>>>(
-        static_cast<const ham_uint>(this->Npix));
+        this->Npix);
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
@@ -415,7 +415,7 @@ public:
     this->Nside = n;
     this->prepare();
     this->Map = std::make_unique<std::vector<Node<T>>>(
-        static_cast<const ham_uint>(this->Npix));
+        this->Npix);
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
@@ -492,7 +492,7 @@ public:
       this->Nside = n;
       this->prepare();
       this->Map = std::make_unique<std::vector<Node<T>>>(
-          static_cast<const ham_uint>(this->Npix));
+          this->Npix);
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
