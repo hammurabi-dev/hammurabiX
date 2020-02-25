@@ -37,30 +37,24 @@ aas-journal: Astrophysical Journal Supplement Series
 
 # Summary
 
-Understanding the Galactic emission is critical for studying not only the multi-phase 
-interstellar medium (ISM), but also for detailed investigations of the cosmic microwave 
-background (CMB) radiation or the 21cm cosmology.
-Both areas recognize the importance of physical modellings of the Galactic polarized 
-synchrotron emission, absorption, and Faraday rotation. 
-For ISM studies, these trace the physical conditions in the Galaxy, while for CMB studies, 
-these provide the most important CMB foreground.
-
+Realistic models of Galactic emission are critical ingredients in the study of both the 
+multi-phase interstellar medium (ISM) and precision cosmology. 
+Models for the polarized synchrotron emission, absorption, and Faraday rotation are 
+required in both cases. 
+For ISM studies, these trace the physical conditions in the Galaxy and this emission is a 
+significant foreground signal for cosmological surveys. 
 The fundamental physical principles of the radiative transfer processes have been well 
-understood for around half a century [@Rybicki:1979], however, with the growing precision 
-and range of observations we are overwhelmed by various local structures and non-linear 
-phenomena within the Galaxy.
-This is slowing down conceptual and theoretical advancements in the mentioned research 
-areas since the observables are no longer analytically calculable in a high-resolution and 
-non-perturbative regime.
+understood for around half a century [@Rybicki:1979], but simple analytic models are not 
+sufficient to capture the local structure and non-linear phenomena revealed by the 
+precision and range of modern measurements.
 
-To meet the growing need of numerical simulation of the Galactic emission, ``hammurabi`` 
+To meet the growing need for numerical simulation of the Galactic emission, ``hammurabi`` 
 [@Waelkens:2009] was developed to simulate Galactic observables based on a 3D 
 modelling of the  physical components of the Galaxy.
-The original code design was, however, not matching modern coding and numerical 
-standards required by the current scientific developments in ISM and CMB foreground 
-modelling.
+The original code design was, however, not up to the coding and numerical standards 
+required for studies of the ISM and cosmic microwave background (CMB) foregrounds.
 Furthermore, the focus in the Galactic emission modelling has migrated recently 
-from assuming simple regular fields structure to more complicated fields with turbulence, 
+from assuming simple regular field structure to more complicated fields with turbulence, 
 enhancing the need for an accurate state-of-the-art simulation package for Galactic emission.
 
 To extract information on the Galactic magnetic fields,
