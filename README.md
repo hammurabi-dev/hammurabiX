@@ -1,6 +1,6 @@
 # hammurabi X README
 
-[![DOI](https://zenodo.org/badge/215691969.svg)](https://zenodo.org/badge/latestdoi/215691969)
+[![DOI](https://zenodo.org/badge/238854871.svg)](https://zenodo.org/badge/latestdoi/238854871)
 
 [![Build Status](https://travis-ci.org/hammurabi-dev/hammurabiX.svg?branch=master)](https://travis-ci.org/hammurabi-dev/hammurabiX)
 
