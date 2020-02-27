@@ -53,7 +53,7 @@ ELSE()
 	SET(FFTW_HINTS $HOME/local/fftw)
 	SET(GTEST_HINTS $HOME/local/googletest)
 	SET(INSTALL_ROOT_DIR $HOME/local/hammurabi)
-	SET(CMAKE_EXE_LINKER_FLAGS -lcurl)
+	SET(CMAKE_EXE_LINKER_FLAGS)
 ENDIF()
 
 #---------------------------------------------#

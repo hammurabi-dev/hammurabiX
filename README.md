@@ -1,10 +1,7 @@
 # hammurabi X README
 
-[![DOI](https://joss.theoj.org/papers/10.21105/joss.01889/status.svg)](https://doi.org/10.21105/joss.01889)
-
-[![DOI](https://zenodo.org/badge/215691969.svg)](https://zenodo.org/badge/latestdoi/215691969)
-
 [![Build Status](https://travis-ci.org/hammurabi-dev/hammurabiX.svg?branch=master)](https://travis-ci.org/hammurabi-dev/hammurabiX)
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.01889/status.svg)](https://doi.org/10.21105/joss.01889)
 
 hammurabi is an open-source (GNU General Public License v3) package
 for simulating full/partial-sky Galactic emissions.
@@ -22,7 +19,7 @@ Essential physical inputs/modelings required during simulation include:
 hammurabi X is a modular C++ framework which is friendly to user defined models.
 Based on earlier versions of hammurabi, we mainly focus on improving its numerical reliablility and scalability.
 
-Please check our [**WIKI PAGE**](https://bitbucket.org/hammurabicode/hamx/wiki/Home) for more detailed technical information.
+Please check our [**WIKI**](https://github.com/hammurabi-dev/hammurabiX/tree/master/wiki) for more detailed technical information.
 
 [**hammurabi version 3**](https://sourceforge.net/projects/hammurabicode/) is still accessible.
 
@@ -40,3 +37,8 @@ Please check our [**WIKI PAGE**](https://bitbucket.org/hammurabicode/hamx/wiki/H
 - [Jiaxin Wang](https://gioacchinowang.github.io/)
 - [Tess Jaffe](https://science.gsfc.nasa.gov/sed/bio/tess.jaffe)
 - [Torsten Ensslin](https://wwwmpa.mpa-garching.mpg.de/~ensslin/)
+
+### acknowledgements
+
+- We copied and modified functions/classes from HEALPix.
+- We use TinyXML2 as the XML file parser.
