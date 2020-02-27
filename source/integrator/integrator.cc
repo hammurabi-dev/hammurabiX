@@ -152,6 +152,9 @@ void Integrator::radial_integration(
   // angular position
   const ham_float THE{ptg_in.theta()};
   const ham_float PHI{ptg_in.phi()};
+  // pre-calculated LoS versor
+  const Hamvec<3, ham_float> los_direction{los_versor(THE, PHI)};
+  // emission related constants
   ham_float lambda_square = 0., i2bt_sync = 0., fd_forefactor = 0.;
   if (par->grid_obs.do_sync.back()) {
     // for calculating synchrotron emission
@@ -171,7 +174,7 @@ void Integrator::radial_integration(
   for (decltype(shell_ref->step) looper = 0; looper < shell_ref->step;
        ++looper) {
     // ec and gc position
-    Hamvec<3, ham_float> oc_pos{los_versor(THE, PHI) * shell_ref->dist[looper]};
+    Hamvec<3, ham_float> oc_pos{los_direction * shell_ref->dist[looper]};
     Hamvec<3, ham_float> pos{oc_pos + par->observer};
     // check LoS depth limit
     if (check_simulation_lower_limit(pos.length(), par->grid_obs.gc_r_min))
@@ -186,10 +189,10 @@ void Integrator::radial_integration(
     Hamvec<3, ham_float> B_vec{breg->read_field(pos, par, gbreg)};
     // add random magnetic field
     B_vec += brnd->read_field(pos, par, gbrnd);
-    const ham_float B_par{los_parproj(B_vec, THE, PHI)};
+    const ham_float B_par{los_parproj(B_vec, los_direction)};
     assert(std::isfinite(B_par));
     // be aware of un-resolved random B_per in calculating emissivity
-    const ham_float B_per{los_perproj(B_vec, THE, PHI)};
+    const ham_float B_per{los_perproj(B_vec, los_direction)};
     assert(std::isfinite(B_per));
     // thermal electron field
     ham_float te{tereg->read_field(pos, par, gtereg)};
@@ -267,20 +270,6 @@ Hamvec<3, ham_float> Integrator::los_versor(const ham_float &the_los,
                                             const ham_float &phi_los) const {
   return Hamvec<3, ham_float>{cos(phi_los) * sin(the_los),
                               sin(phi_los) * sin(the_los), cos(the_los)};
-}
-
-// perpendicular projection of a vector wrt LoS direction
-ham_float Integrator::los_perproj(const Hamvec<3, ham_float> &input,
-                                  const ham_float &the_los,
-                                  const ham_float &phi_los) const {
-  return (input.crossprod(los_versor(the_los, phi_los))).length();
-}
-
-// (signed) parallel projection of a vector wrt LoS direction
-ham_float Integrator::los_parproj(const Hamvec<3, ham_float> &input,
-                                  const ham_float &the_los,
-                                  const ham_float &phi_los) const {
-  return input.dotprod(los_versor(the_los, phi_los));
 }
 
 // converting brightness temp into thermal temp with T_0 = 2.725K

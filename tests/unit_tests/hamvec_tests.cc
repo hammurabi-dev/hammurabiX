@@ -3,6 +3,7 @@
 #include <cmath>
 #include <gtest/gtest.h>
 
+#include <hamtype.h>
 #include <hamvec.h>
 
 TEST(vector, basic) {
@@ -66,9 +67,9 @@ TEST(vector, basic) {
   EXPECT_EQ(vec2[1], double(0.4));
 
   // operator -
-  auto vecm = vec2 - Hamvec<2, float>{0.3, 0.8};
-  EXPECT_EQ(vecm[0], double(0.3) - static_cast<double>(float(0.3)));
-  EXPECT_EQ(vecm[1], double(0.4) - static_cast<double>(float(0.8)));
+  auto vecm = vec2 - Hamvec<2, double>{0.3, 0.8};
+  EXPECT_EQ(vecm[0], double(0.3) - double(0.3));
+  EXPECT_EQ(vecm[1], double(0.4) - double(0.8));
 
   // operator -=
   vec2 = {0.3, 0.4};
@@ -107,23 +108,23 @@ TEST(vector, basic) {
   Hamvec<3, int> vec3{1, 2, 3};
 
   // function lengthsq
-  EXPECT_EQ(vec3.lengthsq(), double(14.0));
+  EXPECT_EQ(vec3.lengthsq(), ham_float(14.0));
 
   // function length
-  EXPECT_EQ(vec3.length(), std::sqrt(double(14.0)));
+  EXPECT_EQ(vec3.length(), std::sqrt(ham_float(14.0)));
 
   // function versor, non-zero
   auto norm = vec3.versor();
-  EXPECT_EQ(norm[0], double(1. / std::sqrt(14.)));
-  EXPECT_EQ(norm[1], double(2. / std::sqrt(14.)));
-  EXPECT_EQ(norm[2], double(3. / std::sqrt(14.)));
+  EXPECT_EQ(norm[0], ham_float(1. / std::sqrt(14.)));
+  EXPECT_EQ(norm[1], ham_float(2. / std::sqrt(14.)));
+  EXPECT_EQ(norm[2], ham_float(3. / std::sqrt(14.)));
 
   // function versor, zero
   vec3 = {0, 0, 0};
   norm = vec3.versor();
-  EXPECT_EQ(norm[0], double(0));
-  EXPECT_EQ(norm[1], double(0));
-  EXPECT_EQ(norm[2], double(0));
+  EXPECT_EQ(norm[0], ham_float(0));
+  EXPECT_EQ(norm[1], ham_float(0));
+  EXPECT_EQ(norm[2], ham_float(0));
 
   // function flip
   vec3 = {1, 2, 3};
@@ -136,7 +137,7 @@ TEST(vector, basic) {
 
   // function dotprod
   auto rslt = vec3a.dotprod(vec3b);
-  EXPECT_EQ(rslt, 0.32);
+  EXPECT_EQ(rslt, ham_float(0.32));
 
   // function crossprod
   Hamvec<3, double> prodt(0, 0, 0);

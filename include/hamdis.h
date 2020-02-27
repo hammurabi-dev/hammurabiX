@@ -400,8 +400,7 @@ public:
   Hampix(const ham_uint &n, const T &v = static_cast<T>(0)) : Hamdis<T>() {
     this->Nside = n;
     this->prepare();
-    this->Map = std::make_unique<std::vector<Node<T>>>(
-        this->Npix);
+    this->Map = std::make_unique<std::vector<Node<T>>>(this->Npix);
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
@@ -414,8 +413,7 @@ public:
   Hampix(const ham_uint &n, const std::vector<T> &v) : Hamdis<T>() {
     this->Nside = n;
     this->prepare();
-    this->Map = std::make_unique<std::vector<Node<T>>>(
-        this->Npix);
+    this->Map = std::make_unique<std::vector<Node<T>>>(this->Npix);
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
@@ -491,8 +489,7 @@ public:
       // 2, empty map initialized by the default constr
       this->Nside = n;
       this->prepare();
-      this->Map = std::make_unique<std::vector<Node<T>>>(
-          this->Npix);
+      this->Map = std::make_unique<std::vector<Node<T>>>(this->Npix);
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif

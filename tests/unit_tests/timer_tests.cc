@@ -15,9 +15,9 @@
 TEST(timing, precision) {
   Timer t;
   t.start("main");
-  
+
   // sleep 5s
-  for (int i=0; i<2; ++i){
+  for (int i = 0; i < 2; ++i) {
     t.start("sub");
     std::this_thread::sleep_for(std::chrono::milliseconds(2500));
     t.stop("sub");

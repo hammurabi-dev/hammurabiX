@@ -24,7 +24,7 @@ Based on earlier versions of hammurabi, we mainly focus on improving its numeric
 
 Please check our [**WIKI PAGE**](https://bitbucket.org/hammurabicode/hamx/wiki/Home) for more detailed technical information.
 
-The original hammurabi source code can be found [**here**](https://sourceforge.net/projects/hammurabicode/).
+[**hammurabi version 3**](https://sourceforge.net/projects/hammurabicode/) is still accessible.
 
 ### hammurabi team publications:
 

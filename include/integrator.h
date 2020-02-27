@@ -35,16 +35,18 @@ protected:
   Hamvec<3, ham_float> los_versor(const ham_float &, const ham_float &) const;
   // perpendicular projection of a vector wrt LoS direction
   // 1st argument: vector in Cartesian frame
-  // 2nd argument: polar angle (in rad)
-  // 3rd argument: azimuthal angle (in rad)
-  ham_float los_perproj(const Hamvec<3, ham_float> &, const ham_float &,
-                        const ham_float &) const;
+  // 2nd argument: los versor
+  inline ham_float los_perproj(const Hamvec<3, ham_float> &input,
+                               const Hamvec<3, ham_float> &ver) const {
+    return (input.crossprod(ver)).length();
+  }
   // (signed) parallel projection of a vector wrt LoS direction
   // 1st argument: vector in Cartesian frame
-  // 2nd argument: polar angle (in rad)
-  // 3rd argument: azimuthal angle (in rad)
-  ham_float los_parproj(const Hamvec<3, ham_float> &, const ham_float &,
-                        const ham_float &) const;
+  // 2nd argument: los versor
+  inline ham_float los_parproj(const Hamvec<3, ham_float> &input,
+                               const Hamvec<3, ham_float> &ver) const {
+    return input.dotprod(ver);
+  }
   // synchrotron emission intrinsic polarization angle (in rad)
   // check Rybicki & Lightman Sec.6.5 'polarization of synchrotron radiation'
   // 1st argument: magnetic field in Cartesian frame

@@ -5,13 +5,13 @@
 
 #include <cassert>
 #include <cmath>
-#include <memory>
-#include <string>
-#include <vector>
-#include <thread>
 #include <ctime>
-#include <sstream>
 #include <iostream>
+#include <memory>
+#include <sstream>
+#include <string>
+#include <thread>
+#include <vector>
 
 #include <hamtype.h>
 #include <hamvec.h>
@@ -93,7 +93,7 @@ inline ham_float variance(const std::vector<ham_float> &vect) {
 // 2nd argument: pointer for 2nd ham_float array
 // 3rd argument: size of array
 inline ham_float covariance(const ham_float *arr1, const ham_float *arr2,
-                     const ham_uint &size) {
+                            const ham_uint &size) {
   ham_float avg1{mean(arr1, size)};
   ham_float avg2{mean(arr2, size)};
   ham_float covar{0.};
@@ -107,7 +107,7 @@ inline ham_float covariance(const ham_float *arr1, const ham_float *arr2,
 // 1st argument: ref for 1st ham_float vector
 // 2nd argument: ref for 2nd ham_float vector
 inline ham_float covariance(const std::vector<ham_float> &vect1,
-                     const std::vector<ham_float> &vect2) {
+                            const std::vector<ham_float> &vect2) {
   assert(vect1.size() == vect2.size());
   ham_float avg1{mean(vect1)};
   ham_float avg2{mean(vect2)};
@@ -136,7 +136,8 @@ inline ham_uint random_seed(const ham_int &s) {
 }
 // load tinyxml2::XML file
 // 1st argument: tinyxml2::XML file name (with dir)
-inline std::unique_ptr<tinyxml2::XMLDocument> loadxml(const std::string &filename) {
+inline std::unique_ptr<tinyxml2::XMLDocument>
+loadxml(const std::string &filename) {
   auto doc = std::make_unique<tinyxml2::XMLDocument>();
   doc->LoadFile(filename.c_str());
   assert(!doc->Error());
@@ -147,8 +148,8 @@ inline std::unique_ptr<tinyxml2::XMLDocument> loadxml(const std::string &filenam
 // 2nd argument: a vector of string, with key chain for tracing
 // the last string in 2nd argument is the target key
 // <root> is automatically included
-inline tinyxml2::XMLElement *tracexml(tinyxml2::XMLDocument *doc,
-                               const std::vector<std::string> &keychain) {
+inline tinyxml2::XMLElement *
+tracexml(tinyxml2::XMLDocument *doc, const std::vector<std::string> &keychain) {
   tinyxml2::XMLElement *el{doc->FirstChildElement("root")};
   if (!keychain.empty()) {
     for (auto key : keychain) {
@@ -164,8 +165,9 @@ inline tinyxml2::XMLElement *tracexml(tinyxml2::XMLDocument *doc,
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
 // 3rd argument: sub-key under 1st argument
-inline std::string fetchstring(tinyxml2::XMLElement *el, const std::string &att_type,
-                        const std::string &key) {
+inline std::string fetchstring(tinyxml2::XMLElement *el,
+                               const std::string &att_type,
+                               const std::string &key) {
 #ifdef VERBOSE
   std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
@@ -174,7 +176,8 @@ inline std::string fetchstring(tinyxml2::XMLElement *el, const std::string &att_
 // get string attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
-inline std::string fetchstring(tinyxml2::XMLElement *el, const std::string &att_type) {
+inline std::string fetchstring(tinyxml2::XMLElement *el,
+                               const std::string &att_type) {
 #ifdef VERBOSE
   std::cout << "attrib: " << att_type << std::endl;
 #endif
@@ -185,7 +188,7 @@ inline std::string fetchstring(tinyxml2::XMLElement *el, const std::string &att_
 // 2nd argument: attribute name
 // 3rd argument: sub-key under 1st argument
 inline ham_int fetchint(tinyxml2::XMLElement *el, const std::string &att_type,
-                 const std::string &key) {
+                        const std::string &key) {
 #ifdef VERBOSE
   std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
@@ -205,17 +208,18 @@ inline ham_int fetchint(tinyxml2::XMLElement *el, const std::string &att_type) {
 // 2nd argument: attribute name
 // 3rd argument: sub-key under 1st argument
 inline ham_uint fetchuint(tinyxml2::XMLElement *el, const std::string &att_type,
-                   const std::string &key) {
+                          const std::string &key) {
 #ifdef VERBOSE
   std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
   return el->FirstChildElement(key.c_str())
-  ->UnsignedAttribute(att_type.c_str());
+      ->UnsignedAttribute(att_type.c_str());
 }
 // get ham_uinteger attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
-inline ham_uint fetchuint(tinyxml2::XMLElement *el, const std::string &att_type) {
+inline ham_uint fetchuint(tinyxml2::XMLElement *el,
+                          const std::string &att_type) {
 #ifdef VERBOSE
   std::cout << "attrib: " << att_type << std::endl;
 #endif
@@ -228,7 +232,7 @@ inline ham_uint fetchuint(tinyxml2::XMLElement *el, const std::string &att_type)
 // 4th argument: default bool, use int instead of bool type
 // since bool can take char* as input
 inline bool fetchbool(tinyxml2::XMLElement *el, const std::string &att_type,
-               const std::string &key) {
+                      const std::string &key) {
 #ifdef VERBOSE
   std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
@@ -247,8 +251,9 @@ inline bool fetchbool(tinyxml2::XMLElement *el, const std::string &att_type) {
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
 // 3rd argument: sub-key under 1st argument
-inline ham_float fetchfloat(tinyxml2::XMLElement *el, const std::string &att_type,
-                     const std::string &key) {
+inline ham_float fetchfloat(tinyxml2::XMLElement *el,
+                            const std::string &att_type,
+                            const std::string &key) {
 #ifdef VERBOSE
   std::cout << "key: " << key << "attrib: " << att_type << std::endl;
 #endif
@@ -257,7 +262,8 @@ inline ham_float fetchfloat(tinyxml2::XMLElement *el, const std::string &att_typ
 // get ham_float attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
-inline ham_float fetchfloat(tinyxml2::XMLElement *el, const std::string &att_type) {
+inline ham_float fetchfloat(tinyxml2::XMLElement *el,
+                            const std::string &att_type) {
 #ifdef VERBOSE
   std::cout << "attrib: " << att_type << std::endl;
 #endif

@@ -164,9 +164,15 @@ TEST(toolkit, los_parproj) {
   const ham_float phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
   const Hamvec<3, ham_float> A{1., 0., 0.};
 
-  EXPECT_LT(std::fabs(pipe->los_parproj(A, theta[0], phi[0]) - 0.), 1e-10);
-  EXPECT_LT(std::fabs(pipe->los_parproj(A, theta[1], phi[1]) + 1.), 1e-10);
-  EXPECT_LT(std::fabs(pipe->los_parproj(A, theta[2], phi[2]) - 0.), 1e-10);
+  EXPECT_LT(
+      std::fabs(pipe->los_parproj(A, pipe->los_versor(theta[0], phi[0])) - 0.),
+      1e-10);
+  EXPECT_LT(
+      std::fabs(pipe->los_parproj(A, pipe->los_versor(theta[1], phi[1])) + 1.),
+      1e-10);
+  EXPECT_LT(
+      std::fabs(pipe->los_parproj(A, pipe->los_versor(theta[2], phi[2])) - 0.),
+      1e-10);
 }
 
 // testing:
@@ -177,9 +183,15 @@ TEST(toolkit, los_perproj) {
   const ham_float phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
   const Hamvec<3, ham_float> A{1., 0., 0.};
 
-  EXPECT_LT(std::fabs(pipe->los_perproj(A, theta[0], phi[0]) - 1.), 1e-10);
-  EXPECT_LT(std::fabs(pipe->los_perproj(A, theta[1], phi[1]) + 0.), 1e-10);
-  EXPECT_LT(std::fabs(pipe->los_perproj(A, theta[2], phi[2]) - 1.), 1e-10);
+  EXPECT_LT(
+      std::fabs(pipe->los_perproj(A, pipe->los_versor(theta[0], phi[0])) - 1.),
+      1e-10);
+  EXPECT_LT(
+      std::fabs(pipe->los_perproj(A, pipe->los_versor(theta[1], phi[1])) + 0.),
+      1e-10);
+  EXPECT_LT(
+      std::fabs(pipe->los_perproj(A, pipe->los_versor(theta[2], phi[2])) - 1.),
+      1e-10);
 }
 
 // testing:
