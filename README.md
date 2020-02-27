@@ -19,7 +19,7 @@ Essential physical inputs/modelings required during simulation include:
 hammurabi X is a modular C++ framework which is friendly to user defined models.
 Based on earlier versions of hammurabi, we mainly focus on improving its numerical reliablility and scalability.
 
-Please check our [**WIKI**](https://github.com/hammurabi-dev/hammurabiX/tree/master/wiki) for more detailed technical information.
+Please check our [**WIKI**](https://github.com/hammurabi-dev/hammurabiX/wiki) for more detailed technical information.
 
 [**hammurabi version 3**](https://sourceforge.net/projects/hammurabicode/) is still accessible.
 
