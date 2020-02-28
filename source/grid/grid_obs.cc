@@ -59,17 +59,17 @@ void Grid_obs::export_grid(const Param *par) {
     expio.dump(*dm_map);
   }
   if (par->grid_obs.do_sync.back()) {
-    std::string name_tag_i = "I_";
-    std::string name_tag_q = "Q_";
-    std::string name_tag_u = "U_";
-    name_tag_i.append(par->grid_obs.sim_sync_name.back());
-    name_tag_q.append(par->grid_obs.sim_sync_name.back());
-    name_tag_u.append(par->grid_obs.sim_sync_name.back());
-    expio.filename(name_tag_i);
+    std::string name_i = par->grid_obs.sim_sync_name.back();
+    std::string name_q = par->grid_obs.sim_sync_name.back();
+    std::string name_u = par->grid_obs.sim_sync_name.back();
+    name_i.insert(name_i.size() - 4, "_I");
+    name_q.insert(name_q.size() - 4, "_Q");
+    name_u.insert(name_u.size() - 4, "_U");
+    expio.filename(name_i);
     expio.dump(*is_map);
-    expio.filename(name_tag_q);
+    expio.filename(name_q);
     expio.dump(*qs_map);
-    expio.filename(name_tag_u);
+    expio.filename(name_u);
     expio.dump(*us_map);
   }
   if (par->grid_obs.do_fd) {
