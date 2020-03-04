@@ -36,6 +36,8 @@ before_script:
 script:
   - cd ${TRAVIS_BUILD_DIR} && mkdir build
   - cd build && cmake .. && make install
+  - export PATH=/tmp/local/hammurabi/bin:${PATH}
+  - export LD_LIBRARY_PATH=/tmp/local/hammurabi/lib:${LD_LIBRARY_PATH}
   - cd ${TRAVIS_BUILD_DIR} && python3 setup.py install
   - make test
   - cd ${TRAVIS_BUILD_DIR}/tutorials && pytest --nbval-lax
