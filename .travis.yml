@@ -35,9 +35,8 @@ before_script:
   - cd fftw && ./configure --enable-threads --enable-openmp --enable-shared --prefix=/tmp/local/ && make && make install
 script:
   - cd ${TRAVIS_BUILD_DIR} && mkdir build
-  - cd build && cmake .. && make install
+  - cd build && cmake .. && make install && make test
   - export PATH=/tmp/local/hammurabi/bin:${PATH}
   - export LD_LIBRARY_PATH=/tmp/local/hammurabi/lib:${LD_LIBRARY_PATH}
   - cd ${TRAVIS_BUILD_DIR} && python3 setup.py install --prefix=/tmp/local
-  - make test
   - cd ${TRAVIS_BUILD_DIR}/tutorials && pytest --nbval-lax
