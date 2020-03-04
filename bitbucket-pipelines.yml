@@ -10,9 +10,13 @@ pipelines:
         - step:  # indentation check
             script:
                 - sudo apt-get update
-                - sudo apt-get install -y --fix-missing build-essential gsl-bin libgsl-dev cmake
+                - sudo apt-get install -y --fix-missing build-essential cmake
                 - sudo apt-get install -y --fix-missing python3 python3-dev python3-setuptools python3-pip
                 - pip3 install numpy scipy matplotlib healpy jupyter pytest nbval
+                - cd ${BITBUCKET_CLONE_DIR}
+                - midkr gsl
+                - wget ftp://ftp.gnu.org/gnu/gsl/gsl-latest.tar.gz && tar xzf gsl-latest.tar.gz -C gsl --strip-components 1
+                - cd gsl && ./configure --prefix=/tmp/local && make && make install
                 - cd ${BITBUCKET_CLONE_DIR}
                 - git clone https://github.com/google/googletest.git googletest
                 - cd googletest && mkdir build
@@ -21,7 +25,7 @@ pipelines:
                 - cd ${BITBUCKET_CLONE_DIR}
                 - mkdir fftw
                 - wget http://www.fftw.org/fftw-3.3.8.tar.gz && tar xzf fftw-3.3.8.tar.gz -C fftw --strip-components 1
-                - cd fftw && ./configure --enable-threads --enable-openmp --enable-shared --prefix=/tmp/local/ && make && make install
+                - cd fftw && ./configure --enable-threads --enable-openmp --enable-shared --prefix=/tmp/local && make && make install
                 - cd ${BITBUCKET_CLONE_DIR} && ./contrib/utilities/download_clang_format && ./contrib/utilities/check_indentation.sh
                 - mkdir build
                 - cd build && cmake .. && make install && make test
