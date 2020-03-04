@@ -34,7 +34,8 @@ before_script:
   - wget http://www.fftw.org/fftw-3.3.8.tar.gz && tar xzf fftw-3.3.8.tar.gz -C fftw --strip-components 1
   - cd fftw && ./configure --enable-threads --enable-openmp --enable-shared --prefix=/tmp/local/ && make && make install
 script:
-  - cd ${TRAVIS_BUILD_DIR} && mkdir build
+  - cd ${TRAVIS_BUILD_DIR} && ./contrib/utilities/download_clang_format && ./contrib/utilities/check_indentation.sh
+  - mkdir build
   - cd build && cmake .. && make install && make test
   - export PATH=/tmp/local/hammurabi/bin:${PATH}
   - export LD_LIBRARY_PATH=/tmp/local/hammurabi/lib:${LD_LIBRARY_PATH}
