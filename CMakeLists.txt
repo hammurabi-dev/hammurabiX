@@ -42,10 +42,8 @@ OPTION(ENABLE_REPORT "Enable verbose report" ON)
 # we SET GSL_HINTS just in case FindGSL fails
 IF(ON_DOCKER)
 	SET(GSL_HINTS /usr) 
-	SET(FFTW_HINTS /usr/local)
-	SET(FFTW_TRAVISHINTS /tmp/local)
-	SET(GTEST_HINTS /usr/local)
-	SET(GTEST_TRAVISHINTS /tmp/local)
+	SET(FFTW_HINTS /tmp/local)
+	SET(GTEST_HINTS /tmp/local)
 	SET(INSTALL_ROOT_DIR /tmp/local/hammurabi)
 ELSE()
 	MESSAGE("apply GSL FFTW3 GoogleTest paths")
@@ -144,19 +142,16 @@ FIND_PATH(FFTW_INCLUDE_DIR
 	NAMES fftw3.h
 	HINTS
 	${FFTW_HINTS}/include
-	${FFTW_TRAVISHINTS}/include
 )
 FIND_LIBRARY(FFTW_LIBRARY
 	NAMES fftw3
 	HINTS
 	${FFTW_HINTS}/lib
-	${FFTW_TRAVISHINTS}/lib
 )
 FIND_LIBRARY(FFTW_OMP_LIBRARY
 	NAMES fftw3_omp
 	HINTS
 	${FFTW_HINTS}/lib
-	${FFTW_TRAVISHINTS}/lib
 )
 IF(FFTW_INCLUDE_DIR)
 	LIST(APPEND ALL_INCLUDE_DIR ${FFTW_INCLUDE_DIR})
@@ -227,18 +222,14 @@ IF(ENABLE_TESTING)
 		NAMES gtest/gtest.h
   		HINTS
 		${GTEST_HINTS}/include
-		${GTEST_TRAVISHINTS}/include
 		${GTEST_HINTS}/googletest/include
-		${GTEST_TRAVISHINTS}/googletest/include
 	)
 	IF(NOT GTEST_INC_DIR)
   		MESSAGE(FATAL_ERROR ${GTEST_INC_DIR})
 	ENDIF()
 	FIND_PATH(GTEST_SOURCE_DIR gtest-all.cc
   		${GTEST_HINTS}/src
-		${GTEST_TRAVISHINTS}/src
   		${GTEST_HINTS}/googletest/src
-		${GTEST_TRAVISHINTS}/googletest/src
 	)
 	IF(NOT GTEST_SOURCE_DIR)
   		MESSAGE(FATAL_ERROR ${GTEST_SOURCE_DIR})

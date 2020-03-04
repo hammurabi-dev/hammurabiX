@@ -17,7 +17,7 @@ WORKDIR /home/lab
 RUN mkdir /home/lab/fftw
 RUN wget http://www.fftw.org/fftw-3.3.8.tar.gz && tar xzf fftw-3.3.8.tar.gz -C fftw --strip-components 1
 WORKDIR fftw
-RUN ./configure --enable-threads --enable-openmp --enable-shared --prefix=/usr/local/ && make && make install
+RUN ./configure --enable-threads --enable-openmp --enable-shared --prefix=/tmp/local/ && make && make install
 WORKDIR /home/lab
 
 # GOOGLE TEST
@@ -25,7 +25,7 @@ RUN git clone https://github.com/google/googletest.git googletest
 WORKDIR /home/lab/googletest
 RUN mkdir /home/lab/googletest/build
 WORKDIR /home/lab/googletest/build
-RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr/local .. && make && make install && cp ../googletest/src/* /usr/local/src
+RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/tmp/local .. && make && make install && cp ../googletest/src/* /tmp/local/src
 WORKDIR /home/lab
 
 # HAMMURABI X
@@ -35,8 +35,8 @@ RUN mkdir /home/lab/hamx/build
 WORKDIR /home/lab/hamx/build
 RUN cmake .. && make install
 # SET PATH
-ENV PATH /usr/local/hammurabi/bin:${PATH}
-ENV LD_LIBRARY_PATH /usr/local/hammurabi/lib:${LD_LIBRARY_PATH}
+ENV PATH /tmp/local/hammurabi/bin:${PATH}
+ENV LD_LIBRARY_PATH /tmp/local/hammurabi/lib:${LD_LIBRARY_PATH}
 WORKDIR /home/lab/hamx
 RUN python3 setup.py install
 WORKDIR /home/lab
@@ -44,4 +44,4 @@ WORKDIR /home/lab
 # CLEAN PACKAGES
 RUN rm -f *.tar.gz
 # SET PATH
-ENV LD_LIBRARY_PATH /usr/local/lib:${LD_LIBRARY_PATH}
+ENV LD_LIBRARY_PATH /tmp/local/lib:${LD_LIBRARY_PATH}
