@@ -1,97 +1,92 @@
 """
-developed by Joe Taylor
-based on the initial work of Theo Steininger
-
 methods:
 
 # Import class
+
 In []: import hampyx as hpx
 
 # Initialize object
-In []: object = hpx.Hampyx (<xml file path>, <executable path>)
 
-hammurabiX executable path is by default '/usr/local/hammurabi/bin/hamx'
-while xml file path is by default './'
+In []: object = hpx.Hampyx (xml_path=<xml file path>, exe_path=<executable path>)
 
-# Modify parameter value from base xml file to temp xml file
+# hammurabiX executable path,
+# by default,
+# is searched from the environment varialbe PATH,
+# while xml file path,
+# by default,
+# is searched in the current working directory './'.
+
+# Modify parameter value from base xml file to temp XML file
+
 In []: object.mod_par (keychain=['key1','key2',...], attrib={'tag':'content'})
 
-# Add new parameter with or without attributes
+# Add new parameter
+
 In []: object.add_par (keychain=['key1','key2',...], subkey='keyfinal', attrib={'tag':'content'})
 
-the new parameter subkey, will be added at the path defined by keychain
-
 # Delete parameter
+
 In []: object.del_par (keychain=['key1','key2',...])
 
-if additional argument opt='all', then all matching parameters will be deleted
-
-the strings 'key1', 'key2', etc represent the path to the desired parameter, going through the xml
-the "tag" is the label for the parameter: eg. "Value" or "cue" or "type"
-the "content" is the content under the tag: eg. the string for the tag "filename"
+# If additional argument opt='all', then all matching parameters will be deleted.
+# The strings 'key1', 'key2',
+# etc represent the path to the desired parameter, going through the XML.
+# The "tag" is the label for the parameter: eg. "Value" or "cue" or "type".
+# The "content" is the content under the tag: eg. the string for the tag "filename".
 
 # Look through the parameter tree in python
+
 In []: object.print_par(keychain=['key1','key2',...])
 
-this will return the current value of the parameter in the XML associated with the path "key1/key2/.../keyfinal/"
+# This will return the current value of the parameter in the XML,
+# associated with the path "key1/key2/.../keyfinal/".
 
 # Run the executable
+
 In []: object(verbose=True/False)
 
-if additional verbose=True (by default is False) hampyx_run.log and hampyx_err.log will be dumped to disk
-notice that dumping logs is not thread safe, use quiet mode in threading
+# If additional verbose=True (by default is False),
+# run.log and err.log will be dumped to disk,
+# notice that dumping logs is not thread safe, use quiet mode in threading.
 
-after this main routine, object.sim_map will be filled with simulation outputs from hammurabiX
-the structure of object.sim_map contains arrays under entries:
-(we give up nested dict structure for the convenience of Bayesian analysis)
-object.sim_map[('sync',str(freq),str(Nside),'I')] # synchrotron intensity map at 'frequency' 
-object.sim_map[('sync',str(freq),str(Nside),'Q')] # synchrotron Q map at 'frequency' 
-object.sim_map[('sync',str(freq),str(Nside),'U')] # synchrotron U map at 'frequency' 
-object.sim_map[('sync',str(freq),str(Nside),'PI')] # synchrotron pol. intensity at 'frequency' 
-object.sim_map[('sync',str(freq),str(Nside),'PA')] # synchrotron pol. angle at 'frequency' (IAU convention)
-object.sim_map[('fd','nan',str(Nside),'nan')] # Faraday depth map
-object.sim_map[('dm','nan',str(Nside),'nan')] # dispersion measure map
-
-note:
-for more detailed instructions please check the wiki page.
+# After this main routine,
+# object.sim_map will be filled with simulation outputs from hammurabiX.
+# The structure of object.sim_map contains arrays under entries:
+# (we give up nested dict structure for the convenience of Bayesian analysis)
+# object.sim_map[('sync',str(freq),str(Nside),'I')] # synchrotron intensity map at 'frequency'
+# object.sim_map[('sync',str(freq),str(Nside),'Q')] # synchrotron Q map at 'frequency'
+# object.sim_map[('sync',str(freq),str(Nside),'U')] # synchrotron U map at 'frequency'
+# object.sim_map[('fd','nan',str(Nside),'nan')] # Faraday depth map
+# object.sim_map[('dm','nan',str(Nside),'nan')] # dispersion measure map
 """
 
 import os
+import tempfile
 import subprocess
-import healpy as hp
 import xml.etree.ElementTree as et
 import numpy as np
-import tempfile as tf
-import logging as log
 
 
 class Hampyx(object):
     
-    def __init__(self,
-                 xml_path=None,
-                 exe_path=None):
+    def __init__(self, xml_path=None, exe_path=None):
         """
-        Hampyx init
+        Hampyx initialization,
+        default executable path is None, we will search users' environment,
+        default parameter file path is None, we will search current working directory,
+        otherwise, ABSOLUTE paths are required.
         
         Parameters
         ----------
         
-        xml_path : str
+        xml_path : string
             XML parameter file path
             
-        exe_path : str
+        exe_path : string
             hammurabi C executable path
-        
-        Note
-        ----
-        default executable path is None, we will search users' environment,
-        default parameter file path is None, we will search current working directory,
-        otherwise, *absolute* paths are required!!!
         """
-        log.debug('initialize Hampyx')
         # current working directory
-        self.wk_dir = os.getcwd()
-        log.debug('set working directory at %s' % self.wk_dir)
+        self.wk_dir = None
         # encapsulated below
         self.exe_path = exe_path
         self.xml_path = xml_path
@@ -118,7 +113,7 @@ class Hampyx(object):
     @exe_path.setter
     def exe_path(self, exe_path):
         """
-        by default hammurabiX executable "hamx" should be available in 'PATH'
+        by default hammurabiX executable "hamx" should be available in PATH
         """
         if exe_path is None:  # search sys environ
             env = os.environ.get('PATH').split(os.pathsep)
@@ -132,10 +127,13 @@ class Hampyx(object):
             assert isinstance(exe_path, str)
             self._exe_path = os.path.abspath(exe_path)
         self._executable = self._exe_path
-        log.debug('set hammurabiX executable path %s' % str(self._executable))
 
     @xml_path.setter
     def xml_path(self, xml_path):
+        """
+        by default an "*.xml" file should be accessible in current working directory,
+        to be specific, the return of os.getcwd()
+        """
         if xml_path is None:
             cnddt = [s for s in os.listdir(self._wk_dir) if 'xml' in s]
             for match in cnddt:  # get the first match that exists
@@ -147,7 +145,6 @@ class Hampyx(object):
             self._xml_path = os.path.abspath(xml_path)
             assert os.path.isfile(self._xml_path)
         self._base_file = self._xml_path
-        log.debug('set hammurabiX base XML parameter file path %s' % str(self._base_file))
 
     @property
     def wk_dir(self):
@@ -155,7 +152,13 @@ class Hampyx(object):
 
     @wk_dir.setter
     def wk_dir(self, wk_dir):
-        self._wk_dir = wk_dir
+        """
+        the working directory acts as a hidden parameter
+        """
+        if wk_dir is None:
+            self._wk_dir = os.getcwd()
+        else:
+            self._wk_dir = wk_dir
 
     @property
     def temp_file(self):
@@ -172,7 +175,6 @@ class Hampyx(object):
     @tree.setter
     def tree(self, tree):
         self._tree = tree
-        log.debug('capture XML parameter tree from %s' % str(tree))
 
     @property
     def sim_map_name(self):
@@ -182,10 +184,8 @@ class Hampyx(object):
     def sim_map_name(self, sim_map_name):
         try:
             self._sim_map_name.update(sim_map_name)
-            log.debug('update simulation map name dict %s' % str(sim_map_name))
         except AttributeError:
             self._sim_map_name = sim_map_name
-            log.debug('set simulation map name dict %s ' % str(sim_map_name))
 
     @property
     def sim_map(self):
@@ -195,15 +195,13 @@ class Hampyx(object):
     def sim_map(self, sim_map):
         try:
             self._sim_map.update(sim_map)
-            log.debug('update simulation map dict %s' % str(sim_map.keys()))
         except AttributeError:
             self._sim_map = sim_map
-            log.debug('set simulation map dict %s' % str(sim_map.keys()))
     
     def __call__(self, verbose=False):
-        return self.call(verbose)
+        return self.run(verbose)
         
-    def call(self, verbose=False):
+    def run(self, verbose=False):
         """
         the main routine for running hammurabiX executable
         
@@ -211,15 +209,15 @@ class Hampyx(object):
         ----------
         
         verbose : bool
-            log hammurabi executable std output/error, or not
+            record hammurabi executable std output/error, or not
         """
         # create new temp parameter file
         if self.temp_file is self._base_file:
             self._new_xml_copy()
         # if need verbose output
         if verbose is True:
-            logfile = open('hammurabiX_run.log', 'w')
-            errfile = open('hammurabiX_err.log', 'w')
+            logfile = open('run.log', 'w')
+            errfile = open('err.log', 'w')
             temp_process = subprocess.Popen([self._executable, self._temp_file],
                                             stdout=logfile,
                                             stderr=errfile)
@@ -245,8 +243,9 @@ class Hampyx(object):
         make a temporary parameter file copy and rename output file with random mark
         """
         # create a random file name which doesn't exist currently
-        fd, new_path = tf.mkstemp(prefix='params_', suffix='.xml', dir=self._wk_dir)
+        fd, new_path = tempfile.mkstemp(prefix='params_', suffix='.xml', dir=self._wk_dir)
         os.close(fd)
+        # retrieve the temporary mark
         rnd_idx = new_path[new_path.index('params_')+7:-4]
         self.temp_file = new_path
         # copy base_file to temp_file
@@ -259,19 +258,19 @@ class Hampyx(object):
                 freq = str(sync.get('freq'))
                 nside = str(sync.get('nside'))
                 self.sim_map_name[('sync', freq, nside)] = os.path.join(self.wk_dir,
-                                                                        'sync_'+freq+'_'+nside+'_'+rnd_idx+'.fits')
+                                                                        'sync_'+freq+'_'+nside+'_'+rnd_idx+'.bin')
                 sync.set('filename', self.sim_map_name[('sync', freq, nside)])
         fd = root.find("./observable/faraday[@cue='1']")
         if fd is not None:
             self._do_fd = True
             nside = str(fd.get('nside'))
-            self.sim_map_name[('fd', 'nan', nside)] = os.path.join(self.wk_dir, 'fd_'+nside+'_'+rnd_idx+'.fits')
+            self.sim_map_name[('fd', 'nan', nside)] = os.path.join(self.wk_dir, 'fd_'+nside+'_'+rnd_idx+'.bin')
             fd.set('filename', self.sim_map_name[('fd', 'nan', nside)])
         dm = root.find("./observable/dm[@cue='1']")
         if dm is not None:
             self._do_dm = True
             nside = str(dm.get('nside'))
-            self.sim_map_name[('dm', 'nan', nside)] = os.path.join(self._wk_dir, 'dm_'+nside+'_'+rnd_idx+'.fits')
+            self.sim_map_name[('dm', 'nan', nside)] = os.path.join(self._wk_dir, 'dm_'+nside+'_'+rnd_idx+'.bin')
             dm.set('filename', self.sim_map_name[('dm', 'nan', nside)])
         # automatically create a new file
         self.tree.write(self.temp_file)
@@ -295,51 +294,30 @@ class Hampyx(object):
                 raise ValueError('mismatched key %s' % str(k))
         # read dispersion measure and delete file
         if self._do_dm is True:
-            if os.path.isfile(self.sim_map_name[dm_key]):
-                [DM] = self._read_fits_file(self.sim_map_name[dm_key])
-                self.sim_map[(dm_key[0], dm_key[1], dm_key[2], 'nan')] = DM
-                os.remove(self.sim_map_name[dm_key])
-            else:
-                raise ValueError('missing %s' % str(self.sim_map_name[dm_key]))
+            self.sim_map[(dm_key[0], dm_key[1], dm_key[2], 'nan')] = self._read_del(self.sim_map_name[dm_key])
         # read faraday depth and delete file
         if self._do_fd is True:
-            if os.path.isfile(self.sim_map_name[fd_key]):
-                [Fd] = self._read_fits_file(self.sim_map_name[fd_key])
-                self.sim_map[(fd_key[0], fd_key[1], fd_key[2], 'nan')] = Fd
-                os.remove(self.sim_map_name[fd_key])
-            else:
-                raise ValueError('missing %s' % str(self.sim_map_name[fd_key]))
+            self.sim_map[(fd_key[0], fd_key[1], fd_key[2], 'nan')] = self._read_del(self.sim_map_name[fd_key])
         # read synchrotron pol. and delete file
         if self._do_sync is True:
             for i in sync_key:
-                # if file exists
-                if os.path.isfile(self.sim_map_name[i]):
-                    [Is, Qs, Us] = self._read_fits_file(self.sim_map_name[i])
-                    self.sim_map[(i[0], i[1], i[2], 'I')] = Is
-                    self.sim_map[(i[0], i[1], i[2], 'Q')] = Qs
-                    self.sim_map[(i[0], i[1], i[2], 'U')] = Us
-                    # polarisation intensity
-                    self.sim_map[(i[0], i[1], i[2], 'PI')] = np.sqrt(np.square(Qs) + np.square(Us))
-                    # polarisatioin angle, IAU convention
-                    self.sim_map[(i[0], i[1], i[2], 'PA')] = np.arctan2(Us, Qs)/2.0
-                    os.remove(self.sim_map_name[i])
-                else:
-                    raise ValueError('missing %s' % str(self.sim_map_name[i]))
-    
-    def _read_fits_file(self, path):
+                self.sim_map[(i[0], i[1], i[2], 'I')] = self._read_del(self.sim_map_name[i][:-4]+'_I.bin')
+                self.sim_map[(i[0], i[1], i[2], 'Q')] = self._read_del(self.sim_map_name[i][:-4]+'_Q.bin')
+                self.sim_map[(i[0], i[1], i[2], 'U')] = self._read_del(self.sim_map_name[i][:-4]+'_U.bin')
+                # polarisation intensity
+                #self.sim_map[(i[0], i[1], i[2], 'PI')] = np.sqrt(np.square(Qs) + np.square(Us))
+                # polarisatioin angle, IAU convention
+                #self.sim_map[(i[0], i[1], i[2], 'PA')] = np.arctan2(Us, Qs)/2.0
+                    
+    def _read_del(self, path):
         """
-        read a single fits file with healpy
+        read a single binary file into a numpy array
+        and then delete the file
         """
-        rslt = []
-        i = 0
-        while True:
-            try:
-                loaded_map = hp.read_map(path, field=i, dtype=np.float64, verbose=False)
-                rslt += [loaded_map]
-                i += 1
-            except IndexError:
-                break
-        return rslt
+        assert(os.path.isfile(path))
+        loaded_map = np.fromfile(path, dtype=np.float64)
+        os.remove(path)
+        return loaded_map
 
     def _del_xml_copy(self):
         """

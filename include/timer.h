@@ -9,19 +9,20 @@
 #include <cassert>
 #include <chrono>
 #include <ctime>
+#include <hamtype.h>
 #include <iostream>
 #include <map>
 #include <string>
 
 class Timer {
   typedef std::chrono::time_point<std::chrono::high_resolution_clock> tick;
-  typedef std::chrono::duration<double, std::milli> duration;
-  typedef std::map<std::string, std::pair<tick, double>> timecache;
+  typedef std::chrono::duration<ham_float, std::milli> duration;
+  typedef std::map<std::string, std::pair<tick, ham_float>> timecache;
 #ifndef NDEBUG
 public:
 #endif
   timecache record;
-
+  bool usato = false; // marker for multiple time recording
 public:
   Timer() = default;
   virtual ~Timer() = default;
@@ -40,7 +41,12 @@ public:
   inline void stop(std::string flag) {
     duration diff =
         (std::chrono::high_resolution_clock::now() - record[flag].first);
-    record[flag].second = diff.count();
+    if (usato) { // multiple stop
+      record[flag].second += diff.count();
+    } else { // 1st stop
+      record[flag].second = diff.count();
+      usato = true;
+    }
   }
   // print to stdout the elapsed time in ms resolution
   // 1st argument: (optional) name of timing record

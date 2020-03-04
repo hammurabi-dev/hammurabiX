@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <grid.h>
+#include <hamtype.h>
 #include <param.h>
 
 Grid_tereg::Grid_tereg(const Param *par) {
@@ -19,7 +20,7 @@ Grid_tereg::Grid_tereg(const Param *par) {
 
 void Grid_tereg::build_grid(const Param *par) {
   // allocate spatial domain thermal electron field
-  te = std::make_unique<double[]>(par->grid_tereg.full_size);
+  te = std::make_unique<ham_float[]>(par->grid_tereg.full_size);
 }
 
 void Grid_tereg::export_grid(const Param *par) {
@@ -27,13 +28,13 @@ void Grid_tereg::export_grid(const Param *par) {
   std::ofstream output(par->grid_tereg.filename.c_str(),
                        std::ios::out | std::ios::binary);
   assert(output.is_open());
-  double tmp;
+  ham_float tmp;
   for (decltype(par->grid_tereg.full_size) i = 0;
        i != par->grid_tereg.full_size; ++i) {
     assert(!output.eof());
     tmp = te[i];
     assert(tmp >= 0);
-    output.write(reinterpret_cast<char *>(&tmp), sizeof(double));
+    output.write(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
   }
   output.close();
 }
@@ -43,11 +44,11 @@ void Grid_tereg::import_grid(const Param *par) {
   std::ifstream input(par->grid_tereg.filename.c_str(),
                       std::ios::in | std::ios::binary);
   assert(input.is_open());
-  double tmp;
+  ham_float tmp;
   for (decltype(par->grid_tereg.full_size) i = 0;
        i != par->grid_tereg.full_size; ++i) {
     assert(!input.eof());
-    input.read(reinterpret_cast<char *>(&tmp), sizeof(double));
+    input.read(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
     te[i] = tmp;
   }
 #ifndef NDEBUG

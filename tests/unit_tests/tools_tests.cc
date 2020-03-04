@@ -3,6 +3,7 @@
 
 #include <gtest/gtest.h>
 
+#include <hamtype.h>
 #include <memory>
 #include <random>
 #include <tinyxml2.h>
@@ -47,34 +48,34 @@ TEST(toolkit, index4d) {
 // toolkit::mean
 TEST(toolkit, mean) {
   std::default_random_engine rng;
-  std::uniform_real_distribution<double> smp(0.0, 1.0);
+  std::uniform_real_distribution<ham_float> smp(0.0, 1.0);
 
-  const double arr[3] = {smp(rng), smp(rng), smp(rng)};
+  const ham_float arr[3] = {smp(rng), smp(rng), smp(rng)};
   EXPECT_DOUBLE_EQ(toolkit::mean(arr, 3), (arr[0] + arr[1] + arr[2]) / 3.);
 
-  const std::vector<double> vec{smp(rng), smp(rng), smp(rng)};
+  const std::vector<ham_float> vec{smp(rng), smp(rng), smp(rng)};
   EXPECT_DOUBLE_EQ(toolkit::mean(vec), (vec[0] + vec[1] + vec[2]) / 3.);
 }
 
 // testing:
 // toolkit::variance
 TEST(toolkit, variance) {
-  const double test_array[3] = {3, 4, 5};
+  const ham_float test_array[3] = {3, 4, 5};
   EXPECT_DOUBLE_EQ(toolkit::variance(test_array, 3), 2. / 3.);
 
-  const std::vector<double> test_vector{3, 4, 5};
+  const std::vector<ham_float> test_vector{3, 4, 5};
   EXPECT_DOUBLE_EQ(toolkit::variance(test_vector), 2. / 3.);
 }
 
 // testing:
 // toolkit::covariance
 TEST(toolkit, covariance) {
-  const double test_array1[3] = {1, 2, 3};
-  const double test_array2[3] = {3, 4, 5};
+  const ham_float test_array1[3] = {1, 2, 3};
+  const ham_float test_array2[3] = {3, 4, 5};
   EXPECT_DOUBLE_EQ(toolkit::covariance(test_array1, test_array2, 3), 2. / 3.);
 
-  const std::vector<double> test_vector1{1, 2, 3};
-  const std::vector<double> test_vector2{3, 4, 5};
+  const std::vector<ham_float> test_vector1{1, 2, 3};
+  const std::vector<ham_float> test_vector2{3, 4, 5};
   EXPECT_DOUBLE_EQ(toolkit::covariance(test_vector1, test_vector2), 2. / 3.);
 }
 
@@ -83,21 +84,21 @@ TEST(toolkit, covariance) {
 TEST(toolkit, xml_parser) {
   auto doc = toolkit::loadxml("reference/tools_tests.xml");
 
-  tinyxml2::XMLElement *el = toolkit::tracexml(doc.get(), {"double"});
+  tinyxml2::XMLElement *el = toolkit::tracexml(doc.get(), {"float"});
 
-  EXPECT_EQ(toolkit::fetchdouble(el, "value"), double(3.14));
+  EXPECT_EQ(toolkit::fetchfloat(el, "value"), ham_float(3.14));
 
-  EXPECT_EQ(toolkit::fetchdouble(el, "dft_value"), double(0));
+  EXPECT_EQ(toolkit::fetchfloat(el, "dft_value"), ham_float(0));
 
-  el = toolkit::tracexml(doc.get(), {"empty_double"});
+  el = toolkit::tracexml(doc.get(), {"empty_float"});
 
-  EXPECT_EQ(toolkit::fetchdouble(el, "value"), double(0));
+  EXPECT_EQ(toolkit::fetchfloat(el, "value"), ham_float(0));
 
   el = toolkit::tracexml(doc.get(), {"integer"});
 
-  EXPECT_EQ(toolkit::fetchunsigned(el, "value"), unsigned(23));
+  EXPECT_EQ(toolkit::fetchuint(el, "value"), ham_uint(23));
 
-  EXPECT_EQ(toolkit::fetchunsigned(el, "dft_value"), unsigned(0));
+  EXPECT_EQ(toolkit::fetchuint(el, "dft_value"), ham_uint(0));
 
   el = toolkit::tracexml(doc.get(), {});
 

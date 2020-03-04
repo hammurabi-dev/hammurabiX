@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <grid.h>
+#include <hamtype.h>
 #include <param.h>
 
 Grid_cre::Grid_cre(const Param *par) {
@@ -20,7 +21,7 @@ Grid_cre::Grid_cre(const Param *par) {
 
 void Grid_cre::build_grid(const Param *par) {
   // allocate phase-space CRE flux
-  cre_flux = std::make_unique<double[]>(par->grid_cre.cre_size);
+  cre_flux = std::make_unique<ham_float[]>(par->grid_cre.cre_size);
 }
 
 void Grid_cre::export_grid(const Param *par) {
@@ -28,12 +29,12 @@ void Grid_cre::export_grid(const Param *par) {
   std::ofstream output(par->grid_cre.filename.c_str(),
                        std::ios::out | std::ios::binary);
   assert(output.is_open());
-  double tmp;
+  ham_float tmp;
   for (decltype(par->grid_cre.cre_size) i = 0; i != par->grid_cre.cre_size;
        ++i) {
     assert(!output.eof());
     tmp = cre_flux[i];
-    output.write(reinterpret_cast<char *>(&tmp), sizeof(double));
+    output.write(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
   }
   output.close();
 }
@@ -43,11 +44,11 @@ void Grid_cre::import_grid(const Param *par) {
   std::ifstream input(par->grid_cre.filename.c_str(),
                       std::ios::in | std::ios::binary);
   assert(input.is_open());
-  double tmp;
+  ham_float tmp;
   for (decltype(par->grid_cre.cre_size) i = 0; i != par->grid_cre.cre_size;
        ++i) {
     assert(!input.eof());
-    input.read(reinterpret_cast<char *>(&tmp), sizeof(double));
+    input.read(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
     cre_flux[i] = tmp;
   }
 #ifndef NDEBUG

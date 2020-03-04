@@ -1,7 +1,7 @@
 // constants in CGS units
 
-#ifndef HAMMURABI_CGS_H
-#define HAMMURABI_CGS_H
+#ifndef HAMMURABI_UNITS_H
+#define HAMMURABI_UNITS_H
 
 #include <cmath>
 
@@ -17,6 +17,9 @@ const double joule = (1.e7 * erg);
 const double watt = (joule / sec);
 
 const double pi = 3.141592653589793238462643383279502884197;
+const double halfpi = 1.570796326794896619231321691639751442099;
+const double twothirds = 0.666666666666666666666666666666666666667;
+const double twopi = 6.283185307179586476925286766559005768394;
 const double rad = (pi / 180.);
 const double arcmin = (2. * pi / (360. * 60.));
 const double arcsec = (2. * pi / (360. * 60. * 60.));

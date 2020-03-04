@@ -6,13 +6,13 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
-#include <cstddef> // for std::size_t
 #include <memory>
 #include <random>
 
 #include <bfield.h>
 #include <crefield.h>
 #include <grid.h>
+#include <hamtype.h>
 #include <hamvec.h>
 #include <tefield.h>
 #include <toolkit.h>
@@ -25,18 +25,18 @@ void fill_cre_grid(const Param *par, Grid_cre *grid);
 
 // assign field vector by position
 void fill_breg_grid(const Param *par, Grid_breg *grid) {
-  hamvec<3, double> gc_pos;
-  double lx{par->grid_breg.x_max - par->grid_breg.x_min};
-  double ly{par->grid_breg.y_max - par->grid_breg.y_min};
-  double lz{par->grid_breg.z_max - par->grid_breg.z_min};
+  Hamvec<3, ham_float> gc_pos;
+  ham_float lx{par->grid_breg.x_max - par->grid_breg.x_min};
+  ham_float ly{par->grid_breg.y_max - par->grid_breg.y_min};
+  ham_float lz{par->grid_breg.z_max - par->grid_breg.z_min};
   for (decltype(par->grid_breg.nx) i = 0; i != par->grid_breg.nx; ++i) {
     gc_pos[0] = i * lx / (par->grid_breg.nx - 1) + par->grid_breg.x_min;
     for (decltype(par->grid_breg.ny) j = 0; j != par->grid_breg.ny; ++j) {
       gc_pos[1] = j * ly / (par->grid_breg.ny - 1) + par->grid_breg.y_min;
       for (decltype(par->grid_breg.nz) k = 0; k != par->grid_breg.nz; ++k) {
         gc_pos[2] = k * lz / (par->grid_breg.nz - 1) + par->grid_breg.z_min;
-        std::size_t idx{toolkit::index3d(par->grid_breg.nx, par->grid_breg.ny,
-                                         par->grid_breg.nz, i, j, k)};
+        ham_uint idx{toolkit::index3d(par->grid_breg.nx, par->grid_breg.ny,
+                                      par->grid_breg.nz, i, j, k)};
         grid->bx[idx] = gc_pos[0];
         grid->by[idx] = gc_pos[1];
         grid->bz[idx] = gc_pos[2];
@@ -47,18 +47,18 @@ void fill_breg_grid(const Param *par, Grid_breg *grid) {
 
 // assign field vector by position
 void fill_brnd_grid(const Param *par, Grid_brnd *grid) {
-  hamvec<3, double> gc_pos;
-  double lx{par->grid_brnd.x_max - par->grid_brnd.x_min};
-  double ly{par->grid_brnd.y_max - par->grid_brnd.y_min};
-  double lz{par->grid_brnd.z_max - par->grid_brnd.z_min};
+  Hamvec<3, ham_float> gc_pos;
+  ham_float lx{par->grid_brnd.x_max - par->grid_brnd.x_min};
+  ham_float ly{par->grid_brnd.y_max - par->grid_brnd.y_min};
+  ham_float lz{par->grid_brnd.z_max - par->grid_brnd.z_min};
   for (decltype(par->grid_brnd.nx) i = 0; i != par->grid_brnd.nx; ++i) {
     gc_pos[0] = i * lx / (par->grid_brnd.nx - 1) + par->grid_brnd.x_min;
     for (decltype(par->grid_brnd.ny) j = 0; j != par->grid_brnd.ny; ++j) {
       gc_pos[1] = j * ly / (par->grid_brnd.ny - 1) + par->grid_brnd.y_min;
       for (decltype(par->grid_brnd.nz) k = 0; k != par->grid_brnd.nz; ++k) {
         gc_pos[2] = k * lz / (par->grid_brnd.nz - 1) + par->grid_brnd.z_min;
-        std::size_t idx{toolkit::index3d(par->grid_brnd.nx, par->grid_brnd.ny,
-                                         par->grid_brnd.nz, i, j, k)};
+        ham_uint idx{toolkit::index3d(par->grid_brnd.nx, par->grid_brnd.ny,
+                                      par->grid_brnd.nz, i, j, k)};
         grid->bx[idx] = gc_pos[0];
         grid->by[idx] = gc_pos[1];
         grid->bz[idx] = gc_pos[2];
@@ -69,17 +69,17 @@ void fill_brnd_grid(const Param *par, Grid_brnd *grid) {
 
 // fill field scalar by sum of position coordinates
 void fill_ternd_grid(const Param *par, Grid_ternd *grid) {
-  hamvec<3, double> gc_pos;
-  double lx{par->grid_ternd.x_max - par->grid_ternd.x_min};
-  double ly{par->grid_ternd.y_max - par->grid_ternd.y_min};
-  double lz{par->grid_ternd.z_max - par->grid_ternd.z_min};
+  Hamvec<3, ham_float> gc_pos;
+  ham_float lx{par->grid_ternd.x_max - par->grid_ternd.x_min};
+  ham_float ly{par->grid_ternd.y_max - par->grid_ternd.y_min};
+  ham_float lz{par->grid_ternd.z_max - par->grid_ternd.z_min};
   for (decltype(par->grid_ternd.nx) i = 0; i != par->grid_ternd.nx; ++i) {
     gc_pos[0] = lx * i / (par->grid_ternd.nx - 1) + par->grid_ternd.x_min;
     for (decltype(par->grid_ternd.ny) j = 0; j != par->grid_ternd.ny; ++j) {
       gc_pos[1] = ly * j / (par->grid_ternd.ny - 1) + par->grid_ternd.y_min;
       for (decltype(par->grid_ternd.nz) k = 0; k != par->grid_ternd.nz; ++k) {
-        std::size_t idx{toolkit::index3d(par->grid_ternd.nx, par->grid_ternd.ny,
-                                         par->grid_ternd.nz, i, j, k)};
+        ham_uint idx{toolkit::index3d(par->grid_ternd.nx, par->grid_ternd.ny,
+                                      par->grid_ternd.nz, i, j, k)};
         gc_pos[2] = lz * k / (par->grid_ternd.nz - 1) + par->grid_ternd.z_min;
         grid->te[idx] = gc_pos[0] + gc_pos[1] + gc_pos[2];
       }
@@ -89,17 +89,17 @@ void fill_ternd_grid(const Param *par, Grid_ternd *grid) {
 
 // fill field scalar by sum of position coordinates
 void fill_tereg_grid(const Param *par, Grid_tereg *grid) {
-  hamvec<3, double> gc_pos;
-  double lx{par->grid_tereg.x_max - par->grid_tereg.x_min};
-  double ly{par->grid_tereg.y_max - par->grid_tereg.y_min};
-  double lz{par->grid_tereg.z_max - par->grid_tereg.z_min};
+  Hamvec<3, ham_float> gc_pos;
+  ham_float lx{par->grid_tereg.x_max - par->grid_tereg.x_min};
+  ham_float ly{par->grid_tereg.y_max - par->grid_tereg.y_min};
+  ham_float lz{par->grid_tereg.z_max - par->grid_tereg.z_min};
   for (decltype(par->grid_tereg.nx) i = 0; i != par->grid_tereg.nx; ++i) {
     gc_pos[0] = lx * i / (par->grid_tereg.nx - 1) + par->grid_tereg.x_min;
     for (decltype(par->grid_tereg.ny) j = 0; j != par->grid_tereg.ny; ++j) {
       gc_pos[1] = ly * j / (par->grid_tereg.ny - 1) + par->grid_tereg.y_min;
       for (decltype(par->grid_tereg.nz) k = 0; k != par->grid_tereg.nz; ++k) {
-        std::size_t idx{toolkit::index3d(par->grid_tereg.nx, par->grid_tereg.ny,
-                                         par->grid_tereg.nz, i, j, k)};
+        ham_uint idx{toolkit::index3d(par->grid_tereg.nx, par->grid_tereg.ny,
+                                      par->grid_tereg.nz, i, j, k)};
         gc_pos[2] = lz * k / (par->grid_tereg.nz - 1) + par->grid_tereg.z_min;
         grid->te[idx] = gc_pos[0] + gc_pos[1] + gc_pos[2];
       }
@@ -109,11 +109,11 @@ void fill_tereg_grid(const Param *par, Grid_tereg *grid) {
 
 // fill field scalar by sum of position coordinates
 void fill_cre_grid(const Param *par, Grid_cre *grid) {
-  hamvec<3, double> gc_pos;
-  double E;
-  double lx{par->grid_cre.x_max - par->grid_cre.x_min};
-  double ly{par->grid_cre.y_max - par->grid_cre.y_min};
-  double lz{par->grid_cre.z_max - par->grid_cre.z_min};
+  Hamvec<3, ham_float> gc_pos;
+  ham_float E;
+  ham_float lx{par->grid_cre.x_max - par->grid_cre.x_min};
+  ham_float ly{par->grid_cre.y_max - par->grid_cre.y_min};
+  ham_float lz{par->grid_cre.z_max - par->grid_cre.z_min};
   for (decltype(par->grid_cre.nx) i = 0; i != par->grid_cre.nx; ++i) {
     gc_pos[0] = lx * i / (par->grid_cre.nx - 1) + par->grid_cre.x_min;
     for (decltype(par->grid_cre.ny) j = 0; j != par->grid_cre.ny; ++j) {
@@ -122,9 +122,9 @@ void fill_cre_grid(const Param *par, Grid_cre *grid) {
         gc_pos[2] = lz * k / (par->grid_cre.nz - 1) + par->grid_cre.z_min;
         for (decltype(par->grid_cre.nE) m = 0; m != par->grid_cre.nE; ++m) {
           E = par->grid_cre.E_min * std::exp(m * par->grid_cre.E_fact);
-          std::size_t idx{toolkit::index4d(par->grid_cre.nx, par->grid_cre.ny,
-                                           par->grid_cre.nz, par->grid_cre.nE,
-                                           i, j, k, m)};
+          ham_uint idx{toolkit::index4d(par->grid_cre.nx, par->grid_cre.ny,
+                                        par->grid_cre.nz, par->grid_cre.nE, i,
+                                        j, k, m)};
           grid->cre_flux[idx] = gc_pos[0] + gc_pos[1] + gc_pos[2] + E;
         }
       }
@@ -157,7 +157,7 @@ TEST(grid, breg_grid) {
       rd; // Will be used to obtain a seed for the random number engine
   std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
   std::uniform_real_distribution<> dis(0.0, 1.0);
-  hamvec<3, double> baseline(dis(gen), dis(gen), dis(gen));
+  Hamvec<3, ham_float> baseline(dis(gen), dis(gen), dis(gen));
   auto test_b = test_breg->read_grid(baseline, test_par.get(), test_grid.get());
   EXPECT_NEAR(test_b[0], baseline[0], 1.0e-10);
   EXPECT_NEAR(test_b[1], baseline[1], 1.0e-10);
@@ -189,7 +189,7 @@ TEST(grid, brnd_grid) {
       rd; // Will be used to obtain a seed for the random number engine
   std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
   std::uniform_real_distribution<> dis(0.0, 1.0);
-  hamvec<3, double> baseline(dis(gen), dis(gen), dis(gen));
+  Hamvec<3, ham_float> baseline(dis(gen), dis(gen), dis(gen));
   auto test_b = test_brnd->read_grid(baseline, test_par.get(), test_grid.get());
   EXPECT_NEAR(test_b[0], baseline[0], 1.0e-10);
   EXPECT_NEAR(test_b[1], baseline[1], 1.0e-10);
@@ -221,7 +221,7 @@ TEST(grid, tereg_grid) {
       rd; // Will be used to obtain a seed for the random number engine
   std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
   std::uniform_real_distribution<> dis(0.0, 1.0);
-  hamvec<3, double> baseline(dis(gen), dis(gen), dis(gen));
+  Hamvec<3, ham_float> baseline(dis(gen), dis(gen), dis(gen));
   auto test_te =
       test_tereg->read_grid(baseline, test_par.get(), test_grid.get());
   EXPECT_NEAR(test_te, baseline[0] + baseline[1] + baseline[2], 1.0e-10);
@@ -253,7 +253,7 @@ TEST(grid, ternd_grid) {
   // standard mersenne_twister_engine seeded with rd()
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0.0, 1.0);
-  hamvec<3, double> baseline(dis(gen), dis(gen), dis(gen));
+  Hamvec<3, ham_float> baseline(dis(gen), dis(gen), dis(gen));
   auto test_te =
       test_ternd->read_grid(baseline, test_par.get(), test_grid.get());
   EXPECT_NEAR(test_te, baseline[0] + baseline[1] + baseline[2], 1.0e-10);
@@ -291,10 +291,10 @@ TEST(grid, cre_grid) {
   // standard mersenne_twister_engine seeded with rd()
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0.0, 1.0);
-  hamvec<3, double> baseline(dis(gen), dis(gen), dis(gen));
+  Hamvec<3, ham_float> baseline(dis(gen), dis(gen), dis(gen));
   std::uniform_int_distribution<> disi(0, test_par->grid_cre.nE - 1);
   auto idxE = disi(gen);
-  const double E =
+  const ham_float E =
       test_par->grid_cre.E_min * std::exp(idxE * test_par->grid_cre.E_fact);
   auto test_c =
       test_cre->read_grid_num(baseline, idxE, test_par.get(), test_grid.get());

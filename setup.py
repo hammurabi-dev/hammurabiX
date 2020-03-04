@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name="hampyx",
-      version="1.0.0",
+      version="2.4.0",
       description="hammurabi X python wrapper",
       license="GPLv3",
       url="https://bitbucket.org/hammurabicode/hamx",
@@ -12,7 +12,7 @@ setup(name="hampyx",
       include_package_data=True,
       platforms="any",
       python_requires='>=3.5',
-      install_requires=['numpy', 'healpy'],
+      install_requires=['numpy'],
       zip_safe=False,
       classifiers=["Development Status :: 5 - Production/Stable",
                    "Topic :: Utilities",

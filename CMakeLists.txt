@@ -1,13 +1,16 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.2.3)
 
 #-------------- customized zone --------------#
+
 SET(CMAKE_CXX_COMPILER "g++")
 OPTION(ENABLE_TESTING "Enable testing for this project" ON)
 OPTION(ENABLE_TIMING "Enable timing for this porect" ON)
 OPTION(ON_DOCKER "Build on docker image" ON)
 OPTION(BUILD_SHARED_LIBS "Build shared library" ON)
 OPTION(ENABLE_REPORT "Enable verbose report" ON)
+
 #-------------- instruction ------------------#
+
 # ENABLE_TESTING by default ON, for package build testing,
 # ENABLE_TIMING is for checking performance,
 # ON_DOCKER by defauly ON, 
@@ -29,42 +32,39 @@ OPTION(ENABLE_REPORT "Enable verbose report" ON)
 # the last resort would be manually calling homemade Makefile building system,
 # you can find cached building files in "cache",
 #
-# if the Makefile fails you,
-# please contact Jiaxin Wang (jiaxin.wang@sjtu.edu.cn),
-#
-# @ enthusiastic or paranoid developers:
 # we use Google Test for tests,
 # Google Test package is assembled INTO testing modules manually,
 # you can either install GoogleTest and cp src dir into install path,
 # or just download GoogleTest and specify root dir to GTEST_HINTS
+
 #--------------------------------------------#
+
 # we SET GSL_HINTS just in case FindGSL fails
 IF(ON_DOCKER)
 	SET(GSL_HINTS /usr) 
-	SET(FFTW_HINTS /usr/local)
-	SET(CFITSIO_HINTS /usr/local)
-	SET(HEALPIX_HINTS /home/lab/healpix)
-	SET(GTEST_HINTS /usr/local)
-	SET(INSTALL_ROOT_DIR /usr/local/hammurabi)
+	SET(FFTW_HINTS /tmp/local)
+	SET(GTEST_HINTS /tmp/local)
+	SET(INSTALL_ROOT_DIR /tmp/local/hammurabi)
 ELSE()
-	MESSAGE("apply customized fftw3/cfitsio/healpix paths")
+	MESSAGE("apply GSL FFTW3 GoogleTest paths")
 	SET(GSL_HINTS $HOME/local/gsl)
 	SET(FFTW_HINTS $HOME/local/fftw)
-	SET(CFITSIO_HINTS $HOME/local/cfitsio)
-	SET(HEALPIX_HINTS $HOME/local/Healpix_3.60)
 	SET(GTEST_HINTS $HOME/local/googletest)
 	SET(INSTALL_ROOT_DIR $HOME/local/hammurabi)
-	SET(CMAKE_EXE_LINKER_FLAGS -lcurl)
+	SET(CMAKE_EXE_LINKER_FLAGS)
 ENDIF()
+
 #---------------------------------------------#
 
 PROJECT(hammurabiX CXX)
 
-# SETup cxx standard
+# setup cxx standard
+
 SET(CMAKE_CXX_STANDARD 14)
 SET(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 # compile flags under defferent options
+
 IF(ENABLE_TESTING AND ENABLE_TIMING)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated")
 ELSEIF(ENABLE_TIMING)
@@ -82,7 +82,8 @@ ENDIF()
 # openmp and thread support
 # if FindOpenMP fails, try add -fopenmp to CMAKE_CXX_FLAGS above
 # the same solution applies to -pthread
-include(FindOpenMP)
+
+INCLUDE(FindOpenMP)
 IF(OPENMP_FOUND)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 ELSE()
@@ -94,6 +95,7 @@ IF(ENABLE_TESTING)
 ENDIF()
 
 # we assemble include and external libs together
+
 SET(ALL_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 SET(ALL_LIBRARIES)
 
@@ -130,56 +132,12 @@ SET(SRC_FILES
 	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_cre.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/tools/tinyxml2.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/tools/toolkit.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/pipeline/pipeline.cc
 )
 
-# find HEALPix
-FIND_PATH(HEALPIX_INCLUDE_DIR
-	NAMES healpix_base.h
-	HINTS 
-	${HEALPIX_HINTS}/include/healpix_cxx
-)
-FIND_LIBRARY(HEALPIX_CXX_LIBRARY
-	NAMES healpix_cxx
-	HINTS 
-	${HEALPIX_HINTS}/lib
-)
-IF(HEALPIX_INCLUDE_DIR)
-	LIST(APPEND ALL_INCLUDE_DIR ${HEALPIX_INCLUDE_DIR})
-ELSE()
-	MESSAGE(FATAL_ERROR "${HEALPIX_INCLUDE_DIR}")
-ENDIF()
-IF(HEALPIX_CXX_LIBRARY)
-	LIST(APPEND ALL_LIBRARIES ${HEALPIX_CXX_LIBRARY})
-ELSE()
-	MESSAGE(FATAL_ERROR "${HEALPIX_CXX_LIBRARY}")
-ENDIF()
-
-# find CFITSIO
-FIND_PATH(CFITSIO_INCLUDE_DIR
-	NAMES fitsio.h
-	HINTS
-	${CFITSIO_HINTS}/include
-)
-FIND_LIBRARY(CFITSIO_LIBRARY
-	NAMES cfitsio
-	HINTS
-	${CFITSIO_HINTS}/lib
-)
-IF(CFITSIO_INCLUDE_DIR)
-	LIST(APPEND ALL_INCLUDE_DIR ${CFITSIO_INCLUDE_DIR})
-ELSE()
-	MESSAGE(FATAL_ERROR "${CFITSIO_INCLUDE_DIR}")
-ENDIF()
-IF(CFITSIO_LIBRARY)
-	LIST(APPEND ALL_LIBRARIES ${CFITSIO_LIBRARY})
-ELSE()
-	MESSAGE(FATAL_ERROR "${CFITSIO_LIBRARY}")
-ENDIF()
-
 # find FFTW, FFTW_OMP
+
 FIND_PATH(FFTW_INCLUDE_DIR
 	NAMES fftw3.h
 	HINTS
@@ -188,7 +146,7 @@ FIND_PATH(FFTW_INCLUDE_DIR
 FIND_LIBRARY(FFTW_LIBRARY
 	NAMES fftw3
 	HINTS
-	${FFTW_HINTS}/lib	
+	${FFTW_HINTS}/lib
 )
 FIND_LIBRARY(FFTW_OMP_LIBRARY
 	NAMES fftw3_omp
@@ -213,9 +171,11 @@ ENDIF()
 
 # find GSL, GSL-cblas
 # IF FindGSL fails, try FIND_PATH & FIND_LIBRARY functions manually
+
 FIND_PACKAGE(GSL REQUIRED)
 
 # find GSL, GSL-cblas manually
+
 IF(NOT GSL_FOUND)
 FIND_PATH(GSL_INCLUDE_DIR
 	NAMES gsl_math.h
@@ -256,6 +216,7 @@ ENDIF()
 # GoogleTest package must be assembled INTO testing modules manually
 # you can either install GoogleTest and cp src dir into install path
 # or just download GoogleTest
+
 IF(ENABLE_TESTING)
 	FIND_PATH(GTEST_INC_DIR 
 		NAMES gtest/gtest.h
@@ -278,21 +239,26 @@ IF(ENABLE_TESTING)
 	SET(GTEST_INCLUDE_DIRS ${GTEST_INC_DIR} ${GTEST_SOURCE_DIR} ${GTEST_SOURCE_DIR}/..)
 ENDIF()
 
-# assemble lib
+# assemble library
+
 INCLUDE_DIRECTORIES(${ALL_INCLUDE_DIR})
 ADD_LIBRARY(hammurabi ${SRC_FILES})
 TARGET_LINK_LIBRARIES(hammurabi ${ALL_LIBRARIES} GSL::gsl GSL::gslcblas)
 
 # build testing cases
+
 IF(ENABLE_TESTING)
 	ENABLE_TESTING()
 	ADD_SUBDIRECTORY(tests)
 ENDIF()
 
 # build executable
+
 ADD_EXECUTABLE(hamx source/main/main_std.cc)
 TARGET_LINK_LIBRARIES(hamx hammurabi)
+
 # copy template parameter file into build directory
+
 FILE(COPY
 	${CMAKE_CURRENT_LIST_DIR}/templates/params_template.xml
 DESTINATION
@@ -300,19 +266,24 @@ DESTINATION
 )
 
 # install package
+
 SET(CMAKE_INSTALL_PREFIX ${INSTALL_ROOT_DIR})
 INSTALL(TARGETS hamx DESTINATION bin)
 INSTALL(FILES
-	${CMAKE_CURRENT_LIST_DIR}/include/cgsunits.h
+	${CMAKE_CURRENT_LIST_DIR}/include/tinyxml2.h
+	${CMAKE_CURRENT_LIST_DIR}/include/hamtype.h
+	${CMAKE_CURRENT_LIST_DIR}/include/hamunits.h
+	${CMAKE_CURRENT_LIST_DIR}/include/hamvec.h
+	${CMAKE_CURRENT_LIST_DIR}/include/hamp.h
+	${CMAKE_CURRENT_LIST_DIR}/include/hamdis.h
+	${CMAKE_CURRENT_LIST_DIR}/include/hamio.h
+	${CMAKE_CURRENT_LIST_DIR}/include/hamsk.h
+	${CMAKE_CURRENT_LIST_DIR}/include/toolkit.h
+	${CMAKE_CURRENT_LIST_DIR}/include/timer.h
 	${CMAKE_CURRENT_LIST_DIR}/include/bfield.h
 	${CMAKE_CURRENT_LIST_DIR}/include/crefield.h
 	${CMAKE_CURRENT_LIST_DIR}/include/tefield.h
 	${CMAKE_CURRENT_LIST_DIR}/include/integrator.h
-	${CMAKE_CURRENT_LIST_DIR}/include/tinyxml2.h
-	${CMAKE_CURRENT_LIST_DIR}/include/timer.h
-	${CMAKE_CURRENT_LIST_DIR}/include/hamvec.h
-	${CMAKE_CURRENT_LIST_DIR}/include/hampixp.h
-	${CMAKE_CURRENT_LIST_DIR}/include/toolkit.h
 	${CMAKE_CURRENT_LIST_DIR}/include/param.h
 	${CMAKE_CURRENT_LIST_DIR}/include/grid.h	
 	DESTINATION include
