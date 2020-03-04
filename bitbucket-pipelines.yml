@@ -3,7 +3,7 @@
 # 2. C++ unit-tests
 # 3. jupyter notebook checks
 
-image: python:3.5.1
+image: atlassian/default-image:2
 
 pipelines:
     default:
