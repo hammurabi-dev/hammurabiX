@@ -11,6 +11,4 @@ It also validates and explains the methods for multi-shell masking.
 
 - Tutorial e03, presents a fast precision check for the random magnetic field generator.
 
-- some mathematical materials can be found in [hammurabi X: Simulating Galactic Synchrotron Emission with Random Magnetic Fields](https://arxiv.org/abs/1907.00207)
-
-- note that in the tutorials we import the python wrapper Hampyx without installation, please check the [**wiki page**](https://bitbucket.org/hammurabicode/hamx/wiki/Home) for instructions.
+- some mathematical materials can be found in [hammurabi X: Simulating Galactic Synchrotron Emission with Random Magnetic Fields](https://iopscience.iop.org/article/10.3847/1538-4365/ab72a2).
