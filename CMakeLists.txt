@@ -131,7 +131,7 @@ SET(SRC_FILES
 	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_brnd.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_cre.cc
 
-	${CMAKE_CURRENT_LIST_DIR}/source/tools/tinyxml2.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/xml/tinyxml2.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/pipeline/pipeline.cc
 )
