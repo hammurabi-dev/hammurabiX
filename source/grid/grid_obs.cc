@@ -59,6 +59,7 @@ void Grid_obs::export_grid(const Param *par) {
     expio.dump(*dm_map);
   }
   if (par->grid_obs.do_sync.back()) {
+    // in units cmb K, conventional units
     std::string name_i = par->grid_obs.sim_sync_name.back();
     std::string name_q = par->grid_obs.sim_sync_name.back();
     std::string name_u = par->grid_obs.sim_sync_name.back();
