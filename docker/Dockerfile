@@ -25,7 +25,8 @@ RUN git clone https://github.com/google/googletest.git googletest
 WORKDIR /home/lab/googletest
 RUN mkdir /home/lab/googletest/build
 WORKDIR /home/lab/googletest/build
-RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/tmp/local .. && make && make install && cp ../googletest/src/* /tmp/local/src
+RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/tmp/local .. && make && make install
+RUN mkdir /tmp/local/src && cp ../googletest/src/* /tmp/local/src
 WORKDIR /home/lab
 
 # HAMMURABI X
