@@ -21,7 +21,7 @@ Based on earlier versions of hammurabi, we mainly focus on improving its numeric
 
 Please check our [**WIKI**](https://github.com/hammurabi-dev/hammurabiX/wiki) for more detailed technical information.
 
-[**hammurabi version 3**](https://sourceforge.net/projects/hammurabicode/) is still accessible.
+The original [**hammurabi v3**](https://sourceforge.net/projects/hammurabicode/) is still accessible.
 
 ### hammurabi team publications:
 
@@ -32,7 +32,7 @@ Please check our [**WIKI**](https://github.com/hammurabi-dev/hammurabiX/wiki) fo
 - [Simulating polarized Galactic synchrotron emission at all frequencies. The Hammurabi code](https://www.aanda.org/articles/aa/abs/2009/08/aa10564-08/aa10564-08.html)
 
 ### contact
-*bug reports and code contributions are warmly welcomed, feel free to contact*
+Bug reports and code contributions are warmly welcomed, feel free to contact
 
 - [Jiaxin Wang](https://gioacchinowang.github.io/)
 - [Tess Jaffe](https://science.gsfc.nasa.gov/sed/bio/tess.jaffe)
