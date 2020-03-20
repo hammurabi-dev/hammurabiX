@@ -141,16 +141,17 @@ class Hampyx(object):
         by default hammurabiX executable "hamx" should be available in PATH
         """
         if exe_path is None:  # search sys environ
+            self._exe_path = None
             env = os.environ.get('PATH').split(os.pathsep)
             for dir in env:  # get the first match that exists
                 if os.path.isfile(os.path.join(dir, 'hamx')):
                     self._exe_path = os.path.join(dir, 'hamx')
                     break
-            if self._exe_path is None:
-                raise ValueError('unable to find the hammurabi X executable from the local PATH')
+            assert (self._exe_path is not None)
         else:  # if given
             assert isinstance(exe_path, str)
             self._exe_path = os.path.abspath(exe_path)
+        assert (os.path.isfile(self._exe_path))
         self._executable = self._exe_path
 
     @xml_path.setter
@@ -160,15 +161,17 @@ class Hampyx(object):
         to be specific, the return of os.getcwd()
         """
         if xml_path is None:
+            self._xml_path = None
             cnddt = [s for s in os.listdir(self._wk_dir) if 'xml' in s]
             for match in cnddt:  # get the first match that exists
                 if os.path.isfile(os.path.join(self._wk_dir, match)):
                     self._xml_path = os.path.join(self._wk_dir, match)
                     break
+            assert (self._xml_path is not None)
         else:
             assert isinstance(xml_path, str)
             self._xml_path = os.path.abspath(xml_path)
-            assert os.path.isfile(self._xml_path)
+        assert os.path.isfile(self._xml_path)
         self._base_file = self._xml_path
 
     @property

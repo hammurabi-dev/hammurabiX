@@ -25,7 +25,8 @@ RUN git clone https://github.com/google/googletest.git googletest
 WORKDIR /home/lab/googletest
 RUN mkdir /home/lab/googletest/build
 WORKDIR /home/lab/googletest/build
-RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/tmp/local .. && make && make install && cp ../googletest/src/* /tmp/local/src
+RUN cmake -DCMAKE_INSTALL_PREFIX:PATH=/tmp/local .. && make && make install
+RUN mkdir /tmp/local/src && cp ../googletest/src/* /tmp/local/src
 WORKDIR /home/lab
 
 # HAMMURABI X
@@ -34,14 +35,13 @@ WORKDIR /home/lab/hamx
 RUN mkdir /home/lab/hamx/build
 WORKDIR /home/lab/hamx/build
 RUN cmake .. && make install
-# SET PATH
-ENV PATH /tmp/local/hammurabi/bin:${PATH}
-ENV LD_LIBRARY_PATH /tmp/local/hammurabi/lib:${LD_LIBRARY_PATH}
 WORKDIR /home/lab/hamx
 RUN python3 setup.py install
 WORKDIR /home/lab
 
 # CLEAN PACKAGES
 RUN rm -f *.tar.gz
+
 # SET PATH
-ENV LD_LIBRARY_PATH /tmp/local/lib:${LD_LIBRARY_PATH}
+ENV PATH /tmp/local/hammurabi/bin:${PATH}
+ENV LD_LIBRARY_PATH /tmp/local/hammurabi/lib:/tmp/local/lib:${LD_LIBRARY_PATH}
