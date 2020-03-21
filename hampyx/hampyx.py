@@ -8,7 +8,7 @@ import numpy as np
 from functools import wraps
 def icy(cls):
     """
-    A class decorator for freezing attributes
+    A class decorator for freezing attributes.
     """
     cls.__frozen = False
     def frozensetattr(self, key, value):
@@ -31,55 +31,30 @@ def icy(cls):
 @icy
 class Hampyx(object):
     """
-    methods:
+	Simple Python wrapper of hammurabi X.
+	
+    Methods
+	-------
+	
+	mod_par(keychain=['key1','key2',...], attrib={'tag':'content'})
+		Modify parameter attribute from the registered XML tree.
     
-    # Import class
+	add_par(keychain=['key1','key2',...], subkey='keyfinal', attrib={'tag':'content'})
+    	Add new parameter/attribute to given key-chain path of the XML tree.
     
-    In []: import hampyx as hpx
+	del_par(keychain=['key1','key2',...],all=False)
+		Delete parameter following the given key-chain path of the XML tree.
+		If all=True, then all matching parameters will be deleted.
     
-    # Initialize object
-    
-    In []: object = hpx.Hampyx (xml_path=<xml file path>, exe_path=<executable path>)
-    
-    # hammurabiX executable path,
-    # by default,
-    # is searched from the environment varialbe PATH,
-    # while xml file path,
-    # by default,
-    # is searched in the current working directory './'.
-    
-    # Modify parameter value from base xml file to temp XML file
-    
-    In []: object.mod_par (keychain=['key1','key2',...], attrib={'tag':'content'})
-    
-    # Add new parameter
-    
-    In []: object.add_par (keychain=['key1','key2',...], subkey='keyfinal', attrib={'tag':'content'})
-    
-    # Delete parameter
-    
-    In []: object.del_par (keychain=['key1','key2',...])
-    
-    # If additional argument opt='all', then all matching parameters will be deleted.
-    # The strings 'key1', 'key2',
-    # etc represent the path to the desired parameter, going through the XML.
-    # The "tag" is the label for the parameter: eg. "Value" or "cue" or "type".
-    # The "content" is the content under the tag: eg. the string for the tag "filename".
-    
-    # Look through the parameter tree in python
-    
-    In []: object.print_par(keychain=['key1','key2',...])
-    
-    # This will return the current value of the parameter in the XML,
-    # associated with the path "key1/key2/.../keyfinal/".
-    
-    # Run the executable
-    
-    In []: object(raiseonerr=True/False)
-    
-    # If additional verbose=True (by default is False),
-    # run.log and err.log will be dumped to disk,
-    # notice that dumping logs is not thread safe, use quiet mode in threading.
+	print_par(keychain=['key1','key2',...])
+		Print parameters following the given key-chain path of the XML tree.
+    	This will return the current value of the parameter in the XML,
+		associated with the path "key1/key2/.../keyfinal/".
+
+	__call__(raiseonerr=True)
+		Run hammurabi X and catch the returns.
+		Error will be raised if raiseonerr=True,
+		otherwise, run.log and err.log are taken silently. 
     
     # After this main routine,
     # object.sim_map will be filled with simulation outputs from hammurabiX.
@@ -357,10 +332,6 @@ class Hampyx(object):
         else:
             os.remove(self._temp_file)
             self._temp_file = self._base_file
-
-    """
-    THE FOLLOWING FUNCTIONS ARE RELATED TO XML FILE MANIPULATION
-    """
 
     def mod_par(self, keychain=None, attrib=None):
         """
