@@ -21,11 +21,25 @@ public:
   Integrator &operator=(const Integrator &) = delete;
   Integrator &operator=(Integrator &&) = delete;
   virtual ~Integrator() = default;
+  // physical field ptrs
+  struct struct_fields {
+    Breg *breg;
+    Brnd *brnd;
+    TEreg *tereg;
+    TErnd *ternd;
+    CREfield *cre;
+  } fields;
+  // physical grid ptrs
+  struct struct_grids {
+    Grid_breg *gbreg;
+    Grid_brnd *gbrnd;
+    Grid_tereg *gtereg;
+    Grid_ternd *gternd;
+    Grid_cre *gcre;
+    Grid_obs *gobs;
+  } grids;
   // assmebling pixels/shells into sky map
-  void write_grid(const Breg *, const Brnd *, const TEreg *, const TErnd *,
-                  const CREfield *, const Grid_breg *, const Grid_brnd *,
-                  const Grid_tereg *, const Grid_ternd *, const Grid_cre *,
-                  Grid_obs *, const Param *) const;
+  void write_grid(const Param *) const;
 #ifdef NDEBUG
 protected:
 #endif
@@ -99,11 +113,7 @@ private:
   };
   // conduct LOS integration in one pixel at given shell
   void radial_integration(const struct_shell *, const Hamp &,
-                          struct_observables *, const Breg *, const Brnd *,
-                          const TEreg *, const TErnd *, const CREfield *,
-                          const Grid_breg *, const Grid_brnd *,
-                          const Grid_tereg *, const Grid_ternd *,
-                          const Grid_cre *, const Param *) const;
+                          struct_observables *, const Param *) const;
   // general upper boundary check
   // return false if 1st argument is larger than 2nd
   inline bool check_simulation_upper_limit(const ham_float &value,

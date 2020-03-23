@@ -20,12 +20,7 @@
 #include <tefield.h>
 #include <timer.h>
 
-void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
-                            const TEreg *tereg, const TErnd *ternd,
-                            const CREfield *cre, const Grid_breg *gbreg,
-                            const Grid_brnd *gbrnd, const Grid_tereg *gtereg,
-                            const Grid_ternd *gternd, const Grid_cre *gcre,
-                            Grid_obs *gobs, const Param *par) const {
+void Integrator::write_grid(const Param *par) const {
   auto shell_ref = std::make_unique<struct_shell>();
   // loop through shells
   for (decltype(par->grid_obs.total_shell) current_shell = 0;
@@ -35,19 +30,19 @@ void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
     const ham_uint current_npix{12 * current_nside * current_nside};
     // get current mask
     if (par->grid_obs.do_mask) {
-      gobs->mask_map->duplicate(current_nside);
+      grids.gobs->mask_map->duplicate(current_nside);
     }
     // prepare temporary maps for current shell
     if (par->grid_obs.do_dm) {
-      gobs->tmp_dm_map->reset(current_nside);
+      grids.gobs->tmp_dm_map->reset(current_nside);
     }
     if (par->grid_obs.do_sync.back()) {
-      gobs->tmp_is_map->reset(current_nside);
-      gobs->tmp_qs_map->reset(current_nside);
-      gobs->tmp_us_map->reset(current_nside);
+      grids.gobs->tmp_is_map->reset(current_nside);
+      grids.gobs->tmp_qs_map->reset(current_nside);
+      grids.gobs->tmp_us_map->reset(current_nside);
     }
     if (par->grid_obs.do_fd or par->grid_obs.do_sync.back()) {
-      gobs->tmp_fd_map->reset(current_nside);
+      grids.gobs->tmp_fd_map->reset(current_nside);
     }
     // setting for radial_integration
     // call auxiliary function assemble_shell_ref
@@ -67,51 +62,49 @@ void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
       observables->dm = 0.;
       // check pixel masking
       if ((not par->grid_obs.do_mask) or
-          gobs->mask_map->data(current_nside, ipix) == 1.0) {
+          grids.gobs->mask_map->data(current_nside, ipix) == 1.0) {
         // remember to complete logic for ptg assignment!
         // and for caching Faraday depth and/or optical depth
         // make serious tests after changing this part!
         Hamp ptg;
         if (par->grid_obs.do_dm) {
-          ptg = gobs->tmp_dm_map->pointing(ipix);
+          ptg = grids.gobs->tmp_dm_map->pointing(ipix);
         }
         if (par->grid_obs.do_fd) {
-          ptg = gobs->tmp_fd_map->pointing(ipix);
+          ptg = grids.gobs->tmp_fd_map->pointing(ipix);
           // cache Faraday rotation from inner shells
-          observables->fd = gobs->fd_map->interpolate(ptg);
+          observables->fd = grids.gobs->fd_map->interpolate(ptg);
         } else if (par->grid_obs.do_sync.back()) {
-          ptg = gobs->tmp_is_map->pointing(ipix);
+          ptg = grids.gobs->tmp_is_map->pointing(ipix);
           // cache Faraday rotation from inner shells
-          observables->fd = gobs->fd_map->interpolate(ptg);
+          observables->fd = grids.gobs->fd_map->interpolate(ptg);
         }
         // core function!
 #ifndef NTIMING
         tmr->start("kernel");
 #endif
-        radial_integration(shell_ref.get(), ptg, observables.get(), breg, brnd,
-                           tereg, ternd, cre, gbreg, gbrnd, gtereg, gternd,
-                           gcre, par);
+        radial_integration(shell_ref.get(), ptg, observables.get(), par);
 #ifndef NTIMING
         tmr->start("kernel");
 #endif
       }
       // collect from pixels
       if (par->grid_obs.do_dm) {
-        gobs->tmp_dm_map->data(ipix, observables->dm);
+        grids.gobs->tmp_dm_map->data(ipix, observables->dm);
       }
       if (par->grid_obs.do_sync.back()) {
-        gobs->tmp_is_map->data(
+        grids.gobs->tmp_is_map->data(
             ipix,
             temp_convert(observables->is, par->grid_obs.sim_sync_freq.back()));
-        gobs->tmp_qs_map->data(
+        grids.gobs->tmp_qs_map->data(
             ipix,
             temp_convert(observables->qs, par->grid_obs.sim_sync_freq.back()));
-        gobs->tmp_us_map->data(
+        grids.gobs->tmp_us_map->data(
             ipix,
             temp_convert(observables->us, par->grid_obs.sim_sync_freq.back()));
       }
       if (par->grid_obs.do_fd or par->grid_obs.do_sync.back()) {
-        gobs->tmp_fd_map->data(ipix, observables->fd);
+        grids.gobs->tmp_fd_map->data(ipix, observables->fd);
       }
     }
 #ifndef NTIMING
@@ -120,25 +113,23 @@ void Integrator::write_grid(const Breg *breg, const Brnd *brnd,
 #endif
     // accumulating new shell map to sim map
     if (par->grid_obs.do_dm) {
-      gobs->dm_map->accumulate(*(gobs->tmp_dm_map));
+      grids.gobs->dm_map->accumulate(*(grids.gobs->tmp_dm_map));
     }
     if (par->grid_obs.do_sync.back()) {
-      gobs->is_map->accumulate(*(gobs->tmp_is_map));
-      gobs->qs_map->accumulate(*(gobs->tmp_qs_map));
-      gobs->us_map->accumulate(*(gobs->tmp_us_map));
+      grids.gobs->is_map->accumulate(*(grids.gobs->tmp_is_map));
+      grids.gobs->qs_map->accumulate(*(grids.gobs->tmp_qs_map));
+      grids.gobs->us_map->accumulate(*(grids.gobs->tmp_us_map));
     }
     if (par->grid_obs.do_fd) {
-      gobs->fd_map->accumulate(*(gobs->tmp_fd_map));
+      grids.gobs->fd_map->accumulate(*(grids.gobs->tmp_fd_map));
     } // end shell accumulation
   }   // end shell iteration
 }
 
-void Integrator::radial_integration(
-    const struct_shell *shell_ref, const Hamp &ptg_in,
-    struct_observables *pixobs, const Breg *breg, const Brnd *brnd,
-    const TEreg *tereg, const TErnd *ternd, const CREfield *cre,
-    const Grid_breg *gbreg, const Grid_brnd *gbrnd, const Grid_tereg *gtereg,
-    const Grid_ternd *gternd, const Grid_cre *gcre, const Param *par) const {
+void Integrator::radial_integration(const struct_shell *shell_ref,
+                                    const Hamp &ptg_in,
+                                    struct_observables *pixobs,
+                                    const Param *par) const {
   // pass in fd, zero others
   ham_float inner_shells_fd{0.};
   if (par->grid_obs.do_fd or par->grid_obs.do_sync.back()) {
@@ -177,27 +168,29 @@ void Integrator::radial_integration(
     Hamvec<3, ham_float> oc_pos{los_direction * shell_ref->dist[looper]};
     Hamvec<3, ham_float> pos{oc_pos + par->observer};
     // check LoS depth limit
-    if (check_simulation_lower_limit(pos.length(), par->grid_obs.gc_r_min))
-      continue;
-    if (check_simulation_upper_limit(pos.length(), par->grid_obs.gc_r_max))
-      continue;
-    if (check_simulation_lower_limit(pos[2], par->grid_obs.gc_z_min))
-      continue;
-    if (check_simulation_upper_limit(pos[2], par->grid_obs.gc_z_max))
+    const bool gc_r_min_flag{
+        check_simulation_lower_limit(pos.length(), par->grid_obs.gc_r_min)};
+    const bool gc_r_max_flag{
+        check_simulation_upper_limit(pos.length(), par->grid_obs.gc_r_max)};
+    const bool gc_z_min_flag{
+        check_simulation_lower_limit(pos[2], par->grid_obs.gc_z_min)};
+    const bool gc_z_max_flag{
+        check_simulation_upper_limit(pos[2], par->grid_obs.gc_z_max)};
+    if (gc_r_min_flag or gc_r_max_flag or gc_z_min_flag or gc_z_max_flag)
       continue;
     // regular magnetic field
-    Hamvec<3, ham_float> B_vec{breg->read_field(pos, par, gbreg)};
+    Hamvec<3, ham_float> B_vec{fields.breg->read_field(pos, par, grids.gbreg)};
     // add random magnetic field
-    B_vec += brnd->read_field(pos, par, gbrnd);
+    B_vec += fields.brnd->read_field(pos, par, grids.gbrnd);
     const ham_float B_par{los_parproj(B_vec, los_direction)};
     assert(std::isfinite(B_par));
     // be aware of un-resolved random B_per in calculating emissivity
     const ham_float B_per{los_perproj(B_vec, los_direction)};
     assert(std::isfinite(B_per));
     // thermal electron field
-    ham_float te{tereg->read_field(pos, par, gtereg)};
+    ham_float te{fields.tereg->read_field(pos, par, grids.gtereg)};
     // add random thermal electron field
-    te += ternd->read_field(pos, par, gternd);
+    te += fields.ternd->read_field(pos, par, grids.gternd);
     // to avoid negative value
     te *= ham_float(te > 0.);
     assert(std::isfinite(te));
@@ -211,11 +204,13 @@ void Integrator::radial_integration(
     }
     // Synchrotron emission
     if (par->grid_obs.do_sync.back()) {
-      const ham_float Jtot{sync_emissivity_t(pos, par, cre, gcre, B_per) *
-                           shell_ref->delta_d * i2bt_sync};
+      const ham_float Jtot{
+          sync_emissivity_t(pos, par, fields.cre, grids.gcre, B_per) *
+          shell_ref->delta_d * i2bt_sync};
       // J_pol receives no contribution from unresolved random field
-      const ham_float Jpol{sync_emissivity_p(pos, par, cre, gcre, B_per) *
-                           shell_ref->delta_d * i2bt_sync};
+      const ham_float Jpol{
+          sync_emissivity_p(pos, par, fields.cre, grids.gcre, B_per) *
+          shell_ref->delta_d * i2bt_sync};
       assert(Jtot < 1e30 and Jpol < 1e30 and Jtot >= 0 and Jpol >= 0);
       pixobs->is += Jtot;
       // intrinsic polarization angle, following IAU definition

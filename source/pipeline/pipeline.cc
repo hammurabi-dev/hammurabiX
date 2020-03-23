@@ -165,10 +165,18 @@ void Pipeline::assemble_obs() {
         // need to rebuild integration grid
         grid_obs->build_grid(par.get());
       }
-      intobj->write_grid(breg.get(), brnd.get(), tereg.get(), ternd.get(),
-                         cre.get(), grid_breg.get(), grid_brnd.get(),
-                         grid_tereg.get(), grid_ternd.get(), grid_cre.get(),
-                         grid_obs.get(), par.get());
+      intobj->fields.breg = breg.get();
+      intobj->fields.brnd = brnd.get();
+      intobj->fields.tereg = tereg.get();
+      intobj->fields.ternd = ternd.get();
+      intobj->fields.cre = cre.get();
+      intobj->grids.gbreg = grid_breg.get();
+      intobj->grids.gbrnd = grid_brnd.get();
+      intobj->grids.gtereg = grid_tereg.get();
+      intobj->grids.gternd = grid_ternd.get();
+      intobj->grids.gcre = grid_cre.get();
+      intobj->grids.gobs = grid_obs.get();
+      intobj->write_grid(par.get());
       grid_obs->export_grid(par.get());
       // delete obsolete parameters
       if (par->grid_obs.do_sync.back()) {
