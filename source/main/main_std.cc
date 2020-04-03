@@ -30,10 +30,8 @@ int main(int argc, char **argv) {
 #endif
   auto run = std::make_unique<Pipeline>(input);
   run->assemble_grid();
-  run->assemble_tereg();
-  run->assemble_breg();
-  run->assemble_ternd();
-  run->assemble_brnd();
+  run->assemble_b();
+  run->assemble_te();
   run->assemble_cre();
   run->assemble_obs();
 #ifndef NTIMING

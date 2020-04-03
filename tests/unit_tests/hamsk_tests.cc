@@ -1,12 +1,11 @@
 // unit tests for Hamsk class
 
 #include <gtest/gtest.h>
-#include <string>
-
 #include <hamdis.h>
 #include <hamio.h>
 #include <hamsk.h>
 #include <hamtype.h>
+#include <string>
 
 TEST(Hampisk, basic) {
   // init

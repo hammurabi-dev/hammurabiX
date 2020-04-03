@@ -1,10 +1,6 @@
-// grid base class
-
-#include <cassert>
-#include <stdexcept>
-
 #include <grid.h>
 #include <param.h>
+#include <stdexcept>
 
 void Grid::build_grid(const Param *) {
   throw std::runtime_error("wrong inheritance");

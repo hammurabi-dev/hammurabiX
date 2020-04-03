@@ -1,8 +1,6 @@
 // unit tests for namespace toolkit
-// feel free to add more rational testing blocks
 
 #include <gtest/gtest.h>
-
 #include <hamtype.h>
 #include <memory>
 #include <random>
@@ -88,27 +86,17 @@ TEST(toolkit, xml_parser) {
 
   EXPECT_EQ(toolkit::fetchfloat(el, "value"), ham_float(3.14));
 
-  EXPECT_EQ(toolkit::fetchfloat(el, "dft_value"), ham_float(0));
-
-  el = toolkit::tracexml(doc.get(), {"empty_float"});
-
-  EXPECT_EQ(toolkit::fetchfloat(el, "value"), ham_float(0));
-
   el = toolkit::tracexml(doc.get(), {"integer"});
 
   EXPECT_EQ(toolkit::fetchuint(el, "value"), ham_uint(23));
 
-  EXPECT_EQ(toolkit::fetchuint(el, "dft_value"), ham_uint(0));
+  el = toolkit::tracexml(doc.get(), {});
+
+  EXPECT_EQ(toolkit::fetchstring(el, "string", "value"), std::string("string"));
 
   el = toolkit::tracexml(doc.get(), {});
 
-  EXPECT_EQ(toolkit::fetchstring(el, "value", "string"), std::string("string"));
+  EXPECT_EQ(toolkit::fetchbool(el, "false", "value"), false);
 
-  el = toolkit::tracexml(doc.get(), {});
-
-  EXPECT_EQ(toolkit::fetchbool(el, "value", "false"), false);
-
-  EXPECT_EQ(toolkit::fetchbool(el, "value", "true"), true);
-
-  EXPECT_EQ(toolkit::fetchbool(el, "dft_value", "true"), false);
+  EXPECT_EQ(toolkit::fetchbool(el, "true", "value"), true);
 }

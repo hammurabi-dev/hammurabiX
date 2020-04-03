@@ -1,11 +1,10 @@
 // unit tests for Hamio class
 
 #include <gtest/gtest.h>
-#include <string>
-
 #include <hamdis.h>
 #include <hamio.h>
 #include <hamtype.h>
+#include <string>
 
 TEST(Hamio, basic) {
   ham_uint base_nside = 4;

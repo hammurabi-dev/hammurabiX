@@ -2,10 +2,9 @@
 // timer record time elapse from Timer::start to Timer::stop
 // timer support nested/overlaped recording
 
-#include <gtest/gtest.h>
-
 #include <chrono>
 #include <cmath>
+#include <gtest/gtest.h>
 #include <thread>
 #include <timer.h>
 

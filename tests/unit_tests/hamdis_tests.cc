@@ -2,12 +2,11 @@
 
 #include <fstream>
 #include <gtest/gtest.h>
-#include <vector>
-
 #include <hamdis.h>
 #include <hamp.h>
 #include <hamtype.h>
 #include <hamunits.h>
+#include <vector>
 
 TEST(Hamdis, basic) {
   // init

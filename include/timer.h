@@ -53,7 +53,7 @@ public:
   // if no name provided, print all records
   inline void print(std::string flag = std::string()) {
     if (flag.empty()) {
-      for (auto i : record)
+      for (auto &i : record)
         std::cout << i.first << " " << i.second.second << " ms" << std::endl;
     } else {
       auto target = record.find(flag);

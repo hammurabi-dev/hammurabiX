@@ -9,6 +9,7 @@
 #include <iostream>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <vector>
@@ -139,8 +140,11 @@ inline ham_uint random_seed(const ham_int &s) {
 inline std::unique_ptr<tinyxml2::XMLDocument>
 loadxml(const std::string &filename) {
   auto doc = std::make_unique<tinyxml2::XMLDocument>();
-  doc->LoadFile(filename.c_str());
-  assert(!doc->Error());
+  auto xmlstat = doc->LoadFile(filename.c_str());
+  if (xmlstat) {
+    std::cerr << filename << std::endl;
+    throw std::runtime_error("missing XML file");
+  }
   return doc;
 }
 // trace down a key inside tinyxml2::XML "document"
@@ -151,12 +155,11 @@ loadxml(const std::string &filename) {
 inline tinyxml2::XMLElement *
 tracexml(tinyxml2::XMLDocument *doc, const std::vector<std::string> &keychain) {
   tinyxml2::XMLElement *el{doc->FirstChildElement("root")};
-  if (!keychain.empty()) {
-    for (auto key : keychain) {
-#ifdef VERBOSE
-      std::cout << "key: " << key << std::endl;
-#endif
-      el = el->FirstChildElement(key.c_str());
+  for (auto &key : keychain) {
+    el = el->FirstChildElement(key.c_str());
+    if (el == nullptr) {
+      std::cerr << el->Name() << "\t" << key << std::endl;
+      throw std::runtime_error("missing XML element");
     }
   }
   return el;
@@ -164,111 +167,152 @@ tracexml(tinyxml2::XMLDocument *doc, const std::vector<std::string> &keychain) {
 // get string attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
-// 3rd argument: sub-key under 1st argument
 inline std::string fetchstring(tinyxml2::XMLElement *el,
-                               const std::string &att_type,
-                               const std::string &key) {
-#ifdef VERBOSE
-  std::cout << "key: " << key << "attrib: " << att_type << std::endl;
-#endif
-  return el->FirstChildElement(key.c_str())->Attribute(att_type.c_str());
+                               const std::string &attname) {
+  auto att = el->FindAttribute(attname.c_str());
+  if (att == nullptr) {
+    std::cerr << el->Name() << "\t" << attname << std::endl;
+    throw std::runtime_error("missing XML attribute");
+  }
+  return att->Value();
 }
 // get string attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
-// 2nd argument: attribute name
-inline std::string fetchstring(tinyxml2::XMLElement *el,
-                               const std::string &att_type) {
-#ifdef VERBOSE
-  std::cout << "attrib: " << att_type << std::endl;
-#endif
-  return el->Attribute(att_type.c_str());
+// 2nd argument: sub-key under 1st argument
+// 3rd argument: attribute name
+inline std::string fetchstring(tinyxml2::XMLElement *el, const std::string &key,
+                               const std::string &attname) {
+  auto el2 = el->FirstChildElement(key.c_str());
+  if (el2 == nullptr) {
+    std::cerr << el->Name() << "\t" << key << std::endl;
+    throw std::runtime_error("missing XML element");
+  }
+  auto att = el2->FindAttribute(attname.c_str());
+  if (att == nullptr) {
+    std::cerr << el->Name() << "\t" << key << "\t" << attname;
+    throw std::runtime_error("missing XML attribute");
+  }
+  return att->Value();
 }
 // get integer attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
-// 3rd argument: sub-key under 1st argument
-inline ham_int fetchint(tinyxml2::XMLElement *el, const std::string &att_type,
-                        const std::string &key) {
-#ifdef VERBOSE
-  std::cout << "key: " << key << "attrib: " << att_type << std::endl;
-#endif
-  return el->FirstChildElement(key.c_str())->IntAttribute(att_type.c_str());
+inline ham_int fetchint(tinyxml2::XMLElement *el, const std::string &attname) {
+  auto att = el->FindAttribute(attname.c_str());
+  if (att == nullptr) {
+    std::cerr << el->Name() << "\t" << attname << std::endl;
+    throw std::runtime_error("missing XML attribute");
+  }
+  return att->IntValue();
 }
 // get integer attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
-// 2nd argument: attribute name
-inline ham_int fetchint(tinyxml2::XMLElement *el, const std::string &att_type) {
-#ifdef VERBOSE
-  std::cout << "attrib: " << att_type << std::endl;
-#endif
-  return el->IntAttribute(att_type.c_str());
+// 2nd argument: sub-key under 1st argument
+// 3rd argument: attribute name
+inline ham_int fetchint(tinyxml2::XMLElement *el, const std::string &key,
+                        const std::string &attname) {
+  auto el2 = el->FirstChildElement(key.c_str());
+  if (el2 == nullptr) {
+    std::cerr << el->Name() << "\t" << key << std::endl;
+    throw std::runtime_error("missing XML element");
+  }
+  auto att = el2->FindAttribute(attname.c_str());
+  if (att == nullptr) {
+    std::cerr << el->Name() << "\t" << key << "\t" << attname << std::endl;
+    throw std::runtime_error("missing XML attribute");
+  }
+  return att->IntValue();
 }
-// get ham_uinteger attribute
-// 1st argument: ptr to tinyxml2::XMLElement (key)
-// 2nd argument: attribute name
-// 3rd argument: sub-key under 1st argument
-inline ham_uint fetchuint(tinyxml2::XMLElement *el, const std::string &att_type,
-                          const std::string &key) {
-#ifdef VERBOSE
-  std::cout << "key: " << key << "attrib: " << att_type << std::endl;
-#endif
-  return el->FirstChildElement(key.c_str())
-      ->UnsignedAttribute(att_type.c_str());
-}
-// get ham_uinteger attribute
+// get unsigned integer attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
 inline ham_uint fetchuint(tinyxml2::XMLElement *el,
-                          const std::string &att_type) {
-#ifdef VERBOSE
-  std::cout << "attrib: " << att_type << std::endl;
-#endif
-  return el->UnsignedAttribute(att_type.c_str());
+                          const std::string &attname) {
+  auto att = el->FindAttribute(attname.c_str());
+  if (att == nullptr) {
+    std::cerr << el->Name() << "\t" << attname << std::endl;
+    throw std::runtime_error("missing XML attribute");
+  }
+  return att->UnsignedValue();
+}
+// get unsigned integer attribute
+// 1st argument: ptr to tinyxml2::XMLElement (key)
+// 2nd argument: sub-key under 1st argument
+// 3rd argument: attribute name
+inline ham_uint fetchuint(tinyxml2::XMLElement *el, const std::string &key,
+                          const std::string &attname) {
+  auto el2 = el->FirstChildElement(key.c_str());
+  if (el2 == nullptr) {
+    std::cerr << el->Name() << "\t" << key << std::endl;
+    throw std::runtime_error("missing XML element");
+  }
+  auto att = el2->FindAttribute(attname.c_str());
+  if (att == nullptr) {
+    std::cerr << el->Name() << "\t" << key << "\t" << attname << std::endl;
+    throw std::runtime_error("missing XML attribute");
+  }
+  return att->UnsignedValue();
 }
 // get bool attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
-// 3rd argument: sub-key under 1st argument
-// 4th argument: default bool, use int instead of bool type
-// since bool can take char* as input
-inline bool fetchbool(tinyxml2::XMLElement *el, const std::string &att_type,
-                      const std::string &key) {
-#ifdef VERBOSE
-  std::cout << "key: " << key << "attrib: " << att_type << std::endl;
-#endif
-  return el->FirstChildElement(key.c_str())->BoolAttribute(att_type.c_str());
+inline bool fetchbool(tinyxml2::XMLElement *el, const std::string &attname) {
+  auto att = el->FindAttribute(attname.c_str());
+  if (att == nullptr) {
+    std::cerr << el->Name() << "\t" << attname << std::endl;
+    throw std::runtime_error("missing XML attribute");
+  }
+  return att->BoolValue();
 }
 // get bool attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
-// 2nd argument: attribute name
-inline bool fetchbool(tinyxml2::XMLElement *el, const std::string &att_type) {
-#ifdef VERBOSE
-  std::cout << "attrib: " << att_type << std::endl;
-#endif
-  return el->BoolAttribute(att_type.c_str());
-}
-// get ham_float attribute
-// 1st argument: ptr to tinyxml2::XMLElement (key)
-// 2nd argument: attribute name
-// 3rd argument: sub-key under 1st argument
-inline ham_float fetchfloat(tinyxml2::XMLElement *el,
-                            const std::string &att_type,
-                            const std::string &key) {
-#ifdef VERBOSE
-  std::cout << "key: " << key << "attrib: " << att_type << std::endl;
-#endif
-  return el->FirstChildElement(key.c_str())->DoubleAttribute(att_type.c_str());
+// 2nd argument: sub-key under 1st argument
+// 3rd argument: attribute name
+inline bool fetchbool(tinyxml2::XMLElement *el, const std::string &key,
+                      const std::string &attname) {
+  auto el2 = el->FirstChildElement(key.c_str());
+  if (el2 == nullptr) {
+    std::cerr << el->Name() << "\t" << key << std::endl;
+    throw std::runtime_error("missing XML element");
+  }
+  auto att = el2->FindAttribute(attname.c_str());
+  if (att == nullptr) {
+    std::cerr << el->Name() << "\t" << key << "\t" << attname << std::endl;
+    throw std::runtime_error("missing XML attribute");
+  }
+  return att->BoolValue();
 }
 // get ham_float attribute
 // 1st argument: ptr to tinyxml2::XMLElement (key)
 // 2nd argument: attribute name
 inline ham_float fetchfloat(tinyxml2::XMLElement *el,
-                            const std::string &att_type) {
-#ifdef VERBOSE
-  std::cout << "attrib: " << att_type << std::endl;
-#endif
-  return el->DoubleAttribute(att_type.c_str());
+                            const std::string &attname) {
+  auto att = el->FindAttribute(attname.c_str());
+  if (att == nullptr) {
+    std::cerr << el->Name() << "\t" << attname << std::endl;
+    throw std::runtime_error("missing XML attribute");
+  }
+  return att->DoubleValue();
 }
+// get ham_float attribute
+// 1st argument: ptr to tinyxml2::XMLElement (key)
+// 2nd argument: sub-key under 1st argument
+// 3rd argument: attribute name
+inline ham_float fetchfloat(tinyxml2::XMLElement *el, const std::string &key,
+                            const std::string &attname) {
+  auto el2 = el->FirstChildElement(key.c_str());
+  if (el2 == nullptr) {
+    std::cerr << el->Name() << "\t" << key << std::endl;
+    throw std::runtime_error("missing XML element");
+  }
+  auto att = el2->FindAttribute(attname.c_str());
+  if (att == nullptr) {
+    std::cerr << el->Name() << "\t" << key << "\t" << attname << std::endl;
+    throw std::runtime_error("missing XML attribute");
+  }
+  return att->DoubleValue();
+}
+
 } // namespace toolkit
 
 #endif

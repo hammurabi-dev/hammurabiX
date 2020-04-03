@@ -3,10 +3,8 @@
 // class design:
 //
 // Grid
-//  |-- Grid_breg (regular magnetic field grid)
-//  |-- Grid_brnd (random magnetic field grid)
-//  |-- Grid_tereg (regular thermal electron field grid)
-//  |-- Grid_ternd (random thermal electron field grid)
+//  |-- Grid_b (magnetic field grid)
+//  |-- Grid_te (thermal electron field grid)
 //  |-- Grid_cre (cosmic ray electron flux field grid)
 //  |-- Grid_obs (observable grid)
 //
@@ -19,16 +17,15 @@
 
 #include <array>
 #include <cassert>
-#include <memory>
-#include <string>
-#include <vector>
-
 #include <fftw3.h>
 #include <hamdis.h>
 #include <hamsk.h>
 #include <hamtype.h>
+#include <memory>
 #include <param.h>
+#include <string>
 #include <tinyxml2.h>
+#include <vector>
 
 class Grid {
 public:
@@ -47,33 +44,16 @@ public:
 };
 
 // regular magnetic vector field grid
-class Grid_breg final : public Grid {
+class Grid_b final : public Grid {
 public:
-  Grid_breg() = default;
-  Grid_breg(const Param *);
-  Grid_breg(const Grid_breg &) = delete;
-  Grid_breg(const Grid_breg &&) = delete;
-  Grid_breg &operator=(const Grid_breg &) = delete;
-  Grid_breg &operator=(Grid_breg &&) = delete;
-  virtual ~Grid_breg() = default;
-  void build_grid(const Param *) override;
-  void export_grid(const Param *) override;
-  void import_grid(const Param *) override;
-  // spatial domain magnetic field
-  std::unique_ptr<ham_float[]> bx, by, bz;
-};
-
-// random magnetic vector field grid
-class Grid_brnd final : public Grid {
-public:
-  Grid_brnd() = default;
-  Grid_brnd(const Param *);
-  Grid_brnd(const Grid_brnd &) = delete;
-  Grid_brnd(const Grid_brnd &&) = delete;
-  Grid_brnd &operator=(const Grid_brnd &) = delete;
-  Grid_brnd &operator=(Grid_brnd &&) = delete;
-  virtual ~Grid_brnd() {
-    if (clean_switch) {
+  Grid_b() = default;
+  Grid_b(const Param *);
+  Grid_b(const Grid_b &) = delete;
+  Grid_b(const Grid_b &&) = delete;
+  Grid_b &operator=(const Grid_b &) = delete;
+  Grid_b &operator=(Grid_b &&) = delete;
+  virtual ~Grid_b() {
+    if (clean_fft) {
       fftw_destroy_plan(plan_c0_bw);
       fftw_destroy_plan(plan_c1_bw);
       fftw_destroy_plan(plan_c0_fw);
@@ -97,37 +77,20 @@ public:
   // for/backward FFT plans
   fftw_plan plan_c0_bw, plan_c1_bw, plan_c0_fw, plan_c1_fw;
   // for destructor
-  bool clean_switch = false;
+  bool clean_fft = false;
 };
 
 // regular thermal electron density field grid
-class Grid_tereg final : public Grid {
+class Grid_te final : public Grid {
 public:
-  Grid_tereg() = default;
-  Grid_tereg(const Param *);
-  Grid_tereg(const Grid_tereg &) = delete;
-  Grid_tereg(const Grid_tereg &&) = delete;
-  Grid_tereg &operator=(const Grid_tereg &) = delete;
-  Grid_tereg &operator=(Grid_tereg &&) = delete;
-  virtual ~Grid_tereg() = default;
-  void build_grid(const Param *) override;
-  void export_grid(const Param *) override;
-  void import_grid(const Param *) override;
-  // spatial domain thermal electron field
-  std::unique_ptr<ham_float[]> te;
-};
-
-// random thermal electron density field grid
-class Grid_ternd final : public Grid {
-public:
-  Grid_ternd() = default;
-  Grid_ternd(const Param *);
-  Grid_ternd(const Grid_ternd &) = delete;
-  Grid_ternd(const Grid_ternd &&) = delete;
-  Grid_ternd &operator=(const Grid_ternd &) = delete;
-  Grid_ternd &operator=(Grid_ternd &&) = delete;
-  virtual ~Grid_ternd() {
-    if (clean_switch) {
+  Grid_te() = default;
+  Grid_te(const Param *);
+  Grid_te(const Grid_te &) = delete;
+  Grid_te(const Grid_te &&) = delete;
+  Grid_te &operator=(const Grid_te &) = delete;
+  Grid_te &operator=(Grid_te &&) = delete;
+  virtual ~Grid_te() {
+    if (clean_fft) {
       fftw_destroy_plan(plan_te_bw);
       fftw_free(te_k);
 #ifdef _OPENMP
@@ -147,7 +110,7 @@ public:
   // backward FFT plan
   fftw_plan plan_te_bw;
   // for destructor
-  bool clean_switch = false;
+  bool clean_fft = false;
 };
 
 // cosmic ray electron flux phase-space density grid
@@ -179,7 +142,7 @@ public:
   virtual ~Grid_obs() = default;
   void build_grid(const Param *) override;
   void export_grid(const Param *) override;
-  // HEALPix map for observables
+  // Hampix map for observables
   // dm_map: dispersion measure
   // is_map: synchrotron Stokes I
   // qs_map: synchrotron Stokes Q

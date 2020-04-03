@@ -3,8 +3,6 @@
 #ifndef HAMMURABI_INT_H
 #define HAMMURABI_INT_H
 
-#include <vector>
-
 #include <bfield.h>
 #include <crefield.h>
 #include <grid.h>
@@ -12,6 +10,7 @@
 #include <hamtype.h>
 #include <param.h>
 #include <tefield.h>
+#include <vector>
 
 class Integrator {
 public:
@@ -23,20 +22,16 @@ public:
   virtual ~Integrator() = default;
   // physical field ptrs
   struct struct_fields {
-    Breg *breg;
-    Brnd *brnd;
-    TEreg *tereg;
-    TErnd *ternd;
+    Bfield *b;
+    TEfield *te;
     CREfield *cre;
   } fields;
   // physical grid ptrs
   struct struct_grids {
-    Grid_breg *gbreg;
-    Grid_brnd *gbrnd;
-    Grid_tereg *gtereg;
-    Grid_ternd *gternd;
-    Grid_cre *gcre;
-    Grid_obs *gobs;
+    Grid_b *b;
+    Grid_te *te;
+    Grid_cre *cre;
+    Grid_obs *obs;
   } grids;
   // assmebling pixels/shells into sky map
   void write_grid(const Param *) const;
@@ -76,7 +71,6 @@ protected:
   // 4th argument: CRE grid object
   // 5th argument: perpendicular component of magnetic field wrt LoS direction
   ham_float sync_emissivity_t(const Hamvec<3, ham_float> &, const Param *,
-                              const CREfield *, const Grid_cre *,
                               const ham_float &) const;
   // synchrotron polarized emissivity calculator
   // 1st argument: galactic centric Cartesian frame position
@@ -85,7 +79,6 @@ protected:
   // 4th argument: CRE grid object
   // 5th argument: perpendicular component of magnetic field wrt LoS direction
   ham_float sync_emissivity_p(const Hamvec<3, ham_float> &, const Param *,
-                              const CREfield *, const Grid_cre *,
                               const ham_float &) const;
   // converting brightness temp into thermal temp with T_0 = 2.725K,
   // Prog.Theor.Exp.Phys. (2014) 2014 (6): 06B109.

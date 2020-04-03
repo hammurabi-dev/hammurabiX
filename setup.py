@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name="hampyx",
-      version="2.4.0",
+      version="2.5.0",
       description="hammurabi X python wrapper",
       license="GPLv3",
       url="https://github.com/hammurabi-dev/hammurabiX",

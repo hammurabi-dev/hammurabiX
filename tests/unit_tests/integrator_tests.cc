@@ -1,9 +1,8 @@
 // unit tests for Integrator class
 
-#include <gtest/gtest.h>
-
 #include <cmath>
 #include <grid.h>
+#include <gtest/gtest.h>
 #include <hamtype.h>
 #include <hamunits.h>
 #include <integrator.h>
@@ -21,6 +20,76 @@ TEST(integrator, boundary_check) {
   ham_float R_lim = (1.0 + 1.0e-5) * R0;
   EXPECT_FALSE(pipe.check_simulation_upper_limit(R0, R_lim));
   EXPECT_TRUE(pipe.check_simulation_lower_limit(R0, R_lim));
+}
+
+// testing:
+// Integrator::los_versor
+TEST(toolkit, los_versor) {
+  auto pipe = std::make_unique<Integrator>();
+  const ham_float theta[3] = {0., 90. * cgs::rad, 90. * cgs::rad};
+  const ham_float phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
+
+  EXPECT_LT(std::fabs(pipe->los_versor(theta[0], phi[0])[0] - 0.), 1e-10);
+  EXPECT_LT(std::fabs(pipe->los_versor(theta[0], phi[0])[1] - 0.), 1e-10);
+  EXPECT_LT(std::fabs(pipe->los_versor(theta[0], phi[0])[2] - 1.), 1e-10);
+  EXPECT_LT(std::fabs(pipe->los_versor(theta[1], phi[1])[0] + 1.), 1e-10);
+  EXPECT_LT(std::fabs(pipe->los_versor(theta[1], phi[1])[1] - 0.), 1e-10);
+  EXPECT_LT(std::fabs(pipe->los_versor(theta[1], phi[1])[2] - 0.), 1e-10);
+  EXPECT_LT(std::fabs(pipe->los_versor(theta[2], phi[2])[0] - 0.), 1e-10);
+  EXPECT_LT(std::fabs(pipe->los_versor(theta[2], phi[2])[1] + 1.), 1e-10);
+  EXPECT_LT(std::fabs(pipe->los_versor(theta[2], phi[2])[2] - 0.), 1e-10);
+}
+
+// testing:
+// Integrator::los_parproj
+TEST(toolkit, los_parproj) {
+  auto pipe = std::make_unique<Integrator>();
+  const ham_float theta[3] = {0., 90. * cgs::rad, 90. * cgs::rad};
+  const ham_float phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
+  const Hamvec<3, ham_float> A{1., 0., 0.};
+
+  EXPECT_LT(
+      std::fabs(pipe->los_parproj(A, pipe->los_versor(theta[0], phi[0])) - 0.),
+      1e-10);
+  EXPECT_LT(
+      std::fabs(pipe->los_parproj(A, pipe->los_versor(theta[1], phi[1])) + 1.),
+      1e-10);
+  EXPECT_LT(
+      std::fabs(pipe->los_parproj(A, pipe->los_versor(theta[2], phi[2])) - 0.),
+      1e-10);
+}
+
+// testing:
+// Integrator::los_perproj
+TEST(toolkit, los_perproj) {
+  auto pipe = std::make_unique<Integrator>();
+  const ham_float theta[3] = {0., 90. * cgs::rad, 90. * cgs::rad};
+  const ham_float phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
+  const Hamvec<3, ham_float> A{1., 0., 0.};
+
+  EXPECT_LT(
+      std::fabs(pipe->los_perproj(A, pipe->los_versor(theta[0], phi[0])) - 1.),
+      1e-10);
+  EXPECT_LT(
+      std::fabs(pipe->los_perproj(A, pipe->los_versor(theta[1], phi[1])) + 0.),
+      1e-10);
+  EXPECT_LT(
+      std::fabs(pipe->los_perproj(A, pipe->los_versor(theta[2], phi[2])) - 1.),
+      1e-10);
+}
+
+// testing:
+// Integrator::sync_ipa
+TEST(toolkit, sync_ipa) {
+  auto pipe = std::make_unique<Integrator>();
+  const ham_float theta[3] = {0., 90. * cgs::rad, 90. * cgs::rad};
+  const ham_float phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
+  const Hamvec<3, ham_float> A{1., 0., 0.};
+
+  EXPECT_LT(std::fabs(pipe->sync_ipa(A, theta[0], phi[0]) + 90. * cgs::rad),
+            1e-10);
+  EXPECT_LT(std::fabs(pipe->sync_ipa(A, theta[2], phi[2]) - 180. * cgs::rad),
+            1e-10);
 }
 
 // testing:
@@ -136,74 +205,4 @@ TEST(integrator, shell_info_assembling) {
   EXPECT_EQ(ref->dist[idx], ref->d_start + (idx + 0.5) * ref->delta_d);
   idx = smp5(rng);
   EXPECT_EQ(ref->dist[idx], ref->d_start + (idx + 0.5) * ref->delta_d);
-}
-
-// testing:
-// los_versor
-TEST(toolkit, los_versor) {
-  auto pipe = std::make_unique<Integrator>();
-  const ham_float theta[3] = {0., 90. * cgs::rad, 90. * cgs::rad};
-  const ham_float phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
-
-  EXPECT_LT(std::fabs(pipe->los_versor(theta[0], phi[0])[0] - 0.), 1e-10);
-  EXPECT_LT(std::fabs(pipe->los_versor(theta[0], phi[0])[1] - 0.), 1e-10);
-  EXPECT_LT(std::fabs(pipe->los_versor(theta[0], phi[0])[2] - 1.), 1e-10);
-  EXPECT_LT(std::fabs(pipe->los_versor(theta[1], phi[1])[0] + 1.), 1e-10);
-  EXPECT_LT(std::fabs(pipe->los_versor(theta[1], phi[1])[1] - 0.), 1e-10);
-  EXPECT_LT(std::fabs(pipe->los_versor(theta[1], phi[1])[2] - 0.), 1e-10);
-  EXPECT_LT(std::fabs(pipe->los_versor(theta[2], phi[2])[0] - 0.), 1e-10);
-  EXPECT_LT(std::fabs(pipe->los_versor(theta[2], phi[2])[1] + 1.), 1e-10);
-  EXPECT_LT(std::fabs(pipe->los_versor(theta[2], phi[2])[2] - 0.), 1e-10);
-}
-
-// testing:
-// los_parproj
-TEST(toolkit, los_parproj) {
-  auto pipe = std::make_unique<Integrator>();
-  const ham_float theta[3] = {0., 90. * cgs::rad, 90. * cgs::rad};
-  const ham_float phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
-  const Hamvec<3, ham_float> A{1., 0., 0.};
-
-  EXPECT_LT(
-      std::fabs(pipe->los_parproj(A, pipe->los_versor(theta[0], phi[0])) - 0.),
-      1e-10);
-  EXPECT_LT(
-      std::fabs(pipe->los_parproj(A, pipe->los_versor(theta[1], phi[1])) + 1.),
-      1e-10);
-  EXPECT_LT(
-      std::fabs(pipe->los_parproj(A, pipe->los_versor(theta[2], phi[2])) - 0.),
-      1e-10);
-}
-
-// testing:
-// los_perproj
-TEST(toolkit, los_perproj) {
-  auto pipe = std::make_unique<Integrator>();
-  const ham_float theta[3] = {0., 90. * cgs::rad, 90. * cgs::rad};
-  const ham_float phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
-  const Hamvec<3, ham_float> A{1., 0., 0.};
-
-  EXPECT_LT(
-      std::fabs(pipe->los_perproj(A, pipe->los_versor(theta[0], phi[0])) - 1.),
-      1e-10);
-  EXPECT_LT(
-      std::fabs(pipe->los_perproj(A, pipe->los_versor(theta[1], phi[1])) + 0.),
-      1e-10);
-  EXPECT_LT(
-      std::fabs(pipe->los_perproj(A, pipe->los_versor(theta[2], phi[2])) - 1.),
-      1e-10);
-}
-
-// testing:
-// sync_ipa
-TEST(toolkit, sync_ipa) {
-  auto pipe = std::make_unique<Integrator>();
-  const ham_float theta[3] = {0., 90. * cgs::rad, 90. * cgs::rad};
-  const ham_float phi[3] = {0., 180. * cgs::rad, 270. * cgs::rad};
-  const Hamvec<3, ham_float> A{1., 0., 0.};
-
-  EXPECT_LT(std::fabs(pipe->sync_ipa(A, theta[0], phi[0]) + 90. * cgs::rad),
-            1e-10);
-  EXPECT_LT(std::fabs(pipe->sync_ipa(A, theta[2], phi[2]) - 180. * cgs::rad),
-            1e-10);
 }

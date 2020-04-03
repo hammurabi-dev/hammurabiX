@@ -3,268 +3,227 @@
 // class design:
 //
 // Bfield
-//   |-- Breg
-//   |     |-- Breg_xxx
-//   |     |-- Breg_yyy
-//   |
-//   |-- Brnd
-//         |-- Brnd_xxx
-//         |-- Brnd_yyy
 //
-// field parameterized modelling is implemented in ``write_field`` function
-// interactions with grid are carried out via ``read_grid`` and ``write_grid``
-// notice that ``read/write_grid`` acts with the internal grid in memory
-// interactions with disk data are carried out within Grid_bfield class
-// ``read_field`` is the universal interface for retrieving field vector
-// at given 3D spatial position
-// ``read_field`` knows where to read the information
-// either from grid or parameterzed modelling
+// method design:
+//
+//    (model collection)
+//       |   |
+//       |   | write_field
+//       |   |
+//       |   |--> (grid)
+//       |          |
+//       |          | read_field
+//       |----------------------> (grid position/index)
+//
+//
+// Bmodel
+//   |-- Bmodel_xxx
+//   |-- Bmodel_yyy
+//
+//
+// method design:
+//
+//    (model) -----------> (grid)
+//       |      write_grid    |
+//       |                    |
+//       |                    | read_grid
+//       | read_model         |
+//       ------------------------> (grid position/index)
 
 #ifndef HAMMURABI_BFIELD_H
 #define HAMMURABI_BFIELD_H
 
+#include <cassert>
 #include <grid.h>
 #include <hamtype.h>
+#include <hamunits.h>
 #include <hamvec.h>
 #include <param.h>
+#include <stdexcept>
+#include <string>
 
 // magnetic field base class
-class Bfield {
+class Bmodel {
 public:
-  Bfield() = default;
-  Bfield(const Bfield &) = delete;
-  Bfield(Bfield &&) = delete;
-  Bfield &operator=(const Bfield &) = delete;
-  Bfield &operator=(Bfield &&) = delete;
-  virtual ~Bfield() = default;
-};
-
-// regular magnetic field
-class Breg : public Bfield {
-public:
-  Breg() = default;
-  Breg(const Breg &) = delete;
-  Breg(Breg &&) = delete;
-  Breg &operator=(const Breg &) = delete;
-  Breg &operator=(Breg &&) = delete;
-  virtual ~Breg() = default;
-  // get regular magnetic field
+  Bmodel() = default;
+  Bmodel(const Bmodel &) = delete;
+  Bmodel(Bmodel &&) = delete;
+  Bmodel &operator=(const Bmodel &) = delete;
+  Bmodel &operator=(Bmodel &&) = delete;
+  virtual ~Bmodel() = default;
+  // assemble magnetic field
   // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
-  // 3rd argument: magnetic grid class object
-  // read from grid of field type if permitted
-  // otherwise use the field assembler
-  virtual Hamvec<3, ham_float> read_field(const Hamvec<3, ham_float> &,
-                                          const Param *,
-                                          const Grid_breg *) const;
-  // assemble analytic magnetic field, specified only in derived class
-  // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
-  virtual Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
-                                           const Param *) const;
+  // 2nd argument: parameter set
+  virtual Hamvec<3, ham_float> read_model(const Hamvec<3, ham_float> &,
+                                          const Param *) const;
+  // read from field grid with given grid index
+  // 1st argument: magnetic field grid index
+  // 2nd argument: magnetic field grid class object
+  virtual Hamvec<3, ham_float> read_grid(const ham_uint &,
+                                         const Grid_b *) const;
   // read from field grid with linear interpolation
   // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
+  // 2nd argument: parameter set
   // 3rd argument: magnetic field grid class object
   virtual Hamvec<3, ham_float> read_grid(const Hamvec<3, ham_float> &,
-                                         const Param *,
-                                         const Grid_breg *) const;
-  // write to field grid
-  // 1st argument: parameter class object
+                                         const Param *, const Grid_b *) const;
+  // write magnetic field to grid
+  // 1st argument: parameter set
   // 2nd argument: magnetic field grid class object
-  virtual void write_grid(const Param *, Grid_breg *) const;
+  virtual void write_grid(const Param *, Grid_b *) const;
 };
-
-// random magnetic field
-class Brnd {
-public:
-  Brnd() = default;
-  Brnd(const Brnd &) = delete;
-  Brnd(Brnd &&) = delete;
-  Brnd &operator=(const Brnd &) = delete;
-  Brnd &operator=(Brnd &&) = delete;
-  virtual ~Brnd() = default;
-  // get random magnetic field
-  virtual Hamvec<3, ham_float> read_field(const Hamvec<3, ham_float> &,
-                                          const Param *,
-                                          const Grid_brnd *) const;
-  // read from field grid with linear interpolation
-  virtual Hamvec<3, ham_float> read_grid(const Hamvec<3, ham_float> &,
-                                         const Param *,
-                                         const Grid_brnd *) const;
-  // write random field to grid (model dependent)
-  virtual void write_grid(const Param *, const Breg *, const Grid_breg *,
-                          Grid_brnd *) const;
-};
-
-//------------------------------ Breg DERIVED --------------------------------//
 
 // uniform regular field modeling
 // with fixed field orientation and strength
-class Breg_unif final : public Breg {
+class Bmodel_unif final : public Bmodel {
 public:
-  Breg_unif() = default;
-  Breg_unif(const Breg_unif &) = delete;
-  Breg_unif(Breg_unif &&) = delete;
-  Breg_unif &operator=(const Breg_unif &) = delete;
-  Breg_unif &operator=(Breg_unif &&) = delete;
-  virtual ~Breg_unif() = default;
-  Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
-                                   const Param *) const override;
+  Bmodel_unif() = default;
+  Bmodel_unif(const Bmodel_unif &) = delete;
+  Bmodel_unif(Bmodel_unif &&) = delete;
+  Bmodel_unif &operator=(const Bmodel_unif &) = delete;
+  Bmodel_unif &operator=(Bmodel_unif &&) = delete;
+  virtual ~Bmodel_unif() = default;
+  Hamvec<3, ham_float> read_model(const Hamvec<3, ham_float> &,
+                                  const Param *) const override;
 };
 
 // WMAP-3yr LSA modeling
 // http://iopscience.iop.org/article/10.1086/513699/meta
 // with errata for GMF modeling
 // https://lambda.gsfc.nasa.gov/product/map/dr2/pub_papers/threeyear/polarization/errata.cfm
-class Breg_lsa final : public Breg {
+class Bmodel_lsa final : public Bmodel {
 public:
-  Breg_lsa() = default;
-  Breg_lsa(const Breg_lsa &) = delete;
-  Breg_lsa(Breg_lsa &&) = delete;
-  Breg_lsa &operator=(const Breg_lsa &) = delete;
-  Breg_lsa &operator=(Breg_lsa &&) = delete;
-  virtual ~Breg_lsa() = default;
-  Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
-                                   const Param *) const override;
+  Bmodel_lsa() = default;
+  Bmodel_lsa(const Bmodel_lsa &) = delete;
+  Bmodel_lsa(Bmodel_lsa &&) = delete;
+  Bmodel_lsa &operator=(const Bmodel_lsa &) = delete;
+  Bmodel_lsa &operator=(Bmodel_lsa &&) = delete;
+  virtual ~Bmodel_lsa() = default;
+  Hamvec<3, ham_float> read_model(const Hamvec<3, ham_float> &,
+                                  const Param *) const override;
 };
 
 // Jaffe modeling
 // https://academic.oup.com/mnras/article/401/2/1013/1150693
 // https://www.aanda.org/articles/aa/abs/2016/12/aa28033-15/aa28033-15.html
-class Breg_jaffe final : public Breg {
+class Bmodel_jaffe final : public Bmodel {
 public:
-  Breg_jaffe() = default;
-  Breg_jaffe(const Breg_jaffe &) = delete;
-  Breg_jaffe(Breg_jaffe &&) = delete;
-  Breg_jaffe &operator=(const Breg_jaffe &) = delete;
-  Breg_jaffe &operator=(Breg_jaffe &&) = delete;
-  virtual ~Breg_jaffe() = default;
-  Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
-                                   const Param *) const override;
+  Bmodel_jaffe() = default;
+  Bmodel_jaffe(const Bmodel_jaffe &) = delete;
+  Bmodel_jaffe(Bmodel_jaffe &&) = delete;
+  Bmodel_jaffe &operator=(const Bmodel_jaffe &) = delete;
+  Bmodel_jaffe &operator=(Bmodel_jaffe &&) = delete;
+  virtual ~Bmodel_jaffe() = default;
+  Hamvec<3, ham_float> read_model(const Hamvec<3, ham_float> &,
+                                  const Param *) const override;
 #ifndef NDEBUG
 protected:
 #endif
   // field orientation
   // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
+  // 2nd argument: parameter set
   Hamvec<3, ham_float> orientation(const Hamvec<3, ham_float> &,
                                    const Param *) const;
   // field amplitude radial scaling
   // 1st argument: Galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
+  // 2nd argument: parameter set
   ham_float radial_scaling(const Hamvec<3, ham_float> &, const Param *) const;
   // spiral arm height scaling
   // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
+  // 2nd argument: parameter set
   // remark: inlined function
   inline ham_float arm_scaling(const Hamvec<3, ham_float> &pos,
                                const Param *par) const {
-    return 1. / (cosh(pos[2] / par->breg_jaffe.arm_z0) *
-                 cosh(pos[2] / par->breg_jaffe.arm_z0));
+    return 1. / (cosh(pos[2] / par->bmodel_jaffe.arm_z0) *
+                 cosh(pos[2] / par->bmodel_jaffe.arm_z0));
   }
   // disk height scaling
   // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
+  // 2nd argument: parameter set
   // remark: inlined function
   inline ham_float disk_scaling(const Hamvec<3, ham_float> &pos,
                                 const Param *par) const {
-    return 1. / (cosh(pos[2] / par->breg_jaffe.disk_z0) *
-                 cosh(pos[2] / par->breg_jaffe.disk_z0));
+    return 1. / (cosh(pos[2] / par->bmodel_jaffe.disk_z0) *
+                 cosh(pos[2] / par->bmodel_jaffe.disk_z0));
   }
   // halo height scaling
   // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
+  // 2nd argument: parameter set
   // remark: inlined function
   inline ham_float halo_scaling(const Hamvec<3, ham_float> &pos,
                                 const Param *par) const {
-    return 1. / (cosh(pos[2] / par->breg_jaffe.halo_z0) *
-                 cosh(pos[2] / par->breg_jaffe.halo_z0));
+    return 1. / (cosh(pos[2] / par->bmodel_jaffe.halo_z0) *
+                 cosh(pos[2] / par->bmodel_jaffe.halo_z0));
   }
   // spiral arm compression factor, for each arm
   // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
+  // 2nd argument: parameter set
   std::vector<ham_float> arm_compress(const Hamvec<3, ham_float> &,
                                       const Param *) const;
   // spiral arm compression factor for dust, for each arm
   // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
+  // 2nd argument: parameter set
   std::vector<ham_float> arm_compress_dust(const Hamvec<3, ham_float> &,
                                            const Param *) const;
   // distance to each spiral arm
   // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
+  // 2nd argument: parameter set
   std::vector<ham_float> dist2arm(const Hamvec<3, ham_float> &,
                                   const Param *) const;
 };
 
-//------------------------------ Brnd DERIVED --------------------------------//
-
-// global (an)isotropic random magnetic field
-// this class is treated as a covering class for specific methods
-class Brnd_global : public Brnd {
-public:
-  Brnd_global() = default;
-  Brnd_global(const Brnd_global &) = delete;
-  Brnd_global(Brnd_global &&) = delete;
-  Brnd_global &operator=(const Brnd_global &) = delete;
-  Brnd_global &operator=(Brnd_global &&) = delete;
-  virtual ~Brnd_global() = default;
-};
-
-// local (an)isotropic random magnetic field
-// this class is treated as a covering class for specific methods
-class Brnd_local : public Brnd {
-public:
-  Brnd_local() = default;
-  Brnd_local(const Brnd_local &) = delete;
-  Brnd_local(Brnd_local &&) = delete;
-  Brnd_local &operator=(const Brnd_local &) = delete;
-  Brnd_local &operator=(Brnd_local &&) = delete;
-  virtual ~Brnd_local() = default;
-};
-
 // Ensslin-Steininger method of global (an)isotropic random magnetic field
-class Brnd_es final : public Brnd_global {
+// https://iopscience.iop.org/article/10.3847/1538-4365/ab72a2
+class Bmodel_es final : public Bmodel {
 public:
-  Brnd_es() = default;
-  Brnd_es(const Brnd_es &) = delete;
-  Brnd_es(Brnd_es &&) = delete;
-  Brnd_es &operator=(const Brnd_es &) = delete;
-  Brnd_es &operator=(Brnd_es &&) = delete;
-  virtual ~Brnd_es() = default;
-  // use triple Fourier transform scheme
-  // check technical report for details
-  void write_grid(const Param *, const Breg *, const Grid_breg *,
-                  Grid_brnd *) const override;
+  Bmodel_es() = default;
+  Bmodel_es(const Bmodel_es &) = delete;
+  Bmodel_es(Bmodel_es &&) = delete;
+  Bmodel_es &operator=(const Bmodel_es &) = delete;
+  Bmodel_es &operator=(Bmodel_es &&) = delete;
+  virtual ~Bmodel_es() = default;
+  void write_grid(const Param *, Grid_b *) const override;
 #ifndef NDEBUG
 protected:
 #endif
   // isotropic power-spectrum
   // 1st argument: isotropic wave-vector magnitude
-  // 2nd argument: parameter class object
-  virtual ham_float spectrum(const ham_float &, const Param *) const;
-  // field energy density reprofiling factor
+  // 2nd argument: parameter set
+  ham_float spectrum(const ham_float &, const Param *) const;
+  // field energy density reprofiling factor (analytic definition)
   // 1st argument: galactic centric Cartesian frame position
-  // 2nd argument: parameter class object
-  virtual ham_float spatial_profile(const Hamvec<3, ham_float> &,
-                                    const Param *) const;
-  // anisotropy factor
+  // 2nd argument: parameter set
+  ham_float spatial_profile(const Hamvec<3, ham_float> &, const Param *) const;
+  // field energy density reprofiling factor (numeric definition)
+  // 1st argument: magnetic field grid index
+  // 2rd argument: parameter set
+  // 3rd argument: magnetic field grid class object
+  ham_float spatial_profile(const ham_uint &, const Param *,
+                            const Grid_b *) const;
+  // anisotropy factor (analytic definition)
   // check technical report for details
-  // 1st argument: galactic centric Cartesian frame position
-  // 2rd argument: parameter class object
-  // 3th argument: regular magnetic field class object
-  // 4th argument: regular magnetic field grid class object
+  // 1st argument: magnetic field grid index
+  // 2rd argument: magnetic field grid class object
   Hamvec<3, ham_float> anisotropy_direction(const Hamvec<3, ham_float> &,
-                                            const Param *, const Breg *,
-                                            const Grid_breg *) const;
-  // anisotropy ratio
+                                            const Param *) const;
+  // anisotropy factor (numeric definition)
+  // 1st argument: magnetic field grid index
+  // 2rd argument: parameter set
+  // 3rd argument: magnetic field grid class object
+  Hamvec<3, ham_float> anisotropy_direction(const ham_uint &, const Param *,
+                                            const Grid_b *) const;
+  // anisotropy ratio (analytic definition)
   // 1st argument: Galactic centric Cartesian frame position
-  // 2rd argument: parameter class object
-  // 3th argument: regular magnetic field class object
-  // 4th argument: regular magnetic field grid class object
-  ham_float anisotropy_ratio(const Hamvec<3, ham_float> &, const Param *,
-                             const Breg *, const Grid_breg *) const;
+  // 2rd argument: parameter set
+  // 3th argument: magnetic field class object
+  // 4th argument: magnetic field grid class object
+  ham_float anisotropy_ratio(const Hamvec<3, ham_float> &, const Param *) const;
+  // anisotropy ratio (numeric definition)
+  // 1st argument: magnetic field grid index
+  // 2rd argument: parameter set
+  // 3rd argument: magnetic field grid class object
+  ham_float anisotropy_ratio(const ham_uint &, const Param *,
+                             const Grid_b *) const;
   // Gram-Schmidt orthogonalization process
   // 1st argument: wave-vector
   // 2nd arugment: input magnetic field vector (in Fourier space)
@@ -274,20 +233,17 @@ protected:
                                    const Hamvec<3, ham_float> &) const;
 };
 
-// local anisotropic random magnetic field
-// in compressive MHD plasma
-class Brnd_mhd final : public Brnd_local {
+// local anisotropic random magnetic field in compressible MHD plasma
+// https://iopscience.iop.org/article/10.3847/1538-4365/ab72a2
+class Bmodel_mhd final : public Bmodel {
 public:
-  Brnd_mhd() = default;
-  Brnd_mhd(const Brnd_mhd &) = delete;
-  Brnd_mhd(Brnd_mhd &&) = delete;
-  Brnd_mhd &operator=(const Brnd_mhd &) = delete;
-  Brnd_mhd &operator=(Brnd_mhd &&) = delete;
-  virtual ~Brnd_mhd() = default;
-  // use vector field decomposition scheme
-  // use regular magnetic field at position of the Sun
-  void write_grid(const Param *, const Breg *, const Grid_breg *,
-                  Grid_brnd *) const override;
+  Bmodel_mhd() = default;
+  Bmodel_mhd(const Bmodel_mhd &) = delete;
+  Bmodel_mhd(Bmodel_mhd &&) = delete;
+  Bmodel_mhd &operator=(const Bmodel_mhd &) = delete;
+  Bmodel_mhd &operator=(Bmodel_mhd &&) = delete;
+  virtual ~Bmodel_mhd() = default;
+  void write_grid(const Param *, Grid_b *) const override;
 #ifndef NDEBUG
 protected:
 #endif
@@ -309,15 +265,15 @@ protected:
   // 1st argument: plasma Mach number
   // 2nd argument: cosine of k-B pitch angle
   inline ham_float F_a(const ham_float &ma, const ham_float &cosa) const {
-    return std::exp(-1. * std::pow(ma, -1.33333333) * std::fabs(cosa) /
-                    std::pow(1 - cosa * cosa, 0.33333333));
+    return std::exp(-1. * std::pow(ma, -cgs::onethird) * std::fabs(cosa) / ma /
+                    std::pow(1 - cosa * cosa, cgs::onethird));
   }
   // slow mode anisotropy power factor
   // 1st argument: plasma Mach number
   // 2nd argument: cosine of k-B pitch angle
   inline ham_float F_s(const ham_float &ma, const ham_float &cosa) const {
-    return std::exp(-1. * std::pow(ma, -1.33333333) * std::fabs(cosa) /
-                    std::pow(1 - cosa * cosa, 0.33333333));
+    return std::exp(-1. * std::pow(ma, -cgs::onethird) * std::fabs(cosa) / ma /
+                    std::pow(1 - cosa * cosa, cgs::onethird));
   }
   // cosine of pitch angle between wavevector and regular GMF
   // 1st argument: field vector
@@ -339,16 +295,95 @@ protected:
                                const Hamvec<3, ham_float> &) const;
   // isotropic part of power spectrum of Alfvenic mode
   // 1st argument: wave vector magnitude
-  // 2nd argument: parameter class object
+  // 2nd argument: parameter set
   ham_float spectrum_a(const ham_float &, const Param *) const;
   // isotropic part of power spectrum of fast mode
   // 1st argument: wave vector magnitude
-  // 2nd argument: parameter class object
+  // 2nd argument: parameter set
   ham_float spectrum_f(const ham_float &, const Param *) const;
   // isotropic part of power spectrum of slow mode
   // 1st argument: wave vector magnitude
-  // 2nd argument: parameter class object
+  // 2nd argument: parameter set
   ham_float spectrum_s(const ham_float &, const Param *) const;
+};
+
+// magnetic field collection class
+class Bfield {
+public:
+  Bfield() = default;
+  Bfield(const Bfield &) = delete;
+  Bfield(Bfield &&) = delete;
+  Bfield &operator=(const Bfield &) = delete;
+  Bfield &operator=(Bfield &&) = delete;
+  virtual ~Bfield() = default;
+  // initialize magnetic field model collection
+  // model ordering arranged during parameter parsing
+  Bfield(Param *par) {
+    if (par->bmodel_list.empty()) {
+      model_list.push_back(std::make_unique<Bmodel>());
+    } else {
+      for (auto &name : par->bmodel_list) {
+        if (name == "unif") {
+          model_list.push_back(std::make_unique<Bmodel_unif>());
+        } else if (name == "lsa") {
+          model_list.push_back(std::make_unique<Bmodel_lsa>());
+        } else if (name == "jaffe") {
+          model_list.push_back(std::make_unique<Bmodel_jaffe>());
+        } else if (name == "es") {
+          model_list.push_back(std::make_unique<Bmodel_es>());
+        } else if (name == "mhd") {
+          model_list.push_back(std::make_unique<Bmodel_mhd>());
+        } else {
+          throw std::runtime_error("unknown B model");
+        }
+      }
+    }
+  }
+  // read magnetic field at given grid index
+  // 1st argument: magnetic field grid index
+  // 2nd argument: magnetic field grid
+  Hamvec<3, ham_float> read_field(const ham_uint &idx,
+                                  const Grid_b *grid) const {
+    return Hamvec<3, ham_float>(grid->bx[idx], grid->by[idx], grid->bz[idx]);
+  }
+  // read magnetic field at given position (with interpolation)
+  // 1st argument: Cartesian frame Galactic centric position
+  // 2nd argument: parameter set
+  // 34d argument: magnetic field grid
+  Hamvec<3, ham_float> read_field(const Hamvec<3, ham_float> &pos,
+                                  const Param *par, const Grid_b *grid) const {
+    Hamvec<3, ham_float> tmp(0., 0., 0.);
+    // get field content from grid
+    // model ordering arranged during parameter parsing
+    if (par->grid_b.build_permission or par->grid_b.read_permission) {
+      // read_grid defined in base class
+      tmp = model_list[0]->read_grid(pos, par, grid);
+    }
+    // get field content directly from model
+    // model ordering arranged during parameter parsing
+    else {
+      for (auto &model : model_list) {
+        tmp += model->read_model(pos, par);
+      }
+    }
+    return tmp;
+  }
+  // write magnetic field to grid before reading
+  // 1st argument: parameter set
+  // 2nd argument: magnetic field grid
+  void write_field(const Param *par, Grid_b *grid) {
+    // write field content to grid
+    // model ordering arranged during parameter parsing
+    assert(par->grid_b.build_permission or par->grid_b.write_permission or
+           par->grid_b.read_permission);
+    for (auto &model : model_list) {
+      model->write_grid(par, grid);
+    }
+  }
+
+protected:
+  // list of magnetic field model pointers
+  std::vector<std::unique_ptr<Bmodel>> model_list;
 };
 
 #endif

@@ -1,22 +1,18 @@
-// cosmic ray electron flux phase-space density field grid
-
 #include <array>
 #include <cassert>
 #include <fstream>
+#include <grid.h>
+#include <hamtype.h>
 #include <memory>
+#include <param.h>
 #include <sstream>
 #include <string>
 #include <vector>
 
-#include <grid.h>
-#include <hamtype.h>
-#include <param.h>
-
 Grid_cre::Grid_cre(const Param *par) {
   // build up grid when have read or write permission
-  if (par->grid_cre.read_permission or par->grid_cre.write_permission) {
+  if (par->grid_cre.read_permission or par->grid_cre.write_permission)
     build_grid(par);
-  }
 }
 
 void Grid_cre::build_grid(const Param *par) {

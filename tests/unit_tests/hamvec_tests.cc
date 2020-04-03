@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <gtest/gtest.h>
-
 #include <hamtype.h>
 #include <hamvec.h>
 

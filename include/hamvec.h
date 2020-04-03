@@ -206,7 +206,7 @@ public:
   }
   // osteam function
   friend std::ostream &operator<<(std::ostream &os, const Hamvec<dim, T> &v) {
-    os << dim << "D vector: ";
+    os << "vector: ";
     for (ham_sint i = 0; i < dim; ++i) {
       os << v[i] << "\t";
     }

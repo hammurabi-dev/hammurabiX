@@ -279,22 +279,22 @@ class Hampyx(object):
         # copy base_file to temp_file
         root = self.tree.getroot()
         # count number of sync output files
-        if root.find("./observable/sync[@cue='1']") is not None:
+        if root.find("./obsio/sync") is not None:
             self._do_sync = True
             # for each sync output
-            for sync in root.findall("./observable/sync[@cue='1']"):
+            for sync in root.findall("./obsio/sync"):
                 freq = str(sync.get('freq'))
                 nside = str(sync.get('nside'))
                 self.sim_map_name[('sync', freq, nside)] = os.path.join(self.wk_dir,
                                                                         'sync_'+freq+'_'+nside+'_'+rnd_idx+'.bin')
                 sync.set('filename', self.sim_map_name[('sync', freq, nside)])
-        fd = root.find("./observable/faraday[@cue='1']")
+        fd = root.find("./obsio/faraday")
         if fd is not None:
             self._do_fd = True
             nside = str(fd.get('nside'))
             self.sim_map_name[('fd', 'nan', nside)] = os.path.join(self.wk_dir, 'fd_'+nside+'_'+rnd_idx+'.bin')
             fd.set('filename', self.sim_map_name[('fd', 'nan', nside)])
-        dm = root.find("./observable/dm[@cue='1']")
+        dm = root.find("./obsio/dm")
         if dm is not None:
             self._do_dm = True
             nside = str(dm.get('nside'))

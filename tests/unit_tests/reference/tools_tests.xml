@@ -2,7 +2,6 @@
 <root>
     <integer value="23"/>
     <float value="3.14"/>
-    <empty_float value=""/>
     <string value="string"/>
     <true value="1"/>
     <false value="0"/>

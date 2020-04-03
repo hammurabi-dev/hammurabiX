@@ -3,62 +3,36 @@
 // we setup field with linear relation to coordinates
 // so that an arbitrary position can be precisely interpoalted and tested
 
-#include <gtest/gtest.h>
-
-#include <cmath>
-#include <memory>
-#include <random>
-
 #include <bfield.h>
+#include <cmath>
 #include <crefield.h>
 #include <grid.h>
+#include <gtest/gtest.h>
 #include <hamtype.h>
 #include <hamvec.h>
+#include <memory>
+#include <random>
 #include <tefield.h>
 #include <toolkit.h>
 
-void fill_breg_grid(const Param *par, Grid_breg *grid);
-void fill_brnd_grid(const Param *par, Grid_brnd *grid);
-void fill_tereg_grid(const Param *par, Grid_tereg *grid);
-void fill_ternd_grid(const Param *par, Grid_tereg *grid);
-void fill_cre_grid(const Param *par, Grid_cre *grid);
+void fill_grid_b(const Param *par, Grid_b *grid);
+void fill_grid_te(const Param *par, Grid_te *grid);
+void fill_grid_cre(const Param *par, Grid_cre *grid);
 
 // assign field vector by position
-void fill_breg_grid(const Param *par, Grid_breg *grid) {
+void fill_grid_b(const Param *par, Grid_b *grid) {
   Hamvec<3, ham_float> gc_pos;
-  ham_float lx{par->grid_breg.x_max - par->grid_breg.x_min};
-  ham_float ly{par->grid_breg.y_max - par->grid_breg.y_min};
-  ham_float lz{par->grid_breg.z_max - par->grid_breg.z_min};
-  for (decltype(par->grid_breg.nx) i = 0; i != par->grid_breg.nx; ++i) {
-    gc_pos[0] = i * lx / (par->grid_breg.nx - 1) + par->grid_breg.x_min;
-    for (decltype(par->grid_breg.ny) j = 0; j != par->grid_breg.ny; ++j) {
-      gc_pos[1] = j * ly / (par->grid_breg.ny - 1) + par->grid_breg.y_min;
-      for (decltype(par->grid_breg.nz) k = 0; k != par->grid_breg.nz; ++k) {
-        gc_pos[2] = k * lz / (par->grid_breg.nz - 1) + par->grid_breg.z_min;
-        ham_uint idx{toolkit::index3d(par->grid_breg.nx, par->grid_breg.ny,
-                                      par->grid_breg.nz, i, j, k)};
-        grid->bx[idx] = gc_pos[0];
-        grid->by[idx] = gc_pos[1];
-        grid->bz[idx] = gc_pos[2];
-      }
-    }
-  }
-}
-
-// assign field vector by position
-void fill_brnd_grid(const Param *par, Grid_brnd *grid) {
-  Hamvec<3, ham_float> gc_pos;
-  ham_float lx{par->grid_brnd.x_max - par->grid_brnd.x_min};
-  ham_float ly{par->grid_brnd.y_max - par->grid_brnd.y_min};
-  ham_float lz{par->grid_brnd.z_max - par->grid_brnd.z_min};
-  for (decltype(par->grid_brnd.nx) i = 0; i != par->grid_brnd.nx; ++i) {
-    gc_pos[0] = i * lx / (par->grid_brnd.nx - 1) + par->grid_brnd.x_min;
-    for (decltype(par->grid_brnd.ny) j = 0; j != par->grid_brnd.ny; ++j) {
-      gc_pos[1] = j * ly / (par->grid_brnd.ny - 1) + par->grid_brnd.y_min;
-      for (decltype(par->grid_brnd.nz) k = 0; k != par->grid_brnd.nz; ++k) {
-        gc_pos[2] = k * lz / (par->grid_brnd.nz - 1) + par->grid_brnd.z_min;
-        ham_uint idx{toolkit::index3d(par->grid_brnd.nx, par->grid_brnd.ny,
-                                      par->grid_brnd.nz, i, j, k)};
+  ham_float lx{par->grid_b.x_max - par->grid_b.x_min};
+  ham_float ly{par->grid_b.y_max - par->grid_b.y_min};
+  ham_float lz{par->grid_b.z_max - par->grid_b.z_min};
+  for (decltype(par->grid_b.nx) i = 0; i != par->grid_b.nx; ++i) {
+    gc_pos[0] = i * lx / (par->grid_b.nx - 1) + par->grid_b.x_min;
+    for (decltype(par->grid_b.ny) j = 0; j != par->grid_b.ny; ++j) {
+      gc_pos[1] = j * ly / (par->grid_b.ny - 1) + par->grid_b.y_min;
+      for (decltype(par->grid_b.nz) k = 0; k != par->grid_b.nz; ++k) {
+        gc_pos[2] = k * lz / (par->grid_b.nz - 1) + par->grid_b.z_min;
+        ham_uint idx{toolkit::index3d(par->grid_b.nx, par->grid_b.ny,
+                                      par->grid_b.nz, i, j, k)};
         grid->bx[idx] = gc_pos[0];
         grid->by[idx] = gc_pos[1];
         grid->bz[idx] = gc_pos[2];
@@ -68,19 +42,19 @@ void fill_brnd_grid(const Param *par, Grid_brnd *grid) {
 }
 
 // fill field scalar by sum of position coordinates
-void fill_ternd_grid(const Param *par, Grid_ternd *grid) {
+void fill_grid_te(const Param *par, Grid_te *grid) {
   Hamvec<3, ham_float> gc_pos;
-  ham_float lx{par->grid_ternd.x_max - par->grid_ternd.x_min};
-  ham_float ly{par->grid_ternd.y_max - par->grid_ternd.y_min};
-  ham_float lz{par->grid_ternd.z_max - par->grid_ternd.z_min};
-  for (decltype(par->grid_ternd.nx) i = 0; i != par->grid_ternd.nx; ++i) {
-    gc_pos[0] = lx * i / (par->grid_ternd.nx - 1) + par->grid_ternd.x_min;
-    for (decltype(par->grid_ternd.ny) j = 0; j != par->grid_ternd.ny; ++j) {
-      gc_pos[1] = ly * j / (par->grid_ternd.ny - 1) + par->grid_ternd.y_min;
-      for (decltype(par->grid_ternd.nz) k = 0; k != par->grid_ternd.nz; ++k) {
-        ham_uint idx{toolkit::index3d(par->grid_ternd.nx, par->grid_ternd.ny,
-                                      par->grid_ternd.nz, i, j, k)};
-        gc_pos[2] = lz * k / (par->grid_ternd.nz - 1) + par->grid_ternd.z_min;
+  ham_float lx{par->grid_te.x_max - par->grid_te.x_min};
+  ham_float ly{par->grid_te.y_max - par->grid_te.y_min};
+  ham_float lz{par->grid_te.z_max - par->grid_te.z_min};
+  for (decltype(par->grid_te.nx) i = 0; i != par->grid_te.nx; ++i) {
+    gc_pos[0] = lx * i / (par->grid_te.nx - 1) + par->grid_te.x_min;
+    for (decltype(par->grid_te.ny) j = 0; j != par->grid_te.ny; ++j) {
+      gc_pos[1] = ly * j / (par->grid_te.ny - 1) + par->grid_te.y_min;
+      for (decltype(par->grid_te.nz) k = 0; k != par->grid_te.nz; ++k) {
+        ham_uint idx{toolkit::index3d(par->grid_te.nx, par->grid_te.ny,
+                                      par->grid_te.nz, i, j, k)};
+        gc_pos[2] = lz * k / (par->grid_te.nz - 1) + par->grid_te.z_min;
         grid->te[idx] = gc_pos[0] + gc_pos[1] + gc_pos[2];
       }
     }
@@ -88,27 +62,7 @@ void fill_ternd_grid(const Param *par, Grid_ternd *grid) {
 }
 
 // fill field scalar by sum of position coordinates
-void fill_tereg_grid(const Param *par, Grid_tereg *grid) {
-  Hamvec<3, ham_float> gc_pos;
-  ham_float lx{par->grid_tereg.x_max - par->grid_tereg.x_min};
-  ham_float ly{par->grid_tereg.y_max - par->grid_tereg.y_min};
-  ham_float lz{par->grid_tereg.z_max - par->grid_tereg.z_min};
-  for (decltype(par->grid_tereg.nx) i = 0; i != par->grid_tereg.nx; ++i) {
-    gc_pos[0] = lx * i / (par->grid_tereg.nx - 1) + par->grid_tereg.x_min;
-    for (decltype(par->grid_tereg.ny) j = 0; j != par->grid_tereg.ny; ++j) {
-      gc_pos[1] = ly * j / (par->grid_tereg.ny - 1) + par->grid_tereg.y_min;
-      for (decltype(par->grid_tereg.nz) k = 0; k != par->grid_tereg.nz; ++k) {
-        ham_uint idx{toolkit::index3d(par->grid_tereg.nx, par->grid_tereg.ny,
-                                      par->grid_tereg.nz, i, j, k)};
-        gc_pos[2] = lz * k / (par->grid_tereg.nz - 1) + par->grid_tereg.z_min;
-        grid->te[idx] = gc_pos[0] + gc_pos[1] + gc_pos[2];
-      }
-    }
-  }
-}
-
-// fill field scalar by sum of position coordinates
-void fill_cre_grid(const Param *par, Grid_cre *grid) {
+void fill_grid_cre(const Param *par, Grid_cre *grid) {
   Hamvec<3, ham_float> gc_pos;
   ham_float E;
   ham_float lx{par->grid_cre.x_max - par->grid_cre.x_min};
@@ -120,10 +74,10 @@ void fill_cre_grid(const Param *par, Grid_cre *grid) {
       gc_pos[1] = ly * j / (par->grid_cre.ny - 1) + par->grid_cre.y_min;
       for (decltype(par->grid_cre.nz) k = 0; k != par->grid_cre.nz; ++k) {
         gc_pos[2] = lz * k / (par->grid_cre.nz - 1) + par->grid_cre.z_min;
-        for (decltype(par->grid_cre.nE) m = 0; m != par->grid_cre.nE; ++m) {
-          E = par->grid_cre.E_min * std::exp(m * par->grid_cre.E_fact);
+        for (decltype(par->grid_cre.ne) m = 0; m != par->grid_cre.ne; ++m) {
+          E = par->grid_cre.e_min * std::exp(m * par->grid_cre.e_fact);
           ham_uint idx{toolkit::index4d(par->grid_cre.nx, par->grid_cre.ny,
-                                        par->grid_cre.nz, par->grid_cre.nE, i,
+                                        par->grid_cre.nz, par->grid_cre.ne, i,
                                         j, k, m)};
           grid->cre_flux[idx] = gc_pos[0] + gc_pos[1] + gc_pos[2] + E;
         }
@@ -133,170 +87,114 @@ void fill_cre_grid(const Param *par, Grid_cre *grid) {
 }
 
 // testing:
-// Breg::read_grid
-TEST(grid, breg_grid) {
+// Grid_b::read_field
+TEST(grid, grid_b) {
+  // initialize parameter set manually
   auto test_par = std::make_unique<Param>();
-  test_par->grid_breg.nx = 10;
-  test_par->grid_breg.ny = 8;
-  test_par->grid_breg.nz = 29;
-  test_par->grid_breg.x_max = 1;
-  test_par->grid_breg.x_min = 0;
-  test_par->grid_breg.y_max = 1;
-  test_par->grid_breg.y_min = 0;
-  test_par->grid_breg.z_max = 1;
-  test_par->grid_breg.z_min = 0;
-  test_par->grid_breg.full_size = 2320;
-  test_par->grid_breg.read_permission = true;
-  auto test_grid = std::make_unique<Grid_breg>(test_par.get());
-  // fill test_grid
-  fill_breg_grid(test_par.get(), test_grid.get());
-  //
-  auto test_breg = std::make_unique<Breg>();
-  // choose an arbitrary position and test read_grid function
-  std::random_device
-      rd; // Will be used to obtain a seed for the random number engine
-  std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
-  std::uniform_real_distribution<> dis(0.0, 1.0);
-  Hamvec<3, ham_float> baseline(dis(gen), dis(gen), dis(gen));
-  auto test_b = test_breg->read_grid(baseline, test_par.get(), test_grid.get());
-  EXPECT_NEAR(test_b[0], baseline[0], 1.0e-10);
-  EXPECT_NEAR(test_b[1], baseline[1], 1.0e-10);
-  EXPECT_NEAR(test_b[2], baseline[2], 1.0e-10);
-}
-
-// testing:
-// Brnd::read_grid
-TEST(grid, brnd_grid) {
-  auto test_par = std::make_unique<Param>();
-  test_par->grid_brnd.nx = 10;
-  test_par->grid_brnd.ny = 8;
-  test_par->grid_brnd.nz = 29;
-  test_par->grid_brnd.x_max = 1;
-  test_par->grid_brnd.x_min = 0;
-  test_par->grid_brnd.y_max = 1;
-  test_par->grid_brnd.y_min = 0;
-  test_par->grid_brnd.z_max = 1;
-  test_par->grid_brnd.z_min = 0;
-  test_par->grid_brnd.full_size = 2320;
-  test_par->grid_brnd.read_permission = true;
-  auto test_grid = std::make_unique<Grid_brnd>(test_par.get());
-  // fill test_grid
-  fill_brnd_grid(test_par.get(), test_grid.get());
-  //
-  auto test_brnd = std::make_unique<Brnd>();
-  // choose an arbitrary position and test read_grid function
-  std::random_device
-      rd; // Will be used to obtain a seed for the random number engine
-  std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
-  std::uniform_real_distribution<> dis(0.0, 1.0);
-  Hamvec<3, ham_float> baseline(dis(gen), dis(gen), dis(gen));
-  auto test_b = test_brnd->read_grid(baseline, test_par.get(), test_grid.get());
-  EXPECT_NEAR(test_b[0], baseline[0], 1.0e-10);
-  EXPECT_NEAR(test_b[1], baseline[1], 1.0e-10);
-  EXPECT_NEAR(test_b[2], baseline[2], 1.0e-10);
-}
-
-// testing:
-// TEreg::read_grid
-TEST(grid, tereg_grid) {
-  auto test_par = std::make_unique<Param>();
-  test_par->grid_tereg.nx = 10;
-  test_par->grid_tereg.ny = 8;
-  test_par->grid_tereg.nz = 29;
-  test_par->grid_tereg.x_max = 1;
-  test_par->grid_tereg.x_min = 0;
-  test_par->grid_tereg.y_max = 1;
-  test_par->grid_tereg.y_min = 0;
-  test_par->grid_tereg.z_max = 1;
-  test_par->grid_tereg.z_min = 0;
-  test_par->grid_tereg.full_size = 2320;
-  test_par->grid_tereg.read_permission = true;
-  auto test_grid = std::make_unique<Grid_tereg>(test_par.get());
-  // fill test_grid
-  fill_tereg_grid(test_par.get(), test_grid.get());
-  //
-  auto test_tereg = std::make_unique<TEreg>();
-  // choose an arbitrary position and test read_grid function
-  std::random_device
-      rd; // Will be used to obtain a seed for the random number engine
-  std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
-  std::uniform_real_distribution<> dis(0.0, 1.0);
-  Hamvec<3, ham_float> baseline(dis(gen), dis(gen), dis(gen));
-  auto test_te =
-      test_tereg->read_grid(baseline, test_par.get(), test_grid.get());
-  EXPECT_NEAR(test_te, baseline[0] + baseline[1] + baseline[2], 1.0e-10);
-}
-
-// testing:
-// TErnd::read_grid
-TEST(grid, ternd_grid) {
-  auto test_par = std::make_unique<Param>();
-  test_par->grid_ternd.nx = 10;
-  test_par->grid_ternd.ny = 8;
-  test_par->grid_ternd.nz = 29;
-  test_par->grid_ternd.x_max = 1;
-  test_par->grid_ternd.x_min = 0;
-  test_par->grid_ternd.y_max = 1;
-  test_par->grid_ternd.y_min = 0;
-  test_par->grid_ternd.z_max = 1;
-  test_par->grid_ternd.z_min = 0;
-  test_par->grid_ternd.full_size = 2320;
-  test_par->grid_ternd.read_permission = true;
-  auto test_grid = std::make_unique<Grid_ternd>(test_par.get());
-  // fill test_grid
-  fill_ternd_grid(test_par.get(), test_grid.get());
-  //
-  auto test_ternd = std::make_unique<TErnd>();
+  test_par->grid_b.nx = 10;
+  test_par->grid_b.ny = 8;
+  test_par->grid_b.nz = 29;
+  test_par->grid_b.x_max = 1;
+  test_par->grid_b.x_min = 0;
+  test_par->grid_b.y_max = 1;
+  test_par->grid_b.y_min = 0;
+  test_par->grid_b.z_max = 1;
+  test_par->grid_b.z_min = 0;
+  test_par->grid_b.full_size = 2320;
+  test_par->grid_b.read_permission = true;
+  // initialize testing grid manually
+  auto test_grid = std::make_unique<Grid_b>(test_par.get());
+  // fill testing grid
+  fill_grid_b(test_par.get(), test_grid.get());
+  // initialize empty field
+  auto test_bfield = std::make_unique<Bfield>(test_par.get());
   // choose an arbitrary position and test read_grid function
   // will be used to obtain a seed for the random number engine
   std::random_device rd;
   // standard mersenne_twister_engine seeded with rd()
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0.0, 1.0);
-  Hamvec<3, ham_float> baseline(dis(gen), dis(gen), dis(gen));
-  auto test_te =
-      test_ternd->read_grid(baseline, test_par.get(), test_grid.get());
-  EXPECT_NEAR(test_te, baseline[0] + baseline[1] + baseline[2], 1.0e-10);
+  Hamvec<3, ham_float> position(dis(gen), dis(gen), dis(gen));
+  auto test_b =
+      test_bfield->read_field(position, test_par.get(), test_grid.get());
+  EXPECT_NEAR(test_b[0], position[0], 1.0e-10);
+  EXPECT_NEAR(test_b[1], position[1], 1.0e-10);
+  EXPECT_NEAR(test_b[2], position[2], 1.0e-10);
 }
 
 // testing:
-// CRE::read_grid
-TEST(grid, cre_grid) {
+// Grid_te::read_field
+TEST(grid, grid_te) {
+  // initialize parameter set manually
+  auto test_par = std::make_unique<Param>();
+  test_par->grid_te.nx = 10;
+  test_par->grid_te.ny = 8;
+  test_par->grid_te.nz = 29;
+  test_par->grid_te.x_max = 1;
+  test_par->grid_te.x_min = 0;
+  test_par->grid_te.y_max = 1;
+  test_par->grid_te.y_min = 0;
+  test_par->grid_te.z_max = 1;
+  test_par->grid_te.z_min = 0;
+  test_par->grid_te.full_size = 2320;
+  test_par->grid_te.read_permission = true;
+  // initialize testing grid manually
+  auto test_grid = std::make_unique<Grid_te>(test_par.get());
+  // fill testing grid
+  fill_grid_te(test_par.get(), test_grid.get());
+  // initialize empty field
+  auto test_tefield = std::make_unique<TEfield>(test_par.get());
+  // choose an arbitrary position and test read_grid function
+  // will be used to obtain a seed for the random number engine
+  std::random_device rd;
+  // standard mersenne_twister_engine seeded with rd()
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<> dis(0.0, 1.0);
+  Hamvec<3, ham_float> position(dis(gen), dis(gen), dis(gen));
+  auto test_te =
+      test_tefield->read_field(position, test_par.get(), test_grid.get());
+  EXPECT_NEAR(test_te, position[0] + position[1] + position[2], 1.0e-10);
+}
+
+// testing:
+// Grid_cre::read_field
+TEST(grid, grid_cre) {
+  // initialize parameter set manually
   auto test_par = std::make_unique<Param>();
   test_par->grid_cre.nx = 10;
   test_par->grid_cre.ny = 8;
   test_par->grid_cre.nz = 29;
-  test_par->grid_cre.nE = 19;
+  test_par->grid_cre.ne = 19;
   test_par->grid_cre.x_max = 1;
   test_par->grid_cre.x_min = 0;
   test_par->grid_cre.y_max = 1;
   test_par->grid_cre.y_min = 0;
   test_par->grid_cre.z_max = 1;
   test_par->grid_cre.z_min = 0;
-  test_par->grid_cre.E_min = 0.01;
-  test_par->grid_cre.E_max = 1;
-  test_par->grid_cre.E_fact =
-      std::log(test_par->grid_cre.E_max / test_par->grid_cre.E_min) /
-      (test_par->grid_cre.nE - 1);
+  test_par->grid_cre.e_min = 0.01;
+  test_par->grid_cre.e_max = 1.;
+  test_par->grid_cre.e_fact =
+      std::log(test_par->grid_cre.e_max / test_par->grid_cre.e_min) /
+      (test_par->grid_cre.ne - 1);
   test_par->grid_cre.cre_size = 44080;
   test_par->grid_cre.read_permission = true;
   auto test_grid = std::make_unique<Grid_cre>(test_par.get());
   // fill test_grid
-  fill_cre_grid(test_par.get(), test_grid.get());
-  //
-  auto test_cre = std::make_unique<CRE_num>();
+  fill_grid_cre(test_par.get(), test_grid.get());
+  // initialize empty field
+  auto test_crefield = std::make_unique<CREfield>(test_par.get());
   // choose an arbitrary position and test read_grid function
   // will be used to obtain a seed for the random number engine
   std::random_device rd;
   // standard mersenne_twister_engine seeded with rd()
   std::mt19937 gen(rd());
   std::uniform_real_distribution<> dis(0.0, 1.0);
-  Hamvec<3, ham_float> baseline(dis(gen), dis(gen), dis(gen));
-  std::uniform_int_distribution<> disi(0, test_par->grid_cre.nE - 1);
-  auto idxE = disi(gen);
-  const ham_float E =
-      test_par->grid_cre.E_min * std::exp(idxE * test_par->grid_cre.E_fact);
-  auto test_c =
-      test_cre->read_grid_num(baseline, idxE, test_par.get(), test_grid.get());
-  EXPECT_NEAR(test_c, baseline[0] + baseline[1] + baseline[2] + E, 1.0e-10);
+  Hamvec<3, ham_float> position(dis(gen), dis(gen), dis(gen));
+  std::uniform_int_distribution<> disi(0, test_par->grid_cre.ne - 1);
+  auto idxe = disi(gen);
+  const ham_float e =
+      test_par->grid_cre.e_min * std::exp(idxe * test_par->grid_cre.e_fact);
+  auto test_c = test_crefield->read_field(position, idxe, test_par.get(),
+                                          test_grid.get());
+  EXPECT_NEAR(test_c, position[0] + position[1] + position[2] + e, 1.0e-10);
 }

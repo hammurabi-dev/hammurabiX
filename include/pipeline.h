@@ -1,13 +1,12 @@
 #ifndef HAMMURABI_PIPELINE_H
 #define HAMMURABI_PIPELINE_H
 
-#include <string>
-
 #include <bfield.h>
 #include <crefield.h>
 #include <grid.h>
 #include <integrator.h>
 #include <param.h>
+#include <string>
 #include <tefield.h>
 #include <toolkit.h>
 
@@ -21,27 +20,21 @@ public:
   Pipeline &operator=(Pipeline &&) = delete;
   virtual ~Pipeline() = default;
   virtual void assemble_grid();
-  virtual void assemble_tereg();
-  virtual void assemble_breg();
-  virtual void assemble_ternd();
-  virtual void assemble_brnd();
+  virtual void assemble_b();
+  virtual void assemble_te();
   virtual void assemble_cre();
   virtual void assemble_obs();
 
 protected:
   std::unique_ptr<Param> par;
-  std::unique_ptr<Grid_tereg> grid_tereg;
-  std::unique_ptr<Grid_breg> grid_breg;
-  std::unique_ptr<Grid_brnd> grid_brnd;
-  std::unique_ptr<Grid_ternd> grid_ternd;
+  std::unique_ptr<Grid_te> grid_te;
+  std::unique_ptr<Grid_b> grid_b;
   std::unique_ptr<Grid_cre> grid_cre;
   std::unique_ptr<Grid_obs> grid_obs;
-  std::unique_ptr<TEreg> tereg;
-  std::unique_ptr<Breg> breg;
-  std::unique_ptr<TErnd> ternd;
-  std::unique_ptr<Brnd> brnd;
-  std::unique_ptr<CREfield> cre;
-  std::unique_ptr<Integrator> intobj;
+  std::unique_ptr<Bfield> bfield;
+  std::unique_ptr<TEfield> tefield;
+  std::unique_ptr<CREfield> crefield;
+  std::unique_ptr<Integrator> integrator;
 };
 
 #endif

@@ -101,34 +101,30 @@ SET(ALL_LIBRARIES)
 
 # find sources
 SET(SRC_FILES
-	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_jaffe.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_lsa.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_unif.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/b/brnd.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/b/brnd_es.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/b/brnd_mhd.cc
-
-	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre_ana.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre_unif.cc
-
-	${CMAKE_CURRENT_LIST_DIR}/source/field/te/tereg.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/te/tereg_unif.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/te/tereg_ymw16.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/te/ternd.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/field/te/ternd_dft.cc
-
 	${CMAKE_CURRENT_LIST_DIR}/source/param/param.cc
+
+	${CMAKE_CURRENT_LIST_DIR}/source/model/b/bmodel.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/model/b/bmodel_unif.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/model/b/bmodel_jaffe.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/model/b/bmodel_lsa.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/model/b/bmodel_es.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/model/b/bmodel_mhd.cc
+
+	${CMAKE_CURRENT_LIST_DIR}/source/model/cre/cremodel.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/model/cre/cremodel_unif.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/model/cre/cremodel_ana.cc
+
+	${CMAKE_CURRENT_LIST_DIR}/source/model/te/temodel.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/model/te/temodel_unif.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/model/te/temodel_ymw16.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/model/te/temodel_dft.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/integrator/integrator.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_obs.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_tereg.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_breg.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_ternd.cc
-	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_brnd.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_b.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_te.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/grid/grid_cre.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/xml/tinyxml2.cc

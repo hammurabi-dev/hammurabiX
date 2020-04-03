@@ -1,66 +1,51 @@
 <?xml version="1.0"?>
 
 <root>
-
-    <observable>
-        <dm cue="1" filename="dm.fits" nside="32"/>
-        <faraday cue="1" filename="fd.fits" nside="32"/>
-        <sync cue="1" freq="23" filename="iqu_sync_23.fits" nside="32"/>
-        <sync cue="1" freq="1.4" filename="iqu_sync_1.4.fits" nside="32"/>
-    </observable>
-    
-    <mask cue="0"/>
-    
-    <fieldio>
-    </fieldio>
-    
-    <grid>
-      
-        <observer>
-            <x value="-8.3"/>
-            <y value="0"/>
-            <z value="0.006"/>
-        </observer>
-        
-        <shell>
-            <layer type="auto">
-                <auto>
-                    <shell_num value="3"/>
-                    <nside_sim value="32"/>
-                </auto>
-                
-                <manual>
-                    <cut value="0.5"/>
-                    <nside_sim value="32"/>
-                    <nside_sim value="16"/>
-                </manual>
-            </layer>
-            <oc_r_min value="5.0"/>
-            <oc_r_max value="45.0"/>
-            <gc_r_min value="0.0"/>
-            <gc_r_max value="20.0"/>
-            <gc_z_min value="0.0"/>
-            <gc_z_max value="10.0"/>
-            <oc_r_res value="0.03"/>
-        </shell>
-    </grid>
-    
-    <magneticfield>
-      
-        <regular cue="0" type="unif">
-        </regular>
-        
-        <random cue="0" type="local" seed="0">
-        </random>
-    </magneticfield>
-    
-    <thermalelectron>
-        <regular cue="0" type="unif">
-        </regular>
-        <random cue="0" type="global" seed="0">
-        </random>
-    </thermalelectron>
-    
-    <cre cue="0" type="unif">
-    </cre>
+	
+	<obsio>
+		<dm filename="dm.fits" nside="32"/>
+		<faraday filename="fd.fits" nside="32"/>
+		<sync freq="23" filename="iqu_sync_23.fits" nside="32"/>
+		<sync freq="1.4" filename="iqu_sync_1.4.fits" nside="32"/>
+	</obsio>
+	
+	<fieldio>
+	</fieldio>
+	
+	<grid>
+		
+		<observer>
+			<x value="-8.3"/>
+			<y value="0"/>
+			<z value="0.006"/>
+		</observer>
+		
+		<shell type="auto">
+			<auto>
+				<shell_num value="3"/>
+				<nside_sim value="32"/>
+			</auto>
+			<manual>
+				<cut value="0.5"/>
+				<nside_sim value="32"/>
+				<nside_sim value="16"/>
+			</manual>
+			<oc_r_min value="5.0"/>
+			<oc_r_max value="45.0"/>
+			<gc_r_min value="0.0"/>
+			<gc_r_max value="20.0"/>
+			<gc_z_min value="0.0"/>
+			<gc_z_max value="10.0"/>
+			<oc_r_res value="0.03"/>
+		</shell>
+	</grid>
+	
+	<bmodel>
+	</bmodel>
+	
+	<temodel>
+	</temodel>
+	
+	<cremodel>
+	</cremodel>
 </root>

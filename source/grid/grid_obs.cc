@@ -1,19 +1,16 @@
-// observable field grid
-
 #include <array>
 #include <cassert>
 #include <fstream>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <vector>
-
 #include <grid.h>
 #include <hamdis.h>
 #include <hamio.h>
 #include <hamtype.h>
 #include <hamunits.h>
+#include <memory>
 #include <param.h>
+#include <sstream>
+#include <string>
+#include <vector>
 
 // line of sight integrator
 Grid_obs::Grid_obs(const Param *par) { build_grid(par); }

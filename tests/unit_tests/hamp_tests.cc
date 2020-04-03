@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <gtest/gtest.h>
-
 #include <hamp.h>
 #include <hamtype.h>
 #include <hamunits.h>

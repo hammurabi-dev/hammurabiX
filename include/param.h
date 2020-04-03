@@ -1,5 +1,3 @@
-// parameters
-
 #ifndef HAMMURABI_PARAM_H
 #define HAMMURABI_PARAM_H
 
@@ -19,72 +17,56 @@ public:
   Param &operator=(const Param &) = delete;
   Param &operator=(Param &&) = delete;
   virtual ~Param() = default;
+
   // galactic centric Cartesian position of the observer
   Hamvec<3, ham_float> observer;
-  // regular magnetic field grid
-  struct param_breg_grid {
+
+  // magnetic field grid
+  struct param_bgrid {
     // in/output file name
     std::string filename;
-    // grid build/read/write controller
-    bool build_permission = false, read_permission = false,
-         write_permission = false;
+    // grid read/write controller
+    bool write_permission = false, read_permission = false;
+    // for internal grid allocation
+    bool build_permission = false;
     // galactic centric Cartesian limit
     ham_float x_max, x_min, y_max, y_min, z_max, z_min;
     // number Cartesian grid support points
     ham_uint nx, ny, nz, full_size;
-  } grid_breg;
-  // random magnetic field grid
-  struct param_brnd_grid {
-    // in/output file name
+  } grid_b;
+
+  // thermal-electron field grid
+  struct param_tegrid {
     std::string filename;
-    // grid build/read/write controller
-    bool read_permission = false, write_permission = false,
-         build_permission = false;
+    // grid read/write controller
+    bool read_permission = false, write_permission = false;
+    // for internal grid allocation
+    bool build_permission = false;
     // galactic centric Cartesian limit
     ham_float x_max, x_min, y_max, y_min, z_max, z_min;
     // number Cartesian grid support points
     ham_uint nx, ny, nz, full_size;
-  } grid_brnd;
-  // regular thermal electron grid
-  struct param_tereg_grid {
-    std::string filename;
-    // grid build/read/write controller
-    bool build_permission = false, read_permission = false,
-         write_permission = false;
-    // galactic centric Cartesian limit
-    ham_float x_max, x_min, y_max, y_min, z_max, z_min;
-    // number Cartesian grid support points
-    ham_uint nx, ny, nz, full_size;
-  } grid_tereg;
-  // random thermal electron grid
-  struct param_ternd_grid {
-    // in/output file name
-    std::string filename;
-    // grid build/read/write controller
-    bool read_permission = false, write_permission = false,
-         build_permission = false;
-    // galactic centric Cartesian limit
-    ham_float x_max, x_min, y_max, y_min, z_max, z_min;
-    // number Cartesian grid support points
-    ham_uint nx, ny, nz, full_size;
-  } grid_ternd;
+  } grid_te;
+
   // cosmic ray electron grid
-  struct param_cre_grid {
+  struct param_cregrid {
     // in/output file name
     std::string filename;
-    // grid build/read/write controller
-    bool build_permission = false, read_permission = false,
-         write_permission = false;
+    // grid read/write controller
+    bool read_permission = false, write_permission = false;
+    // for internal grid allocation
+    bool build_permission = false;
     // number Cartesian grid support points
-    ham_uint nE, nz, nx, ny, cre_size;
+    ham_uint ne, nz, nx, ny, cre_size;
     // galactic centric Cartesian limit
     ham_float x_max, x_min, y_max, y_min, z_max, z_min;
     // cosmic ray electron logarithmic space energy limit
     // E_fact is used for assigning energy bin length
-    ham_float E_min, E_max, E_fact;
+    ham_float e_min, e_max, e_fact;
   } grid_cre;
+
   // observable grid
-  struct param_obs_grid {
+  struct param_obsgrid {
     // grid write controller
     bool write_permission = false;
     // shell resolution controllers
@@ -115,22 +97,28 @@ public:
     bool do_mask = false;
     std::string mask_name;
   } grid_obs;
-  // magnetic field parameters
-  std::string breg_type, brnd_type, brnd_method;
+
+  // field model list
+  std::vector<std::string> bmodel_list;
+  std::vector<std::string> temodel_list;
+  std::vector<std::string> cremodel_list;
+
   // LSA model parameters
-  struct param_breg_lsa {
+  struct param_bmodel_lsa {
     ham_float b0;
     ham_float psi0;
     ham_float psi1;
     ham_float chi0;
-  } breg_lsa;
+  } bmodel_lsa;
+
   // uniform model parameters
-  struct param_breg_unif {
+  struct param_bmodel_unif {
     ham_float bp, bv;
     ham_float l0;
-  } breg_unif;
+  } bmodel_unif;
+
   // Jaffe model parameters
-  struct param_breg_jaffe {
+  struct param_bmodel_jaffe {
     bool quadruple, bss;
     ham_float disk_amp, disk_z0;
     ham_float halo_amp, halo_z0;
@@ -145,28 +133,35 @@ public:
     ham_float arm_pitch, arm_r0, arm_z0;
     // arm compress
     ham_float comp_r, comp_c, comp_d, comp_p;
-  } breg_jaffe;
-  // random magnetic field generation seed
-  ham_uint brnd_seed;
+  } bmodel_jaffe;
+
   // global ES model parameters
-  struct param_brnd_global_es {
+  struct param_bmodel_es {
+    ham_uint seed;
     ham_float rms;
     ham_float k0, k1;
     ham_float a0, a1;
     ham_float rho;
     ham_float r0, z0;
-  } brnd_es;
+  } bmodel_es;
+
   // local MHD model parameters
-  struct param_brnd_local_mhd {
+  struct param_bmodel_mhd {
+    ham_uint seed;
     ham_float pa0, pf0, ps0;
     ham_float aa0, af0, as0, a1;
     ham_float k0, k1;
     ham_float ma, beta;
-  } brnd_mhd;
-  // thermal electron
-  std::string tereg_type, ternd_type, ternd_method;
+  } bmodel_mhd;
+
+  // uniform model parameters
+  struct param_temodel_unif {
+    ham_float n0;
+    ham_float r0;
+  } temodel_unif;
+
   // ymw16 model parameters
-  struct param_tereg_ymw16 {
+  struct param_temodel_ymw16 {
     ham_float r_warp, r0;
     ham_float t0_gamma_w;
     ham_float t1_ad, t1_bd, t1_n1, t1_h1;
@@ -179,48 +174,45 @@ public:
     ham_float t6_j_lb, t6_nlb1, t6_detlb1, t6_wlb1, t6_hlb1, t6_thetalb1,
         t6_nlb2, t6_detlb2, t6_wlb2, t6_hlb2, t6_thetalb2;
     ham_float t7_nli, t7_rli, t7_wli, t7_detthetali, t7_thetali;
-  } tereg_ymw16;
-  // uniform model parameters
-  struct param_tereg_unif {
-    ham_float n0;
-    ham_float r0;
-  } tereg_unif;
-  // random thermal electron generation seed
-  ham_uint ternd_seed;
+  } temodel_ymw16;
+
   // isotropic default model parameters
-  struct param_ternd_global_dft {
+  struct param_temodel_dft {
+    ham_uint seed;
     ham_float rms;
     ham_float k0;
     ham_float a0;
     ham_float r0;
     ham_float z0;
-  } ternd_dft;
-  // cosmic ray electron
-  std::string cre_type;
+  } temodel_dft;
+
   // analytical model parameters
-  struct param_cre_ana {
+  struct param_cremodel_ana {
     ham_float alpha, beta, theta;
     ham_float r0, z0;
-    ham_float E0, j0;
-  } cre_ana;
+    ham_float e0, j0;
+  } cremodel_ana;
+
   // uniform model parameters
-  struct param_cre_unif {
+  struct param_cremodel_unif {
     ham_float alpha;
     ham_float r0;
-    ham_float E0, j0;
-  } cre_unif;
+    ham_float e0, j0;
+  } cremodel_unif;
 
 protected:
-  // collect observable related parameters
-  void obs_param(tinyxml2::XMLDocument *);
-  // collect magnetic field related parameters
-  void breg_param(tinyxml2::XMLDocument *);
-  void brnd_param(tinyxml2::XMLDocument *);
-  // collect thermal electron related parameters
-  void tereg_param(tinyxml2::XMLDocument *);
-  void ternd_param(tinyxml2::XMLDocument *);
-  // collect cosmic ray electron related parameters
-  void cre_param(tinyxml2::XMLDocument *);
+  // parse observable related parameters
+  void parse_obs(tinyxml2::XMLDocument *);
+  // parse physical field I/O
+  void parse_field(tinyxml2::XMLDocument *);
+  // parse physical field grid parameters
+  void parse_grid(tinyxml2::XMLDocument *);
+  // parse magnetic field related parameters
+  void parse_bmodel(tinyxml2::XMLDocument *);
+  // parse thermal electron related parameters
+  void parse_temodel(tinyxml2::XMLDocument *);
+  // parse cosmic ray electron related parameters
+  void parse_cremodel(tinyxml2::XMLDocument *);
 };
 
 #endif

@@ -3,14 +3,14 @@
 
 #include <cassert>
 #include <fstream>
+#include <hamdis.h>
+#include <hamp.h>
+#include <hamtype.h>
+#include <iostream>
 #include <memory>
 #include <omp.h>
 #include <stdexcept>
 #include <string>
-
-#include <hamdis.h>
-#include <hamp.h>
-#include <hamtype.h>
 
 template <typename T> class Hamio {
 protected:
@@ -53,8 +53,10 @@ public:
         outfile.write(reinterpret_cast<char *>(&tmpfloat), sizeof(ham_float));
       }
       outfile.close();
-    } else
-      throw std::runtime_error("unable to open file");
+    } else {
+      std::cerr << this->Filename << std::endl;
+      throw std::runtime_error("unable to open");
+    }
   }
   // write to disk (for Hampix)
   virtual void dump(const Hampix<T> &m) const {
@@ -69,8 +71,10 @@ public:
         outfile.write(reinterpret_cast<char *>(&tmpfloat), sizeof(ham_float));
       }
       outfile.close();
-    } else
-      throw std::runtime_error("unable to open file");
+    } else {
+      std::cerr << this->Filename << std::endl;
+      throw std::runtime_error("unable to open");
+    }
   }
   // read from disk (for Hamdis)
   virtual void load(Hamdis<T> &m) const {
@@ -96,8 +100,10 @@ public:
         m.data(tmpuint, tmpfloat);
       }
       infile.close();
-    } else
-      throw std::runtime_error("unable to open file");
+    } else {
+      std::cerr << this->Filename << std::endl;
+      throw std::runtime_error("unable to open");
+    }
   }
   // read from disk (for Hampix)
   virtual void load(Hampix<T> &m) const {
@@ -114,8 +120,10 @@ public:
         m.data(i, tmpfloat);
       }
       infile.close();
-    } else
-      throw std::runtime_error("unable to open file");
+    } else {
+      std::cerr << this->Filename << std::endl;
+      throw std::runtime_error("unable to open");
+    }
   }
 };
 
