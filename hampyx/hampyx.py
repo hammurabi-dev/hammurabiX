@@ -1,65 +1,3 @@
-"""
-methods:
-
-# Import class
-
-In []: import hampyx as hpx
-
-# Initialize object
-
-In []: object = hpx.Hampyx (xml_path=<xml file path>, exe_path=<executable path>)
-
-# hammurabiX executable path,
-# by default,
-# is searched from the environment varialbe PATH,
-# while xml file path,
-# by default,
-# is searched in the current working directory './'.
-
-# Modify parameter value from base xml file to temp XML file
-
-In []: object.mod_par (keychain=['key1','key2',...], attrib={'tag':'content'})
-
-# Add new parameter
-
-In []: object.add_par (keychain=['key1','key2',...], subkey='keyfinal', attrib={'tag':'content'})
-
-# Delete parameter
-
-In []: object.del_par (keychain=['key1','key2',...])
-
-# If additional argument opt='all', then all matching parameters will be deleted.
-# The strings 'key1', 'key2',
-# etc represent the path to the desired parameter, going through the XML.
-# The "tag" is the label for the parameter: eg. "Value" or "cue" or "type".
-# The "content" is the content under the tag: eg. the string for the tag "filename".
-
-# Look through the parameter tree in python
-
-In []: object.print_par(keychain=['key1','key2',...])
-
-# This will return the current value of the parameter in the XML,
-# associated with the path "key1/key2/.../keyfinal/".
-
-# Run the executable
-
-In []: object(verbose=True/False)
-
-# If additional verbose=True (by default is False),
-# run.log and err.log will be dumped to disk,
-# notice that dumping logs is not thread safe, use quiet mode in threading.
-
-# After this main routine,
-# object.sim_map will be filled with simulation outputs from hammurabiX.
-# The structure of object.sim_map contains arrays under entries:
-# (we give up nested dict structure for the convenience of Bayesian analysis)
-# object.sim_map[('sync',str(freq),str(Nside),'I')] # synchrotron intensity map at 'frequency'
-# object.sim_map[('sync',str(freq),str(Nside),'Q')] # synchrotron Q map at 'frequency'
-# object.sim_map[('sync',str(freq),str(Nside),'U')] # synchrotron U map at 'frequency'
-# object.sim_map[('fd','nan',str(Nside),'nan')] # Faraday depth map
-# object.sim_map[('dm','nan',str(Nside),'nan')] # dispersion measure map
-"""
-
 import os
 import tempfile
 import subprocess
@@ -69,30 +7,65 @@ import numpy as np
 
 from functools import wraps
 def icy(cls):
+    """
+    A class decorator for freezing attributes.
+    """
     cls.__frozen = False
-
     def frozensetattr(self, key, value):
         if self.__frozen and not hasattr(self, key):
             print("Class {} is frozen. Cannot set {} = {}"
                   .format(cls.__name__, key, value))
         else:
             object.__setattr__(self, key, value)
-
     def init_decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
             func(self, *args, **kwargs)
             self.__frozen = True
         return wrapper
-
     cls.__setattr__ = frozensetattr
     cls.__init__ = init_decorator(cls.__init__)
-
     return cls
 
 
 @icy
 class Hampyx(object):
+    """
+	Simple Python wrapper of hammurabi X.
+	
+    Methods
+	-------
+	
+	mod_par(keychain=['key1','key2',...], attrib={'tag':'content'})
+		Modify parameter attribute from the registered XML tree.
+    
+	add_par(keychain=['key1','key2',...], subkey='keyfinal', attrib={'tag':'content'})
+    	Add new parameter/attribute to given key-chain path of the XML tree.
+    
+	del_par(keychain=['key1','key2',...],all=False)
+		Delete parameter following the given key-chain path of the XML tree.
+		If all=True, then all matching parameters will be deleted.
+    
+	print_par(keychain=['key1','key2',...])
+		Print parameters following the given key-chain path of the XML tree.
+    	This will return the current value of the parameter in the XML,
+		associated with the path "key1/key2/.../keyfinal/".
+
+	__call__(raiseonerr=True)
+		Run hammurabi X and catch the returns.
+		Error will be raised if raiseonerr=True,
+		otherwise, run.log and err.log are taken silently. 
+    
+    # After this main routine,
+    # object.sim_map will be filled with simulation outputs from hammurabiX.
+    # The structure of object.sim_map contains arrays under entries:
+    # (we give up nested dict structure for the convenience of Bayesian analysis)
+    # object.sim_map[('sync',str(freq),str(Nside),'I')] # synchrotron intensity map at 'frequency'
+    # object.sim_map[('sync',str(freq),str(Nside),'Q')] # synchrotron Q map at 'frequency'
+    # object.sim_map[('sync',str(freq),str(Nside),'U')] # synchrotron U map at 'frequency'
+    # object.sim_map[('fd','nan',str(Nside),'nan')] # Faraday depth map
+    # object.sim_map[('dm','nan',str(Nside),'nan')] # dispersion measure map
+    """
     
     def __init__(self, xml_path=None, exe_path=None):
         """
@@ -138,7 +111,7 @@ class Hampyx(object):
     @exe_path.setter
     def exe_path(self, exe_path):
         """
-        by default hammurabiX executable "hamx" should be available in PATH
+        By default hammurabiX executable "hamx" should be available in PATH.
         """
         if exe_path is None:  # search sys environ
             self._exe_path = None
@@ -157,8 +130,8 @@ class Hampyx(object):
     @xml_path.setter
     def xml_path(self, xml_path):
         """
-        by default an "*.xml" file should be accessible in current working directory,
-        to be specific, the return of os.getcwd()
+        By default an "*.xml" file should be accessible in current working directory,
+        to be specific, the return of os.getcwd().
         """
         if xml_path is None:
             self._xml_path = None
@@ -181,7 +154,7 @@ class Hampyx(object):
     @wk_dir.setter
     def wk_dir(self, wk_dir):
         """
-        the working directory acts as a hidden parameter
+        The working directory acts as a hidden parameter.
         """
         if wk_dir is None:
             self._wk_dir = os.getcwd()
@@ -226,49 +199,52 @@ class Hampyx(object):
         except AttributeError:
             self._sim_map = sim_map
     
-    def __call__(self, verbose=False):
-        return self.run(verbose)
-        
-    def run(self, verbose=False):
+    def __call__(self, raiseonerr=True):
         """
-        the main routine for running hammurabiX executable
+        The main routine for running hammurabiX executable.
         
         Parameters
         ----------
         
-        verbose : bool
-            record hammurabi executable std output/error, or not
+        raiseonerr : bool
+            Error raising flag, if not raising on error, do logging.
         """
         # create new temp parameter file
         if self.temp_file is self._base_file:
             self._new_xml_copy()
-        # if need verbose output
-        if verbose is True:
+        if raiseonerr:
+            logfile = subprocess.PIPE
+            errfile = subprocess.PIPE
+        else:
             logfile = open('run.log', 'w')
             errfile = open('err.log', 'w')
+        try:
             temp_process = subprocess.Popen([self._executable, self._temp_file],
                                             stdout=logfile,
                                             stderr=errfile)
-            temp_process.wait()
+            returncode = temp_process.wait()
+        except Exception as e:
+            if raiseonerr:
+                raise OSError("ERROR subprocess.Popen raised {}".format(e))
+            else:
+                print("WARNING subprocess.Popen raised {}".format(e))
+        if returncode != 0:
+            # This only returns the output if you used subprocess.PIPE, i.e. writelog=False
+            last_call_log, last_call_err = temp_process.communicate()
+            print(last_call_log)
+            print(last_call_err)
+            if raiseonerr:
+                raise ValueError("HamX returned status {}".format(returncode))
+        if not raiseonerr:
             logfile.close()
             errfile.close()
-        # if quiet, only print upon error
-        else:
-            temp_process = subprocess.Popen([self._executable, self._temp_file],
-                                            stdout=subprocess.PIPE,
-                                            stderr=subprocess.STDOUT)
-            temp_process.wait()
-            if temp_process.returncode != 0:
-                last_call_log, last_call_err = temp_process.communicate()
-                print(last_call_log)
-                print(last_call_err)
         # grab output maps and delete temp files
         self._get_sims()
         self._del_xml_copy()
 
     def _new_xml_copy(self):
         """
-        make a temporary parameter file copy and rename output file with random mark
+        Make a temporary parameter file copy and rename output file with random mark.
         """
         # create a random file name which doesn't exist currently
         fd, new_path = tempfile.mkstemp(prefix='params_', suffix='.xml', dir=self._wk_dir)
@@ -305,7 +281,7 @@ class Hampyx(object):
 
     def _get_sims(self):
         """
-        grab simulation output from disk and delete corresponding fits file
+        Grab simulation output from disk and delete corresponding fits file.
         """
         # locate the keys
         sync_key = list()
@@ -339,8 +315,8 @@ class Hampyx(object):
                     
     def _read_del(self, path):
         """
-        read a single binary file into a numpy array
-        and then delete the file
+        Read a single binary file into a numpy array,
+        and then delete the file.
         """
         assert(os.path.isfile(path))
         loaded_map = np.fromfile(path, dtype=np.float64)
@@ -349,7 +325,7 @@ class Hampyx(object):
 
     def _del_xml_copy(self):
         """
-        delete temporary parameter file copy
+        Delete temporary parameter file copy.
         """
         if self.temp_file is self._base_file:
             raise ValueError('read only')
@@ -357,17 +333,23 @@ class Hampyx(object):
             os.remove(self._temp_file)
             self._temp_file = self._base_file
 
-    """
-    THE FOLLOWING FUNCTIONS ARE RELATED TO XML FILE MANIPULATION
-    """
-
     def mod_par(self, keychain=None, attrib=None):
         """
-        modify parameter in self.tree
-        argument of type ['path','to','target'], {attrib}
-        attrib of type {'tag': 'content'}
-        if attribute 'tag' already exists, then new attrib will be assigned
-        if attribute 'tag' is not found, then new 'tag' will be inserted
+        Modify parameter in the XML tree,
+        argument of type ['path','to','target'], {attrib}.
+        
+        Parameters
+        ----------
+        
+        keychain : list
+            A list of key entry strings.
+        
+        attrib : dict
+            A dict in format {'tag': 'content'},
+            where 'tag' is know as XML attribute name, of given XML element,
+            followed by the 'content' which records the attribute value.
+            If attribute 'tag' already exists, then new attrib will be assigned.
+            If attribute 'tag' is not found, then new 'tag' will be inserted.
         """
         # input type check
         if type(attrib) is not dict or type(keychain) is not list:
@@ -384,9 +366,9 @@ class Hampyx(object):
 
     def add_par(self, keychain=None, subkey=None, attrib=None):
         """
-        add new subkey under keychain in the tree
-        argument of type ['path','to','target'], 'subkey', {attrib}
-        or of type ['path','to','target'], 'subkey'
+        Add new subkey under keychain in the XML tree,
+        argument of type ['path','to','target'], 'subkey', {attrib},
+        or of type ['path','to','target'], 'subkey'.
         """
         # input type check
         if type(keychain) is not list or type(subkey) is not str:
@@ -415,9 +397,9 @@ class Hampyx(object):
 
     def print_par(self, keychain=None):
         """
-        print a certain parameter
-        argument of type ['path','to','key'] (e.g. ['grid','observer','x'])
-        print all parameters down to the keychain children level
+        Print a certain parameter,
+        argument of type ['path','to','key'] (e.g. ['grid','observer','x']),
+        print all parameters down to the keychain children level.
         """
         # input type check
         if type(keychain) is not list:
@@ -436,15 +418,16 @@ class Hampyx(object):
                 for child in target:
                     print('|--> ', child.tag, child.attrib)
 
-    def del_par(self, keychain=None, opt=None):
+    def del_par(self, keychain=None, clean=False):
         """
-        deletes an parameter and all of its children
-        argument of type ['keys','to','target'] (e.g. ['grid','observer','x'])
-        if opt='all', delete all parameters that match given keychain
+        Deletes an parameter and all of its children,
+        argument of type ['keys','to','target'] (e.g. ['grid','observer','x']),
+        if clean=True, delete all parameters that match given keychain.
         """
         # input type check
         if type(keychain) is not list:
             raise ValueError('wrong input %s' % keychain)
+        assert isinstance(clean, bool)
         root = self.tree.getroot()
         if keychain is not None:
             path_str = '.'
@@ -459,12 +442,10 @@ class Hampyx(object):
             parent = root.find(par_path_str)
             if target is None or parent is None:
                 raise ValueError('wrong path %s' % path_str)
-            if opt is None:
-                parent.remove(target)
-            elif (opt == 'all'):
+            if clean:
                 for i in root.findall(path_str):
                     parent.remove(i)
             else:
-                raise ValueError('unsupported option at %s' % keychain)
+                parent.remove(target)
         else:
             raise ValueError('empty keychain')
