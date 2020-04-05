@@ -7,5 +7,5 @@
 // testing:
 // template XML parameters
 TEST(parameter, parse) {
-	auto par = std::make_unique<Param>("templates/params_template.xml");
+  auto par = std::make_unique<Param>("templates/params_template.xml");
 }
