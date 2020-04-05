@@ -1,1 +1,2 @@
 ADD_SUBDIRECTORY(unit_tests)
+ADD_SUBDIRECTORY(sanity_tests)

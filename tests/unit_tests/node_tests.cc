@@ -1,7 +1,6 @@
 // unit tests for Node class
 
 #include <gtest/gtest.h>
-
 #include <hamdis.h>
 #include <hamp.h>
 #include <hamtype.h>

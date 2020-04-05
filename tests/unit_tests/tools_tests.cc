@@ -4,7 +4,6 @@
 #include <hamtype.h>
 #include <memory>
 #include <random>
-#include <tinyxml2.h>
 #include <toolkit.h>
 #include <vector>
 
