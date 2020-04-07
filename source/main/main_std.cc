@@ -1,10 +1,9 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <pipeline.h>
 #include <stdexcept>
 #include <string>
-
-#include <pipeline.h>
 #include <timer.h>
 
 int main(int argc, char **argv) {
@@ -27,7 +26,7 @@ int main(int argc, char **argv) {
 #ifndef NTIMING
   auto tmr = std::make_unique<Timer>();
   tmr->start("mainroutine");
-	tmr->start("prepfield");
+  tmr->start("prepfield");
 #endif
   auto run = std::make_unique<Pipeline>(input);
   run->assemble_grid();
@@ -35,12 +34,12 @@ int main(int argc, char **argv) {
   run->assemble_te();
   run->assemble_cre();
 #ifndef NTIMING
-	tmr->stop("prepfield");
-	tmr->start("LoSintegral");
+  tmr->stop("prepfield");
+  tmr->start("LoSintegral");
 #endif
   run->assemble_obs();
 #ifndef NTIMING
-	tmr->stop("LoSintegral");
+  tmr->stop("LoSintegral");
   tmr->stop("mainroutine");
   tmr->print();
 #endif

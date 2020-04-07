@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <string>
 #include <tefield.h>
+#include <timer.h>
 #include <toolkit.h>
 #include <vector>
 
@@ -33,7 +34,15 @@ void Pipeline::assemble_b() {
       par->grid_b.build_permission) {
     grid_b->build_grid(par.get());
     // allows adding models to numerical input
+#ifndef NTIMING
+    auto tmr = std::make_unique<Timer>();
+    tmr->start("writeB");
+#endif
     bfield->write_field(par.get(), grid_b.get());
+#ifndef NTIMING
+    tmr->stop("writeB");
+    tmr->print();
+#endif
     if (par->grid_b.write_permission)
       grid_b->export_grid(par.get());
   }
@@ -46,7 +55,15 @@ void Pipeline::assemble_te() {
       par->grid_te.build_permission) {
     grid_te->build_grid(par.get());
     // allows adding models to numerical input
+#ifndef NTIMING
+    auto tmr = std::make_unique<Timer>();
+    tmr->start("writeTE");
+#endif
     tefield->write_field(par.get(), grid_te.get());
+#ifndef NTIMING
+    tmr->stop("writeTE");
+    tmr->print();
+#endif
     if (par->grid_te.write_permission)
       grid_te->export_grid(par.get());
   }
@@ -59,7 +76,15 @@ void Pipeline::assemble_cre() {
       par->grid_cre.build_permission) {
     grid_cre->build_grid(par.get());
     // allows adding models to numerical input
+#ifndef NTIMING
+    auto tmr = std::make_unique<Timer>();
+    tmr->start("writeCRE");
+#endif
     crefield->write_field(par.get(), grid_cre.get());
+#ifndef NTIMING
+    tmr->stop("writeCRE");
+    tmr->print();
+#endif
     if (par->grid_cre.write_permission)
       grid_cre->export_grid(par.get());
   }
@@ -69,16 +94,16 @@ void Pipeline::assemble_cre() {
 void Pipeline::assemble_obs() {
   integrator = std::make_unique<Integrator>();
   if (par->grid_obs.write_permission) {
-		// connect fields
-		integrator->fields.b = bfield.get();
-		integrator->fields.te = tefield.get();
-		integrator->fields.cre = crefield.get();
-		// connect grids
-		integrator->grids.b = grid_b.get();
-		integrator->grids.te = grid_te.get();
-		integrator->grids.cre = grid_cre.get();
-		integrator->grids.obs = grid_obs.get();
-		// multi-frequency loop
+    // connect fields
+    integrator->fields.b = bfield.get();
+    integrator->fields.te = tefield.get();
+    integrator->fields.cre = crefield.get();
+    // connect grids
+    integrator->grids.b = grid_b.get();
+    integrator->grids.te = grid_te.get();
+    integrator->grids.cre = grid_cre.get();
+    integrator->grids.obs = grid_obs.get();
+    // multi-frequency loop
     const auto repeat = par->grid_obs.do_sync.size();
     for (ham_uint i = 0; i < repeat; ++i) {
       if (i > 0) {
