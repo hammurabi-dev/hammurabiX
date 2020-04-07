@@ -47,7 +47,7 @@ void Integrator::write_grid(const Param *par) const {
     assemble_shell_ref(shell_ref.get(), par, current_shell);
 #ifndef NTIMING
     auto tmr = std::make_unique<Timer>();
-    tmr->start("pix");
+    tmr->start("pixLoS");
 #endif
 #ifdef _OPENMP
 #pragma omp parallel for schedule(dynamic)
@@ -78,13 +78,7 @@ void Integrator::write_grid(const Param *par) const {
           observables->fd = grids.obs->fd_map->interpolate(ptg);
         }
         // core function!
-#ifndef NTIMING
-        tmr->start("kernel");
-#endif
         radial_integration(shell_ref.get(), ptg, observables.get(), par);
-#ifndef NTIMING
-        tmr->start("kernel");
-#endif
       }
       // collect from pixels
       if (par->grid_obs.do_dm) {
@@ -106,7 +100,7 @@ void Integrator::write_grid(const Param *par) const {
       }
     }
 #ifndef NTIMING
-    tmr->stop("pix");
+    tmr->stop("pixLoS");
     tmr->print();
 #endif
     // accumulating new shell map to sim map

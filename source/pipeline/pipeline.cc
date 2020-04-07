@@ -69,6 +69,16 @@ void Pipeline::assemble_cre() {
 void Pipeline::assemble_obs() {
   integrator = std::make_unique<Integrator>();
   if (par->grid_obs.write_permission) {
+		// connect fields
+		integrator->fields.b = bfield.get();
+		integrator->fields.te = tefield.get();
+		integrator->fields.cre = crefield.get();
+		// connect grids
+		integrator->grids.b = grid_b.get();
+		integrator->grids.te = grid_te.get();
+		integrator->grids.cre = grid_cre.get();
+		integrator->grids.obs = grid_obs.get();
+		// multi-frequency loop
     const auto repeat = par->grid_obs.do_sync.size();
     for (ham_uint i = 0; i < repeat; ++i) {
       if (i > 0) {
@@ -77,15 +87,6 @@ void Pipeline::assemble_obs() {
         // need to rebuild integration grid
         grid_obs->build_grid(par.get());
       }
-      // connect fields
-      integrator->fields.b = bfield.get();
-      integrator->fields.te = tefield.get();
-      integrator->fields.cre = crefield.get();
-      // connect grids
-      integrator->grids.b = grid_b.get();
-      integrator->grids.te = grid_te.get();
-      integrator->grids.cre = grid_cre.get();
-      integrator->grids.obs = grid_obs.get();
       // write and export
       integrator->write_grid(par.get());
       grid_obs->export_grid(par.get());

@@ -26,16 +26,22 @@ int main(int argc, char **argv) {
   }
 #ifndef NTIMING
   auto tmr = std::make_unique<Timer>();
-  tmr->start("main");
+  tmr->start("mainroutine");
+	tmr->start("prepfield");
 #endif
   auto run = std::make_unique<Pipeline>(input);
   run->assemble_grid();
   run->assemble_b();
   run->assemble_te();
   run->assemble_cre();
+#ifndef NTIMING
+	tmr->stop("prepfield");
+	tmr->start("LoSintegral");
+#endif
   run->assemble_obs();
 #ifndef NTIMING
-  tmr->stop("main");
+	tmr->stop("LoSintegral");
+  tmr->stop("mainroutine");
   tmr->print();
 #endif
   return EXIT_SUCCESS;
