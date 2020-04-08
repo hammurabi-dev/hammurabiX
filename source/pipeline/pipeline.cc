@@ -41,10 +41,17 @@ void Pipeline::assemble_b() {
     bfield->write_field(par.get(), grid_b.get());
 #ifndef NTIMING
     tmr->stop("writeB");
-    tmr->print();
 #endif
-    if (par->grid_b.write_permission)
+    if (par->grid_b.write_permission) {
+#ifndef NTIMING
+      tmr->start("exportB");
+#endif
       grid_b->export_grid(par.get());
+#ifndef NTIMING
+      tmr->stop("exportB");
+      tmr->print();
+#endif
+    }
   }
 }
 
@@ -62,10 +69,17 @@ void Pipeline::assemble_te() {
     tefield->write_field(par.get(), grid_te.get());
 #ifndef NTIMING
     tmr->stop("writeTE");
-    tmr->print();
 #endif
-    if (par->grid_te.write_permission)
+    if (par->grid_te.write_permission) {
+#ifndef NTIMING
+      tmr->start("exportTE");
+#endif
       grid_te->export_grid(par.get());
+#ifndef NTIMING
+      tmr->stop("exportTE");
+      tmr->print();
+#endif
+    }
   }
 }
 
@@ -83,10 +97,17 @@ void Pipeline::assemble_cre() {
     crefield->write_field(par.get(), grid_cre.get());
 #ifndef NTIMING
     tmr->stop("writeCRE");
-    tmr->print();
 #endif
-    if (par->grid_cre.write_permission)
+    if (par->grid_cre.write_permission) {
+#ifndef NTIMING
+      tmr->start("exportCRE");
+#endif
       grid_cre->export_grid(par.get());
+#ifndef NTIMING
+      tmr->stop("exportCRE");
+      tmr->print();
+#endif
+    }
   }
 }
 
