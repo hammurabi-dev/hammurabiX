@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
               << "hammurabi X requires the path to the XML parameter file"
               << std::endl
               << "try hamx -h for more details." << std::endl;
-    throw std::pipetime_error("exit before execution");
+    throw std::runtime_error("exit before execution");
   }
   const std::string input(argv[1]);
   if (input == "-h") {
