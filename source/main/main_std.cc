@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
               << "hammurabi X requires the path to the XML parameter file"
               << std::endl
               << "try hamx -h for more details." << std::endl;
-    throw std::runtime_error("exit before execution");
+    throw std::pipetime_error("exit before execution");
   }
   const std::string input(argv[1]);
   if (input == "-h") {
@@ -28,16 +28,16 @@ int main(int argc, char **argv) {
   tmr->start("mainroutine");
   tmr->start("prepfield");
 #endif
-  auto run = std::make_unique<Pipeline>(input);
-  run->assemble_grid();
-  run->assemble_b();
-  run->assemble_te();
-  run->assemble_cre();
+  auto pipe = std::make_unique<Pipeline>(input);
+  pipe->assemble_grid();
+  pipe->assemble_b();
+  pipe->assemble_te();
+  pipe->assemble_cre();
 #ifndef NTIMING
   tmr->stop("prepfield");
   tmr->start("LoSintegral");
 #endif
-  run->assemble_obs();
+  pipe->assemble_obs();
 #ifndef NTIMING
   tmr->stop("LoSintegral");
   tmr->stop("mainroutine");

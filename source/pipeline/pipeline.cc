@@ -32,10 +32,14 @@ void Pipeline::assemble_b() {
   bfield = std::make_unique<Bfield>(par.get());
   if (par->grid_b.read_permission or par->grid_b.write_permission or
       par->grid_b.build_permission) {
+#ifndef NTIMING
+    auto tmr = std::make_unique<Timer>();
+    tmr->start("buildB");
+#endif
     grid_b->build_grid(par.get());
     // allows adding models to numerical input
 #ifndef NTIMING
-    auto tmr = std::make_unique<Timer>();
+    tmr->stop("buildB");
     tmr->start("writeB");
 #endif
     bfield->write_field(par.get(), grid_b.get());
@@ -60,10 +64,14 @@ void Pipeline::assemble_te() {
   tefield = std::make_unique<TEfield>(par.get());
   if (par->grid_te.read_permission or par->grid_te.write_permission or
       par->grid_te.build_permission) {
+#ifndef NTIMING
+    auto tmr = std::make_unique<Timer>();
+    tmr->start("buildTE");
+#endif
     grid_te->build_grid(par.get());
     // allows adding models to numerical input
 #ifndef NTIMING
-    auto tmr = std::make_unique<Timer>();
+    tmr->stop("buildTE");
     tmr->start("writeTE");
 #endif
     tefield->write_field(par.get(), grid_te.get());
@@ -88,10 +96,14 @@ void Pipeline::assemble_cre() {
   crefield = std::make_unique<CREfield>(par.get());
   if (par->grid_cre.read_permission or par->grid_cre.write_permission or
       par->grid_cre.build_permission) {
+#ifndef NTIMING
+    auto tmr = std::make_unique<Timer>();
+    tmr->start("buildCRE");
+#endif
     grid_cre->build_grid(par.get());
     // allows adding models to numerical input
 #ifndef NTIMING
-    auto tmr = std::make_unique<Timer>();
+    tmr->stop("buildCRE");
     tmr->start("writeCRE");
 #endif
     crefield->write_field(par.get(), grid_cre.get());
