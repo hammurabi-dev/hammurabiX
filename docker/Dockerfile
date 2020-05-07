@@ -2,10 +2,8 @@ FROM ubuntu:latest
 
 MAINTAINER jiaxin.wang@sjtu.edu.cn
 
-# users may need python-tk, please install it manually: # apt-get install python3-tk
-
 RUN apt-get update
-RUN apt-get install -y --fix-missing build-essential libblas-dev liblapack-dev gsl-bin libgsl-dev cmake
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --fix-missing build-essential libblas-dev liblapack-dev gsl-bin libgsl-dev cmake
 RUN apt-get install -y --fix-missing git wget vim unzip valgrind graphviz
 RUN apt-get install -y --fix-missing python3 python3-dev python3-pip
 RUN pip3 install numpy scipy matplotlib astropy healpy jupyter pytest nbval gprof2dot
