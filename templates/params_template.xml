@@ -1,26 +1,36 @@
 <?xml version="1.0"?>
 <!-- HAMMURABI PARAMETER SET VERSION 2.5.0-->
+<!-- the XML format helps us visualizing and maintaining parameters comprehensively -->
 <root>
-	
+	<!-- the very 1st level entries under "root" should always exist -->
+    <!-- dispensable entries are marked with "(optional)" -->
 	<obsio> <!-- observables I/O, frequency in GHz -->
-		
+		<!-- in/out-put files in ham_float (defined in hamtype.h) binary format -->
+        <!-- the existance of an entry triggers corresponding in/output routine -->
+        <!-- HEALPix Nside is used by default, the nside attributes marks the final output resolution -->
 		<dm filename="dm.bin" nside="8"/> <!-- Dispersion Measure (optional) -->
 		<faraday filename="fd.bin" nside="64"/> <!-- Faraday depth (optional) -->
+        <!-- simultaneous synchrotron emission production at multiple frequencies is allowed -->
 		<sync freq="30" filename="sync_30.bin" nside="16"/> <!-- synchrotron dmission (optional) -->
 		<sync freq="1.4" filename="sync_1.4.bin" nside="32"/> <!-- synchrotron dmission (optional) -->
-		<!-- mask filename="mask.bin" nside="32"/ --> <!-- the mask map is universally applied to all observable outputs -->
+        <!-- the mask map is universally applied to all observable outputs -->
+        <!-- mask map is an input, DO NOT uncomment the following entry if no mask map is prepared -->
+        <!-- a simple mask map preparation Python script can be found in the template directory -->
+		<!-- mask filename="mask.bin" nside="32"/ --> <!-- mask (optional) -->
 	</obsio>
 	
 	<fieldio> <!-- physical fields I/O -->
-		
+		<!-- "read" & "write" are boolean buttons for turnning on reading & writing routine -->
+        <!-- it is possible to do reading followed by writing procedure -->
+        <!-- in/out-put files in ham_float (defined in hamtype.h) binary format -->
 		<bfield read="0" write="0" filename="bfield.bin"/> <!-- magnetic field (optional) -->
 		<tefield read="0" write="0" filename="tefield.bin"/> <!-- thermal electron field (optional) -->
 		<crefield read="0" write="0" filename="crefield.bin"/> <!-- cosmic ray electron field (optional) -->
-		
 	</fieldio>
 	
 	<grid> <!-- field & observable grid -->
-		
+		<!-- 3-4D galactic-centric Cartesian field grids are supported -->
+        <!-- which means the galaxy center is located at the center of each grid -->
 		<observer> <!-- galactic-centric position of observer -->
 			<x value="-8.3"/> <!-- kpc -->
 			<y value="0"/> <!-- kpc -->
@@ -28,7 +38,7 @@
 		</observer>
 		
 		<bfield> <!-- magnetic field grid (optional) -->
-			<!-- grid vertex size -->
+			<!-- grid vertex size (number of total vertices) -->
 			<nx value="200"/> <!-- -->
 			<ny value="200"/> <!-- -->
 			<nz value="80"/> <!-- -->
@@ -68,56 +78,63 @@
 			<y_max value="0.0"/> <!-- kpc -->
 			<z_min value="-4.0"/> <!-- kpc -->
 			<z_max value="4.0"/> <!-- kpc -->
+            <!-- CRE grid requires another energy coordinate -->
 			<!-- e_max = e_min*exp(ne*e_fact) -->
+            <!-- by definition, e_min cannot be 0 -->
 			<e_min value="0.1"/> <!-- GeV -->
 			<e_max value="100.0"/> <!-- GeV -->
 		</crefield>
-		
-		<shell type="auto"> <!-- LoS integration helio/observer-centric spherical shell setting -->
-			<!-- automatic shell deviding -->
+        
+		<shell type="auto"> <!-- spherical line-of-sight integration shells -->
+            <!-- the shell type attribute above should be either "auto" or "manual" -->
+            <!-- galactic-centric (spherical frame) radial limits -->
+            <gc_r_min value="0.0"/> <!-- kpc -->
+            <gc_r_max value="20.0"/> <!-- kpc -->
+            <!-- galactic-centric (cylindric frame) height limits -->
+            <gc_z_min value="-10.0"/> <!-- kpc -->
+            <gc_z_max value="10.0"/> <!-- kpc -->
+            <!-- observer-centric (spherical frame) radial limits -->
+            <oc_r_min value="0.0"/> <!-- kpc -->
+            <oc_r_max value="30.0"/> <!-- kpc -->
+            <!-- observer-centric (spherical frame) integratal resolution -->
+            <oc_r_res value="0.01"/> <!-- kpc -->
+            <!-- algorithms of the shell arrangement can be found in ApJS 247 18 -->
+			<!-- automatic shell dividing -->
 			<auto>
 				<shell_num value="1"/> <!-- total shell number -->
 				<nside_sim value="32"/> <!-- lowest shell nside -->
 			</auto>
-			<!-- set shell resolution from inside out -->
-			<!-- set shell cutting point from inside out -->
-			<manual> <!-- total shell number calculated automatically -->
+			<!-- manual shell dividing -->
+			<manual>
+                <!-- the total shell number calculated automatically -->
+                <!-- set shell cutting point from inside out -->
+                <!-- the cut values are the fractions of maximal observer-centric radius -->
 				<cut value="0.5"/> <!-- shell dividing position -->
-				<!-- shell nsides from inside out -->
+                <!-- set shell resolution from inside out -->
 				<nside_sim value="32"/>
 				<nside_sim value="64"/>
 			</manual>
-			<!-- observer-centric radial limit -->
-			<oc_r_min value="0.0"/> <!-- kpc -->
-			<oc_r_max value="30.0"/> <!-- kpc -->
-			<!-- galactic-centric radial limit -->
-			<gc_r_min value="0.0"/> <!-- kpc -->
-			<gc_r_max value="20.0"/> <!-- kpc -->
-			<!-- galactic-centric height limit -->
-			<gc_z_min value="-10.0"/> <!-- kpc -->
-			<gc_z_max value="10.0"/> <!-- kpc -->
-			<!-- observer-centric radial integratal resolution -->
-			<oc_r_res value="0.01"/> <!-- kpc -->
 		</shell>
-		
+        
 	</grid>
 	
-	<bmodel> <!-- magnetic fields, component activated by cue="1" -->
-		
-		<unif cue="1"> <!-- uniform field -->
+	<bmodel> <!-- magnetic field models -->
+		<!-- model component can be activated by the boolean button: cue="1" -->
+        <!-- in v2.5+, superposition of field models is allowed -->
+		<unif cue="1"> <!-- uniform field (optional) -->
 			<bp value="2.0"/> <!-- parallel, microG -->
 			<bv value="0.0"/> <!-- vertical, microG -->
 			<l0 value="70"/> <!-- longitude, deg -->
 		</unif>
 		
-		<lsa cue="0"> <!-- LSA (WMAP-3yr) -->
+		<lsa cue="0"> <!-- logrithmic-spiral-arm (optional) -->
 			<b0 value="1.2"/> <!-- microG -->
 			<psi0 value="27.0"/> <!-- deg -->
 			<psi1 value="0.9"/> <!-- deg -->
 			<chi0 value="25.0"/> <!-- deg -->
 		</lsa>
 		
-		<jaffe cue="0"> <!-- Jaffe -->
+		<jaffe cue="0"> <!-- Jaffe (optional) -->
 			<quadruple cue="0"/> <!-- quadruple pattern in halo -->
 			<bss cue="0"/> <!-- bi-symmetric -->
 			<disk_amp value="0.167"/> <!-- disk amplitude, microG -->
@@ -154,7 +171,7 @@
 			<comp_p value="3"/> <!-- cutoff power -->
 		</jaffe>
 		
-		<es cue="0" seed="0"> <!-- Ensslin-Steininger field -->
+		<es cue="0" seed="0"> <!-- Ensslin-Steininger field (optional) -->
 			<rms value="0.8"/> <!-- RMS -->
 			<k0 value="10.0"/> <!-- injection, 1/(Lambda in kpc) -->
 			<k1 value="0.1"/> <!-- inverse cascading cutoff, 1/(Lambda in kpc) -->
@@ -166,7 +183,7 @@
 			<z0 value="1.0"/> <!-- in kpc -->
 		</es>
 		
-		<mhd cue="0" seed="0"> <!-- compressible MHD approximation -->
+		<mhd cue="0" seed="0"> <!-- compressible MHD approximation (optional) -->
 			<pa0  value="1"/> <!-- Alfven power norm at k0 -->
 			<pf0 value="1"/> <!-- fast power norm at k0 -->
 			<ps0 value="1"/> <!-- slow power norm at k0 -->
@@ -182,14 +199,15 @@
 		
 	</bmodel>
 	
-	<temodel> <!-- thermal electron field -->
-		
-		<unif cue="1"> <!-- uniform -->
+	<temodel> <!-- thermal electron field models -->
+        <!-- model component can be activated by the boolean button: cue="1" -->
+        <!-- in v2.5+, superposition of field models is allowed -->
+		<unif cue="1"> <!-- uniform (optional) -->
 			<n0 value="0.01"/> <!-- pccm -->
 			<r0 value="3.0"/> <!-- kpc -->
 		</unif>
 		
-		<ymw16 cue="0"> <!-- YMW16 -->
+		<ymw16 cue="0"> <!-- YMW16 (optional) -->
 			<warp>
 				<r_warp value="8.4"/> <!-- galactic warp, kpc -->
 				<gamma_w value="0.14"/> <!-- warp ratio -->
@@ -276,7 +294,7 @@
 			</loopi>
 		</ymw16>
 		
-		<dft cue="0" seed="0"> <!-- default random -->
+		<dft cue="0" seed="0"> <!-- default random (optional) -->
 			<rms value="1.0"/>
 			<k0 value="2.0"/> <!-- cutoff 1/Lambda, kpc -->
 			<a0 value="-1.7"/>
@@ -288,17 +306,19 @@
 	</temodel>
 	
 	<cremodel> <!-- cosmic-ray electron, flux norm comes with unit [GeV m^2 s Sr]^-1 -->
-		
-		<unif cue="1"> <!-- uniform -->
+        <!-- model component can be activated by the boolean button: cue="1" -->
+        <!-- superposition of field models is NOT allowed -->
+		<unif cue="1"> <!-- uniform (optional) -->
 			<alpha value="3.0"/>
-			<r0 value="3.0"/> <!-- cutoff radius, kpc -->
-			<!-- by default, we choose AMS02 20.6GeV -->
+			<r0 value="3.0"/> <!-- galactic spherical frame cutoff radius, kpc -->
+			<!-- by default, we choose AMS02 20.6GeV as the flux reference -->
 			<e0 value="20.6"/> <!-- CRE total energy reference, GeV -->
-			<j0 value="0.0217"/> <!-- local CRE flux norm factor @ E0 -->
+			<j0 value="0.0217"/> <!-- local CRE flux norm factor @ e0 -->
 		</unif>
 		
-		<pwrlaw cue="0">
-			<!-- CRE spectral index: -alpha+beta*r+theta*z, Galactic cylindric frame -->
+		<pwrlaw cue="0"> <!-- power-law (optional) -->
+            <!-- spatial scaling is defined in the galactic cylindric frame -->
+			<!-- CRE spectral index: -alpha+beta*r+theta*z -->
 			<alpha value="3.0"/>
 			<beta value="0.0"/>
 			<theta value="0.0"/>
@@ -306,7 +326,7 @@
 			<z0 value="1.0"/> <!-- kpc -->
 			<!-- by default, we choose AMS02 result @ 20.6GeV -->
 			<e0 value="20.6"/> <!-- CRE kinetic energy reference, GeV -->
-			<j0 value="0.0217"/> <!-- local CRE flux norm factor @ E0 -->
+			<j0 value="0.0217"/> <!-- local CRE flux norm factor @ e0 -->
 		</pwrlaw>
 		
 	</cremodel>
