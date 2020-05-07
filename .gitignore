@@ -1,6 +1,7 @@
 /*build*
 sites
 *.d
+*.DS_Store
 
 # eclipse
 /.cproject
