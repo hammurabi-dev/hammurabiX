@@ -40,6 +40,7 @@ OPTION(ENABLE_REPORT "Enable verbose report" ON)
 #--------------------------------------------#
 
 # we SET GSL_HINTS just in case FindGSL fails
+# note that $HOME may not work well in CMake HINTS
 IF(ON_DOCKER)
 	SET(GSL_HINTS /usr) 
 	SET(FFTW_HINTS /tmp/local)
@@ -47,10 +48,10 @@ IF(ON_DOCKER)
 	SET(INSTALL_ROOT_DIR /tmp/local/hammurabi)
 ELSE()
 	MESSAGE("apply GSL FFTW3 GoogleTest paths")
-	SET(GSL_HINTS $HOME/local/gsl)
-	SET(FFTW_HINTS $HOME/local/fftw)
-	SET(GTEST_HINTS $HOME/local/googletest)
-	SET(INSTALL_ROOT_DIR $HOME/local/hammurabi)
+	SET(GSL_HINTS /usr/local/gsl)
+	SET(FFTW_HINTS /usr/local/fftw)
+	SET(GTEST_HINTS /usr/local/googletest)
+	SET(INSTALL_ROOT_DIR /usr/local/hammurabi)
 	SET(CMAKE_EXE_LINKER_FLAGS)
 ENDIF()
 
