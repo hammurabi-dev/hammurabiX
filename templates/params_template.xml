@@ -37,7 +37,7 @@
 			<z value="0.006"/> <!-- kpc -->
 		</observer>
 		
-		<bfield> <!-- magnetic field grid (optional) -->
+		<bfield> <!-- magnetic field grid (optional if <bfield read="0" write="0" .../>) -->
 			<!-- grid vertex size (number of total vertices) -->
 			<nx value="200"/> <!-- -->
 			<ny value="200"/> <!-- -->
@@ -51,7 +51,7 @@
 			<z_max value="4.0"/> <!-- kpc -->
 		</bfield>
 		
-		<tefield> <!-- thermal electron field grid -->
+		<tefield> <!-- thermal electron field grid (optional if <tefield read="0" write="0" .../>) -->
 			<!-- grid vertex size -->
 			<nx value="200"/> <!-- -->
 			<ny value="200"/> <!-- -->
@@ -65,7 +65,7 @@
 			<z_max value="4.0"/> <!-- kpc -->
 		</tefield>
 		
-		<crefield> <!-- CRE field grid -->
+		<crefield> <!-- CRE field grid (optional if <crefield read="0" write="0" .../>) -->
 			<!-- grid vertex size -->
 			<nz value="80"/> <!-- -->
 			<nx value="80"/> <!-- -->
