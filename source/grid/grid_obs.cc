@@ -12,7 +12,6 @@
 #include <string>
 #include <vector>
 
-// line of sight integrator
 Grid_obs::Grid_obs(const Param *par) { build_grid(par); }
 
 void Grid_obs::build_grid(const Param *par) {
@@ -56,13 +55,17 @@ void Grid_obs::export_grid(const Param *par) {
     expio.dump(*dm_map);
   }
   if (par->grid_obs.do_sync.back()) {
+    const std::string suffix(".");
+    auto suffix_pos = par->grid_obs.sim_sync_name.back().find(suffix);
+    if (suffix_pos == std::string::npos)
+        throw std::runtime_error("missing suffix");
     // in units cmb K, conventional units
     std::string name_i = par->grid_obs.sim_sync_name.back();
     std::string name_q = par->grid_obs.sim_sync_name.back();
     std::string name_u = par->grid_obs.sim_sync_name.back();
-    name_i.insert(name_i.size() - 4, "_I");
-    name_q.insert(name_q.size() - 4, "_Q");
-    name_u.insert(name_u.size() - 4, "_U");
+    name_i.insert(suffix_pos, "_I");
+    name_q.insert(suffix_pos, "_Q");
+    name_u.insert(suffix_pos, "_U");
     expio.filename(name_i);
     expio.dump(*is_map);
     expio.filename(name_q);

@@ -22,6 +22,8 @@ Param::Param(const std::string file_name) {
 
 void Param::parse_obs(tinyxml2::XMLDocument *doc) {
   // observable base path
+  const std::string binary_suffix(".bin");
+  const std::string fits_suffix(".fits");
   tinyxml2::XMLElement *ele{toolkit::tracexml(doc, {"obsio"})};
   // controller for reading shell parameters
   grid_obs.write_permission = false;
@@ -30,6 +32,8 @@ void Param::parse_obs(tinyxml2::XMLDocument *doc) {
     grid_obs.write_permission = true;
     grid_obs.do_dm = true;
     grid_obs.sim_dm_name = toolkit::fetchstring(ele, "dm", "filename");
+      if (grid_obs.sim_dm_name.find(binary_suffix) == std::string::npos and grid_obs.sim_dm_name.find(fits_suffix) == std::string::npos)
+        throw std::runtime_error("wrong suffix");
     grid_obs.nside_dm = toolkit::fetchuint(ele, "dm", "nside");
   } else {
     grid_obs.do_dm = false;
@@ -39,6 +43,8 @@ void Param::parse_obs(tinyxml2::XMLDocument *doc) {
     grid_obs.write_permission = true;
     grid_obs.do_fd = true;
     grid_obs.sim_fd_name = toolkit::fetchstring(ele, "faraday", "filename");
+      if (grid_obs.sim_fd_name.find(binary_suffix) == std::string::npos and grid_obs.sim_fd_name.find(fits_suffix) == std::string::npos)
+          throw std::runtime_error("wrong suffix");
     grid_obs.nside_fd = toolkit::fetchuint(ele, "faraday", "nside");
   } else {
     grid_obs.do_fd = false;
@@ -51,6 +57,8 @@ void Param::parse_obs(tinyxml2::XMLDocument *doc) {
     grid_obs.sim_sync_freq.push_back(toolkit::fetchfloat(subele, "freq") *
                                      cgs::GHz);
     grid_obs.sim_sync_name.push_back(toolkit::fetchstring(subele, "filename"));
+      if (grid_obs.sim_sync_name.back().find(binary_suffix) == std::string::npos and grid_obs.sim_sync_name.back().find(fits_suffix) == std::string::npos)
+          throw std::runtime_error("wrong suffix");
     grid_obs.nside_sync.push_back(toolkit::fetchuint(subele, "nside"));
     for (auto e = subele->NextSiblingElement("sync"); e != nullptr;
          e = e->NextSiblingElement("sync")) {
@@ -58,6 +66,8 @@ void Param::parse_obs(tinyxml2::XMLDocument *doc) {
       grid_obs.sim_sync_freq.push_back(toolkit::fetchfloat(e, "freq") *
                                        cgs::GHz);
       grid_obs.sim_sync_name.push_back(toolkit::fetchstring(e, "filename"));
+        if (grid_obs.sim_sync_name.back().find(binary_suffix) == std::string::npos and grid_obs.sim_sync_name.back().find(fits_suffix) == std::string::npos)
+            throw std::runtime_error("wrong suffix");
       grid_obs.nside_sync.push_back(toolkit::fetchuint(e, "nside"));
     }
   } else {
@@ -67,6 +77,8 @@ void Param::parse_obs(tinyxml2::XMLDocument *doc) {
   if (ele->FirstChildElement("mask") != nullptr) {
     grid_obs.do_mask = true;
     grid_obs.mask_name = toolkit::fetchstring(ele, "mask", "filename");
+      if (grid_obs.mask_name.find(binary_suffix) == std::string::npos and grid_obs.mask_name.find(fits_suffix) == std::string::npos)
+          throw std::runtime_error("wrong suffix");
     grid_obs.nside_mask = toolkit::fetchuint(ele, "mask", "nside");
   } else {
     grid_obs.do_mask = false;
@@ -74,22 +86,29 @@ void Param::parse_obs(tinyxml2::XMLDocument *doc) {
 }
 
 void Param::parse_field(tinyxml2::XMLDocument *doc) {
+    const std::string binary_suffix(".bin");
   // bfield io
   tinyxml2::XMLElement *ele{toolkit::tracexml(doc, {"fieldio"})};
   if (ele->FirstChildElement("bfield") != nullptr) {
     grid_b.read_permission = toolkit::fetchbool(ele, "bfield", "read");
     grid_b.write_permission = toolkit::fetchbool(ele, "bfield", "write");
     grid_b.filename = toolkit::fetchstring(ele, "bfield", "filename");
+      if (grid_b.filename.find(binary_suffix) == std::string::npos)
+          throw std::runtime_error("wrong suffix");
   }
   if (ele->FirstChildElement("tefield") != nullptr) {
     grid_te.read_permission = toolkit::fetchbool(ele, "tefield", "read");
     grid_te.write_permission = toolkit::fetchbool(ele, "tefield", "write");
     grid_te.filename = toolkit::fetchstring(ele, "tefield", "filename");
+      if (grid_te.filename.find(binary_suffix) == std::string::npos)
+          throw std::runtime_error("wrong suffix");
   }
   if (ele->FirstChildElement("crefield") != nullptr) {
     grid_cre.read_permission = toolkit::fetchbool(ele, "crefield", "read");
     grid_cre.write_permission = toolkit::fetchbool(ele, "crefield", "write");
     grid_cre.filename = toolkit::fetchstring(ele, "crefield", "filename");
+      if (grid_cre.filename.find(binary_suffix) == std::string::npos)
+          throw std::runtime_error("wrong suffix");
   }
 }
 

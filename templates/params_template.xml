@@ -4,6 +4,7 @@
 <root>
 	<!-- the very 1st level entries under "root" should always exist -->
     <!-- dispensable entries are marked with "(optional)" -->
+    <!-- output file names can have suffixes either as '.bin' or '.fits' -->
 	<obsio> <!-- observables I/O, frequency in GHz -->
 		<!-- in/out-put files in ham_float (defined in hamtype.h) binary format -->
         <!-- the existance of an entry triggers corresponding in/output routine -->
@@ -23,6 +24,7 @@
 		<!-- "read" & "write" are boolean buttons for turnning on reading & writing routine -->
         <!-- it is possible to do reading followed by writing procedure -->
         <!-- in/out-put files in ham_float (defined in hamtype.h) binary format -->
+        <!-- in/out-put file names must have suffixes '.bin' -->
 		<bfield read="0" write="0" filename="bfield.bin"/> <!-- magnetic field (optional) -->
 		<tefield read="0" write="0" filename="tefield.bin"/> <!-- thermal electron field (optional) -->
 		<crefield read="0" write="0" filename="crefield.bin"/> <!-- cosmic ray electron field (optional) -->
