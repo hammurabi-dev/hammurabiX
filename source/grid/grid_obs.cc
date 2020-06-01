@@ -58,7 +58,7 @@ void Grid_obs::export_grid(const Param *par) {
     const std::string suffix(".");
     auto suffix_pos = par->grid_obs.sim_sync_name.back().find(suffix);
     if (suffix_pos == std::string::npos)
-        throw std::runtime_error("missing suffix");
+      throw std::runtime_error("missing suffix");
     // in units cmb K, conventional units
     std::string name_i = par->grid_obs.sim_sync_name.back();
     std::string name_q = par->grid_obs.sim_sync_name.back();
