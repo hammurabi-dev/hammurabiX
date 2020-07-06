@@ -14,7 +14,8 @@ Hamvec<3, ham_float> Bmodel::read_model(const Hamvec<3, ham_float> &,
 
 Hamvec<3, ham_float> Bmodel::read_grid(const ham_uint &idx,
                                        const Grid_b *grid) const {
-  return Hamvec<3, ham_float>(grid->bx[idx], grid->by[idx], grid->bz[idx]);
+  return Hamvec<3, ham_float>(grid->bx->at(idx), grid->by->at(idx),
+                              grid->bz->at(idx));
 }
 
 Hamvec<3, ham_float> Bmodel::read_grid(const Hamvec<3, ham_float> &pos,
@@ -54,33 +55,33 @@ Hamvec<3, ham_float> Bmodel::read_grid(const Hamvec<3, ham_float> &pos,
   ham_uint idx2{toolkit::index3d(par->grid_b.nx, par->grid_b.ny, par->grid_b.nz,
                                  xl, yl, zl + 1)};
   const Hamvec<3, ham_float> i1{
-      grid->bx[idx1] * (1. - zd) + grid->bx[idx2] * zd,
-      grid->by[idx1] * (1. - zd) + grid->by[idx2] * zd,
-      grid->bz[idx1] * (1. - zd) + grid->bz[idx2] * zd};
+      grid->bx->at(idx1) * (1. - zd) + grid->bx->at(idx2) * zd,
+      grid->by->at(idx1) * (1. - zd) + grid->by->at(idx2) * zd,
+      grid->bz->at(idx1) * (1. - zd) + grid->bz->at(idx2) * zd};
   idx1 = toolkit::index3d(par->grid_b.nx, par->grid_b.ny, par->grid_b.nz, xl,
                           yl + 1, zl);
   idx2 = toolkit::index3d(par->grid_b.nx, par->grid_b.ny, par->grid_b.nz, xl,
                           yl + 1, zl + 1);
   const Hamvec<3, ham_float> i2{
-      grid->bx[idx1] * (1. - zd) + grid->bx[idx2] * zd,
-      grid->by[idx1] * (1. - zd) + grid->by[idx2] * zd,
-      grid->bz[idx1] * (1. - zd) + grid->bz[idx2] * zd};
+      grid->bx->at(idx1) * (1. - zd) + grid->bx->at(idx2) * zd,
+      grid->by->at(idx1) * (1. - zd) + grid->by->at(idx2) * zd,
+      grid->bz->at(idx1) * (1. - zd) + grid->bz->at(idx2) * zd};
   idx1 = toolkit::index3d(par->grid_b.nx, par->grid_b.ny, par->grid_b.nz,
                           xl + 1, yl, zl);
   idx2 = toolkit::index3d(par->grid_b.nx, par->grid_b.ny, par->grid_b.nz,
                           xl + 1, yl, zl + 1);
   const Hamvec<3, ham_float> j1{
-      grid->bx[idx1] * (1. - zd) + grid->bx[idx2] * zd,
-      grid->by[idx1] * (1. - zd) + grid->by[idx2] * zd,
-      grid->bz[idx1] * (1. - zd) + grid->bz[idx2] * zd};
+      grid->bx->at(idx1) * (1. - zd) + grid->bx->at(idx2) * zd,
+      grid->by->at(idx1) * (1. - zd) + grid->by->at(idx2) * zd,
+      grid->bz->at(idx1) * (1. - zd) + grid->bz->at(idx2) * zd};
   idx1 = toolkit::index3d(par->grid_b.nx, par->grid_b.ny, par->grid_b.nz,
                           xl + 1, yl + 1, zl);
   idx2 = toolkit::index3d(par->grid_b.nx, par->grid_b.ny, par->grid_b.nz,
                           xl + 1, yl + 1, zl + 1);
   const Hamvec<3, ham_float> j2{
-      grid->bx[idx1] * (1. - zd) + grid->bx[idx2] * zd,
-      grid->by[idx1] * (1. - zd) + grid->by[idx2] * zd,
-      grid->bz[idx1] * (1. - zd) + grid->bz[idx2] * zd};
+      grid->bx->at(idx1) * (1. - zd) + grid->bx->at(idx2) * zd,
+      grid->by->at(idx1) * (1. - zd) + grid->by->at(idx2) * zd,
+      grid->bz->at(idx1) * (1. - zd) + grid->bz->at(idx2) * zd};
   // interpolate along y direction, two interpolated vectors
   const Hamvec<3, ham_float> w1{i1 * (1. - yd) + i2 * yd};
   const Hamvec<3, ham_float> w2{j1 * (1. - yd) + j2 * yd};
@@ -105,9 +106,9 @@ void Bmodel::write_grid(const Param *par, Grid_b *grid) const {
         gc_pos[2] = k * lz / (par->grid_b.nz - 1) + par->grid_b.z_min;
         const ham_uint idx{idx_lv2 + k};
         tmp_vec = read_model(gc_pos, par);
-        grid->bx[idx] = tmp_vec[0];
-        grid->by[idx] = tmp_vec[1];
-        grid->bz[idx] = tmp_vec[2];
+        grid->bx->at(idx) = tmp_vec[0];
+        grid->by->at(idx) = tmp_vec[1];
+        grid->bz->at(idx) = tmp_vec[2];
       }
     }
   }

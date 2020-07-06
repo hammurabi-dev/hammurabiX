@@ -19,9 +19,9 @@ Grid_b::Grid_b(const Param *par) {
 
 void Grid_b::build_grid(const Param *par) {
   // allocate spatial domian magnetic field
-  bx = std::make_unique<ham_float[]>(par->grid_b.full_size);
-  by = std::make_unique<ham_float[]>(par->grid_b.full_size);
-  bz = std::make_unique<ham_float[]>(par->grid_b.full_size);
+  bx = std::make_unique<std::vector<ham_float>>(par->grid_b.full_size);
+  by = std::make_unique<std::vector<ham_float>>(par->grid_b.full_size);
+  bz = std::make_unique<std::vector<ham_float>>(par->grid_b.full_size);
   // activate FFT allocation upon build_permission
   if (par->grid_b.build_permission) {
     clean_fft = true;
@@ -61,11 +61,11 @@ void Grid_b::export_grid(const Param *par) {
   ham_float tmp;
   for (ham_uint i = 0; i != par->grid_b.full_size; ++i) {
     assert(!output.eof());
-    tmp = bx[i];
+    tmp = bx->at(i);
     output.write(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
-    tmp = by[i];
+    tmp = by->at(i);
     output.write(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
-    tmp = bz[i];
+    tmp = bz->at(i);
     output.write(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
   }
   output.close();
@@ -80,11 +80,11 @@ void Grid_b::import_grid(const Param *par) {
   for (ham_uint i = 0; i != par->grid_b.full_size; ++i) {
     assert(!input.eof());
     input.read(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
-    bx[i] = tmp;
+    bx->at(i) = tmp;
     input.read(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
-    by[i] = tmp;
+    by->at(i) = tmp;
     input.read(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
-    bz[i] = tmp;
+    bz->at(i) = tmp;
   }
 #ifndef NDEBUG
   auto eof = input.tellg();
@@ -92,4 +92,25 @@ void Grid_b::import_grid(const Param *par) {
 #endif
   assert(eof == input.tellg());
   input.close();
+}
+
+void Grid_b::import_grid(const std::vector<ham_float> *input) {
+  const ham_uint input_size{bx->size()};
+  assert(3 * input_size == input->size());
+  for (ham_uint i = 0; i < input_size; ++i) {
+    bx->at(i) = input->at(i);
+    by->at(i) = input->at(i + 1);
+    bz->at(i) = input->at(i + 2);
+  }
+}
+
+std::vector<ham_float> *Grid_b::export_grid() {
+  const ham_uint output_size{bx->size()};
+  auto output = std::make_unique<std::vector<ham_float>>(3 * output_size);
+  for (ham_uint i = 0; i < output_size; ++i) {
+    output->at(i) = bx->at(i);
+    output->at(i + 1) = by->at(i);
+    output->at(i + 2) = bz->at(i);
+  }
+  return output.get();
 }

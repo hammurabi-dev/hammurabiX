@@ -33,9 +33,9 @@ void fill_grid_b(const Param *par, Grid_b *grid) {
         gc_pos[2] = k * lz / (par->grid_b.nz - 1) + par->grid_b.z_min;
         ham_uint idx{toolkit::index3d(par->grid_b.nx, par->grid_b.ny,
                                       par->grid_b.nz, i, j, k)};
-        grid->bx[idx] = gc_pos[0];
-        grid->by[idx] = gc_pos[1];
-        grid->bz[idx] = gc_pos[2];
+        grid->bx->at(idx) = gc_pos[0];
+        grid->by->at(idx) = gc_pos[1];
+        grid->bz->at(idx) = gc_pos[2];
       }
     }
   }

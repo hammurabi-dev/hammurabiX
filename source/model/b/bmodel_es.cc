@@ -323,11 +323,11 @@ void Bmodel_es::write_grid(const Param *par, Grid_b *grid) const {
         // c1(q) = by(q) + i bz(q)
         // c1*1(-q) = by(q) - i bz(q)
         // grid has already been filled, we add new component instead of reset
-        grid->bx[idx] +=
+        grid->bx->at(idx) +=
             0.5 * (grid->c0[idx][0] + grid->c0[idx_sym][0]) * inv_grid_size;
-        grid->by[idx] +=
+        grid->by->at(idx) +=
             0.5 * (grid->c1[idx][0] + grid->c1[idx_sym][0]) * inv_grid_size;
-        grid->bz[idx] +=
+        grid->bz->at(idx) +=
             0.5 * (grid->c1[idx_sym][1] + grid->c1[idx][1]) * inv_grid_size;
       }
     }

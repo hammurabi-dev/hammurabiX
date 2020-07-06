@@ -70,8 +70,10 @@ public:
   void build_grid(const Param *) override;
   void export_grid(const Param *) override;
   void import_grid(const Param *) override;
+  std::vector<ham_float> *export_grid();
+  void import_grid(const std::vector<ham_float> *);
   // spatial domain magnetic field
-  std::unique_ptr<ham_float[]> bx, by, bz;
+  std::unique_ptr<std::vector<ham_float>> bx, by, bz;
   // Fourier domain magnetic field
   fftw_complex *c0, *c1;
   // for/backward FFT plans

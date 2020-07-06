@@ -344,7 +344,8 @@ public:
   // 2nd argument: magnetic field grid
   Hamvec<3, ham_float> read_field(const ham_uint &idx,
                                   const Grid_b *grid) const {
-    return Hamvec<3, ham_float>(grid->bx[idx], grid->by[idx], grid->bz[idx]);
+    return Hamvec<3, ham_float>(grid->bx->at(idx), grid->by->at(idx),
+                                grid->bz->at(idx));
   }
   // read magnetic field at given position (with interpolation)
   // 1st argument: Cartesian frame Galactic centric position
