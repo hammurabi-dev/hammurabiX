@@ -81,7 +81,8 @@ public:
     std::fstream infile(this->Filename.c_str(),
                         std::ios::in | std::ios::binary);
     if (infile.is_open()) {
-      T tmpfloat, tmpfloat2;
+      T tmpfloat;
+      ham_float tmpfloat1, tmpfloat2;
       ham_uint tmpuint;
       // unable to multithread
       for (ham_uint i = 0; i < m.npix(); ++i) {
@@ -91,9 +92,9 @@ public:
         infile.read(reinterpret_cast<char *>(&tmpuint), sizeof(ham_uint));
         m.index(tmpuint, tmpuint);
         // theta
-        infile.read(reinterpret_cast<char *>(&tmpfloat), sizeof(T));
+        infile.read(reinterpret_cast<char *>(&tmpfloat1), sizeof(ham_float));
         // phi
-        infile.read(reinterpret_cast<char *>(&tmpfloat2), sizeof(T));
+        infile.read(reinterpret_cast<char *>(&tmpfloat2), sizeof(ham_float));
         m.pointing(tmpuint, tmpfloat, tmpfloat2);
         // data
         infile.read(reinterpret_cast<char *>(&tmpfloat), sizeof(T));

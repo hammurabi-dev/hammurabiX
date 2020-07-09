@@ -20,5 +20,6 @@ typedef std::uint_fast32_t ham_uint; // unsigned int
 typedef std::int_fast32_t ham_int;   // singed int
 typedef std::int_fast8_t ham_sint;   // short int
 typedef double ham_float;            // floating piont
+typedef float hamio_float;           // I/O floating point
 
 #endif

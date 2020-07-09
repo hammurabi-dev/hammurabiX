@@ -58,15 +58,15 @@ void Grid_b::export_grid(const Param *par) {
   std::ofstream output(par->grid_b.filename.c_str(),
                        std::ios::out | std::ios::binary);
   assert(output.is_open());
-  ham_float tmp;
+  hamio_float tmp;
   for (ham_uint i = 0; i != par->grid_b.full_size; ++i) {
     assert(!output.eof());
-    tmp = bx[i];
-    output.write(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
-    tmp = by[i];
-    output.write(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
-    tmp = bz[i];
-    output.write(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
+    tmp = static_cast<hamio_float>(bx[i]);
+    output.write(reinterpret_cast<char *>(&tmp), sizeof(hamio_float));
+    tmp = static_cast<hamio_float>(by[i]);
+    output.write(reinterpret_cast<char *>(&tmp), sizeof(hamio_float));
+    tmp = static_cast<hamio_float>(bz[i]);
+    output.write(reinterpret_cast<char *>(&tmp), sizeof(hamio_float));
   }
   output.close();
 }
@@ -76,15 +76,15 @@ void Grid_b::import_grid(const Param *par) {
   std::ifstream input(par->grid_b.filename.c_str(),
                       std::ios::in | std::ios::binary);
   assert(input.is_open());
-  ham_float tmp;
+  hamio_float tmp;
   for (ham_uint i = 0; i != par->grid_b.full_size; ++i) {
     assert(!input.eof());
-    input.read(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
-    bx[i] = tmp;
-    input.read(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
-    by[i] = tmp;
-    input.read(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
-    bz[i] = tmp;
+    input.read(reinterpret_cast<char *>(&tmp), sizeof(hamio_float));
+    bx[i] = static_cast<ham_float>(tmp);
+    input.read(reinterpret_cast<char *>(&tmp), sizeof(hamio_float));
+    by[i] = static_cast<ham_float>(tmp);
+    input.read(reinterpret_cast<char *>(&tmp), sizeof(hamio_float));
+    bz[i] = static_cast<ham_float>(tmp);
   }
 #ifndef NDEBUG
   auto eof = input.tellg();

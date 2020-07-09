@@ -42,12 +42,12 @@ void Grid_te::export_grid(const Param *par) {
   std::ofstream output(par->grid_te.filename.c_str(),
                        std::ios::out | std::ios::binary);
   assert(output.is_open());
-  ham_float tmp;
+  hamio_float tmp;
   for (decltype(par->grid_te.full_size) i = 0; i != par->grid_te.full_size;
        ++i) {
     assert(!output.eof());
-    tmp = te[i];
-    output.write(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
+    tmp = static_cast<hamio_float>(te[i]);
+    output.write(reinterpret_cast<char *>(&tmp), sizeof(hamio_float));
   }
   output.close();
 }
@@ -57,12 +57,12 @@ void Grid_te::import_grid(const Param *par) {
   std::ifstream input(par->grid_te.filename.c_str(),
                       std::ios::in | std::ios::binary);
   assert(input.is_open());
-  ham_float tmp;
+  hamio_float tmp;
   for (decltype(par->grid_te.full_size) i = 0; i != par->grid_te.full_size;
        ++i) {
     assert(!input.eof());
-    input.read(reinterpret_cast<char *>(&tmp), sizeof(ham_float));
-    te[i] = tmp;
+    input.read(reinterpret_cast<char *>(&tmp), sizeof(hamio_float));
+    te[i] = static_cast<ham_float>(tmp);
   }
 #ifndef NDEBUG
   auto eof = input.tellg();
