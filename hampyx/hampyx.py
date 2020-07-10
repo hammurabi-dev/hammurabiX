@@ -120,11 +120,13 @@ class Hampyx(object):
                 if os.path.isfile(os.path.join(dir, 'hamx')):
                     self._exe_path = os.path.join(dir, 'hamx')
                     break
-            assert (self._exe_path is not None)
+            if (self._exe_path is None):
+                raise ValueError('fail to locate the executable')
         else:  # if given
             assert isinstance(exe_path, str)
             self._exe_path = os.path.abspath(exe_path)
-        assert (os.path.isfile(self._exe_path))
+        if not (os.path.isfile(self._exe_path)):
+            raise ValueError('fail to read {}'.format(self._exe_path))
         self._executable = self._exe_path
 
     @xml_path.setter
@@ -140,11 +142,13 @@ class Hampyx(object):
                 if os.path.isfile(os.path.join(self._wk_dir, match)):
                     self._xml_path = os.path.join(self._wk_dir, match)
                     break
-            assert (self._xml_path is not None)
+            if (self._xml_path is None):
+                raise ValueError('fail to locate XML file')
         else:
             assert isinstance(xml_path, str)
             self._xml_path = os.path.abspath(xml_path)
-        assert os.path.isfile(self._xml_path)
+        if not os.path.isfile(self._xml_path):
+            raise ValueError('fail to read {}'.format(self._xml_path))
         self._base_file = self._xml_path
 
     @property
@@ -295,7 +299,7 @@ class Hampyx(object):
             elif k[0] == 'sync':
                 sync_key.append(k)
             else:
-                raise ValueError('mismatched key %s' % str(k))
+                raise ValueError('mismatched key {}'.format(str(k)))
         # read dispersion measure and delete file
         if self._do_dm is True:
             self.sim_map[(dm_key[0], dm_key[1], dm_key[2], 'nan')] = self._read_del(self.sim_map_name[dm_key])
@@ -318,7 +322,8 @@ class Hampyx(object):
         Read a single binary file into a numpy array,
         and then delete the file.
         """
-        assert(os.path.isfile(path))
+        if not (os.path.isfile(path)):
+            raise ValueError('fail to find {}'.format(path))
         loaded_map = np.fromfile(path, dtype=np.float64)
         os.remove(path)
         return loaded_map
@@ -328,7 +333,7 @@ class Hampyx(object):
         Delete temporary parameter file copy.
         """
         if self.temp_file is self._base_file:
-            raise ValueError('read only')
+            raise ValueError('no temporary file')
         else:
             os.remove(self._temp_file)
             self._temp_file = self._base_file
@@ -353,14 +358,14 @@ class Hampyx(object):
         """
         # input type check
         if type(attrib) is not dict or type(keychain) is not list:
-            raise ValueError('wrong input %s %s' % (keychain, attrib))
+            raise ValueError('wrong input {} {}'.format(keychain, attrib))
         root = self.tree.getroot()
         path_str = '.'
         for key in keychain:
             path_str += '/' + key
         target = root.find(path_str)
         if target is None:
-            raise ValueError('wrong path %s' % path_str)
+            raise ValueError('wrong path {}'.format(path_str))
         for i in attrib:
             target.set(i, attrib.get(i))
 
@@ -372,7 +377,7 @@ class Hampyx(object):
         """
         # input type check
         if type(keychain) is not list or type(subkey) is not str:
-            raise ValueError('wrong input %s %s %s' % (keychain, subkey, attrib))
+            raise ValueError('wrong input {} {} {}'.format(keychain, subkey, attrib))
         if attrib is not None and type(attrib) is dict:
             root = self.tree.getroot()
             path_str = '.'
@@ -382,7 +387,7 @@ class Hampyx(object):
             # check if (subkey, attrib) already exists
             for existed in target.findall(subkey):
                 if existed.attrib == attrib:
-                    raise ValueError('repeatitive input %s %s %s' % (keychain, subkey, attrib))
+                    raise ValueError('repeatitive input {} {} {}'.format(keychain, subkey, attrib))
             # if not, add to the given position
             et.SubElement(target, subkey, attrib)
         elif attrib is None:
@@ -393,7 +398,7 @@ class Hampyx(object):
             target = root.find(path_str)
             et.SubElement(target, subkey)
         else:
-            raise ValueError('wrong input %s %s %s' % (keychain, subkey, attrib))
+            raise ValueError('wrong input {} {} {}'.format(keychain, subkey, attrib))
 
     def print_par(self, keychain=None):
         """
@@ -403,7 +408,7 @@ class Hampyx(object):
         """
         # input type check
         if type(keychain) is not list:
-            raise ValueError('wrong input %s' % keychain)
+            raise ValueError('wrong input {}'.format(keychain))
         root = self.tree.getroot()
         # print top parameter level if no input is given
         if keychain is None:
@@ -426,7 +431,7 @@ class Hampyx(object):
         """
         # input type check
         if type(keychain) is not list:
-            raise ValueError('wrong input %s' % keychain)
+            raise ValueError('wrong input {}'.fromat(keychain))
         assert isinstance(clean, bool)
         root = self.tree.getroot()
         if keychain is not None:
@@ -441,7 +446,7 @@ class Hampyx(object):
             target = root.find(path_str)
             parent = root.find(par_path_str)
             if target is None or parent is None:
-                raise ValueError('wrong path %s' % path_str)
+                raise ValueError('wrong path {}'.format(path_str))
             if clean:
                 for i in root.findall(path_str):
                     parent.remove(i)

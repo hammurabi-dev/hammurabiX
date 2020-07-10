@@ -12,7 +12,6 @@ TEST(Hamio, basic) {
   // init
   Hamio<ham_float> io_dft("reference/random_map_nside4.bin");
   EXPECT_EQ(io_dft.filename(), std::string("reference/random_map_nside4.bin"));
-
   // manual read
   std::vector<ham_float> base_input;
   std::fstream base_file("reference/random_map_nside4.bin",
