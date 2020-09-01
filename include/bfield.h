@@ -113,6 +113,49 @@ public:
                                    const Param *) const override;
 };
 
+// uniform Cartesian field 
+// with fixed field orientation and strength
+class Breg_cart final : public Breg {
+public:
+  Breg_cart() = default;
+  Breg_cart(const Breg_cart &) = delete;
+  Breg_cart(Breg_cart &&) = delete;
+  Breg_cart &operator=(const Breg_cart &) = delete;
+  Breg_cart &operator=(Breg_cart &&) = delete;
+  virtual ~Breg_cart() = default;
+  Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
+                                   const Param *) const override;
+};
+
+
+// Helical field 
+class Breg_helix final : public Breg {
+public:
+  Breg_helix() = default;
+  Breg_helix(const Breg_helix &) = delete;
+  Breg_helix(Breg_helix &&) = delete;
+  Breg_helix &operator=(const Breg_helix &) = delete;
+  Breg_helix &operator=(Breg_helix &&) = delete;
+  virtual ~Breg_helix() = default;
+  Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
+                                   const Param *) const override;
+};
+
+// Jansson & Farrer 2012 model
+/// http://iopscience.iop.org/article/10.1088/0004-637X/757/1/14/meta
+class Breg_jf12 final : public Breg {
+public:
+  Breg_jf12() = default;
+  Breg_jf12(const Breg_jf12 &) = delete;
+  Breg_jf12(Breg_jf12 &&) = delete;
+  Breg_jf12 &operator=(const Breg_jf12 &) = delete;
+  Breg_jf12 &operator=(Breg_jf12 &&) = delete;
+  virtual ~Breg_jf12() = default;
+  Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
+                                   const Param *) const override;
+};
+
+
 // WMAP-3yr LSA modeling
 // http://iopscience.iop.org/article/10.1086/513699/meta
 // with errata for GMF modeling
@@ -273,6 +316,57 @@ protected:
   Hamvec<3, ham_float> gramschmidt(const Hamvec<3, ham_float> &,
                                    const Hamvec<3, ham_float> &) const;
 };
+
+// Jansson-Farrar 2012 method of global (an)isotropic random magnetic field
+class Brnd_jf12 final : public Brnd_global {
+public:
+  Brnd_jf12() = default;
+  Brnd_jf12(const Brnd_jf12 &) = delete;
+  Brnd_jf12(Brnd_jf12 &&) = delete;
+  Brnd_jf12 &operator=(const Brnd_jf12 &) = delete;
+  Brnd_jf12 &operator=(Brnd_jf12 &&) = delete;
+  virtual ~Brnd_jf12() = default;
+  // use triple Fourier transform scheme
+  // check technical report for details
+  void write_grid(const Param *, const Breg *, const Grid_breg *,
+                  Grid_brnd *) const override;
+#ifndef NDEBUG
+protected:
+#endif
+  // isotropic power-spectrum
+  // 1st argument: isotropic wave-vector magnitude
+  // 2nd argument: parameter class object
+  virtual ham_float spectrum(const ham_float &, const Param *) const;
+  // field energy density reprofiling factor
+  // 1st argument: galactic centric Cartesian frame position
+  // 2nd argument: parameter class object
+  virtual ham_float spatial_profile(const Hamvec<3, ham_float> &,
+                                    const Param *) const;
+  // anisotropy factor
+  // check technical report for details
+  // 1st argument: galactic centric Cartesian frame position
+  // 2rd argument: parameter class object
+  // 3th argument: regular magnetic field class object
+  // 4th argument: regular magnetic field grid class object
+  Hamvec<3, ham_float> anisotropy_direction(const Hamvec<3, ham_float> &,
+                                            const Param *, const Breg *,
+                                            const Grid_breg *) const;
+  // anisotropy ratio
+  // 1st argument: Galactic centric Cartesian frame position
+  // 2rd argument: parameter class object
+  // 3th argument: regular magnetic field class object
+  // 4th argument: regular magnetic field grid class object
+  ham_float anisotropy_ratio(const Hamvec<3, ham_float> &, const Param *,
+                             const Breg *, const Grid_breg *) const;
+  // Gram-Schmidt orthogonalization process
+  // 1st argument: wave-vector
+  // 2nd arugment: input magnetic field vector (in Fourier space)
+  // remark: real and imagine parts of complex magnetic field vector
+  // in Fourier space handled separately
+  Hamvec<3, ham_float> gramschmidt(const Hamvec<3, ham_float> &,
+                                   const Hamvec<3, ham_float> &) const;
+};
+
 
 // local anisotropic random magnetic field
 // in compressive MHD plasma

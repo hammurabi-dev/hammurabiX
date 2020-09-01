@@ -135,7 +135,7 @@
   <magneticfield>
     <!-- regular fields -->
     <!-- if cue="0", all child elements are opitonal -->
-    <regular cue="1" type="unif">
+    <regular cue="1" type="jf12">
       <!-- LSA (WMAP-3yr) -->
       <lsa>
         <b0 value="1.2"/> <!-- microG -->
@@ -190,6 +190,43 @@
         <bv value="0.0"/> <!-- vertical, microG -->
         <l0 value="70"/> <!-- longitude, deg -->
       </unif>
+      <cart>
+        <bx value="1.0"/> <!-- in x direction, microG -->
+        <by value="0.0"/> <!-- in y direction, microG -->
+        <bz value="0.0"/> <!-- in z direction, microG -->
+     </cart>
+     <helix>
+        <bx value="1.0"/> <!-- scaling of helix in x direction (bx*cos(phi)), microG -->
+        <by value="1.0"/> <!-- scaling of helix in y direction (by*sin(phi)), microG -->
+	<bz value="0.0"/> <!-- scaling of helix in z direction (bz*phi), microG -->
+	<r_min value="3.0"/> <!-- inner radius of helix, kpc -->
+	<r_max value="5.0"/> <!-- outer radius of helix, kpc -->
+     </helix>
+     <jf12>
+	<b_arm1 value="0.1"/> <!-- field strength of disk spiral arm 1, microG -->
+	<b_arm2 value="3.0"/> <!-- field strength of disk spiral arm 2, microG -->
+	<b_arm3 value="-0.9"/> <!-- field strength of disk spiral arm 3, microG -->
+	<b_arm4 value="-0.8"/> <!-- field strength of disk spiral arm 4, microG -->
+	<b_arm5 value="-2.0"/> <!-- field strength of disk spiral arm 5, microG -->
+	<b_arm6 value="-4.2"/> <!-- field strength of disk spiral arm 6, microG -->
+	<b_arm7 value="0.0"/> <!-- field strength of disk spiral arm 7, microG -->
+	<b_ring value="0.1"/> <!-- field strength of molecular ring from 3kpc< r< 5 kpc, microG -->
+	<h_disk value="0.40"/> <!-- transition between disk and halo, kpc -->
+	<w_disk value="0.27"/> <!-- transition width of disk, kpc -->
+		
+	<Bn value="1.4"/> <!-- field strength of northern hemisphere toroidal halo, microG -->
+	<Bs value="-1.1"/> <!-- field strength of southern hemisphere toroidal halo, microG -->
+	<rn value="9.22"/> <!-- transition radius of northern hemisphere toroidal halo, kpc -->
+	<rs value="16.7"/> <!-- transition radius of southern hemisphere toroidal halo, kpc -->
+	<wh value="0.20"/> <!-- transition width of toroidal halo, kpc -->
+	<z0 value="5.3"/> <!-- vertical scale height of toroidal halo, kpc -->
+		
+	<B0_X value="4.6"/> <!-- field strength at origin of X halo, microG -->
+	<Xtheta value="49"/> <!-- elevation angle at z= 0, r > rpc_X, rad -->
+	<rpc_X value="4.8"/> <!-- radius where Xtheta = Xtheta_0, kpc -->
+	<r0_X value="2.9"/> <!-- exponential scale length of X halo, kpc -->	
+     </jf12>
+ 
     </regular>
     <!-- random/turbulent fields -->
     <!-- seed should be non-negative int -->
@@ -210,7 +247,32 @@
           <r0 value="8.0"/> <!-- in kpc -->
           <z0 value="1.0"/> <!-- in kpc -->
         </es>
-      </global>
+        <!-- Jansson-Farrar 2012 method -->
+        <jf12>
+          <rms value="1.0"/> <!-- RMS -->
+          <k0 value="10.0"/> <!-- injection, 1/(Lambda in kpc) -->
+          <k1 value="0.1"/> <!-- inverse cascading cutoff, 1/(Lambda in kpc) -->
+          <a0 value="1.7"/> <!-- 5/3, Kolmogorov -->
+          <a1 value="0.0"/> <!-- inverse cascade -->
+          <rho value="1.0"/> <!-- [0,infinity] -->
+	  <!-- energy density rescaling -->
+	  <!-- Disk component -->
+	  <b0_1 value="10.81"/> <!--in uG-->
+	  <b0_2 value="6.96"/> <!--in uG-->
+          <b0_3 value="9.59"/> <!--in uG-->
+          <b0_4 value="6.96"/> <!--in uG-->
+          <b0_5 value="1.96"/> <!--in uG-->
+          <b0_6 value="16.34"/> <!--in uG-->
+          <b0_7 value="37.29"/> <!--in uG-->
+          <b0_8 value="10.35"/> <!--in uG-->
+          <b0_int value="7.63"/> <!--in uG-->
+	  <z0_spiral value="0.61"/> <!-- in kpc -->
+	  <!-- Halo component -->
+          <b0_halo value="4.68"/> <!--in uG-->
+          <r0_halo value="10.97"/> <!-- in kpc -->
+	  <z0_halo value="2.84"/> <!-- in kpc -->
+        </jf12>
+       </global>
       <!-- local generators -->
       <local type="mhd">
         <!-- compressive MHD approximation -->
