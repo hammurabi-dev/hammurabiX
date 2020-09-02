@@ -3,11 +3,11 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.2.3)
 #-------------- customized zone --------------#
 
 SET(CMAKE_CXX_COMPILER "g++")
-OPTION(ENABLE_TESTING "Enable testing for this project" OFF)
+OPTION(ENABLE_TESTING "Enable testing for this project" ON)
 OPTION(ENABLE_TIMING "Enable timing for this porect" ON)
-OPTION(ON_DOCKER "Build on docker image" OFF)
+OPTION(ON_DOCKER "Build on docker image" ON)
 OPTION(BUILD_SHARED_LIBS "Build shared library" ON)
-OPTION(ENABLE_REPORT "Enable verbose report" OFF)
+OPTION(ENABLE_REPORT "Enable verbose report" ON)
 
 #-------------- instruction ------------------#
 
@@ -50,7 +50,7 @@ ELSE()
 	SET(GSL_HINTS $HOME/local/gsl)
 	SET(FFTW_HINTS $HOME/local/fftw)
 	SET(GTEST_HINTS $HOME/local/gtest)
-	SET(INSTALL_ROOT_DIR /usr/local/hammurabi)
+	SET(INSTALL_ROOT_DIR $HOME/local/hammurabi)
 	SET(CMAKE_EXE_LINKER_FLAGS)
 ENDIF()
 
