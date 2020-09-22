@@ -140,40 +140,27 @@ void Brnd_mhd::write_grid(const Param *par, const Breg *breg,
 #pragma omp parallel for schedule(static)
 #endif
   for (decltype(par->grid_brnd.nx) i = 0; i < par->grid_brnd.nx; ++i) {
-    decltype(par->grid_brnd.nx) i_sym{par->grid_brnd.nx -
-                                      i}; // apply Hermitian symmetry
+    decltype(par->grid_brnd.nx) i_sym{par->grid_brnd.nx - i};
     if (i == 0)
       i_sym = i;
-    // it's better to calculate indeces manually
-    // just for reference, how indeces are calculated
-    // const ham_uint idx
-    // {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i,j,l)};
-    // const ham_uint idx_sym
-    // {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i_sym,j_sym,l_sym)};
     const ham_uint idx_lv1{i * par->grid_brnd.ny * par->grid_brnd.nz};
     const ham_uint idx_sym_lv1{i_sym * par->grid_brnd.ny * par->grid_brnd.nz};
     for (decltype(par->grid_brnd.ny) j = 0; j < par->grid_brnd.ny; ++j) {
-      decltype(par->grid_brnd.ny) j_sym{par->grid_brnd.ny -
-                                        j}; // apply Hermitian symmetry
+      decltype(par->grid_brnd.ny) j_sym{par->grid_brnd.ny - j};
       if (j == 0)
         j_sym = j;
       const ham_uint idx_lv2{idx_lv1 + j * par->grid_brnd.nz};
       const ham_uint idx_sym_lv2{idx_sym_lv1 + j_sym * par->grid_brnd.nz};
       for (decltype(par->grid_brnd.nz) l = 0; l < par->grid_brnd.nz; ++l) {
-        decltype(par->grid_brnd.nz) l_sym{par->grid_brnd.nz -
-                                          l}; // apply Hermitian symmetry
+        decltype(par->grid_brnd.nz) l_sym{par->grid_brnd.nz - l};
         if (l == 0)
           l_sym = l;
         const ham_uint idx{idx_lv2 + l};             // q
         const ham_uint idx_sym{idx_sym_lv2 + l_sym}; //-q
         // reconstruct bx,by,bz from c0,c1,c*0,c*1
-        // c0(q) = bx(q) + i by(q)
-        // c*0(-q) = bx(q) - i by(q)
-        // c1(q) = by(q) + i bz(q)
-        // c1*1(-q) = by(q) - i bz(q)
         grid->bx[idx] = 0.5 * (grid->c0[idx][0] + grid->c0[idx_sym][0]);
         grid->by[idx] = 0.5 * (grid->c1[idx][0] + grid->c1[idx_sym][0]);
-        grid->bz[idx] = 0.5 * (grid->c1[idx_sym][1] + grid->c1[idx][1]);
+        grid->bz[idx] = 0.5 * (grid->c1[idx][1] + grid->c1[idx_sym][1]);
       }
     }
   }
