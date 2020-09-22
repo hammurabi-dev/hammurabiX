@@ -49,7 +49,7 @@ ELSE()
 	MESSAGE("apply GSL FFTW3 GoogleTest paths")
 	SET(GSL_HINTS $HOME/local/gsl)
 	SET(FFTW_HINTS $HOME/local/fftw)
-	SET(GTEST_HINTS $HOME/local/googletest)
+	SET(GTEST_HINTS $HOME/local/gtest)
 	SET(INSTALL_ROOT_DIR $HOME/local/hammurabi)
 	SET(CMAKE_EXE_LINKER_FLAGS)
 ENDIF()
@@ -66,13 +66,13 @@ SET(CMAKE_CXX_STANDARD_REQUIRED YES)
 # compile flags under defferent options
 
 IF(ENABLE_TESTING AND ENABLE_TIMING)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -g")
 ELSEIF(ENABLE_TIMING)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -DNDEBUG")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -g -DNDEBUG")
 ELSEIF(ENABLE_TESTING)
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -DNTIMING")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -g -DNTIMING")
 ELSE()
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -DNTIMING -DNDEBUG")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wall -Wextra -pedantic -fPIC -Wno-deprecated -g -DNTIMING -DNDEBUG")
 ENDIF()
 
 IF (ENABLE_REPORT)
@@ -105,8 +105,12 @@ SET(SRC_FILES
 	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_jaffe.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_lsa.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_unif.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_cart.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_helix.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/b/breg_jf12.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/b/brnd.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/b/brnd_es.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/field/b/brnd_jf12.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/field/b/brnd_mhd.cc
 
 	${CMAKE_CURRENT_LIST_DIR}/source/field/cre/cre.cc

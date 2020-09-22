@@ -68,6 +68,12 @@ void Pipeline::assemble_breg() {
     breg = std::make_unique<Breg_jaffe>();
   } else if (par->breg_type == "unif") {
     breg = std::make_unique<Breg_unif>();
+  } else if (par->breg_type == "cart") {
+    breg = std::make_unique<Breg_cart>();
+  } else if (par->breg_type == "helix") {
+    breg = std::make_unique<Breg_helix>();
+  } else if (par->breg_type == "jf12") {
+    breg = std::make_unique<Breg_jf12>();
   } else
     throw std::runtime_error("unsupported breg model");
   // if export to file
@@ -111,6 +117,8 @@ void Pipeline::assemble_brnd() {
     if (par->brnd_type == "global") {
       if (par->brnd_method == "es") {
         brnd = std::make_unique<Brnd_es>();
+      } else if (par->brnd_method == "jf12") {
+        brnd = std::make_unique<Brnd_jf12>();
       } else
         throw std::runtime_error("unsupported brnd model");
       // fill grid with random fields

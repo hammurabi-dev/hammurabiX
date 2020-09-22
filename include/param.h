@@ -146,6 +146,21 @@ public:
     // arm compress
     ham_float comp_r, comp_c, comp_d, comp_p;
   } breg_jaffe;
+  struct param_breg_cart {
+    ham_float bx, by;
+    ham_float bz;
+  } breg_cart;
+  struct param_breg_helix {
+    ham_float bx, by, bz;
+    ham_float r_min, r_max;
+  } breg_helix;
+  struct param_breg_jf12 {
+    ham_float b_arm1, b_arm2, b_arm3, b_arm4, b_arm5, b_arm6, b_arm7;
+    ham_float b_ring, h_disk, w_disk;
+    ham_float Bn, Bs, rn, rs, wh, z0;
+    ham_float B0_X, Xtheta, rpc_X, r0_X;
+  } breg_jf12;
+
   // random magnetic field generation seed
   ham_uint brnd_seed;
   // global ES model parameters
@@ -156,6 +171,15 @@ public:
     ham_float rho;
     ham_float r0, z0;
   } brnd_es;
+  struct param_brnd_global_jf12 {
+    ham_float rms;
+    ham_float k0, k1;
+    ham_float a0, a1;
+    ham_float rho;
+    ham_float b0_1,b0_2,b0_3,b0_4,b0_5,b0_6,b0_7,b0_8;
+    ham_float b0_int, z0_spiral;
+    ham_float b0_halo, r0_halo, z0_halo;
+  } brnd_jf12;
   // local MHD model parameters
   struct param_brnd_local_mhd {
     ham_float pa0, pf0, ps0;
