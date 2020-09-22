@@ -279,13 +279,23 @@ void Bmodel_es::write_grid(const Param *par, Grid_b *grid) const {
         // we take only the real part of b, multiply it by sqrt(2)
         // cause after G-S process, conjugate symmetry might have been destroied
         // sqrt(2) preserve the total spectral power
-        grid->c0[idx][0] = cgs::sqrt2 * free_b_re[0];
-        grid->c0[idx][1] = cgs::sqrt2 * free_b_re[1];
-        grid->c1[idx][0] = cgs::sqrt2 * free_b_re[1];
-        grid->c1[idx][1] = cgs::sqrt2 * free_b_re[2];
+        grid->bx[idx] = cgs::sqrt2 * free_b_re[0];
+        grid->by[idx] = cgs::sqrt2 * free_b_re[1];
+        grid->bz[idx] = cgs::sqrt2 * free_b_re[2];
       } // l
     }   // j
   }     // i
+  // re-assign the field back, avoid thread crash
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+  for (decltype(par->grid_b.full_size) idx = 0; idx < par->grid_b.full_size;
+       ++idx) {
+    grid->c0[idx][0] = grid->bx[idx];
+    grid->c0[idx][1] = grid->by[idx];
+    grid->c1[idx][0] = grid->c0[idx][1];
+    grid->c1[idx][1] = grid->bz[idx];
+  }
   // execute DFT backward plan
   fftw_execute_dft(grid->plan_c0_bw, grid->c0, grid->c0);
   fftw_execute_dft(grid->plan_c1_bw, grid->c1, grid->c1);
