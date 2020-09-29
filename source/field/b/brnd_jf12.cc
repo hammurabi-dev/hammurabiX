@@ -287,15 +287,11 @@ void Brnd_jf12::write_grid(const Param *par, const Breg *breg,
           tmp_k[2] -= cgs::kpc * par->grid_brnd.nz / lz;
         const ham_uint idx{idx_lv2 + l};             // k
         const ham_uint idx_sym{idx_sym_lv2 + l_sym}; //-k
-        // reconstruct bx,by,bz from c0,c1,c*0,c*1
-        // c0(k) = bx(k) + i by(k)
-        // c*0(-k) = bx(k) - i by(k)
-        // c1(k) = by(k) + i bz(k)
-        // c1*1(-k) = by(k) - i bz(k)
+	// reconstruct bx,by,bz from c0,c1,c*0,c*1, keep real parts
         const Hamvec<3, ham_float> tmp_b_re{
             0.5 * (grid->c0[idx][0] + grid->c0[idx_sym][0]),
             0.5 * (grid->c1[idx][0] + grid->c1[idx_sym][0]),
-            0.5 * (grid->c1[idx_sym][1] + grid->c1[idx][1])};
+            0.5 * (grid->c1[idx][1] + grid->c1[idx_sym][1])};
         // Gram-Schmidt process
         const Hamvec<3, ham_float> free_b_re{gramschmidt(tmp_k, tmp_b_re)};
         // reassemble c0,c1 from bx,by,bz
@@ -304,13 +300,23 @@ void Brnd_jf12::write_grid(const Param *par, const Breg *breg,
         // we take only the real part of b, multiply it by sqrt(2)
         // cause after G-S process, conjugate symmetry might have been destroied
         // sqrt(2) preserve the total spectral power
-        grid->c0[idx][0] = 1.41421356 * free_b_re[0];
-        grid->c0[idx][1] = 1.41421356 * free_b_re[1];
-        grid->c1[idx][0] = 1.41421356 * free_b_re[1];
-        grid->c1[idx][1] = 1.41421356 * free_b_re[2];
+        grid->bx[idx] = cgs::sqrtwo * free_b_re[0];
+        grid->by[idx] = cgs::sqrtwo * free_b_re[1];
+        grid->bz[idx] = cgs::sqrtwo * free_b_re[2];
       } // l
     }   // j
   }     // i
+  // re-assign the field back, avoid thread crash
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+  for (decltype(par->grid_brnd.full_size) idx = 0;
+       idx < par->grid_brnd.full_size; ++idx) {
+    grid->c0[idx][0] = grid->bx[idx];
+    grid->c0[idx][1] = grid->by[idx];
+    grid->c1[idx][0] = grid->c0[idx][1];
+    grid->c1[idx][1] = grid->bz[idx];
+  }
   // execute DFT backward plan
   fftw_execute_dft(grid->plan_c0_bw, grid->c0, grid->c0);
   fftw_execute_dft(grid->plan_c1_bw, grid->c1, grid->c1);
