@@ -34,7 +34,7 @@ ham_float Brnd_es::anisotropy_ratio(const Hamvec<3, ham_float> &,
 ham_float Brnd_es::spectrum(const ham_float &k, const Param *par) const {
   // units fixing, wave vector in 1/kpc units
   const ham_float p0{par->brnd_es.rms * par->brnd_es.rms};
-  const ham_float unit = 1. / (4 * cgs::pi * k * k);
+  const ham_float unit = 1. / (4. * cgs::pi * k * k);
   // power laws
   const ham_float band1{ham_float(k < par->brnd_es.k1)};
   const ham_float band2{ham_float(k > par->brnd_es.k1) *
@@ -42,7 +42,7 @@ ham_float Brnd_es::spectrum(const ham_float &k, const Param *par) const {
   const ham_float band3{ham_float(k > par->brnd_es.k0)};
   const ham_float P =
       band1 * std::pow(par->brnd_es.k0 / par->brnd_es.k1, par->brnd_es.a1) *
-          std::pow(k / par->brnd_es.k1, 6.0) +
+          std::pow(k / par->brnd_es.k1, 6.) +
       band2 / std::pow(k / par->brnd_es.k0, par->brnd_es.a1) +
       band3 / std::pow(k / par->brnd_es.k0, par->brnd_es.a0);
   return P * p0 * unit;
@@ -68,9 +68,9 @@ Hamvec<3, ham_float> Brnd_es::gramschmidt(const Hamvec<3, ham_float> &k,
   const ham_float inv_k_mod = 1. / k.lengthsq();
   // multiply \sqrt(3) for preserving spectral power statistically
   return Hamvec<3, ham_float>{
-      1.73205081 * (b[0] - k[0] * k.dotprod(b) * inv_k_mod),
-      1.73205081 * (b[1] - k[1] * k.dotprod(b) * inv_k_mod),
-      1.73205081 * (b[2] - k[2] * k.dotprod(b) * inv_k_mod)};
+      cgs::sqrthree * (b[0] - k[0] * k.dotprod(b) * inv_k_mod),
+      cgs::sqrthree * (b[1] - k[1] * k.dotprod(b) * inv_k_mod),
+      cgs::sqrthree * (b[2] - k[2] * k.dotprod(b) * inv_k_mod)};
 }
 
 void Brnd_es::write_grid(const Param *par, const Breg *breg,
@@ -128,7 +128,8 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
         // as renormalization comes in PHASE II,
         // 1/3, P0 in spectrum, dk3 are numerically redundant
         // while useful for precision check
-        const ham_float sigma{std::sqrt(0.33333333 * spectrum(ks, par) * dk3)};
+        const ham_float sigma{
+            std::sqrt(cgs::onethird * spectrum(ks, par) * dk3)};
         grid->c0[idx][0] = sigma * gsl_ran_ugaussian(seed_id);
         grid->c0[idx][1] = sigma * gsl_ran_ugaussian(seed_id);
         grid->c1[idx][0] = sigma * gsl_ran_ugaussian(seed_id);
@@ -186,7 +187,7 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
         assert(rho >= 0.);
         const ham_float rho2 = rho * rho;
         const ham_float rhonorm =
-            1. / std::sqrt(0.33333333 * rho2 + 0.66666667 / rho2);
+            1. / std::sqrt(cgs::onethird * rho2 + cgs::twothirds / rho2);
         if (H_versor.lengthsq() <
             1e-10) // zero regular field, no prefered anisotropy
           continue;
@@ -211,24 +212,16 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
 #pragma omp parallel for schedule(static)
 #endif
   for (decltype(par->grid_brnd.nx) i = 0; i < par->grid_brnd.nx; ++i) {
-    decltype(par->grid_brnd.nx) i_sym{par->grid_brnd.nx -
-                                      i}; // apply Hermitian symmetry
+    decltype(par->grid_brnd.nx) i_sym{par->grid_brnd.nx - i};
     if (i == 0)
       i_sym = i;
     Hamvec<3, ham_float> tmp_k{cgs::kpc * i / lx, 0, 0};
-    // it's better to calculate indeces manually
-    // just for reference, how indeces are calculated
-    // const ham_uint idx
-    // {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i,j,l)};
-    // const ham_uint idx_sym
-    // {toolkit::index3d(par->grid_brnd.nx,par->grid_brnd.ny,par->grid_brnd.nz,i_sym,j_sym,l_sym)};
     const ham_uint idx_lv1{i * par->grid_brnd.ny * par->grid_brnd.nz};
     const ham_uint idx_sym_lv1{i_sym * par->grid_brnd.ny * par->grid_brnd.nz};
     if (i >= (par->grid_brnd.nx + 1) / 2)
       tmp_k[0] -= cgs::kpc * par->grid_brnd.nx / lx;
     for (decltype(par->grid_brnd.ny) j = 0; j < par->grid_brnd.ny; ++j) {
-      decltype(par->grid_brnd.ny) j_sym{par->grid_brnd.ny -
-                                        j}; // apply Hermitian symmetry
+      decltype(par->grid_brnd.ny) j_sym{par->grid_brnd.ny - j};
       if (j == 0)
         j_sym = j;
       tmp_k[1] = cgs::kpc * j / ly;
@@ -237,8 +230,7 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
       const ham_uint idx_lv2{idx_lv1 + j * par->grid_brnd.nz};
       const ham_uint idx_sym_lv2{idx_sym_lv1 + j_sym * par->grid_brnd.nz};
       for (decltype(par->grid_brnd.nz) l = 0; l < par->grid_brnd.nz; ++l) {
-        decltype(par->grid_brnd.nz) l_sym{par->grid_brnd.nz -
-                                          l}; // apply Hermitian symmetry
+        decltype(par->grid_brnd.nz) l_sym{par->grid_brnd.nz - l};
         if (l == 0)
           l_sym = l;
         tmp_k[2] = cgs::kpc * l / lz;
@@ -246,15 +238,11 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
           tmp_k[2] -= cgs::kpc * par->grid_brnd.nz / lz;
         const ham_uint idx{idx_lv2 + l};             // k
         const ham_uint idx_sym{idx_sym_lv2 + l_sym}; //-k
-        // reconstruct bx,by,bz from c0,c1,c*0,c*1
-        // c0(k) = bx(k) + i by(k)
-        // c*0(-k) = bx(k) - i by(k)
-        // c1(k) = by(k) + i bz(k)
-        // c1*1(-k) = by(k) - i bz(k)
+        // reconstruct bx,by,bz from c0,c1,c*0,c*1, keep real parts
         const Hamvec<3, ham_float> tmp_b_re{
             0.5 * (grid->c0[idx][0] + grid->c0[idx_sym][0]),
             0.5 * (grid->c1[idx][0] + grid->c1[idx_sym][0]),
-            0.5 * (grid->c1[idx_sym][1] + grid->c1[idx][1])};
+            0.5 * (grid->c1[idx][1] + grid->c1[idx_sym][1])};
         // Gram-Schmidt process
         const Hamvec<3, ham_float> free_b_re{gramschmidt(tmp_k, tmp_b_re)};
         // reassemble c0,c1 from bx,by,bz
@@ -263,55 +251,57 @@ void Brnd_es::write_grid(const Param *par, const Breg *breg,
         // we take only the real part of b, multiply it by sqrt(2)
         // cause after G-S process, conjugate symmetry might have been destroied
         // sqrt(2) preserve the total spectral power
-        grid->c0[idx][0] = 1.41421356 * free_b_re[0];
-        grid->c0[idx][1] = 1.41421356 * free_b_re[1];
-        grid->c1[idx][0] = 1.41421356 * free_b_re[1];
-        grid->c1[idx][1] = 1.41421356 * free_b_re[2];
+        grid->bx[idx] = cgs::sqrtwo * free_b_re[0];
+        grid->by[idx] = cgs::sqrtwo * free_b_re[1];
+        grid->bz[idx] = cgs::sqrtwo * free_b_re[2];
       } // l
     }   // j
   }     // i
+  // re-assign the field back, avoid thread crash
+#ifdef _OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+  for (decltype(par->grid_brnd.full_size) idx = 0;
+       idx < par->grid_brnd.full_size; ++idx) {
+    grid->c0[idx][0] = grid->bx[idx];
+    grid->c0[idx][1] = grid->by[idx];
+    grid->c1[idx][0] = grid->c0[idx][1];
+    grid->c1[idx][1] = grid->bz[idx];
+  }
   // execute DFT backward plan
   fftw_execute_dft(grid->plan_c0_bw, grid->c0, grid->c0);
   fftw_execute_dft(grid->plan_c1_bw, grid->c1, grid->c1);
   // according to FFTW convention
   // transform forward followed by backword scale up array by nx*ny*nz
-  const ham_float inv_grid_size = 1.0 / par->grid_brnd.full_size;
+  const ham_float inv_grid_size = 1. / par->grid_brnd.full_size;
 #ifdef _OPENMP
 #pragma omp parallel for schedule(static)
 #endif
   for (decltype(par->grid_brnd.nx) i = 0; i < par->grid_brnd.nx; ++i) {
-    decltype(par->grid_brnd.nx) i_sym{par->grid_brnd.nx -
-                                      i}; // apply Hermitian symmetry
+    decltype(par->grid_brnd.nx) i_sym{par->grid_brnd.nx - i};
     if (i == 0)
       i_sym = i;
-    // it's faster to calculate indeces manually
     const ham_uint idx_lv1{i * par->grid_brnd.ny * par->grid_brnd.nz};
     const ham_uint idx_sym_lv1{i_sym * par->grid_brnd.ny * par->grid_brnd.nz};
     for (decltype(par->grid_brnd.ny) j = 0; j < par->grid_brnd.ny; ++j) {
-      decltype(par->grid_brnd.ny) j_sym{par->grid_brnd.ny -
-                                        j}; // apply Hermitian symmetry
+      decltype(par->grid_brnd.ny) j_sym{par->grid_brnd.ny - j};
       if (j == 0)
         j_sym = j;
       const ham_uint idx_lv2{idx_lv1 + j * par->grid_brnd.nz};
       const ham_uint idx_sym_lv2{idx_sym_lv1 + j_sym * par->grid_brnd.nz};
       for (decltype(par->grid_brnd.nz) l = 0; l < par->grid_brnd.nz; ++l) {
-        decltype(par->grid_brnd.nz) l_sym{par->grid_brnd.nz -
-                                          l}; // apply Hermitian symmetry
+        decltype(par->grid_brnd.nz) l_sym{par->grid_brnd.nz - l};
         if (l == 0)
           l_sym = l;
         const ham_uint idx{idx_lv2 + l};             // q
         const ham_uint idx_sym{idx_sym_lv2 + l_sym}; //-q
         // reconstruct bx,by,bz from c0,c1,c*0,c*1
-        // c0(q) = bx(q) + i by(q)
-        // c*0(-q) = bx(q) - i by(q)
-        // c1(q) = by(q) + i bz(q)
-        // c1*1(-q) = by(q) - i bz(q)
         grid->bx[idx] =
             0.5 * (grid->c0[idx][0] + grid->c0[idx_sym][0]) * inv_grid_size;
         grid->by[idx] =
             0.5 * (grid->c1[idx][0] + grid->c1[idx_sym][0]) * inv_grid_size;
         grid->bz[idx] =
-            0.5 * (grid->c1[idx_sym][1] + grid->c1[idx][1]) * inv_grid_size;
+            0.5 * (grid->c1[idx][1] + grid->c1[idx_sym][1]) * inv_grid_size;
       }
     }
   }
