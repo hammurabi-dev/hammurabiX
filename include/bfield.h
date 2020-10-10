@@ -113,7 +113,7 @@ public:
                                    const Param *) const override;
 };
 
-// uniform Cartesian field 
+// uniform Cartesian field
 // with fixed field orientation and strength
 class Breg_cart final : public Breg {
 public:
@@ -127,8 +127,7 @@ public:
                                    const Param *) const override;
 };
 
-
-// Helical field 
+// Helical field
 class Breg_helix final : public Breg {
 public:
   Breg_helix() = default;
@@ -154,7 +153,6 @@ public:
   Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
                                    const Param *) const override;
 };
-
 
 // WMAP-3yr LSA modeling
 // http://iopscience.iop.org/article/10.1086/513699/meta
@@ -366,7 +364,6 @@ protected:
   Hamvec<3, ham_float> gramschmidt(const Hamvec<3, ham_float> &,
                                    const Hamvec<3, ham_float> &) const;
 };
-
 
 // local anisotropic random magnetic field
 // in compressive MHD plasma

@@ -176,7 +176,7 @@ public:
     ham_float k0, k1;
     ham_float a0, a1;
     ham_float rho;
-    ham_float b0_1,b0_2,b0_3,b0_4,b0_5,b0_6,b0_7,b0_8;
+    ham_float b0_1, b0_2, b0_3, b0_4, b0_5, b0_6, b0_7, b0_8;
     ham_float b0_int, z0_spiral;
     ham_float b0_halo, r0_halo, z0_halo;
   } brnd_jf12;

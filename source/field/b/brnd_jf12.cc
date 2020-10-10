@@ -16,15 +16,16 @@
 
 // global anisotropic turbulent field
 Hamvec<3, ham_float>
-Brnd_jf12::anisotropy_direction(const Hamvec<3, ham_float> &pos, const Param *par,
-                              const Breg *breg, const Grid_breg *gbreg) const {
+Brnd_jf12::anisotropy_direction(const Hamvec<3, ham_float> &pos,
+                                const Param *par, const Breg *breg,
+                                const Grid_breg *gbreg) const {
   return (breg->read_field(pos, par, gbreg)).versor();
 }
 
 // global anisotropic turbulent field
 ham_float Brnd_jf12::anisotropy_ratio(const Hamvec<3, ham_float> &,
-                                    const Param *par, const Breg *,
-                                    const Grid_breg *) const {
+                                      const Param *par, const Breg *,
+                                      const Grid_breg *) const {
   // the simplest case, const.
   return par->brnd_jf12.rho;
 }
@@ -41,7 +42,8 @@ ham_float Brnd_jf12::spectrum(const ham_float &k, const Param *par) const {
                         ham_float(k < par->brnd_jf12.k0)};
   const ham_float band3{ham_float(k > par->brnd_jf12.k0)};
   const ham_float P =
-      band1 * std::pow(par->brnd_jf12.k0 / par->brnd_jf12.k1, par->brnd_jf12.a1) *
+      band1 *
+          std::pow(par->brnd_jf12.k0 / par->brnd_jf12.k1, par->brnd_jf12.a1) *
           std::pow(k / par->brnd_jf12.k1, 6.0) +
       band2 / std::pow(k / par->brnd_jf12.k0, par->brnd_jf12.a1) +
       band3 / std::pow(k / par->brnd_jf12.k0, par->brnd_jf12.a0);
@@ -51,8 +53,8 @@ ham_float Brnd_jf12::spectrum(const ham_float &k, const Param *par) const {
 // galactic scaling of random field energy density
 // set to 1 at observer's place
 ham_float Brnd_jf12::spatial_profile(const Hamvec<3, ham_float> &pos,
-                                   const Param *par) const {
-  
+                                     const Param *par) const {
+
   const ham_float b0_1 = par->brnd_jf12.b0_1;
   const ham_float b0_2 = par->brnd_jf12.b0_2;
   const ham_float b0_3 = par->brnd_jf12.b0_3;
@@ -61,48 +63,66 @@ ham_float Brnd_jf12::spatial_profile(const Hamvec<3, ham_float> &pos,
   const ham_float b0_6 = par->brnd_jf12.b0_6;
   const ham_float b0_7 = par->brnd_jf12.b0_7;
   const ham_float b0_8 = par->brnd_jf12.b0_8;
-  
+
   const ham_float b0_int = par->brnd_jf12.b0_int;
   const ham_float z0_spiral = par->brnd_jf12.z0_spiral;
   const ham_float b0_halo = par->brnd_jf12.b0_halo;
   const ham_float r0_halo = par->brnd_jf12.r0_halo;
   const ham_float z0_halo = par->brnd_jf12.z0_halo;
 
-  const ham_float Rmax = 20.*cgs::kpc;
-  const ham_float rho_GC = 1.*cgs::kpc;
+  const ham_float Rmax = 20. * cgs::kpc;
+  const ham_float rho_GC = 1. * cgs::kpc;
   const ham_float r{sqrt(pos[0] * pos[0] + pos[1] * pos[1])};
-  const ham_float rho{sqrt(pos[0] * pos[0] + pos[1] * pos[1]+pos[2]*pos[2])};
+  const ham_float rho{
+      sqrt(pos[0] * pos[0] + pos[1] * pos[1] + pos[2] * pos[2])};
   const ham_float z{pos[2]};
-  const ham_float phi{atan2(pos[1],pos[0])};
+  const ham_float phi{atan2(pos[1], pos[0])};
 
-  const ham_float rc_B[8] = {5.1, 6.3, 7.1, 8.3, 9.8, 11.4, 12.7, 15.5}; //neg x crossings of spiral arms		  
-  const ham_float inc = 11.5; //inclination, in degrees
-  
+  const ham_float rc_B[8] = {
+      5.1, 6.3,  7.1,  8.3,
+      9.8, 11.4, 12.7, 15.5}; // neg x crossings of spiral arms
+  const ham_float inc = 11.5; // inclination, in degrees
+
   const ham_float b_arms[8] = {b0_1, b0_2, b0_3, b0_4, b0_5, b0_6, b0_7, b0_8};
- 
-  ham_float scaling_disk = 0.0*cgs::muGauss;
-  ham_float scaling_halo = 0.0*cgs::muGauss;
 
-  //boundaries outside which B is zero, not sure if this works?
-  if (r > Rmax || rho < rho_GC ) {return 0.0;}
-  if (r<5.*cgs::kpc) {scaling_disk = b0_int;}
-  else {
-	  ham_float r_negx = r*exp(-1/tan(M_PI/180.*(90-inc))*(phi-M_PI));
-	  if (r_negx > rc_B[7]*cgs::kpc) {r_negx = r*exp(-1/tan(M_PI/180.*(90-inc))*(phi+M_PI)); }
-	  if (r_negx > rc_B[7]*cgs::kpc) {r_negx = r*exp(-1/tan(M_PI/180.*(90-inc))*(phi+3*M_PI)); } 	  
-          for (int i=7; i>=0; i--){ if (r_negx < rc_B[i]*cgs::kpc) { scaling_disk = b_arms[i]*(5.*cgs::kpc)/r; } } // "region 8,7,6,..,2"
+  ham_float scaling_disk = 0.0 * cgs::muGauss;
+  ham_float scaling_halo = 0.0 * cgs::muGauss;
+
+  // boundaries outside which B is zero, not sure if this works?
+  if (r > Rmax || rho < rho_GC) {
+    return 0.0;
   }
-  
-  scaling_disk = scaling_disk*exp( -0.5*z*z/(z0_spiral*z0_spiral) );
-  scaling_halo = b0_halo*exp(-std::fabs(r/r0_halo))*exp(-std::fabs(z/z0_halo));
+  if (r < 5. * cgs::kpc) {
+    scaling_disk = b0_int;
+  } else {
+    ham_float r_negx =
+        r * exp(-1 / tan(M_PI / 180. * (90 - inc)) * (phi - M_PI));
+    if (r_negx > rc_B[7] * cgs::kpc) {
+      r_negx = r * exp(-1 / tan(M_PI / 180. * (90 - inc)) * (phi + M_PI));
+    }
+    if (r_negx > rc_B[7] * cgs::kpc) {
+      r_negx = r * exp(-1 / tan(M_PI / 180. * (90 - inc)) * (phi + 3 * M_PI));
+    }
+    for (int i = 7; i >= 0; i--) {
+      if (r_negx < rc_B[i] * cgs::kpc) {
+        scaling_disk = b_arms[i] * (5. * cgs::kpc) / r;
+      }
+    } // "region 8,7,6,..,2"
+  }
 
-  return (scaling_disk*scaling_disk+scaling_halo*scaling_halo)/(cgs::muGauss*cgs::muGauss);
+  scaling_disk = scaling_disk * exp(-0.5 * z * z / (z0_spiral * z0_spiral));
+  scaling_halo =
+      b0_halo * exp(-std::fabs(r / r0_halo)) * exp(-std::fabs(z / z0_halo));
+
+  return (scaling_disk * scaling_disk + scaling_halo * scaling_halo) /
+         (cgs::muGauss * cgs::muGauss);
 }
 
 // Gram-Schimdt, rewritten using Healpix vec3 library
 // tiny error caused by machine is inevitable
-Hamvec<3, ham_float> Brnd_jf12::gramschmidt(const Hamvec<3, ham_float> &k,
-                                          const Hamvec<3, ham_float> &b) const {
+Hamvec<3, ham_float>
+Brnd_jf12::gramschmidt(const Hamvec<3, ham_float> &k,
+                       const Hamvec<3, ham_float> &b) const {
   if (k.lengthsq() == 0 or b.lengthsq() == 0) {
     return b;
   }
@@ -115,7 +135,7 @@ Hamvec<3, ham_float> Brnd_jf12::gramschmidt(const Hamvec<3, ham_float> &k,
 }
 
 void Brnd_jf12::write_grid(const Param *par, const Breg *breg,
-                         const Grid_breg *gbreg, Grid_brnd *grid) const {
+                           const Grid_breg *gbreg, Grid_brnd *grid) const {
   // STEP I
   // GENERATE GAUSSIAN RANDOM FROM SPECTRUM
   // initialize random seed
@@ -287,7 +307,7 @@ void Brnd_jf12::write_grid(const Param *par, const Breg *breg,
           tmp_k[2] -= cgs::kpc * par->grid_brnd.nz / lz;
         const ham_uint idx{idx_lv2 + l};             // k
         const ham_uint idx_sym{idx_sym_lv2 + l_sym}; //-k
-	// reconstruct bx,by,bz from c0,c1,c*0,c*1, keep real parts
+        // reconstruct bx,by,bz from c0,c1,c*0,c*1, keep real parts
         const Hamvec<3, ham_float> tmp_b_re{
             0.5 * (grid->c0[idx][0] + grid->c0[idx_sym][0]),
             0.5 * (grid->c1[idx][0] + grid->c1[idx_sym][0]),

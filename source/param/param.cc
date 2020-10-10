@@ -253,17 +253,17 @@ void Param::breg_param(tinyxml2::XMLDocument *doc) {
                      cgs::muGauss; // microGauss
       breg_cart.by = toolkit::fetchfloat(subptr, "value", "by") *
                      cgs::muGauss; // microGauss
-      breg_cart.bz =
-          toolkit::fetchfloat(subptr, "value", "bz") * cgs::muGauss; // microGauss
+      breg_cart.bz = toolkit::fetchfloat(subptr, "value", "bz") *
+                     cgs::muGauss; // microGauss
     } else if (breg_type == "helix") {
       tinyxml2::XMLElement *subptr{
           toolkit::tracexml(doc, {"magneticfield", "regular", "helix"})};
       breg_helix.bx = toolkit::fetchfloat(subptr, "value", "bx") *
-                     cgs::muGauss; // microGauss
+                      cgs::muGauss; // microGauss
       breg_helix.by = toolkit::fetchfloat(subptr, "value", "by") *
-                     cgs::muGauss; // microGauss
-      breg_helix.bz =
-          toolkit::fetchfloat(subptr, "value", "bz") * cgs::muGauss; // microGauss
+                      cgs::muGauss; // microGauss
+      breg_helix.bz = toolkit::fetchfloat(subptr, "value", "bz") *
+                      cgs::muGauss; // microGauss
       breg_helix.r_min =
           toolkit::fetchfloat(subptr, "value", "r_min") * cgs::kpc; // kpc
       breg_helix.r_max =
@@ -271,52 +271,54 @@ void Param::breg_param(tinyxml2::XMLDocument *doc) {
     } else if (breg_type == "jf12") {
       tinyxml2::XMLElement *subptr{
           toolkit::tracexml(doc, {"magneticfield", "regular", "jf12"})};
-      //DISK PARAMETERS
-      //magnitude of spiral arms in disk
+      // DISK PARAMETERS
+      // magnitude of spiral arms in disk
       breg_jf12.b_arm1 = toolkit::fetchfloat(subptr, "value", "b_arm1") *
-                     cgs::muGauss; // microGauss
+                         cgs::muGauss; // microGauss
       breg_jf12.b_arm2 = toolkit::fetchfloat(subptr, "value", "b_arm2") *
-                     cgs::muGauss; // microGauss
+                         cgs::muGauss; // microGauss
       breg_jf12.b_arm3 = toolkit::fetchfloat(subptr, "value", "b_arm3") *
-                     cgs::muGauss; // microGauss
+                         cgs::muGauss; // microGauss
       breg_jf12.b_arm4 = toolkit::fetchfloat(subptr, "value", "b_arm4") *
-                     cgs::muGauss; // microGauss
+                         cgs::muGauss; // microGauss
       breg_jf12.b_arm5 = toolkit::fetchfloat(subptr, "value", "b_arm5") *
-                     cgs::muGauss; // microGauss
+                         cgs::muGauss; // microGauss
       breg_jf12.b_arm6 = toolkit::fetchfloat(subptr, "value", "b_arm6") *
-                     cgs::muGauss; // microGauss
+                         cgs::muGauss; // microGauss
       breg_jf12.b_arm7 = toolkit::fetchfloat(subptr, "value", "b_arm7") *
-                     cgs::muGauss; // microGauss
-      //magnitude of purely azimuthal molecular ring field (from 3 kpc < r < 5kpc)
+                         cgs::muGauss; // microGauss
+      // magnitude of purely azimuthal molecular ring field (from 3 kpc < r <
+      // 5kpc)
       breg_jf12.b_ring = toolkit::fetchfloat(subptr, "value", "b_ring") *
-                     cgs::muGauss; // microGauss
-      breg_jf12.h_disk =
-          toolkit::fetchfloat(subptr, "value", "h_disk") * cgs::kpc; // disk/halo transition height, kpc
-      breg_jf12.w_disk =
-          toolkit::fetchfloat(subptr, "value", "w_disk") * cgs::kpc; // disk transition width, kpc
+                         cgs::muGauss; // microGauss
+      breg_jf12.h_disk = toolkit::fetchfloat(subptr, "value", "h_disk") *
+                         cgs::kpc; // disk/halo transition height, kpc
+      breg_jf12.w_disk = toolkit::fetchfloat(subptr, "value", "w_disk") *
+                         cgs::kpc; // disk transition width, kpc
       // TOROIDAL HALO PARAMETERS
       breg_jf12.Bn = toolkit::fetchfloat(subptr, "value", "Bn") *
                      cgs::muGauss; // northern halo magnitude, microGauss
       breg_jf12.Bs = toolkit::fetchfloat(subptr, "value", "Bs") *
                      cgs::muGauss; // southern halo magnitude, microGauss
-      breg_jf12.rn =
-          toolkit::fetchfloat(subptr, "value", "rn") * cgs::kpc; // northern transition radius, kpc
-      breg_jf12.rs =
-          toolkit::fetchfloat(subptr, "value", "rs") * cgs::kpc; // southern transition radius, kpc
-      breg_jf12.wh =
-          toolkit::fetchfloat(subptr, "value", "wh") * cgs::kpc; // halo transition width, kpc
-      breg_jf12.z0 =
-          toolkit::fetchfloat(subptr, "value", "z0") * cgs::kpc; // vertical scale height, kpc
+      breg_jf12.rn = toolkit::fetchfloat(subptr, "value", "rn") *
+                     cgs::kpc; // northern transition radius, kpc
+      breg_jf12.rs = toolkit::fetchfloat(subptr, "value", "rs") *
+                     cgs::kpc; // southern transition radius, kpc
+      breg_jf12.wh = toolkit::fetchfloat(subptr, "value", "wh") *
+                     cgs::kpc; // halo transition width, kpc
+      breg_jf12.z0 = toolkit::fetchfloat(subptr, "value", "z0") *
+                     cgs::kpc; // vertical scale height, kpc
       // X HALO PARAMETERS
       breg_jf12.B0_X = toolkit::fetchfloat(subptr, "value", "B0_X") *
-                     cgs::muGauss; // field strength at origin, microGauss
+                       cgs::muGauss; // field strength at origin, microGauss
       breg_jf12.Xtheta = toolkit::fetchfloat(subptr, "value", "Xtheta") *
-                     cgs::rad; // elevation angle at z = 0, r > rpc_x, deg (converted to rad later)
+                         cgs::rad; // elevation angle at z = 0, r > rpc_x, deg
+                                   // (converted to rad later)
       breg_jf12.rpc_X = toolkit::fetchfloat(subptr, "value", "rpc_X") *
-                     cgs::kpc; // radius where Xtheta=Xtheta_0, kpc 
+                        cgs::kpc; // radius where Xtheta=Xtheta_0, kpc
       breg_jf12.r0_X = toolkit::fetchfloat(subptr, "value", "r0_X") *
-                     cgs::kpc; //exponential scale length, kpc  
-  } else {
+                       cgs::kpc; // exponential scale length, kpc
+    } else {
       throw std::runtime_error("unsupported breg model");
     }
   }
@@ -371,28 +373,41 @@ void Param::brnd_param(tinyxml2::XMLDocument *doc) {
         brnd_es.r0 = toolkit::fetchfloat(subptr, "value", "r0") * cgs::kpc;
         brnd_es.z0 = toolkit::fetchfloat(subptr, "value", "z0") * cgs::kpc;
       } else if (brnd_method == "jf12") {
-        subptr =
-            toolkit::tracexml(doc, {"magneticfield", "random", "global", "jf12"});
-       brnd_jf12.rms =
+        subptr = toolkit::tracexml(
+            doc, {"magneticfield", "random", "global", "jf12"});
+        brnd_jf12.rms =
             toolkit::fetchfloat(subptr, "value", "rms") * cgs::muGauss;
         brnd_jf12.k0 = toolkit::fetchfloat(subptr, "value", "k0");
         brnd_jf12.a0 = toolkit::fetchfloat(subptr, "value", "a0");
         brnd_jf12.k1 = toolkit::fetchfloat(subptr, "value", "k1");
         brnd_jf12.a1 = toolkit::fetchfloat(subptr, "value", "a1");
         brnd_jf12.rho = toolkit::fetchfloat(subptr, "value", "rho");
-        brnd_jf12.b0_1 = toolkit::fetchfloat(subptr, "value", "b0_1") * cgs::muGauss;
-        brnd_jf12.b0_2 = toolkit::fetchfloat(subptr, "value", "b0_2") * cgs::muGauss;
-        brnd_jf12.b0_3 = toolkit::fetchfloat(subptr, "value", "b0_3") * cgs::muGauss;
-        brnd_jf12.b0_4 = toolkit::fetchfloat(subptr, "value", "b0_4") * cgs::muGauss;
-        brnd_jf12.b0_5 = toolkit::fetchfloat(subptr, "value", "b0_5") * cgs::muGauss;
-        brnd_jf12.b0_6 = toolkit::fetchfloat(subptr, "value", "b0_6") * cgs::muGauss;
-        brnd_jf12.b0_7 = toolkit::fetchfloat(subptr, "value", "b0_7") * cgs::muGauss;
-        brnd_jf12.b0_8 = toolkit::fetchfloat(subptr, "value", "b0_8") * cgs::muGauss;
-        brnd_jf12.b0_int = toolkit::fetchfloat(subptr, "value", "b0_int") * cgs::muGauss;
-        brnd_jf12.z0_spiral = toolkit::fetchfloat(subptr, "value", "z0_spiral") * cgs::kpc;
-        brnd_jf12.b0_halo = toolkit::fetchfloat(subptr, "value", "b0_halo") * cgs::muGauss;     
-	brnd_jf12.r0_halo = toolkit::fetchfloat(subptr, "value", "r0_halo") * cgs::kpc;
-        brnd_jf12.z0_halo = toolkit::fetchfloat(subptr, "value", "z0_halo") * cgs::kpc;
+        brnd_jf12.b0_1 =
+            toolkit::fetchfloat(subptr, "value", "b0_1") * cgs::muGauss;
+        brnd_jf12.b0_2 =
+            toolkit::fetchfloat(subptr, "value", "b0_2") * cgs::muGauss;
+        brnd_jf12.b0_3 =
+            toolkit::fetchfloat(subptr, "value", "b0_3") * cgs::muGauss;
+        brnd_jf12.b0_4 =
+            toolkit::fetchfloat(subptr, "value", "b0_4") * cgs::muGauss;
+        brnd_jf12.b0_5 =
+            toolkit::fetchfloat(subptr, "value", "b0_5") * cgs::muGauss;
+        brnd_jf12.b0_6 =
+            toolkit::fetchfloat(subptr, "value", "b0_6") * cgs::muGauss;
+        brnd_jf12.b0_7 =
+            toolkit::fetchfloat(subptr, "value", "b0_7") * cgs::muGauss;
+        brnd_jf12.b0_8 =
+            toolkit::fetchfloat(subptr, "value", "b0_8") * cgs::muGauss;
+        brnd_jf12.b0_int =
+            toolkit::fetchfloat(subptr, "value", "b0_int") * cgs::muGauss;
+        brnd_jf12.z0_spiral =
+            toolkit::fetchfloat(subptr, "value", "z0_spiral") * cgs::kpc;
+        brnd_jf12.b0_halo =
+            toolkit::fetchfloat(subptr, "value", "b0_halo") * cgs::muGauss;
+        brnd_jf12.r0_halo =
+            toolkit::fetchfloat(subptr, "value", "r0_halo") * cgs::kpc;
+        brnd_jf12.z0_halo =
+            toolkit::fetchfloat(subptr, "value", "z0_halo") * cgs::kpc;
       } else if (brnd_method == "jaffe") {
         subptr = toolkit::tracexml(
             doc, {"magneticfield", "random", "global", "jaffe"});
