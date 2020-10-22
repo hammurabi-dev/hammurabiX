@@ -40,4 +40,3 @@ script:
   - export PATH=/tmp/local/hammurabi/bin:${PATH}
   - export LD_LIBRARY_PATH=/tmp/local/hammurabi/lib:${LD_LIBRARY_PATH}
   - cd ${TRAVIS_BUILD_DIR} && pip3 install .
-  - cd ${TRAVIS_BUILD_DIR}/tutorials && pytest --nbval-lax
