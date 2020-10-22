@@ -49,9 +49,9 @@ Hamvec<3, ham_float> Breg_jf12::write_field(const Hamvec<3, ham_float> &pos,
       3. * cgs::kpc; // inner boundary of the molecular ring region (field is
                      // zero within this region)
   const ham_float f[8] = {
-      0.130, 0.165, 0.094, 0.122, 0.13,
-      0.118, 0.084, 0.156}; // fractions of circumference spanned by each
-                            // spiral, sums to unity
+      0.130, 0.165, 0.094, 0.122,
+      0.13,  0.118, 0.084, 0.156}; // fractions of circumference spanned by each
+                                   // spiral, sums to unity
   const ham_float rc_B[8] = {
       5.1,  6.3,  7.1, 8.3, 9.8,
       11.4, 12.7, 15.5}; // the radii where the spiral arm boundaries cross the
