@@ -1,5 +1,5 @@
 #ifndef HAMMURABI_MSK_H
-#define HAMMRABI_MSK_H
+#define HAMMURABI_MSK_H
 
 #include <iostream>
 #include <map>
