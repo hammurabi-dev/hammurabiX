@@ -157,7 +157,8 @@ void Integrator::radial_integration(
   // emission related constants
   ham_float lambda_square{0};
   ham_float i2bt_sync{0.};
-  const ham_float fd_forefactor{-(cgs::qe * cgs::qe * cgs::qe) / (2. * cgs::pi * cgs::mec2 * cgs::mec2)};
+  const ham_float fd_forefactor{-(cgs::qe * cgs::qe * cgs::qe) /
+                                (2. * cgs::pi * cgs::mec2 * cgs::mec2)};
   if (par->grid_obs.do_sync.back()) {
     // for calculating synchrotron emission
     lambda_square = (cgs::c_light / par->grid_obs.sim_sync_freq.back()) *
