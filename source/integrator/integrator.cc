@@ -155,7 +155,9 @@ void Integrator::radial_integration(
   // pre-calculated LoS versor
   const Hamvec<3, ham_float> los_direction{los_versor(THE, PHI)};
   // emission related constants
-  ham_float lambda_square = 0., i2bt_sync = 0., fd_forefactor = 0.;
+  ham_float lambda_square{0};
+  ham_float i2bt_sync{0.};
+  const ham_float fd_forefactor{-(cgs::qe * cgs::qe * cgs::qe) / (2. * cgs::pi * cgs::mec2 * cgs::mec2)};
   if (par->grid_obs.do_sync.back()) {
     // for calculating synchrotron emission
     lambda_square = (cgs::c_light / par->grid_obs.sim_sync_freq.back()) *
@@ -165,10 +167,6 @@ void Integrator::radial_integration(
     i2bt_sync = cgs::c_light * cgs::c_light /
                 (2. * cgs::kB * par->grid_obs.sim_sync_freq.back() *
                  par->grid_obs.sim_sync_freq.back());
-  }
-  if (par->grid_obs.do_fd) {
-    fd_forefactor =
-        -(cgs::qe * cgs::qe * cgs::qe) / (2. * cgs::pi * cgs::mec2 * cgs::mec2);
   }
   // radial accumulation
   for (decltype(shell_ref->step) looper = 0; looper < shell_ref->step;
@@ -205,11 +203,11 @@ void Integrator::radial_integration(
     if (par->grid_obs.do_dm) {
       pixobs->dm += te * shell_ref->delta_d;
     }
-    // Faraday depth
+    // Faraday depth (essential for sync. em.)
     if (par->grid_obs.do_fd or par->grid_obs.do_sync.back()) {
       pixobs->fd += te * B_par * fd_forefactor * shell_ref->delta_d;
     }
-    // Synchrotron emission
+    // synchrotron emission
     if (par->grid_obs.do_sync.back()) {
       const ham_float Jtot{sync_emissivity_t(pos, par, cre, gcre, B_per) *
                            shell_ref->delta_d * i2bt_sync};
