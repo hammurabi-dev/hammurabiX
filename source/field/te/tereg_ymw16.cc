@@ -246,12 +246,8 @@ ham_float TEreg_ymw16::gum(const ham_float &xx, const ham_float &yy,
                  std::sqrt((xx - xc) * (xx - xc) + (yy - yc) * (yy - yc)))};
   const ham_float tantheta = std::tan(theta);
   // zp is positive
-  ham_float zp{(par->tereg_ymw16.t5_agn * par->tereg_ymw16.t5_agn *
-                par->tereg_ymw16.t5_kgn * tantheta) /
-               std::sqrt(par->tereg_ymw16.t5_agn * par->tereg_ymw16.t5_agn +
-                         par->tereg_ymw16.t5_agn * par->tereg_ymw16.t5_agn *
-                             par->tereg_ymw16.t5_kgn *
-                             par->tereg_ymw16.t5_kgn)};
+  ham_float zp{(par->tereg_ymw16.t5_agn *par->tereg_ymw16.t5_kgn) /
+               std::sqrt(1. + par->tereg_ymw16.t5_kgn * par->tereg_ymw16.t5_kgn/(tantheta*tantheta))};
   // xyp is positive
   const ham_float xyp{zp / tantheta};
   // alpha is positive
