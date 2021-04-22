@@ -139,6 +139,25 @@ void Param::parse_bmodel(tinyxml2::XMLDocument *doc) {
     bmodel_lsa.psi1 = toolkit::fetchfloat(subele, "psi1", "value") * cgs::rad;
     bmodel_lsa.chi0 = toolkit::fetchfloat(subele, "chi0", "value") * cgs::rad;
   }
+  // Cart model
+  subele = ele->FirstChildElement("cart");
+  if (subele != nullptr and toolkit::fetchbool(subele, "cue")) {
+    bmodel_list.push_back("cart");
+    bmodel_cart.bx = toolkit::fetchfloat(subele, "bx", "value") * cgs::muGauss;
+    bmodel_cart.by = toolkit::fetchfloat(subptr, "by", "value") * cgs::muGauss;
+    bmodel_cart.bz = toolkit::fetchfloat(subptr, "bz", "value") * cgs::muGauss;
+  }
+  // helical model
+  subele = ele->FirstChildElement("helix");
+  if (subele != nullptr and toolkit::fetchbool(subele, "cue")) {
+    bmodel_helix.bx = toolkit::fetchfloat(subptr, "bx", "value") * cgs::muGauss;
+    bmodel_helix.by = toolkit::fetchfloat(subptr, "by", "value") * cgs::muGauss;
+    bmodel_helix.bz = toolkit::fetchfloat(subptr, "bz", "value") * cgs::muGauss;
+    bmodel_helix.r_min =
+        toolkit::fetchfloat(subptr, "r_min", "value") * cgs::kpc;
+    bmodel_helix.r_max =
+        toolkit::fetchfloat(subptr, "r_max", "value") * cgs::kpc;
+  }
   // Jaffe model
   subele = ele->FirstChildElement("jaffe");
   if (subele != nullptr and toolkit::fetchbool(subele, "cue")) {

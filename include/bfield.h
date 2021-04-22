@@ -87,6 +87,33 @@ public:
                                   const Param *) const override;
 };
 
+// uniform Cartesian field modeling
+// with fixed field orientation and strength
+class Bmodel_cart final : public Bmodel {
+public:
+  Bmodel_cart() = default;
+  Bmodel_cart(const Bmodel_cart &) = delete;
+  Bmodel_cart(Bmodel_cart &&) = delete;
+  Bmodel_cart &operator=(const Bmodel_cart &) = delete;
+  Bmodel_cart &operator=(Bmodel_cart &&) = delete;
+  virtual ~Bmodel_cart() = default;
+  Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
+                                   const Param *) const override;
+};
+
+// Helical field
+class Bmodel_helix final : public Bmodel {
+public:
+  Bmodel_helix() = default;
+  Bmodel_helix(const Bmodel_helix &) = delete;
+  Bmodel_helix(Bmodel_helix &&) = delete;
+  Bmodel_helix &operator=(const Bmodel_helix &) = delete;
+  Bmodel_helix &operator=(Bmodel_helix &&) = delete;
+  virtual ~Bmodel_helix() = default;
+  Hamvec<3, ham_float> write_field(const Hamvec<3, ham_float> &,
+                                   const Param *) const override;
+};
+
 // WMAP-3yr LSA modeling
 // http://iopscience.iop.org/article/10.1086/513699/meta
 // with errata for GMF modeling

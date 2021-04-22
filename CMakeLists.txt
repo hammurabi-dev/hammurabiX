@@ -106,6 +106,8 @@ SET(SRC_FILES
 
 	${CMAKE_CURRENT_LIST_DIR}/source/model/b/bmodel.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/model/b/bmodel_unif.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/model/b/bmodel_cart.cc
+	${CMAKE_CURRENT_LIST_DIR}/source/model/b/bmodel_helix.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/model/b/bmodel_jaffe.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/model/b/bmodel_lsa.cc
 	${CMAKE_CURRENT_LIST_DIR}/source/model/b/bmodel_es.cc

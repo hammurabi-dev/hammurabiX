@@ -40,5 +40,5 @@ Bug reports and code contributions are warmly welcomed, feel free to contact
 
 ### acknowledgements
 
-- We copied and modified functions/classes from HEALPix.
+- We copied (with caution and minimal adjustments) some key functions/classes from HEALPix.
 - We use TinyXML2 as the XML file parser.

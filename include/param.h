@@ -117,6 +117,18 @@ public:
     ham_float l0;
   } bmodel_unif;
 
+  // Cartesian uniform model parameters
+  struct param_bmodel_cart {
+    ham_float bx, by;
+    ham_float bz;
+  } bmodel_cart;
+
+  // helical model parameters
+  struct param_bmodel_helix {
+    ham_float bx, by, bz;
+    ham_float r_min, r_max;
+  } bmodel_helix;
+
   // Jaffe model parameters
   struct param_bmodel_jaffe {
     bool quadruple, bss;
