@@ -234,24 +234,25 @@ ham_float TEmodel_ymw16::gum(const ham_float &xx, const ham_float &yy,
   if (yy < 0 or xx > 0)
     return 0.; // timesaving
   // center of Gum Nebula
-  const ham_float lc{264. * cgs::rad};
-  const ham_float bc{-4. * cgs::rad};
-  const ham_float dc{450. * cgs::pc};
-  const ham_float xc{dc * std::cos(bc) * std::sin(lc)};
-  const ham_float yc{par->temodel_ymw16.r0 - dc * std::cos(bc) * std::cos(lc)};
-  const ham_float zc{dc * std::sin(bc)};
+  // const ham_float lc{264. * cgs::rad};
+  // const ham_float bc{-4. * cgs::rad};
+  // const ham_float dc{450. * cgs::pc};
+  const ham_float xc{450. * cgs::pc * std::cos(-4. * cgs::rad) *
+                     std::sin(264. * cgs::rad)};
+  const ham_float yc{par->temodel_ymw16.r0 - 450. * cgs::pc *
+                                                 std::cos(-4. * cgs::rad) *
+                                                 std::cos(264. * cgs::rad)};
+  const ham_float zc{450. * cgs::pc * std::sin(-4. * cgs::rad)};
   // theta is limited in I quadrant
   const ham_float theta{
       std::atan2(std::fabs(zz - zc),
                  std::sqrt((xx - xc) * (xx - xc) + (yy - yc) * (yy - yc)))};
   const ham_float tantheta = std::tan(theta);
   // zp is positive
-  ham_float zp{(par->temodel_ymw16.t5_agn * par->temodel_ymw16.t5_agn *
-                par->temodel_ymw16.t5_kgn * tantheta) /
-               std::sqrt(par->temodel_ymw16.t5_agn * par->temodel_ymw16.t5_agn +
-                         par->temodel_ymw16.t5_agn * par->temodel_ymw16.t5_agn *
-                             par->temodel_ymw16.t5_kgn *
-                             par->temodel_ymw16.t5_kgn)};
+  ham_float zp{
+      par->temodel_ymw16.t5_agn * par->temodel_ymw16.t5_kgn /
+      std::sqrt(1. + par->temodel_ymw16.t5_kgn * par->temodel_ymw16.t5_kgn /
+                         (tantheta * tantheta))};
   // xyp is positive
   const ham_float xyp{zp / tantheta};
   // alpha is positive
